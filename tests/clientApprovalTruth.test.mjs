@@ -33,6 +33,7 @@ test('actual client approval rendering separates pending decisions from approved
     assert.match(unavailable, /Approvals could not be loaded/)
     assert.doesNotMatch(unavailable, /Nothing waiting|PRIVATE|Reviewed delivery video/)
     const staff = renderToStaticMarkup(createElement(ContentReviewCard, { review:row, staffView:true, canDecide:false, onChanged() {} }))
-    assert.match(staff, /Publish manually through the connected channel/)
+    assert.match(staff, /Check publishing status and the native platform before scheduling manually/)
+    assert.doesNotMatch(staff, /has not been scheduled or posted by Dynamics/)
   } finally { await server.close() }
 })

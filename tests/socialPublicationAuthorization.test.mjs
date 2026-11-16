@@ -153,6 +153,14 @@ test('revocation is explicit, client scoped and does not claim provider cancella
   assert.equal((await invoke(f, body)).status, 404)
 })
 
+test('turning publishing off never disables an active manager withdrawing queued authority', async () => {
+  const f = fixture()
+  const result = await invoke(f, { action: 'revoke', jobId, clientId: f.target.clientId }, false)
+  assert.equal(result.status, 200)
+  assert.equal(result.body.publication.authorizationRevoked, true)
+  assert.deepEqual(f.calls[0], ['revoke', jobId, f.target.clientId, actorId])
+})
+
 test('worker recovers the original authorization and rejects revocation, actor removal, retargeting and fingerprint drift', async () => {
   const f = fixture(), i = f.intent(), fingerprint = await auth.socialPublicationFingerprint(i)
   const job = { id: jobId, status: 'queued', payload: { intent: i, authorized_by: actorId },

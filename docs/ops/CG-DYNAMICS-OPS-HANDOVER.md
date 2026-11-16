@@ -1,3 +1,30 @@
+## 16 November — staff publishing status/withdrawal, local only
+
+Same draft PR991 / #220. Manager-only publishing status panel is wired into the
+existing Client Schedule production cards and staff approval queue; client and
+ordinary staff cards expose no controls. Imported existing Lucide assets; no new
+dependency/page/calendar. New undeployed `social-publication` function only reads
+exact review/client/deliverable jobs or explicitly withdraws authority. It cannot
+grant new authority, call providers or dispatch the worker. Empty vs unavailable
+and queued/processing/verified/uncertain states remain distinct. Withdrawal uses
+second confirmation, exact scope and readback; it preserves started/posting truth
+and never changes creative approval or Teams.
+
+Reproduced/fixed the disabled publishing gate blocking withdrawal. Active managers
+can withdraw while creation remains disabled. New authorization and worker
+provider bindings remain unregistered. Existing unapplied migrations unchanged
+in this increment; no production/API/provider/OAuth/Microsoft/Vercel actions.
+
+Browser control refused the native Chrome read because current URL confidence
+was unavailable; no UI input/settings/session changes occurred. Fixture stopped.
+Callback/lifecycle/SSR checks cover scope races and role exclusion; **no new visual
+or phone acceptance claimed**. [Current receipt and release order](SOCIAL-PUBLISHING-220-2026-11-15.md).
+Final full4444 total /4414 pass /30 skipped /0 failures, including isolated
+PostgreSQL.42 targeted checks pass;20 new regressions included in full total.
+Build/emitted management bundle, scoped lint, strict Edge/helper typing and diff
+pass. Earlier full failures (old staff-copy assertion/cleanup guard) are resolved.
+Generated access artifacts restored; owned container/fixture stopped. No deploy.
+
 ## 16 November — exact staff publication confirmation, local only
 
 Same draft PR991 / #220. Preview/confirm server action core now binds the exact

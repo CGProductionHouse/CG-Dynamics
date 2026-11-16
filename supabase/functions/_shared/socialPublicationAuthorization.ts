@@ -56,7 +56,7 @@ function freshEvidence(e: PublicationPreflightEvidence, fingerprint: string, now
     && e.mediaProfile.length <= 128
 }
 
-async function boundedRequestBody(request: Request): Promise<string | null> {
+export async function readBoundedPublicationBody(request: Request): Promise<string | null> {
   if (!request.body) return null
   const reader = request.body.getReader(), decoder = new TextDecoder('utf-8', { fatal: true })
   let size = 0, text = ''
@@ -83,9 +83,8 @@ export function socialPublicationAuthorizationHandler(ports: PublicationAuthoriz
     try {
       const actor = await ports.authenticate(request)
       if (!actor || !UUID.test(actor.id) || actor.active !== true || !['admin', 'manager'].includes(actor.role)) return respond(403, { ok: false, error: 'ACTIVE_MANAGER_REQUIRED' })
-      if (!enabled) return respond(409, { ok: false, error: 'PUBLICATION_ROLLOUT_DISABLED' })
       // Bounded parsing also avoids consuming caller uploads as approval evidence.
-      const raw = await boundedRequestBody(request)
+      const raw = await readBoundedPublicationBody(request)
       if (raw === null) return respond(400, { ok: false, error: 'PUBLICATION_REQUEST_INVALID' })
       let body: unknown
       try { body = JSON.parse(raw) } catch { return respond(400, { ok: false, error: 'PUBLICATION_REQUEST_INVALID' }) }
@@ -99,6 +98,8 @@ export function socialPublicationAuthorizationHandler(ports: PublicationAuthoriz
         return respond(200, { ok: true, publication: { jobId: result.jobId, status: result.status, state: result.state,
           authorizationRevoked: true, providerMayHaveStarted: result.providerMayHaveStarted } })
       }
+      // The kill switch stops NEW authority, never an authenticated withdrawal.
+      if (!enabled) return respond(409, { ok: false, error: 'PUBLICATION_ROLLOUT_DISABLED' })
       const confirmation = body.action === 'confirm'
       const expectedKeys = confirmation ? ['action', 'target', 'expectedFingerprint', 'confirmPublication'] : ['action', 'target']
       const selected = target(body.target)

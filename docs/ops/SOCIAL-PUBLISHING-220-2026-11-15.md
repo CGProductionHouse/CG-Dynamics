@@ -45,6 +45,73 @@ client was found or assumed; no LinkedIn publishing entitlement was verified.
 
 ## Implemented locally
 
+### 16 November continuation — staff status and withdrawal interface
+
+The existing `ContentReviewCard` now exposes a lazy **Publishing status** panel
+to managers/admins in Client Schedule's production panel and the staff approval
+queue. Client cards and ordinary staff cards never expose management controls.
+It uses existing branded components/classes and vendored Lucide SVG assets; no
+production dependency or new page/calendar was added. The old unconditional
+claim that an approved review had not been scheduled/posted by Dynamics was
+replaced with an instruction to check actual status and the native platform.
+
+The new **undeployed** `social-publication` Edge entrypoint supports only status
+and explicit withdrawal. It verifies the current active manager profile, derives
+client/deliverable scope from the exact review, and reads complete matching jobs.
+Private payloads, evidence, credentials and arbitrary provider URLs are not
+returned. Missing/malformed/partial backend evidence is unavailable, never empty
+or healthy. Verified Facebook links require the exact Page/post identity. A
+generic cancellation cannot make an unstarted job look queued. Reading a stored
+receipt is not a fresh provider-health assertion or a native scheduler inventory.
+
+The UI distinguishes queued, submitting, processing, provider-scheduled,
+verified-posted, stopped, failed/blocked and uncertain outcomes. Withdrawal needs
+a second explicit click and sends only review/job IDs; the server derives client
+scope and refuses a job from another review. Uncertain withdrawal invalidates the
+old view until readback. Once an operation starts, withdrawal preserves its state
+and warns that no provider post was cancelled/deleted. Creative approval, Teams
+and canonical schedule fields remain untouched. No automatic retry/submit action
+is offered. Both the UI and endpoint keep new authorization unavailable.
+
+A deterministic regression reproduced that the prior disabled-rollout gate also
+blocked withdrawal (`409` instead of `200`). Withdrawal now remains available
+to an active manager even while creation/publishing is disabled. Preview and
+new confirmation still require the original rollout gate and trusted preflight.
+
+No UI automation action completed: browser inventory reported local browser access
+unavailable, and the native Chrome read was stopped because the tool could not
+determine the current URL confidently. No browser/security setting, tab/session
+or provider account was changed. The synthetic fixture was prepared and stopped;
+it was **not visually accepted**. Actual component callback/lifecycle tests cover
+second confirmation, late responses after review switching, and uncertain or
+already-started withdrawals. These are unit checks, not browser/mobile proofs.
+
+Release order remains review/approval first: current queue migration, then the
+reviewed new management function, then a separately authorized frontend release.
+Before those gates, the UI's absent-backend path is explicitly unavailable and
+directs staff to Teams/native-platform checks. No live status/withdrawal action,
+SQL, Edge rollout, provider mutation, OAuth, Microsoft write or Vercel use occurred.
+Trusted current-context/Teams/media adapters, preview/new-confirmation staff
+wiring and remaining provider adapters stay in the existing activation plan.
+
+Final acceptance for this increment: **4444 total /4414 passed /30 skipped /
+0 failures**, Node24.16.0, including the existing isolated PostgreSQL fixtures.
+Twenty new checks are included: the disabled-gate withdrawal regression and19
+management/role/receipt/component lifecycle checks. The42 targeted management,
+authorization, client-approval and teardown checks pass. Full acceptance initially
+exposed an old staff-copy assertion and a teardown-guard mismatch; those contracts
+were updated/cleanup hardened, then the targeted and complete suites passed.
+App build, emitted `ContentReviewCard` management code, scoped ESLint, strict
+Edge/helper typing bridge and diff checks pass. React review retained event-driven
+loading, imported existing icons, bounded scoped requests and keyed async cleanup.
+The two generated access-matrix files were restored; the owned QA container and
+local fixture were stopped. No visual/mobile pass is inferred from these checks.
+Logs: `%TEMP%/cg-publication-management-final-acceptance.log`,
+`%TEMP%/cg-publication-management-focused-final.log`,
+`%TEMP%/cg-publishing-stop-repro.log`, `%TEMP%/cg-publication-management-build.log`.
+Existing Vercel Git-deployment guard remains false; no PR checks/cloud deployment
+were triggered. Source checkout is clean after the continuation commit.
+
 ### 16 November continuation — exact staff confirmation in the existing queue
 
 The authorization core now provides **preview → explicit confirmation → durable
@@ -77,8 +144,9 @@ to cancel/delete a provider post or make a started mutation reversible. Repeat
 withdrawals preserve the same audit fact; foreign-client lookups cannot mutate it.
 
 `socialPublicationAuthorization.ts` and `socialPublicationAuthorizationStore.ts`
-are a tested server action core and service-only RPC ports. They are **not exposed
-through a deployed Edge endpoint, ChatGPT tool or staff button yet**. Trusted
+are a tested server action core and service-only RPC ports. Preview/new confirmation
+is **not exposed through a deployed Edge endpoint, ChatGPT tool or staff button yet**;
+status and withdrawal now have the source-only management interface above. Trusted
 current-context/Teams/media adapters and the existing staff interface must be
 connected before registration. No native provider access/OAuth or caller checkbox
 is promoted into proof. Worker bindings remain unregistered; publishing and

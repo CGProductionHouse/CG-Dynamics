@@ -76,6 +76,6 @@ export function ContentProductionPanel({ deliverable, canManage }: { deliverable
     </div></details>
     {message && <p role="status" className="text-sm text-brand-teal">{message}</p>}
     {error && <p role="alert" className="text-sm text-red-300">{error}</p>}
-    {reviews.map(review => <ContentReviewCard staffView key={review.id} review={review} canDecide={canManage && review.state === 'internal_review'} onChanged={() => setRevision(value => value + 1)} />)}
+    {reviews.map(review => <ContentReviewCard staffView canManagePublishing={canManage} key={review.id} review={review} canDecide={canManage && review.state === 'internal_review'} onChanged={() => setRevision(value => value + 1)} />)}
   </section>
 }
