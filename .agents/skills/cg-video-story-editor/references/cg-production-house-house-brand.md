@@ -22,6 +22,6 @@ Rejected: plain or teal-heavy grounds; full stops; anything hard to read; small 
 
 ## CG's own material that editors may need
 
-- Client websites CG built and may showcase (with each client's consent assumed only where already published): Wiseman Group, Piek Group, Bouwer Coetzee Attorneys, Red Oak, Imbewu Vending (no current screenshot), cgproductionhouse.com.
+- Client websites CG built that may be considered for a showcase (public availability is not consent to reuse or publish; verify the exact client approval first): Wiseman Group, Piek Group, Bouwer Coetzee Attorneys, Red Oak, Imbewu Vending (no current screenshot), cgproductionhouse.com.
 - CG Dynamics screens show real client and staff names. Use them only after CA confirms, or blur names.
-- Approved CG video to date: see [CG websites case study](cg-websites-video-case-study.md).
+- CG websites video R06 remains internal_review; no client or public-release approval is established by this brief. See [CG websites case study](cg-websites-video-case-study.md).
