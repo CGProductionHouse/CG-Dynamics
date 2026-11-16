@@ -1,6 +1,59 @@
 # Social publishing — 15 November 2026
 
-## Latest 16 November — LinkedIn lifecycle correction, SOURCE ONLY
+## Latest 16 November — canonical Instagram preparation and confirmation, SOURCE ONLY
+
+Continued the same draft PR #991 / #220. Reproduced that BOTH Instagram login
+routes failed the canonical reader's Facebook-only release check. The existing
+reader now supports explicit exact-account photo policies for Facebook Page,
+Instagram Login and Instagram via Facebook Login. It reuses the SAME immutable
+review, monthly_deliverables, captured Teams evidence, private source hash,
+original confirmation and background_jobs authorities. No second scheduler or
+approval store. Route-specific current grants, channel, original JPEG byte limit
+and strict Instagram media profile are checked; Facebook grants/proofs cannot
+stand in for Instagram. PNG/video and wrong channels stop before media/provider
+access, and oversized JPEGs stop before byte materialization.
+
+New PRIVATE instagramPublicationRuntime joins the already tested credential/
+media/provider composition to that canonical reader and the existing fenced
+worker interface, including its separate publish-ready-container method. Common
+target derivation and ORIGINAL durable authorization recovery were extracted from
+the Facebook runtime into socialPublicationRuntimeSource; existing Facebook paths
+reuse them. Configuration/intent scalars are captured before asynchronous reads.
+The existing staff preview/confirm handler now exposes a generic private photo
+alias while preserving its original Facebook import/Edge contract. Browser input
+still contains only review ID and exact confirmation, never client/account/proofs.
+
+**Instagram remains UNREGISTERED in Edge/MCP/worker dispatch.** No environment
+activation parser, default codec, imported production dependency or live setting
+was added. The mandatory decoder argument remains held on the unanswered exact
+dependency approval. These source helpers cannot become reachable by enabling the
+existing Facebook flags. Caption/tag/disclosure qualification, dedicated exact
+Instagram release policy/entry review and native/provider/device acceptance remain
+required before rollout. All FOUR prior migration candidates remain UNAPPLIED;
+this increment changes no SQL/schema, production data, roles, mappings or tokens.
+Teams remains the team's scheduling platform and the Microsoft sync hold is intact.
+
+Actual local composition tests cover both encrypted login routes, zero-write/
+zero-sign preview, exact confirmation, duplicate-confirmation original receipt,
+worker recovery of the original authorization, changed caption suppression,
+revocation, stale captures, inactive manager, foreign routes/accounts and missing
+decoder. Provider requests/storage are synthetic; these are not live provider or
+native Deno receipts. Focused suite: **228/228**. Real isolated PostgreSQL:
+**29/29**, including two new login-specific atomic preview/confirmation cases.
+Five separate real codec QA decode calls still pass in integrity-checked task
+TEMP only; no manifest/lock/shared node_modules changes. Build/emitted app,
+scoped lint and helper/entry typing bridge pass. Final full local acceptance for
+this frozen source: **4,608 total / 4,578 passed / 30 skipped / 0 failures**,
+including the actual candidate PostgreSQL fixtures. Generated unrelated access-
+matrix artifacts were restored and the task-owned network-none QA container
+stopped. Source review found no blocking issue within this private increment;
+this does not approve registration, dependencies or rollout.
+No new UI/browser/physical phone acceptance is claimed. No publishing/upload/
+schedule, production SQL/data/Edge/config/OAuth/provider/Microsoft/Vercel action.
+Main remains4af41304; Nolan PR990 has no overlapping publishing files. Google
+Control Centre target remains unidentified; no guessed tracker write.
+
+## Earlier 16 November — LinkedIn lifecycle correction, SOURCE ONLY
 
 While the exact JPEG dependency approval is pending, official LinkedIn review
 exposed a concrete normalization gap: native `lifecycleState=PUBLISH_REQUESTED`

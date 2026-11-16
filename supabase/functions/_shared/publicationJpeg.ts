@@ -1,6 +1,7 @@
 import type { PrivatePublicationSnapshot } from './socialPublishingMedia.ts'
 import type { PublicationTarget } from './socialPublicationAuthorization.ts'
 
+export const INSTAGRAM_PHOTO_MAX_BYTES = 8_000_000
 export interface StrictJpegDecodeOptions {
   useTArray: true; formatAsRGBA: true; tolerantDecoding: false; maxResolutionInMP: 4; maxMemoryUsageInMB: 64
 }
@@ -21,7 +22,7 @@ export async function verifyPublicationJpeg(snapshot: Readonly<PrivatePublicatio
   const instagram = ['instagram_login', 'instagram_facebook_login'].includes(target.route)
   if ((!instagram && target.route !== 'facebook_page') || !/^\d+$/.test(target.accountId) || typeof decode !== 'function'
     || snapshot.mediaType !== 'image/jpeg' || snapshot.byteLength !== snapshot.bytes.length || snapshot.byteLength < 32
-    || snapshot.byteLength > (instagram ? 8_000_000 : 9_999_999)) fail()
+    || snapshot.byteLength > (instagram ? INSTAGRAM_PHOTO_MAX_BYTES : 9_999_999)) fail()
   const b = snapshot.bytes.slice(), view = new DataView(b.buffer)
   if (b[0] !== 255 || b[1] !== 216) fail()
   let p = 2, segments = 0, width = 0, height = 0, jfif = false, scan = false

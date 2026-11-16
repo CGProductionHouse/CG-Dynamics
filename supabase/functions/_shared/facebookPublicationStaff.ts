@@ -1,12 +1,11 @@
-import { readBoundedPublicationBody, socialPublicationAuthorizationHandler, type PublicationAuthorizationPorts } from './socialPublicationAuthorization.ts'
-import type { facebookPublicationRuntime } from './facebookPublicationRuntime.ts'
+import { readBoundedPublicationBody, socialPublicationAuthorizationHandler, type PublicationAuthorizationPorts, type PublicationTarget } from './socialPublicationAuthorization.ts'
 
 /** Browser supplies a review ID and exact preview confirmation only. Account,
  * client, media and schedule are resolved on the server; no proof booleans.
  */
-export function facebookPublicationStaffHandler(input: {
+export function photoPublicationStaffHandler(input: {
   authenticate: PublicationAuthorizationPorts['authenticate']
-  runtime: ReturnType<typeof facebookPublicationRuntime> | null
+  runtime: { readCandidate: PublicationAuthorizationPorts['readCandidate']; targetForReview(reviewId: string): Promise<PublicationTarget> } | null
   persistence: Pick<PublicationAuthorizationPorts, 'authorize' | 'revoke'>
 }) {
   return async (request: Request): Promise<Response> => {
@@ -33,3 +32,7 @@ export function facebookPublicationStaffHandler(input: {
     } catch { return response(503, 'PUBLICATION_VERIFICATION_UNAVAILABLE') }
   }
 }
+
+// Preserve the existing undeployed Facebook entry/import contract. Instagram's
+// private composition can reuse the same confirmation flow, not another endpoint.
+export const facebookPublicationStaffHandler = photoPublicationStaffHandler

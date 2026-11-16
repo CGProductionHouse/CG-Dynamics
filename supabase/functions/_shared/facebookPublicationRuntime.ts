@@ -2,15 +2,13 @@ import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { facebookPhotoProvider, verifyFacebookPublishingTarget, type FacebookServerConfig } from './facebookPublishingProvider.ts'
 import { verifyFacebookPhotoMedia } from './facebookPhotoMedia.ts'
 import { publicationCandidateReader, type PrivatePublicationPreparationChecks } from './socialPublicationPreparation.ts'
-import { readSocialPublicationAuthorization } from './socialPublicationAuthorizationStore.ts'
+import { publicationRuntimeSource } from './socialPublicationRuntimeSource.ts'
 import type { SocialProviderBindings } from './socialPublishingQueue.ts'
-import type { PublicationTarget } from './socialPublicationAuthorization.ts'
-import type { PublishingIntent } from './socialPublishing.ts'
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 export interface FacebookPublicationConfiguration {
   server: FacebookServerConfig
-  release: PrivatePublicationPreparationChecks['release']
+  release: PrivatePublicationPreparationChecks['release'] & { route: 'facebook_page' }
 }
 
 /** Disabled unless BOTH dispatch gates plus an exact SERVER account packet are
@@ -39,39 +37,18 @@ export function readFacebookPublicationConfiguration(get: (name: string) => stri
  */
 export function facebookPublicationRuntime(sb: SupabaseClient, configuration: FacebookPublicationConfiguration) {
   const server = Object.freeze({ ...configuration.server }), release = Object.freeze({ ...configuration.release })
+  if (release.route !== 'facebook_page') throw new Error('Exact Facebook publication release unavailable.')
   const readCandidate = publicationCandidateReader(sb, { release,
     verifyProvider: target => verifyFacebookPublishingTarget(sb, target, server),
     verifyMedia: (snapshot, target) => verifyFacebookPhotoMedia(snapshot, target) })
   const provider = facebookPhotoProvider(sb, server)
-  const assertTarget = (intent: Readonly<PublishingIntent>) => {
-    if (release.approved !== true || intent.platform !== 'facebook' || intent.route !== release.route || intent.clientId !== release.clientId
-      || intent.connectionId !== release.connectionId || intent.accountId !== release.accountId) throw new Error('Exact publication release unavailable.')
-  }
+  const source = publicationRuntimeSource(sb, release, readCandidate), assertTarget = source.assertTarget
   return {
     readCandidate,
-    async targetForReview(reviewId: string): Promise<PublicationTarget> {
-      if (!UUID.test(reviewId)) throw new Error('Publication review unavailable.')
-      const { data, error } = await sb.from('content_review_versions').select('id,client_id,deliverable_id')
-        .eq('id', reviewId).eq('client_id', release.clientId).maybeSingle()
-      if (error || !data || data.id !== reviewId || data.client_id !== release.clientId || !UUID.test(data.deliverable_id)) throw new Error('Publication review unavailable.')
-      return { clientId: release.clientId, connectionId: release.connectionId, accountId: release.accountId, route: release.route,
-        deliverableId: data.deliverable_id, reviewVersionId: reviewId }
-    },
+    targetForReview: source.targetForReview,
     workerBindings(jobId: string): SocialProviderBindings {
-      if (!UUID.test(jobId)) throw new Error('Publication job unavailable.')
       return {
-        async readCurrent(intent) {
-          assertTarget(intent)
-          const authorization = await readSocialPublicationAuthorization(sb, jobId, intent)
-          if (!authorization) throw new Error('Current publication authority unavailable.')
-          const job = await sb.from('background_jobs').select('payload').eq('id', jobId).eq('job_type', 'social_publish').maybeSingle()
-          const actorId = job.data?.payload?.authorized_by
-          if (job.error || typeof actorId !== 'string' || !UUID.test(actorId)) throw new Error('Publication actor unavailable.')
-          const target = { clientId: intent.clientId, deliverableId: intent.deliverableId, reviewVersionId: intent.reviewVersionId,
-            connectionId: intent.connectionId, accountId: intent.accountId, route: intent.route }
-          const current = await readCandidate(target, actorId)
-          return { ...current.context, authorization }
-        },
+        readCurrent: source.workerReadCurrent(jobId),
         async submit(intent) { assertTarget(intent); return await provider.submit(intent) },
         // Status reads use the recorded exact Page receipt. Withdrawal does not
         // turn an already-submitted operation into permission for another POST.

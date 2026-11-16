@@ -326,6 +326,34 @@ test('real PostgreSQL: queue, source/role fences, crash recovery, receipts and O
     assert.equal(firstBody.publication.authorizationId, f.intent.authorizationId)
     sql(`update background_jobs set status='cancelled' where id=${q(f.job)}`)
   })
+  for (const route of ['instagram_login', 'instagram_facebook_login']) await t.test(`${route} exact confirmation uses the same atomic queue and original receipt in real PostgreSQL`, async () => {
+    const f = fixture({ authorized: false, advance: false })
+    Object.assign(f.intent, { platform: 'instagram', route, key: `social-publish:v1:${JSON.stringify([f.client, f.deliverable, f.review, 'instagram', '12345'])}` })
+    sql(`update content_review_versions set channels=array['instagram'] where id=${q(f.review)};
+      update background_jobs set idempotency_key=${q(f.intent.key)},payload=jsonb_set(payload,'{intent}',${q(JSON.stringify(f.intent))}::jsonb) where id=${q(f.job)}`)
+    const current = context(f)
+    current.review.channels = ['instagram']; current.binding.route = route; current.authorization = null
+    current.binding.grantedScopes = route === 'instagram_login' ? ['instagram_business_basic', 'instagram_business_content_publish']
+      : ['instagram_basic', 'instagram_content_publish', 'pages_read_engagement']
+    const count = sql("select count(*) from background_jobs where job_type='social_publish'")
+    const handler = authorization.socialPublicationAuthorizationHandler({ ...authorizationStore.socialPublicationAuthorizationStore(rpcClient()),
+      authenticate: async () => ({ id: actor, role: 'manager', active: true }), readCandidate: async () => ({ context: current,
+        evidence: { intentFingerprint: await authorization.socialPublicationFingerprint(f.intent), checkedAt: new Date().toISOString(),
+          teamsRecordId: 'fixture-task', teamsRevision: 'fixture-revision', mediaProfile: 'instagram_baseline_jpeg_v1' } }) }, true)
+    const target = { clientId: f.client, deliverableId: f.deliverable, reviewVersionId: f.review, connectionId: f.connection, accountId: '12345', route }
+    const request = body => new Request('https://fixture.invalid', { method: 'POST', body: JSON.stringify(body) })
+    const preview = await handler(request({ action: 'preview', target })), body = await preview.json()
+    assert.equal(preview.status, 200)
+    assert.equal(sql(`select publication->'authorization' is null from background_jobs where id=${q(f.job)}`), 't')
+    const confirm = { action: 'confirm', target, expectedFingerprint: body.preview.fingerprint, confirmPublication: true }
+    const first = await handler(request(confirm)), result = await first.json()
+    assert.equal(first.status, 200); assert.equal(result.publication.jobId, f.job)
+    const saved = sql(`select publication->'authorization' from background_jobs where id=${q(f.job)}`)
+    assert.equal((await handler(request(confirm))).status, 200)
+    assert.equal(sql(`select publication->'authorization' from background_jobs where id=${q(f.job)}`), saved)
+    assert.equal(sql("select count(*) from background_jobs where job_type='social_publish'"), count)
+    sql(`update background_jobs set status='cancelled' where id=${q(f.job)}`)
+  })
   await t.test('UTF-8 fingerprint matches SQL exactly and changes with each approved material field', async () => {
     const f = fixture({ advance: false }), i = { ...f.intent, caption: 'Café : café\nR99 🛠️ / \\"' }
     const expected = await authorization.socialPublicationFingerprint(i)

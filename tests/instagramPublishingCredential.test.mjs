@@ -5,7 +5,7 @@ import { createServer } from 'vite'
 import { readFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 
-let server, credentials, instagramTokens, metaTokens, providerModule
+let server, credentials, instagramTokens, metaTokens, providerModule, runtimeModule, staffModule, authStore, policy
 const originalFetch = globalThis.fetch
 before(async () => {
   server = await createServer({ configFile: false, server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true }, logLevel: 'error' })
@@ -13,6 +13,10 @@ before(async () => {
   instagramTokens = await server.ssrLoadModule('/supabase/functions/_shared/instagramTokenEncryption.ts')
   metaTokens = await server.ssrLoadModule('/supabase/functions/_shared/metaTokenStorage.ts')
   providerModule = await server.ssrLoadModule('/supabase/functions/_shared/instagramPublishingProvider.ts')
+  runtimeModule = await server.ssrLoadModule('/supabase/functions/_shared/instagramPublicationRuntime.ts')
+  staffModule = await server.ssrLoadModule('/supabase/functions/_shared/facebookPublicationStaff.ts')
+  authStore = await server.ssrLoadModule('/supabase/functions/_shared/socialPublicationAuthorizationStore.ts')
+  policy = await server.ssrLoadModule('/supabase/functions/_shared/socialPublishing.ts')
 })
 after(async () => { try { await server?.close() } finally { globalThis.fetch = originalFetch } })
 const NOW = Date.parse('2026-11-16T12:00:00Z'), stamp = new Date(NOW).toISOString(), expiry = new Date(NOW + 3600_000).toISOString()
@@ -60,6 +64,101 @@ async function fixture(route = 'instagram_login') {
 }
 const resolve = f => credentials.resolveInstagramPublishingCredential(f.sb, f.target, f.config, f.ports)
 const verify = f => credentials.verifyInstagramPublishingTarget(f.sb, f.target, f.config, f.ports)
+
+async function canonicalFixture(route) {
+  const f = await fixture(route), now = Date.now(), actorId = randomUUID(), jobId = randomUUID(), bytes = readFileSync('tests/fixtures/publication-baseline-320.jpg')
+  const due = new Date(now + 60_000).toISOString(), date = new Date(now + 60_000 + 7200_000).toISOString().slice(0, 10)
+  f.tables.profiles = [{ id: actorId, role: 'manager', is_active: true }]
+  f.tables.content_review_versions = [{ id: f.target.reviewVersionId, client_id: f.target.clientId, deliverable_id: f.target.deliverableId,
+    state: 'approved', channels: ['instagram'], media_type: 'image/jpeg', asset_path: `${f.target.deliverableId}/original.jpg`, caption: 'Approved photo caption', scheduled_at: due }]
+  f.tables.monthly_deliverables = [{ id: f.target.deliverableId, client_id: f.target.clientId, scheduled_date: date,
+    archived_at: null, posted_at: null, production_status: 'not_started', microsoft_task_id: 'fixture-task' }]
+  f.tables.background_jobs = []
+  f.tables.meta_instagram_connection_tokens[0].token_expires_at = new Date(now + 3600_000).toISOString()
+  const events = [], proof = { contract: 'social_publication_schedule_evidence_v1', clientId: f.target.clientId, deliverableId: f.target.deliverableId,
+    reviewVersionId: f.target.reviewVersionId, recordId: 'fixture-task', revision: 'a'.repeat(64), scheduledDate: date,
+    capturedAt: new Date(now).toISOString(), checkedAt: new Date(now).toISOString() }
+  f.sb.storage = { from() { return {
+    async download(path) { events.push(['download', path]); return { data: new Blob([bytes], { type: 'image/jpeg' }), error: null } },
+    async createSignedUrl() { events.push(['sign']); throw new Error('Preview and confirmation must never sign media') },
+  } } }
+  f.sb.rpc = async (name, args) => {
+    events.push(['rpc', name])
+    if (name === 'read_social_publication_schedule_evidence') { assert.equal(args.p_actor, actorId); return { data: proof, error: null } }
+    if (name !== 'authorize_social_publication') throw new Error('Unexpected fixture mutation')
+    const i = args.p_intent
+    assert.equal(args.p_actor, actorId); assert.equal(i.route, route); assert.equal(i.platform, 'instagram')
+    if (!f.tables.background_jobs.length) f.tables.background_jobs.push({ id: jobId, job_type: 'social_publish', status: 'queued',
+      payload: { intent: i, authorized_by: actorId }, publication: { state: 'queued', authorization: { id: i.authorizationId,
+        actorId, fingerprint: args.p_fingerprint, revokedAt: null } } })
+    const j = f.tables.background_jobs[0]
+    return { data: { jobId, authorizationId: j.payload.intent.authorizationId, fingerprint: j.publication.authorization.fingerprint, status: 'queued', state: 'queued' }, error: null }
+  }
+  globalThis.fetch = async (raw, init = {}) => {
+    assert.equal(init.method ?? 'GET', 'GET', 'Canonical preview/confirmation cannot publish')
+    if (new URL(raw).pathname.endsWith('/debug_token')) return Response.json({ data: { app_id: '777', type: 'USER', is_valid: true,
+      expires_at: Math.floor(now / 1000) + 3600, data_access_expires_at: Math.floor(now / 1000) + 7200, scopes: f.scopes } })
+    return f.ports.fetch(raw, init)
+  }
+  const configuration = { server: { ...f.config, projectUrl: 'https://fixture.supabase.co' }, release: { ...f.target, approved: true } }
+  let decodes = 0
+  const decoder = () => { decodes++; return { width: 320, height: 320, data: new Uint8Array(320 * 320 * 4) } }
+  const runtime = runtimeModule.instagramPublicationRuntime(f.sb, configuration, decoder)
+  const handler = staffModule.photoPublicationStaffHandler({ runtime, authenticate: async () => ({ id: actorId, role: 'manager', active: true }),
+    persistence: authStore.socialPublicationAuthorizationStore(f.sb) })
+  const invoke = async body => { const response = await handler(new Request('https://fixture.invalid', { method: 'POST', body: JSON.stringify(body) })); return { status: response.status, body: await response.json() } }
+  return { ...f, runtime, invoke, events, proof, configuration, decoder, jobId, actorId, decodeCount: () => decodes }
+}
+
+for (const route of ['instagram_login', 'instagram_facebook_login']) test(`${route} actual canonical composition prepares and confirms once, then recovers only the original worker authorization`, async () => {
+  const f = await canonicalFixture(route), reviewId = f.target.reviewVersionId
+  const preview = await f.invoke({ action: 'preview', reviewId })
+  assert.equal(preview.status, 200); assert.equal(preview.body.preview.platform, 'instagram')
+  assert.equal(f.tables.background_jobs.length, 0); assert.equal(f.events.some(e => e[0] === 'sign'), false)
+  const confirmation = { action: 'confirm', reviewId, expectedFingerprint: preview.body.preview.fingerprint, confirmPublication: true }
+  const first = await f.invoke(confirmation), duplicate = await f.invoke(confirmation)
+  assert.equal(first.status, 200); assert.deepEqual(first, duplicate); assert.equal(f.tables.background_jobs.length, 1)
+  const job = f.tables.background_jobs[0], bindings = f.runtime.workerBindings(f.jobId)
+  const current = await bindings.readCurrent(job.payload.intent)
+  assert.equal(current.authorization.id, job.payload.intent.authorizationId)
+  assert.equal(current.binding.route, route); assert.equal(current.binding.mediaContractVerified, true)
+  assert.equal(current.assetSha256, createHash('sha256').update(readFileSync('tests/fixtures/publication-baseline-320.jpg')).digest('hex'))
+  f.configuration.release.accountId = '999' // Captured server policy cannot drift after an async preview.
+  assert.equal((await f.runtime.targetForReview(reviewId)).accountId, '123')
+  f.tables.content_review_versions[0].caption = 'Unapproved replacement'
+  const changed = await bindings.readCurrent(job.payload.intent)
+  assert.equal(policy.publishingDispatchDecision(job.payload.intent, changed, job.payload.intent.scheduledAt), 'blocked_source_changed')
+  const calls = f.calls.length
+  job.publication.authorization.revokedAt = new Date().toISOString()
+  await assert.rejects(bindings.readCurrent(job.payload.intent), /Current publication authority unavailable/)
+  assert.equal(f.calls.length, calls)
+  assert.equal(f.events.some(e => e[0] === 'sign'), false)
+  assert.equal(JSON.stringify(first.body).includes('fixture-'), false)
+})
+
+test('private Instagram runtime preserves stale-preview, capture, active-role, route and mandatory-decoder gates', async () => {
+  const f = await canonicalFixture('instagram_login'), reviewId = f.target.reviewVersionId
+  const preview = await f.invoke({ action: 'preview', reviewId })
+  f.tables.content_review_versions[0].caption += ' amended'
+  assert.equal((await f.invoke({ action: 'confirm', reviewId, expectedFingerprint: preview.body.preview.fingerprint, confirmPublication: true })).status, 409)
+  assert.equal(f.tables.background_jobs.length, 0)
+  f.proof.capturedAt = new Date(Date.now() - 301_000).toISOString()
+  const prior = f.calls.length
+  assert.equal((await f.invoke({ action: 'preview', reviewId })).status, 409)
+  assert.equal(f.calls.length, prior)
+  f.tables.profiles[0].is_active = false
+  await assert.rejects(f.runtime.readCandidate(f.target, f.actorId), /ACTIVE_MANAGER_REQUIRED/)
+  const bindings = f.runtime.workerBindings(f.jobId), candidate = { ...f.target, platform: 'instagram' }
+  for (const change of [{ clientId: randomUUID() }, { accountId: '999' }, { route: 'instagram_facebook_login' }, { platform: 'facebook' }]) {
+    for (const method of ['readCurrent', 'submit', 'publishReadyContainer', 'reconcile']) await assert.rejects(bindings[method]({ ...candidate, ...change }), /Exact publication release/)
+  }
+  assert.throws(() => runtimeModule.instagramPublicationRuntime(f.sb, f.configuration, undefined), /decoder required/)
+  for (const change of [{ approved: false }, { route: 'facebook_page' }, { connectionId: 'not-a-uuid' }]) {
+    assert.throws(() => runtimeModule.instagramPublicationRuntime(f.sb, { ...f.configuration, release: { ...f.configuration.release, ...change } }, f.decoder), /release unavailable/)
+  }
+  assert.throws(() => f.runtime.workerBindings('not-a-job'), /job unavailable/)
+  await assert.rejects(f.runtime.targetForReview(randomUUID()), /review unavailable/)
+})
 
 for (const route of ['instagram_login', 'instagram_facebook_login']) test(`${route} resolves its existing encrypted exact-account store with GET-only current publishing evidence`, async () => {
   const f = await fixture(route), result = await resolve(f)

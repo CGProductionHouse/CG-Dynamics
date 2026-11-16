@@ -1,4 +1,30 @@
-## Latest 16 November — LinkedIn native status gap fixed locally
+## Latest 16 November — Instagram canonical confirmation source path
+
+Same draft PR #991 / #220. Reproduced both Instagram routes being rejected by the
+Facebook-only canonical reader, then extended the EXISTING photo preparation to
+route-specific exact-account policies, grants, approved channels/JPEG/media profile,
+captured Teams proof and original hashes. Private Instagram composition now shares
+target derivation and ORIGINAL durable confirmation recovery with Facebook; existing
+staff prepare/confirm flow is reused with its old import/Edge contract preserved.
+No second queue, scheduler, approval store or Microsoft lane. Revoked/stale/foreign/
+changed evidence cannot authorize submission. Preview/confirmation never signs files
+or makes a provider mutation; duplicate confirmation keeps one original receipt.
+
+Instagram remains UNREGISTERED in every live dispatch/Edge/MCP path, without a new
+environment activation parser. Mandatory decoder dependency approval remains pending;
+manifest/lock/shared node_modules untouched. Caption/disclosure qualification and
+dedicated exact-account release/registration/native-provider-phone acceptance remain
+gates. FOUR prior candidate migrations unapplied; no new SQL/schema/dependency or
+production/provider/OAuth/Microsoft/Vercel change. Current focused228/228 and isolated
+PostgreSQL29/29 pass, including both login-specific atomic confirmation cases;5 real
+task-TEMP codec decodes, build/emitted app, scoped lint and typing bridge pass. Final
+full acceptance: **4608 total /4578 pass /30 skipped /0 failures**, including actual
+candidate PostgreSQL. Generated unrelated artifacts restored; owned network-none
+QA container stopped. Source review passes within this private increment. See
+[same receipt](SOCIAL-PUBLISHING-220-2026-11-15.md). No new UI/phone/native Edge proof.
+Main4af41304; Nolan PR990 untouched; Google Control Centre target unidentified.
+
+## Earlier 16 November — LinkedIn native status gap fixed locally
 
 Same draft PR #991 / #220. Official LinkedIn schema review reproduced native
 PUBLISH_REQUESTED becoming unknown in the shared normalizer. Fixed native

@@ -15,11 +15,11 @@ after(async () => { await server?.close() })
 const NOW = Date.parse('2026-11-16T10:00:00Z')
 const bytes = Uint8Array.from([255, 216, 255, 20, 255, 217]) // Signature-only fixture; media qualification is explicitly stubbed.
 const digest = createHash('sha256').update(bytes).digest('hex')
-function fixture() {
-  const target = { clientId: randomUUID(), deliverableId: randomUUID(), reviewVersionId: randomUUID(), connectionId: randomUUID(), accountId: '12345', route: 'facebook_page' }
+function fixture(route = 'facebook_page') {
+  const target = { clientId: randomUUID(), deliverableId: randomUUID(), reviewVersionId: randomUUID(), connectionId: randomUUID(), accountId: '12345', route }
   const actorId = randomUUID(), calls = [], errors = new Set()
   const review = { id: target.reviewVersionId, client_id: target.clientId, deliverable_id: target.deliverableId, state: 'approved', asset_path: `${target.deliverableId}/exact.jpg`, media_type: 'image/jpeg',
-    caption: 'Approved café caption', channels: ['facebook'], scheduled_at: '2026-11-17T08:00:00Z' }
+    caption: 'Approved café caption', channels: [policy.PUBLISHING_PATHS[route].platform], scheduled_at: '2026-11-17T08:00:00Z' }
   const deliverable = { id: target.deliverableId, client_id: target.clientId, scheduled_date: '2026-11-17', archived_at: null, posted_at: null, production_status: 'not_started', microsoft_task_id: 'exact-task' }
   const proof = { contract: 'social_publication_schedule_evidence_v1', clientId: target.clientId, deliverableId: target.deliverableId, reviewVersionId: target.reviewVersionId,
     recordId: 'exact-task', revision: 'a'.repeat(64), scheduledDate: '2026-11-17', capturedAt: new Date(NOW - 60_000).toISOString(), checkedAt: new Date(NOW).toISOString() }
@@ -38,9 +38,9 @@ function fixture() {
     async createSignedUrl() { calls.push(['sign']); throw new Error('Preflight must not sign media') },
   } } } }
   const binding = { clientId: target.clientId, connectionId: target.connectionId, accountId: target.accountId, route: target.route,
-    active: true, grantedScopes: ['pages_show_list', 'pages_manage_posts', 'pages_read_engagement'], tokenValidUntil: '2026-11-18T10:00:00Z',
+    active: true, grantedScopes: [...policy.PUBLISHING_PATHS[route].scopes, ...(route === 'instagram_login' ? [] : ['pages_show_list'])], tokenValidUntil: '2026-11-18T10:00:00Z',
     appAccessVerified: true, accountPublishingVerified: true, mediaContractVerified: false, privateToken: 'PRIVATE TOKEN' }
-  const mediaProof = { verified: true, profile: 'fixture_facebook_photo_v1', checkedAt: new Date(NOW).toISOString(), privateUrl: 'https://PRIVATE.invalid' }
+  const mediaProof = { verified: true, profile: route === 'facebook_page' ? 'fixture_facebook_photo_v1' : 'instagram_baseline_jpeg_v1', checkedAt: new Date(NOW).toISOString(), privateUrl: 'https://PRIVATE.invalid' }
   const providerProof = { binding, checkedAt: new Date(NOW).toISOString() }
   const checks = { release: { ...target, approved: true }, now: () => NOW,
     async verifyProvider(selected) { calls.push(['provider', selected]); return providerProof },
@@ -48,6 +48,41 @@ function fixture() {
   return { target, actorId, review, deliverable, proof, binding, mediaProof, providerProof, tables, calls, errors, sb, checks }
 }
 const run = f => preparation.publicationCandidateReader(f.sb, f.checks)(f.target, f.actorId)
+
+for (const route of ['instagram_login', 'instagram_facebook_login']) test(`${route} canonical preparation reuses the exact approved review and Teams evidence without publishing or signing`, async () => {
+  const f = fixture(route), result = await run(f)
+  assert.equal(result.context.binding.route, route)
+  assert.deepEqual(result.context.review.channels, ['instagram'])
+  assert.equal(result.context.assetSha256, digest)
+  assert.equal(result.context.authorization, null)
+  assert.equal(result.evidence.mediaProfile, 'instagram_baseline_jpeg_v1')
+  assert.equal(result.context.binding.grantedScopes.includes('pages_manage_posts'), false)
+  assert.equal(f.calls.some(c => c[0] === 'sign'), false)
+  assert.equal(JSON.stringify(result).includes('PRIVATE'), false)
+})
+
+for (const route of ['instagram_login', 'instagram_facebook_login']) test(`${route} cannot use foreign route grants or a Facebook media proof`, async () => {
+  for (const change of [f => { f.binding.grantedScopes = ['pages_show_list', 'pages_manage_posts', 'pages_read_engagement'] },
+    f => { f.binding.route = route === 'instagram_login' ? 'instagram_facebook_login' : 'instagram_login' },
+    f => { f.mediaProof.profile = 'facebook_static_png_v1' }, f => { f.checks.release.route = 'facebook_page' }]) {
+    const f = fixture(route); change(f)
+    await assert.rejects(run(f)); assert.equal(f.calls.some(c => c[0] === 'sign'), false)
+  }
+})
+
+test('Instagram PNG/video or an unapproved channel stops before snapshot/provider access and an oversized JPEG before body materialization', async () => {
+  for (const type of ['image/png', 'video/mp4']) {
+    const f = fixture('instagram_login'); f.review.media_type = type
+    await assert.rejects(run(f), /REVIEWED_PROVIDER_MEDIA_PROOF_REQUIRED/)
+    assert.equal(f.calls.some(c => ['download', 'provider', 'media'].includes(c[0])), false)
+  }
+  const f = fixture('instagram_login'); f.review.channels = ['facebook']
+  await assert.rejects(run(f), /CURRENT_UNSCHEDULED_REVIEW_REQUIRED/)
+  assert.equal(f.calls.some(c => ['download', 'provider', 'media'].includes(c[0])), false)
+  const large = fixture('instagram_login'); let read = false
+  large.sb.storage.from = () => ({ download: async () => ({ data: { size: 8_000_001, type: 'image/jpeg', arrayBuffer() { read = true; throw new Error('PRIVATE') } }, error: null }) })
+  await assert.rejects(run(large)); assert.equal(read, false)
+})
 
 test('provider completion after thirty seconds is checked against completion time rather than a stale entry clock', async () => {
   const f = fixture(); let clock = NOW

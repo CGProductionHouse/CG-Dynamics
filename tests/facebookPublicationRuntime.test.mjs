@@ -146,6 +146,7 @@ test('default-off configuration needs both gates, exact release and existing Met
   for (const key of Object.keys(env)) assert.equal(read({ ...env, [key]: undefined }), null, key)
   for (const change of [{ SOCIAL_FACEBOOK_PHOTO_RELEASE: '{}' }, { SOCIAL_FACEBOOK_PHOTO_RELEASE: JSON.stringify({ ...f.release }) },
     { SUPABASE_URL: 'https://user:secret@fixture.supabase.co' }, { META_GRAPH_VERSION: 'latest' }, { SOCIAL_PUBLISHING_ENABLED: 'TRUE' }]) assert.equal(read({ ...env, ...change }), null)
+  assert.throws(() => runtimeModule.facebookPublicationRuntime(f.sb, { server: f.config, release: { ...f.release, route: 'instagram_login' } }), /release unavailable/)
 })
 
 test('actual authorization Edge entry honors preflight, authentication, active profile and default-off gate without provider/secret access', async () => {

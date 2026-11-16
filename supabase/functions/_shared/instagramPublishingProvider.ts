@@ -2,7 +2,7 @@ import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { resolveInstagramPublishingCredential, verifyInstagramPublishingTarget, type InstagramPublishingCredentialConfig } from './instagramPublishingCredential.ts'
 import { instagramPhotoTransport } from './instagramPublishingTransport.ts'
 import { createInstagramPhotoContainer, publishInstagramPhotoContainer, readInstagramPhotoStatus } from './instagramPublishing.ts'
-import { verifyPublicationJpeg, type StrictJpegDecoder } from './publicationJpeg.ts'
+import { verifyPublicationJpeg, INSTAGRAM_PHOTO_MAX_BYTES, type StrictJpegDecoder } from './publicationJpeg.ts'
 import { inspectPublicationSnapshot, approvedSnapshotDelivery, type PrivatePublicationSnapshot } from './socialPublishingMedia.ts'
 import type { PublicationTarget } from './socialPublicationAuthorization.ts'
 import type { SocialProviderBindings } from './socialPublishingQueue.ts'
@@ -25,18 +25,18 @@ export function instagramPhotoProvider(sb: SupabaseClient, input: InstagramPubli
     return instagramPhotoTransport({ intent, stage, graphVersion: settings.graphVersion, appSecret: config.facebook?.appSecret,
       resolveCredential: i => resolveInstagramPublishingCredential(sb, i, config),
       qualifiedMediaUrl: async i => {
-        const snapshot = await inspectPublicationSnapshot(sb, i, 8_000_000)
+        const snapshot = await inspectPublicationSnapshot(sb, i, INSTAGRAM_PHOTO_MAX_BYTES)
         await verifyMedia(snapshot, i)
         return await delivery(i)
       } })
   }
-  const bindings: Omit<SocialProviderBindings, 'readCurrent'> = {
+  const bindings = {
     async submit(intent) { return await createInstagramPhotoContainer(intent, await transport(intent, 'create')) },
     async publishReadyContainer(intent) { return await publishInstagramPhotoContainer(intent, await transport(intent, 'publish')) },
     async reconcile(intent, protocol) {
       if (!protocol) throw new Error('Durable Instagram protocol receipt required.')
       return await readInstagramPhotoStatus(intent, await transport(intent, 'status'), protocol)
     },
-  }
+  } satisfies Omit<SocialProviderBindings, 'readCurrent'>
   return { ...bindings, verifyMedia, verifyProvider: (target: Readonly<PublicationTarget>) => verifyInstagramPublishingTarget(sb, target, config) }
 }
