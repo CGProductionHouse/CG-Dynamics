@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { NOLAN_DECISIONS_ACCEPTED, previewDecisionTask, listMyNativeDecisions, createNativeDecision, closeNativeDecision, type DecisionTaskPreview, type NativeDecisionRow } from '../../lib/nolanDecisionApi'
+import { NOLAN_DECISIONS_ACCEPTED, decisionRetryUncertain, previewDecisionTask, listMyNativeDecisions, createNativeDecision, closeNativeDecision, type DecisionTaskPreview, type NativeDecisionRow } from '../../lib/nolanDecisionApi'
 
 /** Account isolation is enforced by the parent's scope key as well as server auth. */
 export function NolanNeedsYou({ viewerId, role }: { viewerId: string; role: string }) {
@@ -19,6 +19,7 @@ function DecisionWorkspace({viewerId,role}:{viewerId:string;role:string}) {
  const [response,setResponse]=useState<Record<string,string>>({})
  const [receipt,setReceipt]=useState('')
  const key=useRef<string|null>(null)
+ const uncertain=useRef(false)
  const mounted=useRef(true)
  useEffect(()=>{mounted.current=true;return()=>{mounted.current=false}},[])
  useEffect(()=>{
@@ -47,11 +48,12 @@ function DecisionWorkspace({viewerId,role}:{viewerId:string;role:string}) {
    // SQL rejection rolls back; only these known errors allow a corrected draft.
    // Network/timeouts or an absent receipt keep the retry key and frozen draft.
    const code=(error as {code?:string})?.code
-   if(code && ['P0001','42501','22P02','23514','23503'].includes(code)) key.current=null
+   uncertain.current=decisionRetryUncertain(uncertain.current,code)
+   if(!uncertain.current) key.current=null
    throw error
   }
   if(!mounted.current)return
-  setReceipt('Request recorded: '+id);setPreview(null);setQuestion('');setRecipient('');key.current=null;setGeneration(n=>n+1)
+  uncertain.current=false;setReceipt('Request recorded: '+id);setPreview(null);setQuestion('');setRecipient('');key.current=null;setGeneration(n=>n+1)
  })
  const close=(r:NativeDecisionRow,action:'resolve'|'withdraw')=>run(async()=>{
   await closeNativeDecision(r.id,r.version,action,response[r.id]??'')

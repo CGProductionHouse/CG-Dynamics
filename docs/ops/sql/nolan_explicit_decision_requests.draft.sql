@@ -24,7 +24,7 @@ revoke all on public.nolan_decision_requests from public, anon, authenticated;
 -- No direct table grants/policies: only narrow checked RPCs expose records.
 -- No service-role browser access or generic dynamic SQL.
 create function public.nolan_decision_actor()
-returns uuid language plpgsql stable security definer set search_path = pg_catalog set timezone = 'UTC' as $
+returns uuid language plpgsql stable security definer set search_path = pg_catalog set timezone = 'UTC' as $$
 declare v_id uuid;
 begin
  select id into v_id from public.profiles
@@ -35,7 +35,7 @@ end $$;
 revoke all on function public.nolan_decision_actor() from public,anon,authenticated;
 
 create function public.preview_nolan_decision_task(p_task_id uuid)
-returns jsonb language plpgsql stable security definer set search_path = pg_catalog set timezone = 'UTC' as $
+returns jsonb language plpgsql stable security definer set search_path = pg_catalog set timezone = 'UTC' as $$
 declare v_actor uuid; v_task public.command_centre_tasks; v_recipients jsonb;
 begin
  v_actor := public.nolan_decision_actor();
@@ -52,7 +52,7 @@ end $$;
 
 create function public.create_nolan_decision_request(
  p_task_id uuid,p_expected_revision text,p_recipient_id uuid,p_question text,p_idempotency_key uuid)
-returns uuid language plpgsql security definer set search_path = pg_catalog set timezone = 'UTC' as $
+returns uuid language plpgsql security definer set search_path = pg_catalog set timezone = 'UTC' as $$
 declare v_actor uuid; v_task public.command_centre_tasks; v_prior public.nolan_decision_requests; v_id uuid;
 begin
  select id into v_actor from public.profiles where id=auth.uid() and is_active and role='admin' for share;
@@ -86,7 +86,7 @@ begin
 end $$;
 
 create function public.list_my_nolan_decision_requests()
-returns jsonb language plpgsql stable security definer set search_path = pg_catalog set timezone = 'UTC' as $
+returns jsonb language plpgsql stable security definer set search_path = pg_catalog set timezone = 'UTC' as $$
 declare v_actor uuid; v_rows jsonb; v_count integer;
 begin
  v_actor := public.nolan_decision_actor();
@@ -108,12 +108,13 @@ begin
 end $$;
 
 create function public.close_nolan_decision_request(p_request_id uuid,p_expected_version integer,p_action text,p_response text)
-returns void language plpgsql security definer set search_path = pg_catalog set timezone = 'UTC' as $
+returns void language plpgsql security definer set search_path = pg_catalog set timezone = 'UTC' as $$
 declare v_actor uuid; v_request public.nolan_decision_requests; v_task public.command_centre_tasks;
 begin
  select id into v_actor from public.profiles where id=auth.uid() and is_active and role in ('admin','manager') for share;
  if not found then raise exception 'Active manager access required' using errcode='42501'; end if;
- select * into v_request from public.nolan_decision_requests where id=p_request_id for update;
+ select * into v_request from public.nolan_decision_requests where id=p_request_id
+ and (recipient_id=v_actor or requested_by=v_actor) for update;
  if not found or (v_request.recipient_id<>v_actor and v_request.requested_by<>v_actor) then
    raise exception 'Decision request unavailable' using errcode='42501';
  end if;

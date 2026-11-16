@@ -126,3 +126,35 @@ Do not activate the UI gate or apply migration until those checks are verified.
 Independent review correction: draft SQL is stored outside supabase/migrations so ordinary deployment tooling cannot apply it merely because it exists in the PR. Promoting it to an executable migration requires reviewed acceptance and separate release authorization. Native command-centre links use the existing daily-tasks workspace, with the exact UUID shown separately; the Planner board-ID route is not reused or claimed as an exact task deep link.
 
 Further source-review corrections: every RPC fixes timezone UTC for consistent JSON timestamp revision serialization; known SQL rejection codes release the draft for correction, while network/timeout/missing receipt errors retain the retry key and locked fields. These behaviors still require rendered and real-DB acceptance.
+
+
+## Deeper review and acceptance gate correction
+
+Source review after 2495491 found an actual SQL syntax defect: replacement-string
+expansion reduced the five opening dollar quotes to a single dollar. This has
+been corrected using literal-safe replacement and a five-pair delimiter regression.
+This illustrates why TypeScript/source tests are not SQL execution acceptance.
+
+Create retries now preserve an earlier uncertain outcome even if a later retry
+returns a confirmed SQL rejection. A later rollback does not disprove an earlier
+successful commit. Empty/non-UUID creation receipts, mismatched preview source,
+blank revisions/titles and invalid/duplicate recipient records are rejected.
+The close locking query includes actor membership before taking the row lock.
+Seven source/synthetic checks pass; real SQL parsing and transaction tests remain
+unverified. Activation remains disabled.
+
+Read-only acceptance discovery: connected Supabase inventory contains CG Hours and
+CG Dynamics production projects; CG Dynamics development-branch list is empty.
+No production SQL was executed and no paid branch was created. Cloud has no
+PostgreSQL/Docker or installed PostgreSQL parser. Prior denied Docker/Windows
+sandbox routes were not retried.
+
+Concrete next step: supply a permitted writable isolated checkout/runtime with
+an already available postgres:17-alpine image and authorized Docker daemon, then run:
+RUN_NOLAN_DECISION_DB_TESTS=1 node --test tests/nolanDecisionDatabase.test.mjs
+This test deliberately refuses image pulls and has no networking/host ports.
+A passing minimal-dependency fixture is only the first gate: repeat with canonical
+schema/profile policies, real concurrent sessions and legitimate same-origin
+test identities before enabling UI. Alternatively an explicitly authorized,
+isolated non-production database could host the synthetic fixture; production
+and new billable branches are not substitutes without separate authorization.

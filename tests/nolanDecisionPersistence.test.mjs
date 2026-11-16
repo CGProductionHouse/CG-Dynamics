@@ -32,4 +32,25 @@ test('malformed and duplicate server receipt sets cannot masquerade as a complet
  for(const invalid of [null,{},[row,row],[{...row,version:0}],[{...row,recipientActive:null}],[{...row,state:'approved'}]]) assert.throws(()=>validate(invalid))
 })
 
-test('native link and deterministic rejection retain honest navigation and retry behavior',()=>{assert.ok(ui.includes('/admin/work?tab=daily-tasks'));assert.ok(!ui.includes('tab=board&id='));assert.ok(ui.includes("['P0001','42501','22P02','23514','23503']"));assert.ok(ui.includes('Network/timeouts or an absent receipt keep the retry key'))})
+test('native link and deterministic rejection retain honest navigation and retry behavior',()=>{assert.ok(ui.includes('/admin/work?tab=daily-tasks'));assert.ok(!ui.includes('tab=board&id='));assert.ok(ui.includes('decisionRetryUncertain(uncertain.current,code)'));assert.ok(ui.includes('Network/timeouts or an absent receipt keep the retry key'))})
+
+test('SQL dollar-quote openings and closings are paired, not replacement-expanded',()=>{
+ assert.equal(sql.split('as $$').length-1,5)
+ assert.equal(sql.split('end $$;').length-1,5)
+ assert.equal(sql.split('as $\n').length-1,0)
+ assert.ok(sql.includes('and (recipient_id=v_actor or requested_by=v_actor) for update'))
+})
+test('uncertain retry stays locked and malformed creation/preview receipts fail closed',async()=>{
+ const compiled=await transform(api.replace("import { supabase } from './supabase'","const supabase = {}"),{loader:'ts',format:'cjs'})
+ const m={exports:{}};new Function('module','exports',compiled.code)(m,m.exports)
+ const {decisionRetryUncertain:uncertain,validateDecisionPreview:preview,validateDecisionCreationReceipt:created}=m.exports
+ assert.equal(uncertain(false,'P0001'),false)
+ assert.equal(uncertain(false,undefined),true)
+ for(const code of ['P0001','42501',undefined]) assert.equal(uncertain(true,code),true)
+ for(const invalid of ['',null,'anything']) assert.throws(()=>created(invalid))
+ const id='10000000-0000-4000-8000-000000000001', other='10000000-0000-4000-8000-000000000002'
+ assert.equal(created(id),id)
+ const good={taskId:id,title:'Task',revision:'a'.repeat(32),recipients:[{id:other,name:'Recipient'}]}
+ assert.deepEqual(preview(good,id),good)
+ for(const bad of [{...good,taskId:other},{...good,title:''},{...good,revision:''},{...good,recipients:[{}]},{...good,recipients:[good.recipients[0],good.recipients[0]]}]) assert.throws(()=>preview(bad,id))
+})
