@@ -1,5 +1,6 @@
 import type { InstagramPublishingTransport } from './instagramPublishing.ts'
 import { PUBLISHING_PATHS, type PublishingIntent } from './socialPublishing.ts'
+import { requireInstagramPublishingCaption } from './instagramPublishingCaption.ts'
 
 export class InstagramPublishingTransportError extends Error {
   constructor(readonly code: string) { super(code); this.name = 'InstagramPublishingTransportError' }
@@ -32,6 +33,7 @@ export async function instagramPhotoTransport(input: {
   if ((stage === 'create' && (!['queued', 'retry_wait'].includes(i.state) || i.providerOperationId || i.providerPostId))
     || (stage === 'publish' && (i.state !== 'processing' || !/^\d+$/.test(i.providerOperationId ?? '') || i.providerPostId))
     || (stage === 'status' && !/^\d+$/.test(i.providerOperationId ?? ''))) fail('INSTAGRAM_TRANSPORT_STAGE_REQUIRED')
+  if (stage !== 'status') requireInstagramPublishingCaption(i.caption)
   const appSecret = input.appSecret, base = `https://${i.route === 'instagram_login' ? 'graph.instagram.com' : 'graph.facebook.com'}/${version}`
   const fetcher = input.fetch ?? fetch, resolved = now()
   const c = await input.resolveCredential(i).catch(() => fail('INSTAGRAM_CURRENT_CREDENTIAL_REQUIRED'))

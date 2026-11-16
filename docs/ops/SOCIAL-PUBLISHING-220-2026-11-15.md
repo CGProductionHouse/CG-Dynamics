@@ -1,6 +1,57 @@
 # Social publishing — 15 November 2026
 
-## Latest 16 November — canonical Instagram preparation and confirmation, SOURCE ONLY
+## Latest 16 November — Instagram caption qualification and current-main integration, SOURCE ONLY
+
+Same draft PR #991 / #220. Brought main4ee7d503 (PR993) into this branch; only
+handover prepend conflict required resolution. Preserved BOTH the staff/mobile
+owner's committed release record and this lane's source-only evidence. No edits
+to their runtime work or any new deployment by this lane. Their LIVE status is
+recorded from main's receipt, not independently re-certified here.
+
+Reproduced oversized Instagram copy passing canonical preparation and private
+transport construction. Added one pure text profile shared by canonical reading,
+admission, create/publish protocol and private transport. Invalid captions stop
+before private bytes/credential/provider access; exact safe blocker codes reach
+the existing confirmation core without raw text. Valid spaces, CRLF/newlines,
+Unicode and business emails are sent unchanged. No truncation, rewriting or
+duplicate-tag removal. Invalid UTF-16 is rejected before transport can replace it.
+
+Meta's current [media reference](https://developers.facebook.com/documentation/instagram-platform/instagram-graph-api/reference/ig-user/media)
+documents caption bounds of2200 characters/30 hashtags/20 @tags. Its precise Unicode
+counting/tokenization is unspecified: this conservative application profile caps
+2200 UTF-16 units and lexical tag occurrences (Unicode hashtags, standalone ASCII
+username mentions excluding normal email local parts). This is NOT native proof
+for all provider-valid text. Native boundary acceptance remains a rollout gate.
+Facebook copy does not inherit Instagram's smaller bound. GET-only receipt reads
+skip NEW-post caption qualification, preserving already accepted operation truth.
+A ready container with invalid current copy cannot cross the second publish
+barrier; its existing uncertainty is retained instead of a false cancelled claim.
+
+The reference also confirms Page Publishing Authorization and conditional two-
+factor requirements can block real publication. Current permission/quota checks
+are not a guarantee of provider acceptance; no account/security setting was read
+or changed to bypass those requirements. Disclosure/partnership options remain
+unimplemented and cannot be inferred from approved text or the filename.
+
+Focused236/236, build/emitted app, scoped lint and helper/entry typing bridge pass.
+The first merged-source full run exposed TWO stale commandCentreNavigation tests
+still requiring PR993's removed desktop-clone phone drawer. Updated only that
+test file to exercise the actual mobileNavigationGroups helper, manager/admin
+reachability, ordinary-staff isolation and the intentional import-inside-Team-Work
+flow. All14 main mobile/login runtime files remain byte-identical to origin/main;
+no staff UI rollback or operational change. Navigation/mobile regression33/33
+and scoped test lint pass. Final merged-source acceptance after the test-only
+compatibility correction: **4,642 total / 4,612 passed / 30 skipped / 0 failures**,
+including all29 actual isolated PostgreSQL checks. Generated unrelated access-
+matrix artifacts restored and the owned network-none QA container stopped.
+Source review passes within this private increment; rollout remains held.
+No UI changes from this caption increment or fresh browser/native/provider/phone
+acceptance. Decoder dependency approval remains pending; manifest/lock/shared
+node_modules untouched. Instagram still UNREGISTERED; FOUR migrations remain
+UNAPPLIED. No upload/schedule/publish, live SQL/data/Edge/config/OAuth/provider/
+Microsoft/Vercel action, new production dependency or overlapping Nolan work.
+
+## Earlier 16 November — canonical Instagram preparation and confirmation, SOURCE ONLY
 
 Continued the same draft PR #991 / #220. Reproduced that BOTH Instagram login
 routes failed the canonical reader's Facebook-only release check. The existing

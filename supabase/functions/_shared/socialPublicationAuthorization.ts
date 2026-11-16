@@ -27,7 +27,8 @@ const exactKeys = (r: Record<string, unknown>, keys: readonly string[]) => Objec
 const hash = (s: unknown): s is string => typeof s === 'string' && /^[a-f0-9]{64}$/.test(s)
 const preparationBlockers = new Set(['PREPARATION_SCOPE_INVALID', 'ACTIVE_MANAGER_REQUIRED', 'EXACT_ACCOUNT_RELEASE_REQUIRED',
   'CANONICAL_PUBLICATION_SOURCE_UNAVAILABLE', 'CURRENT_UNSCHEDULED_REVIEW_REQUIRED', 'FRESH_TEAMS_EVIDENCE_REQUIRED',
-  'CURRENT_PROVIDER_PROOF_REQUIRED', 'REVIEWED_PROVIDER_MEDIA_PROOF_REQUIRED', 'PREPARATION_SOURCE_CHANGED'])
+  'CURRENT_PROVIDER_PROOF_REQUIRED', 'REVIEWED_PROVIDER_MEDIA_PROOF_REQUIRED', 'PREPARATION_SOURCE_CHANGED',
+  'INSTAGRAM_CAPTION_INVALID', 'INSTAGRAM_CAPTION_TOO_LONG', 'INSTAGRAM_HASHTAG_LIMIT', 'INSTAGRAM_MENTION_LIMIT'])
 
 /** This is a stale-preview detector, NOT a bearer capability. Authorization
  * still requires an active manager, fresh private preflight and atomic storage.

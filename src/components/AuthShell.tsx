@@ -14,7 +14,7 @@ export default function AuthShell({
   footer?: ReactNode
 }) {
   return (
-    <div className="min-h-screen bg-brand-bg bg-[radial-gradient(circle_at_top,rgba(45,212,191,0.1),transparent_28rem)] flex items-center justify-center px-4 py-8">
+    <div data-auth-shell className="min-h-screen bg-brand-bg bg-[radial-gradient(circle_at_top,rgba(45,212,191,0.1),transparent_28rem)] flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-sm bg-brand-surface/95 border border-brand-muted rounded-xl p-6 shadow-[0_0_50px_rgba(45,212,191,0.1)] sm:p-8">
         <div className="mb-7 flex justify-center">
           <BrandMark subtitle="Client reporting portal" />

@@ -131,6 +131,51 @@ test('a real preflight can finish after transport construction without looking l
   assert.ok(t.request)
 })
 
+test('invalid Instagram captions stop before credential/media/provider access rather than consuming a mutation attempt', async () => {
+  for (const caption of ['x'.repeat(2201), Array.from({ length: 31 }, (_, n) => `#tag${n}`).join(' '),
+    Array.from({ length: 21 }, (_, n) => `@person${n}`).join(' '), 'broken\ud800text']) {
+    const i = { ...fixture().intent, caption, state: 'queued', providerOperationId: null }, g = graphFixture(i)
+    let credentials = 0
+    await assert.rejects(g.make('create', { resolveCredential: async () => { credentials++; return g.credential } }))
+    assert.equal(credentials, 0); assert.equal(g.calls.length, 0)
+    let requests = 0
+    const direct = { request: async () => { requests++; return {} }, approvedMediaUrl: async () => { throw new Error('Must not sign') } }
+    await assert.rejects(instagram.createInstagramPhotoContainer(i, direct))
+    await assert.rejects(instagram.publishInstagramPhotoContainer({ ...i, state: 'processing', providerOperationId: '456' }, direct))
+    assert.equal(requests, 0)
+  }
+})
+
+test('invalid current caption blocks the second durable publish barrier but never blocks GET-only reconciliation of an accepted receipt', async () => {
+  const f = fixture(); f.intent.caption = 'x'.repeat(2201); f.context.review.caption = f.intent.caption
+  const stopped = (await dispatch(f)).publication
+  assert.equal(stopped.state, 'unknown_outcome'); assert.equal(stopped.errorCode, 'INSTAGRAM_CURRENT_AUTHORITY_REQUIRED')
+  assert.equal(f.events.some(e => ['begin_instagram_publication_publish', 'publish', 'create'].includes(e[0])), false)
+  const i = { ...f.intent, providerPostId: '789' }, g = graphFixture(i, { handle: path => path === '/456' ? Response.json({ id: '456', status_code: 'PUBLISHED' }) : null })
+  const receipt = await instagram.readInstagramPhotoStatus(i, await g.make('status'), { ...f.protocol, phase: 'verifying', publishAttempted: true })
+  assert.equal(receipt.state, 'posted'); assert.ok(g.calls.every(c => c[0] === 'GET'))
+})
+
+test('valid caption boundaries retain the approved spaces, Unicode, contact details and newlines exactly in the provider body', async () => {
+  const prefix = '  Café 🛠\r\n#MadeInSA @client\nContact sales@client.co.za: '
+  const i = { ...fixture().intent, state: 'queued', providerOperationId: null, caption: prefix + 'x'.repeat(2200 - prefix.length - 2) + '  ' }
+  const g = graphFixture(i), receipt = await instagram.createInstagramPhotoContainer(i, await g.make('create'))
+  assert.equal(receipt.state, 'processing')
+  assert.equal(new URLSearchParams(g.calls.at(-1)[3].body).get('caption'), i.caption)
+  assert.equal(i.caption.length, 2200)
+})
+
+test('Instagram caption bounds apply to both login routes without reducing the independent Facebook caption policy', () => {
+  const f = fixture(); f.context.review.caption = 'x'.repeat(2201)
+  for (const route of ['instagram_login', 'instagram_facebook_login']) {
+    f.context.binding.route = route; f.context.authorization.route = route
+    assert.ok(policy.preparePublishingIntent(f.context).blockers.includes('INSTAGRAM_CAPTION_TOO_LONG'))
+  }
+  f.context.binding.route = 'facebook_page'; f.context.authorization.route = 'facebook_page'
+  f.context.review.channels = ['facebook']; f.context.binding.grantedScopes = ['pages_manage_posts', 'pages_read_engagement']
+  assert.ok(policy.preparePublishingIntent(f.context).intent)
+})
+
 for (const [name, result, attempted, mediaId, state] of [
   ['ready', { id: '456', status_code: 'FINISHED' }, false, null, 'processing'],
   ['ready after attempted publication', { id: '456', status_code: 'FINISHED' }, true, null, 'unknown_outcome'],

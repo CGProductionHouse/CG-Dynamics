@@ -1,5 +1,6 @@
 // #220: execution policy for children of monthly_deliverables + an immutable
 // content_review_versions row. This is not a calendar, OAuth store or live worker.
+import { instagramCaptionBlocker } from './instagramPublishingCaption.ts'
 export type PublishingPlatform = 'facebook' | 'instagram' | 'tiktok' | 'linkedin' | 'youtube'
 export type PublishingRoute = 'facebook_page' | 'instagram_facebook_login' | 'instagram_login' | 'tiktok_accounts' | 'linkedin_organization' | 'youtube_channel'
 export type PublishingState = 'queued' | 'submitting' | 'provider_scheduled' | 'processing' | 'posted' | 'retry_wait' | 'blocked' | 'failed' | 'unknown_outcome' | 'cancelled'
@@ -68,6 +69,10 @@ export function preparePublishingIntent(context: PublishingContext): { intent: P
   if (!r.channels.includes(path.platform)) blockers.push('CHANNEL_NOT_APPROVED')
   if (!present(r.caption) || !hash(context.assetSha256) || !r.asset_path.startsWith(`${d.id}/`)
     || !['image/jpeg', 'image/png', 'image/webp', 'video/mp4'].includes(r.media_type)) blockers.push('APPROVED_ASSET_REQUIRED')
+  if (path.platform === 'instagram') {
+    const captionBlocker = instagramCaptionBlocker(r.caption)
+    if (captionBlocker) blockers.push(captionBlocker)
+  }
   if (!d.scheduled_date || johannesburgPublishingDate(r.scheduled_at) !== d.scheduled_date) blockers.push('CANONICAL_SCHEDULE_MISMATCH')
   if (!a || !present(a.id) || a.reviewVersionId !== r.id || a.clientId !== r.client_id || a.accountId !== b.accountId
     || a.connectionId !== b.connectionId || a.route !== b.route

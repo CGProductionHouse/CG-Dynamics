@@ -94,7 +94,7 @@ export function ClientPortalShell({
   }, [mobileMenuOpen])
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[#030706] text-report-text">
+    <div data-client-portal className="relative min-h-screen w-full min-w-0 bg-[#030706] text-report-text">
       <div
         aria-hidden
         className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_8%_-4%,rgba(45,212,191,0.17),transparent_31rem),radial-gradient(circle_at_96%_12%,rgba(249,115,22,0.11),transparent_28rem),linear-gradient(180deg,#030807_0%,#040706_48%,#020403_100%)]"
@@ -103,7 +103,7 @@ export function ClientPortalShell({
 
       <header className="relative z-10 border-b border-white/[0.08] bg-[#030706]/80 shadow-[0_18px_60px_-44px_rgba(45,212,191,0.55)] backdrop-blur-2xl">
         <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-4 sm:px-6 sm:py-5 lg:px-8">
-          <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+          <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
             {client ? (
               <ClientLogo
                 client={client}
@@ -118,7 +118,7 @@ export function ClientPortalShell({
 
             {client && (
               <div className="min-w-0">
-                <p className="text-[0.62rem] font-black uppercase tracking-[0.24em] text-[#2dd4bf]">CG client portal</p>
+                <p className="truncate text-[0.62rem] font-black uppercase tracking-[0.24em] text-[#2dd4bf]">CG client portal</p>
                 <p className="mt-1 truncate text-base font-black tracking-[-0.02em] text-white sm:text-lg">{client.name}</p>
               </div>
             )}
@@ -159,7 +159,7 @@ export function ClientPortalShell({
         </nav>
       </header>
 
-      <main id="client-portal-content" className="relative z-[1] mx-auto w-full max-w-7xl px-4 pb-[calc(7rem+env(safe-area-inset-bottom))] pt-6 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
+      <main id="client-portal-content" className="relative z-[1] mx-auto w-full min-w-0 max-w-7xl px-4 pb-[calc(7rem+env(safe-area-inset-bottom))] pt-6 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
         {children}
       </main>
 

@@ -1,4 +1,5 @@
 import type { InstagramPublicationProtocol, PublishingIntent, PublishingObservation } from './socialPublishing.ts'
+import { requireInstagramPublishingCaption } from './instagramPublishingCaption.ts'
 
 export interface InstagramPublishingTransport {
   // PRIVATE adapter must enforce actual JPEG qualification, original approved
@@ -28,6 +29,7 @@ async function quota(i: Readonly<PublishingIntent>, t: InstagramPublishingTransp
 /** ONE mutation, container ID receipt first. No polling or publication here. */
 export async function createInstagramPhotoContainer(i: Readonly<PublishingIntent>, t: InstagramPublishingTransport): Promise<PublishingObservation> {
   contract(i)
+  requireInstagramPublishingCaption(i.caption)
   if (!['queued', 'retry_wait'].includes(i.state) || i.providerOperationId || i.providerPostId) throw new Error('New Instagram container authority required.')
   await quota(i, t)
   const raw = await t.approvedMediaUrl(i), url = new URL(raw)
@@ -42,6 +44,7 @@ export async function createInstagramPhotoContainer(i: Readonly<PublishingIntent
  */
 export async function publishInstagramPhotoContainer(i: Readonly<PublishingIntent>, t: InstagramPublishingTransport): Promise<PublishingObservation> {
   contract(i)
+  requireInstagramPublishingCaption(i.caption)
   if (!id(i.providerOperationId) || i.providerPostId) throw new Error('Recorded Instagram container required.')
   const status = await t.request('GET', `/${i.providerOperationId}`, { fields: 'id,status_code' })
   if (status.id !== i.providerOperationId || status.status_code !== 'FINISHED' || status.error) return unknown(i, 'INSTAGRAM_CONTAINER_NOT_READY')

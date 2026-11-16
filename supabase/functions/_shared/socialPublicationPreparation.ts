@@ -4,6 +4,7 @@ import { PUBLISHING_PATHS, preparePublishingIntent, type PublishingBinding, type
 import { socialPublicationFingerprint, type PublicationAuthorizationPorts, type PublicationTarget } from './socialPublicationAuthorization.ts'
 import { FACEBOOK_PHOTO_MAX_BYTES } from './facebookPhotoMedia.ts'
 import { INSTAGRAM_PHOTO_MAX_BYTES } from './publicationJpeg.ts'
+import { instagramCaptionBlocker } from './instagramPublishingCaption.ts'
 
 export class PublicationPreparationError extends Error {
   constructor(readonly code: string) { super(code); this.name = 'PublicationPreparationError' }
@@ -60,6 +61,10 @@ export function publicationCandidateReader(sb: SupabaseClient, checks: PrivatePu
       || !Array.isArray(r.channels) || ['scheduled', 'posted'].includes(d.production_status)) stop('CURRENT_UNSCHEDULED_REVIEW_REQUIRED')
     if (!r.channels.includes(profile.platform)) stop('CURRENT_UNSCHEDULED_REVIEW_REQUIRED')
     if (profile.platform === 'instagram' && r.media_type !== 'image/jpeg') stop('REVIEWED_PROVIDER_MEDIA_PROOF_REQUIRED')
+    if (profile.platform === 'instagram') {
+      const blocker = instagramCaptionBlocker(r.caption)
+      if (blocker) stop(blocker)
+    }
     const { data: schedule, error } = await sb.rpc('read_social_publication_schedule_evidence', { p_actor: actorId, p_deliverable: d.id, p_review: r.id })
     if (error || !schedule || schedule.contract !== 'social_publication_schedule_evidence_v1' || schedule.clientId !== target.clientId
       || schedule.deliverableId !== d.id || schedule.reviewVersionId !== r.id || schedule.recordId !== d.microsoft_task_id

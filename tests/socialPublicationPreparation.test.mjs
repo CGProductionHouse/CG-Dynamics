@@ -92,6 +92,25 @@ test('provider completion after thirty seconds is checked against completion tim
   assert.equal(result.evidence.checkedAt, new Date(clock).toISOString())
 })
 
+test('invalid Instagram captions fail canonical preparation before private bytes and provider checks', async () => {
+  const f = fixture('instagram_login'); f.review.caption = 'x'.repeat(2201)
+  await assert.rejects(run(f), /INSTAGRAM_CAPTION_TOO_LONG/)
+  assert.equal(f.calls.some(c => ['download', 'media', 'provider'].includes(c[0])), false)
+})
+
+test('actual confirmation core reports the specific Instagram caption blocker with no queue write or raw private text', async () => {
+  for (const [caption, code] of [['PRIVATE'.repeat(400), 'INSTAGRAM_CAPTION_TOO_LONG'], ['#PRIVATE '.repeat(31), 'INSTAGRAM_HASHTAG_LIMIT'],
+    ['@PRIVATE '.repeat(21), 'INSTAGRAM_MENTION_LIMIT'], ['PRIVATE\ud800', 'INSTAGRAM_CAPTION_INVALID']]) {
+    const f = fixture('instagram_login'); f.review.caption = caption; let writes = 0
+    const handler = authorization.socialPublicationAuthorizationHandler({ authenticate: async () => ({ id: f.actorId, role: 'manager', active: true }),
+      readCandidate: preparation.publicationCandidateReader(f.sb, f.checks), authorize: async () => { writes++; throw new Error('No write') }, revoke: async () => null }, true)
+    const response = await handler(new Request('https://fixture.invalid', { method: 'POST', body: JSON.stringify({ action: 'preview', target: f.target }) }))
+    assert.equal(response.status, 409)
+    const body = await response.json(); assert.deepEqual(body.blockers, [code]); assert.equal(JSON.stringify(body).includes('PRIVATE'), false)
+    assert.equal(writes, 0); assert.equal(f.calls.some(c => ['download', 'provider', 'media', 'sign'].includes(c[0])), false)
+  }
+})
+
 test('capture and token freshness must still hold after a long private preflight', async () => {
   for (const scenario of ['capture', 'token']) {
     const f = fixture(); let clock = NOW
