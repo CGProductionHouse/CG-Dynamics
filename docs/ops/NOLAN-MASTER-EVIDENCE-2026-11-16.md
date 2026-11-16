@@ -1,5 +1,35 @@
 # Nolan Master evidence — source candidate, 16 November 2026
 
+## Active-work snapshot follow-up
+
+From PR990 `07bdcf7`, checked main `b524a9f` and separate PR995 `d5a02c0`.
+Master defaults to **Active work** and offers explicit **Completed history** and
+**All records** views. It reuses `taskLifecycle` completion authority: only done/
+legacy completed leave active work. Approved, scheduled, blocked, waiting-client,
+deferred and reopened tasks remain active; completion timestamps do not override
+current lifecycle. No due-date/overdue claim uses the adapter's start-date fallback.
+
+A compact visible-snapshot summary shows active, blocked, waiting-client,
+unassigned-active and completed counts. Summary buttons open the corresponding
+view/filter and reset search/page; changing work view retains search/ownership,
+clears the old status filter and resets pagination. Search/filter still evaluates
+the complete authorized snapshot within the chosen lifecycle, before 12-row paging.
+Clear filters retains the chosen view. All records permits cross-history search.
+Counts are before search/filter, account-visible only, not whole-business/fleet
+coverage. Blocked/waiting/unassigned overlap active counts rather than adding up.
+
+Failed/refreshing empty snapshots show Unknown counts; retained counts explicitly
+say last-known. Missing directory evidence is Unknown, never fabricated unassigned
+ownership; partially unavailable owners are separately disclosed. The successful
+empty state means zero visible records, not no company work. Existing literal note
+limits, source links, freshness, access checks and unknown execution/next-action
+fields remain intact. No new source, DB, registry, provider, mutation or live claim.
+
+Focused local checks: 34 passed, zero failed/skipped, including lifecycle/history,
+filter/pagination, unavailable/stale/empty counts and prior large-note/access cases.
+Scoped lint, diff and application build passed. Render/helper checks are not actual
+signed-in browser/device acceptance; that existing approved-host gate remains open.
+
 ## Concise control-panel follow-up
 
 From PR990 `1734724`, checked main `b524a9f` and PR995 `d5a02c0` before changes.

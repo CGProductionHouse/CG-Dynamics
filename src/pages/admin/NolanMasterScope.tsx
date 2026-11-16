@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { taskStatusDisplayLabel, type CommandCentreTask } from '../../lib/commandCentre'
 import { nolanTaskOwnerLabel } from '../../lib/nolanOwnership'
 import { nolanEvidenceAge } from '../../lib/nolanTaskEvidence'
-import { nolanMasterPage, nolanNotePreview } from '../../lib/nolanMasterPresentation'
+import { nolanMasterPage, nolanMasterSummary, nolanNotePreview, type NolanMasterLifecycle } from '../../lib/nolanMasterPresentation'
 import { NolanTaskOwnership } from './NolanTaskOwnership'
 import { NolanTaskActivity } from './NolanTaskActivity'
 
@@ -17,8 +17,15 @@ export function MasterScope({ tasks = [], directory = null, role = '', sourceUna
   const [status, setStatus] = useState('')
   const [ownership, setOwnership] = useState('')
   const [page, setPage] = useState(0)
+  const [lifecycle, setLifecycle] = useState<NolanMasterLifecycle>('active')
   if (!['admin', 'manager'].includes(role)) return <p role="alert">Manager access required. No task evidence displayed.</p>
-  const result = nolanMasterPage(tasks, directory, { query, status, ownership }, page)
+  const result = nolanMasterPage(tasks, directory, { query, status, ownership, lifecycle }, page)
+  const counts = nolanMasterSummary(tasks, directory)
+  const uncertain = sourceUnavailable || loading
+  const countLabel = (value: number | null) => value === null || (uncertain && !tasks.length) ? 'Unknown' : `${value}${uncertain ? ' last-known' : ''}`
+  const inspect = (nextLifecycle: NolanMasterLifecycle, nextStatus = '', nextOwnership = '') => {
+    setLifecycle(nextLifecycle); setQuery(''); setStatus(nextStatus); setOwnership(nextOwnership); setPage(0)
+  }
   const sections = [
     ['Websites & discovery', '/admin/work?tab=board&id=7f413d31-17cd-4761-b2e9-a031c1343444', 'Four reviewed reporting mappings; full Builder registry pending.'],
     ['Apps: CG Hours, CG Pay, Dynamics, Web Editor', '/admin/work?tab=board', 'Exact linked Dynamics work; full external milestone inventory pending.'],
@@ -36,13 +43,29 @@ export function MasterScope({ tasks = [], directory = null, role = '', sourceUna
   return <section className="nolan-master" aria-label="Master task evidence">
     <p>Existing work records visible to this account. Task ownership is not an agent execution assignment. Status is recorded workflow state, not a live worker heartbeat.</p>
     <p role="status">{loading ? 'Refreshing — last-known records only.' : sourceUnavailable ? 'Task source unavailable — retained records are stale.' : 'Task source read completed.'} Last successful read: {checkedAt ?? 'Unknown'}.</p>
+    <section aria-label="Visible task snapshot summary">
+      <h3>Visible task snapshot</h3>
+      <p>Counts before search and filters, for records this account can read — not company or fleet totals. Blocked, waiting and unassigned overlap active work.</p>
+      {uncertain && <p role="status">{tasks.length ? 'Counts are last-known, not current verification.' : 'Counts unavailable — no current zero-work conclusion.'}</p>}
+      <div className="nolan-master-summary">
+        <button onClick={() => inspect('active')}>Active work: {countLabel(counts.active)}</button>
+        <button onClick={() => inspect('active', 'Blocked')}>Blocked: {countLabel(counts.blocked)}</button>
+        <button onClick={() => inspect('active', 'Waiting client')}>Waiting client: {countLabel(counts.waiting)}</button>
+        <button disabled={!directory} onClick={() => inspect('active', '', 'unassigned')}>Unassigned active: {countLabel(counts.unassigned)}</button>
+        <button onClick={() => inspect('history')}>Completed history: {countLabel(counts.completed)}</button>
+      </div>
+      {counts.ownershipUnknown > 0 && <p>Owner evidence unavailable for {counts.ownershipUnknown} active records in this snapshot; these are not counted as unassigned.</p>}
+    </section>
     <div className="toolbar">
+      <select aria-label="Master work view" value={lifecycle} onChange={e => { setLifecycle(e.target.value as NolanMasterLifecycle); setStatus(''); setPage(0) }}>
+        <option value="active">Active work</option><option value="history">Completed history</option><option value="all">All records</option>
+      </select>
       <input aria-label="Search master tasks" placeholder="Find task, owner, client or ID…" value={query} onChange={e => { setQuery(e.target.value); setPage(0) }} />
       <select aria-label="Master task status" value={status} onChange={e => { setStatus(e.target.value); setPage(0) }}><option value="">All statuses</option>{[...new Set(tasks.map(taskStatusDisplayLabel))].sort().map(value => <option key={value}>{value}</option>)}</select>
       <select aria-label="Master ownership state" value={ownership} onChange={e => { setOwnership(e.target.value); setPage(0) }}><option value="">All ownership states</option>{['verified', 'unassigned', 'unresolved', 'conflict', 'unknown'].map(value => <option key={value}>{value}</option>)}</select>
       <button className="refresh-data" onClick={() => { setQuery(''); setStatus(''); setOwnership(''); setPage(0) }}>Clear master filters</button>
     </div>
-    <p>{result.total} matching task records · includes completed history; not company-wide or agent-fleet coverage.</p>
+    <p>{result.total} matching task records · {lifecycle === 'active' ? 'active work' : lifecycle === 'history' ? 'completed history' : 'all records'}; not company-wide or agent-fleet coverage.</p>
     <nav className="toolbar" aria-label="Master task pages">
       <button className="refresh-data" disabled={result.page === 0} onClick={() => setPage(result.page - 1)}>Previous tasks</button>
       <span role="status">Showing {result.from}–{result.to} of {result.total} · Page {result.page + 1} of {result.pages}</span>
@@ -70,7 +93,7 @@ export function MasterScope({ tasks = [], directory = null, role = '', sourceUna
       </details>
       <NolanTaskActivity key={`${task.id}:${refreshGeneration}`} taskId={task.data_origin === 'planner_tasks' ? task.native_id ?? task.id : null} directory={directory} role={role} sourceUnavailable={sourceUnavailable || loading} />
     </article>})}</div>
-    {!result.total && <p>No matching task evidence. Check source availability and filters before concluding there is no work.</p>}
+    {!result.total && <p>No matching task evidence in this view. Select All records to search active work and completed history together. Check source availability and filters before concluding there is no work.</p>}
     <details className="coverage-details"><summary>Responsibility coverage &amp; source navigation</summary>
     <p>These twelve links describe coverage only. No task-to-responsibility assignment is inferred from titles or notes.</p>
     <div className="grid list">{sections.map(([title, href, note]) => <article className="card" key={title}><h3>{title}</h3><span className="badge">Open source</span><p className="next">{note}</p><Link className="native-owner" to={href}>View ↗</Link></article>)}</div></details></section>

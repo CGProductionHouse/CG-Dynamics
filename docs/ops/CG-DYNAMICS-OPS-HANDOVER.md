@@ -226,6 +226,17 @@ gate remains; this candidate is not a claim of completed live-board backfill.
 
 ## 16 November — Nolan final bounded checkpoint and review release path
 
+### Active-work operational summary
+
+Master now defaults to active tasks, with explicit completed history/all-record
+views and clickable account-visible active/blocked/waiting-client/unassigned
+snapshot counts. Shared lifecycle keeps approved/scheduled/deferred/reopened work
+active; no date-fallback deadline claim. Unavailable empty counts are Unknown;
+retained counts are last-known and unknown ownership is not called unassigned.
+34 focused checks plus build/lint/diff pass. Browser/device remains unexecuted;
+this is candidate UI, not whole-business/fleet coverage or live deployment.
+[Exact behavior and evidence](NOLAN-MASTER-EVIDENCE-2026-11-16.md).
+
 ### Concise Master control-panel follow-up
 
 Master now pages 12 canonical task cards and bounds literal source-note previews
