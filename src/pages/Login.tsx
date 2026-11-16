@@ -26,6 +26,10 @@ export default function Login() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
+    // Dismiss the iOS keyboard before asynchronous auth replaces this form.
+    // Otherwise its focus zoom can survive SPA navigation into the portal.
+    const active = document.activeElement
+    if (active instanceof HTMLElement && e.currentTarget.contains(active)) active.blur()
     setError(null)
     setUnconfirmed(false)
     setLoading(true)

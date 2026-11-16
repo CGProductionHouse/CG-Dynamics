@@ -1,3 +1,19 @@
+## 16 November — client opening crop corrective release LIVE
+
+CA's new screenshot confirms #993 reached the phone but the opening view still
+crops. The old HTTP/test receipt is not physical-device acceptance. Isolated
+`fix/client-portal-opening-viewport` adds a bounded iOS entry-only retained-zoom
+repair and pre-auth blur.93tests plus actual local Chromium/WebKit five-width
+opening/login/long-name checks pass; native Chromium16/14magnification reproduces
+the old crop and returns to1 with correction, later zoom preserved. No production
+data/account changes or other agent files. [Evidence and release boundary](CLIENT-OPENING-VIEWPORT-2026-11-16.md).
+Runtime89b20830 now LIVE atdpl_GwQE8n9fRXGdr13L4Gbjj8VV2iM5 (PR #994):
+one local prebuild/stage then same-stage promotion; protected/live HTML/JS/CSS
+match exact local bytes, routes200/invalid capability404. No cloud app build or
+DB/provider/account change. Prior dpl_B8eMyLViZqYRNxae4cR9HXqLhwhB retained.
+Physical iPhone acceptance remains unverified; do not claim HTTP checks prove it.
+Exact Google Control Centre target remains unavailable; no guessed tracker write.
+
 ## 16 November — approved mobile staff/client viewport release LIVE
 
 CA approved PR #993 release. Exact runtime ccbb6ec7 is LIVE at
