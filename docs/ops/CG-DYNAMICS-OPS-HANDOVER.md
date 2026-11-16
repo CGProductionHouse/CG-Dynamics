@@ -1,3 +1,30 @@
+## 16 November — exact staff publication confirmation, local only
+
+Same draft PR991 / #220. Preview/confirm server action core now binds the exact
+approved image/caption/account/time and re-reads private server readiness. Preview
+writes nothing; only active manager/admin confirmation can persist authority.
+UTF-8 fingerprint + confirmation/provenance are stored atomically in the existing
+background_jobs row. Repeats/races return the original receipt. The SQL begin
+barrier refuses raw/unconfirmed, revoked or fingerprint-mismatched jobs.
+Revocation stops unstarted work; after begin it preserves in-flight/posted truth
+and read-only reconciliation. It never promises provider deletion/cancellation.
+
+No new table/queue/dependency. Existing **unapplied** queue migration revised;
+future release must review current PR contents. Core/RPC ports are not exposed by
+an Edge endpoint, MCP tool or staff UI yet. Trusted current-context/Teams/media
+adapters and staff-action wiring remain; worker bindings remain unregistered.
+No live SQL/data/provider/config/OAuth/Microsoft/deployment action. Existing
+Nolan/staff lane and Microsoft hold preserved. [Current receipt](SOCIAL-PUBLISHING-220-2026-11-15.md).
+Local real-PostgreSQL regression also reproduced and fixed historical requester
+access to candidate publication payloads after a role change. Restrictive SELECT
+policy applies only to social_publish and requires an active manager/admin;
+other job visibility is preserved. No live publication-data exposure inferred.
+Final acceptance:4424 total /4394 pass /30 skipped /0 failures with isolated
+PostgreSQL;28 new regressions and101 affected checks pass. Build/app-bundle,
+scoped lint, strict helper typing and diff pass. Expected failing RLS reproduction
+superseded by final19-test PostgreSQL and full green runs. Generated artifacts
+restored; owned container stopped. No new UI/phone/hosted-provider acceptance.
+
 ## 16 November — private Facebook photo delivery, local only
 
 Same draft PR991 / #220/#236, isolated `codex/social-publishing-220` worktree.

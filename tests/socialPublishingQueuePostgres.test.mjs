@@ -10,7 +10,7 @@ const container = process.env.CG_SOCIAL_QA_CONTAINER
 const enabled = container === 'cg-dynamics-social-220-qa'
 const database = `qa_${randomUUID().replaceAll('-', '')}`
 const actor = randomUUID()
-let server, queue
+let server, queue, authorization, authorizationStore
 const q = value => `'${String(value).replaceAll("'", "''")}'`
 function sql(text, role) {
   return execFileSync('docker', ['exec', '-i', container, 'psql', '-X', '-U', 'postgres', '-d', database, '-v', 'ON_ERROR_STOP=1', '-Atq'], {
@@ -56,10 +56,12 @@ before(async () => {
   sql(readFileSync('supabase/migrations/20261115104950_tiktok_business_oauth.sql', 'utf8'))
   server = await createServer({ configFile: false, server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true }, logLevel: 'error' })
   queue = await server.ssrLoadModule('/supabase/functions/_shared/socialPublishingQueue.ts')
+  authorization = await server.ssrLoadModule('/supabase/functions/_shared/socialPublicationAuthorization.ts')
+  authorizationStore = await server.ssrLoadModule('/supabase/functions/_shared/socialPublicationAuthorizationStore.ts')
 })
 after(async () => server?.close())
 
-function fixture() {
+function fixture({ authorized = true, advance = true } = {}) {
   const client = randomUUID(), deliverable = randomUUID(), review = randomUUID(), connection = randomUUID()
   sql(`insert into clients values(${q(client)},true,'{}'); insert into monthly_deliverables values(${q(deliverable)},${q(client)},(now() at time zone 'Africa/Johannesburg')::date,null,null);
    insert into content_review_versions values(${q(review)},${q(deliverable)},${q(client)},'approved',${q(`${deliverable}/final.jpg`)},'image/jpeg','Approved caption',array['facebook'],now()+interval '2 minutes');
@@ -70,11 +72,23 @@ function fixture() {
    from content_review_versions where id=${q(review)}`)
   const enqueue = value => sql(`select enqueue_social_publication(${q(JSON.stringify(value))}::jsonb,${q(actor)})`, 'service_role')
   const job = enqueue(intent)
+  const authorize = (value, by = actor, evidenceChanges = {}) => {
+    const fingerprint = sql(`select social_publication_fingerprint(${q(JSON.stringify(value))})`)
+    const evidence = { intentFingerprint: fingerprint, checkedAt: new Date().toISOString(), teamsRecordId: 'fixture-task', teamsRevision: 'fixture-revision', mediaProfile: 'fixture-facebook-photo', ...evidenceChanges }
+    return jsonSql(`select authorize_social_publication(${q(JSON.stringify(value))},${q(by)},${q(fingerprint)},${q(JSON.stringify(evidence))})`)
+  }
+  if (authorized) authorize(intent)
   // Advance synthetic source + approval consistently to due time, without waiting.
+  // Shift the synthetic confirmation as well; production source is never edited.
+  if (advance) {
   intent.scheduledAt = sql("select to_char(now()-interval '1 minute','YYYY-MM-DD\"T\"HH24:MI:SS.US\"Z\"')")
   sql(`update content_review_versions set scheduled_at=${q(intent.scheduledAt)} where id=${q(review)};
-   update background_jobs set payload=jsonb_set(payload,'{intent}',${q(JSON.stringify(intent))}::jsonb),run_after=now() where id=${q(job)};`)
-  return { client, deliverable, review, connection, intent, job, enqueue }
+   update background_jobs set payload=jsonb_set(payload,'{intent}',${q(JSON.stringify(intent))}::jsonb),run_after=now(),
+    publication=case when publication->'authorization' is null then publication else jsonb_set(jsonb_set(publication,
+    '{authorization,fingerprint}',to_jsonb(social_publication_fingerprint(${q(JSON.stringify(intent))}))),
+    '{authorization,evidence,intentFingerprint}',to_jsonb(social_publication_fingerprint(${q(JSON.stringify(intent))}))) end where id=${q(job)};`)
+  }
+  return { client, deliverable, review, connection, intent, job, enqueue, authorize }
 }
 function claim(f, worker) {
   sql(`select id from claim_next_background_job(${q(worker)})`)
@@ -85,6 +99,8 @@ function rpcClient() {
     const args = name === 'claim_social_publication' ? [a.p_id, a.p_worker]
       : name === 'begin_social_publication' ? [a.p_id, a.p_worker, a.p_fence]
       : name === 'save_social_publication' ? [a.p_id, a.p_worker, a.p_fence, JSON.stringify(a.p_observation)] : null
+    if (name === 'authorize_social_publication') return { data: jsonSql(`select authorize_social_publication(${q(JSON.stringify(a.p_intent))},${q(a.p_actor)},${q(a.p_fingerprint)},${q(JSON.stringify(a.p_evidence))})`), error: null }
+    if (name === 'revoke_social_publication') return { data: jsonSql(`select revoke_social_publication(${q(a.p_id)},${q(a.p_client)},${q(a.p_actor)})`), error: null }
     if (!args) throw new Error('Unexpected fixture RPC')
     return { data: jsonSql(`select to_jsonb(${name}(${args.map(q).join(',')}))`), error: null }
   } }
@@ -98,6 +114,117 @@ function context(f) {
 }
 
 test('real PostgreSQL: queue, source/role fences, crash recovery, receipts and OAuth transactions', { skip: !enabled }, async t => {
+  await t.test('publication rows are hidden from former requesters who become client/staff/inactive; generic job visibility stays intact', () => {
+    const f = fixture({ advance: false })
+    sql('grant select on background_jobs,profiles to authenticated')
+    const legacy = sql(`insert into background_jobs(job_type,requested_by,run_after) values('meta_sync',${q(actor)},'infinity') returning id`)
+    const count = id => sql(`set request.jwt.claim.sub=${q(actor)}; select count(*) from background_jobs where id=${q(id)}`, 'authenticated')
+    try {
+      assert.equal(count(f.job), '1')
+      for (const [role, active] of [['client', true], ['staff', true], ['manager', false]]) {
+        sql(`update profiles set role=${q(role)},is_active=${active} where id=${q(actor)}`)
+        assert.equal(count(f.job), '0', `Publication leaked to ${role}/${active}`)
+        assert.equal(count(legacy), '1', 'Unrelated job visibility changed')
+      }
+    } finally {
+      sql(`update profiles set role='manager',is_active=true where id=${q(actor)};
+       update background_jobs set status='cancelled' where id in (${q(f.job)},${q(legacy)})`)
+    }
+  })
+  await t.test('preview/confirm core uses atomic authorization RPC, duplicate confirmation keeps the original receipt', async () => {
+    const f = fixture({ authorized: false, advance: false }), writes = socialCount()
+    function socialCount() { return sql("select count(*) from background_jobs where job_type='social_publish'") }
+    const ports = { ...authorizationStore.socialPublicationAuthorizationStore(rpcClient()),
+      authenticate: async () => ({ id: actor, role: 'manager', active: true }),
+      readCandidate: async () => ({ context: context(f), evidence: { intentFingerprint: await authorization.socialPublicationFingerprint(f.intent),
+        checkedAt: new Date().toISOString(), teamsRecordId: 'fixture-task', teamsRevision: 'fixture-revision', mediaProfile: 'fixture-facebook-photo' } }) }
+    const handler = authorization.socialPublicationAuthorizationHandler(ports, true)
+    const target = { clientId: f.client, deliverableId: f.deliverable, reviewVersionId: f.review, connectionId: f.connection, accountId: '12345', route: 'facebook_page' }
+    const request = body => new Request('https://fixture.invalid/authorization', { method: 'POST', body: JSON.stringify(body) })
+    const previewResponse = await handler(request({ action: 'preview', target })), preview = await previewResponse.json()
+    assert.equal(previewResponse.status, 200); assert.equal(socialCount(), writes)
+    assert.equal(sql(`select publication->'authorization' is null from background_jobs where id=${q(f.job)}`), 't')
+    const body = { action: 'confirm', target, expectedFingerprint: preview.preview.fingerprint, confirmPublication: true }
+    const first = await handler(request(body)), firstBody = await first.json()
+    assert.equal(first.status, 200); assert.equal(firstBody.publication.jobId, f.job)
+    const saved = sql(`select publication->'authorization' from background_jobs where id=${q(f.job)}`)
+    assert.equal((await handler(request(body))).status, 200)
+    assert.equal(sql(`select publication->'authorization' from background_jobs where id=${q(f.job)}`), saved)
+    assert.equal(socialCount(), writes)
+    assert.equal(firstBody.publication.authorizationId, f.intent.authorizationId)
+    sql(`update background_jobs set status='cancelled' where id=${q(f.job)}`)
+  })
+  await t.test('UTF-8 fingerprint matches SQL exactly and changes with each approved material field', async () => {
+    const f = fixture({ advance: false }), i = { ...f.intent, caption: 'Café : café\nR99 🛠️ / \\"' }
+    const expected = await authorization.socialPublicationFingerprint(i)
+    assert.equal(sql(`select social_publication_fingerprint(${q(JSON.stringify(i))})`), expected)
+    for (const field of ['clientId', 'deliverableId', 'reviewVersionId', 'platform', 'route', 'connectionId', 'accountId', 'assetPath', 'assetSha256', 'mediaType', 'caption', 'scheduledAt']) {
+      const next = { ...i, [field]: i[field] + ':changed' }
+      assert.notEqual(await authorization.socialPublicationFingerprint(next), expected)
+    }
+    assert.equal(await authorization.socialPublicationFingerprint({ ...i, authorizationId: randomUUID(), key: 'different-click', attempt: 8 }), expected)
+    sql(`update background_jobs set status='cancelled' where id=${q(f.job)}`)
+  })
+  await t.test('raw queue insertion is never sufficient authority to begin a provider mutation', () => {
+    const f = fixture({ authorized: false }), row = claim(f, 'unconfirmed')
+    assert.equal(sql(`select begin_social_publication(${q(f.job)},'unconfirmed',${q(row.fence)})`), 'f')
+    assert.equal(sql(`select publication->>'started_at' is null from background_jobs where id=${q(f.job)}`), 't')
+    sql(`update background_jobs set status='cancelled' where id=${q(f.job)}`)
+  })
+  await t.test('confirmation requires fresh exact server evidence and privileged execution; invalid evidence leaves no grant', () => {
+    const f = fixture({ authorized: false, advance: false })
+    for (const evidence of [{ checkedAt: '2000-01-01T00:00:00Z' }, { checkedAt: 'infinity' },
+      { checkedAt: new Date(Date.now() + 60_000).toISOString() }, { intentFingerprint: 'b'.repeat(64) },
+      { teamsRecordId: '' }, { teamsRevision: null }, { mediaProfile: '' }, { providerToken: 'fixture-not-a-token' }]) {
+      assert.throws(() => f.authorize(f.intent, actor, evidence), /publication (confirmation|preflight)/)
+    }
+    assert.throws(() => f.authorize(f.intent, randomUUID()), /Active manager/)
+    for (const role of ['anon', 'authenticated']) {
+      assert.throws(() => sql(`select authorize_social_publication(${q(JSON.stringify(f.intent))},${q(actor)},repeat('a',64),'{}')`, role), /permission denied/)
+      assert.throws(() => sql(`select revoke_social_publication(${q(f.job)},${q(f.client)},${q(actor)})`, role), /permission denied/)
+    }
+    assert.equal(sql(`select publication->'authorization' is null from background_jobs where id=${q(f.job)}`), 't')
+    sql(`update background_jobs set status='cancelled' where id=${q(f.job)}`)
+  })
+  await t.test('parallel confirmations keep one authorization and do not retarget an existing publication', async () => {
+    const f = fixture({ authorized: false, advance: false }), other = randomUUID()
+    sql(`insert into profiles values(${q(other)},'manager',true,'Another fixture manager')`)
+    const fp = sql(`select social_publication_fingerprint(${q(JSON.stringify(f.intent))})`)
+    const evidence = { intentFingerprint: fp, checkedAt: new Date().toISOString(), teamsRecordId: 'task', teamsRevision: 'rev', mediaProfile: 'photo' }
+    const command = by => `select authorize_social_publication(${q(JSON.stringify({ ...f.intent, authorizationId: randomUUID() }))},${q(by)},${q(fp)},${q(JSON.stringify(evidence))})`
+    const receipts = (await Promise.all([parallelSql(command(actor)), parallelSql(command(other))])).map(JSON.parse)
+    assert.deepEqual(receipts[0], receipts[1]); assert.equal(receipts[0].jobId, f.job)
+    const original = sql(`select publication->'authorization' from background_jobs where id=${q(f.job)}`)
+    assert.throws(() => f.authorize({ ...f.intent, connectionId: randomUUID() }), /Existing publication differs/)
+    assert.equal(sql(`select publication->'authorization' from background_jobs where id=${q(f.job)}`), original)
+    sql(`update background_jobs set status='cancelled' where id=${q(f.job)}`)
+  })
+  await t.test('revocation stops a queued/claimed job, is idempotent and cannot mutate another client', () => {
+    const f = fixture(), row = claim(f, 'withdrawn')
+    assert.equal(jsonSql(`select revoke_social_publication(${q(f.job)},${q(randomUUID())},${q(actor)})`), null)
+    assert.equal(sql(`select status from background_jobs where id=${q(f.job)}`), 'running')
+    const first = jsonSql(`select revoke_social_publication(${q(f.job)},${q(f.client)},${q(actor)})`)
+    assert.equal(first.state, 'cancelled'); assert.equal(first.providerMayHaveStarted, false)
+    const saved = sql(`select publication->'authorization' from background_jobs where id=${q(f.job)}`)
+    assert.deepEqual(jsonSql(`select revoke_social_publication(${q(f.job)},${q(f.client)},${q(actor)})`), first)
+    assert.equal(sql(`select publication->'authorization' from background_jobs where id=${q(f.job)}`), saved)
+    assert.equal(sql(`select begin_social_publication(${q(f.job)},'withdrawn',${q(row.fence)})`), 'f')
+  })
+  await t.test('revocation after durable begin retains in-flight truth and permits receipt reconciliation', () => {
+    const f = fixture(), row = claim(f, 'already-started')
+    assert.equal(sql(`select begin_social_publication(${q(f.job)},'already-started',${q(row.fence)})`), 't')
+    const revoked = jsonSql(`select revoke_social_publication(${q(f.job)},${q(f.client)},${q(actor)})`)
+    assert.equal(revoked.state, 'submitting'); assert.equal(revoked.providerMayHaveStarted, true)
+    assert.equal(sql(`select save_social_publication(${q(f.job)},'already-started',${q(row.fence)},'{"state":"posted","postId":"12345_789"}')`), 't')
+    assert.equal(sql(`select publication->>'state' from background_jobs where id=${q(f.job)}`), 'posted')
+    assert.equal(sql(`select publication->'authorization'->>'revokedAt' is not null from background_jobs where id=${q(f.job)}`), 't')
+  })
+  await t.test('changed recorded confirmation fingerprint blocks a valid claimed intent', () => {
+    const f = fixture(), row = claim(f, 'tampered-confirmation')
+    sql(`update background_jobs set publication=jsonb_set(publication,'{authorization,fingerprint}',to_jsonb(repeat('b',64))) where id=${q(f.job)}`)
+    assert.equal(sql(`select begin_social_publication(${q(f.job)},'tampered-confirmation',${q(row.fence)})`), 'f')
+    sql(`update background_jobs set status='cancelled' where id=${q(f.job)}`)
+  })
   await t.test('repeated clicks/reconnections keep one job, generic job types survive, foreign source and client/staff roles denied', () => {
     const f = fixture()
     // Re-enqueue while source is future (then restore due fixture).
@@ -158,7 +285,11 @@ test('real PostgreSQL: queue, source/role fences, crash recovery, receipts and O
       insert into content_review_versions select ${q(newer)},deliverable_id,client_id,'approved',asset_path||'.v2',media_type,caption,channels,now()+interval '2 minutes' from content_review_versions where id=${q(f.review)}`)
     const intent = { ...f.intent, key: `version-two-${newer}`, reviewVersionId: newer, assetPath: f.intent.assetPath + '.v2', scheduledAt: sql(`select scheduled_at from content_review_versions where id=${q(newer)}`) }
     const replacement = { ...f, job: f.enqueue(intent) }
-    sql(`update background_jobs set run_after=now() where id=${q(replacement.job)}`)
+    f.authorize(intent)
+    intent.scheduledAt = sql("select to_char(now()-interval '1 minute','YYYY-MM-DD\"T\"HH24:MI:SS.US\"Z\"')")
+    sql(`update content_review_versions set scheduled_at=${q(intent.scheduledAt)} where id=${q(newer)};
+      update background_jobs set payload=jsonb_set(payload,'{intent}',${q(JSON.stringify(intent))}::jsonb),
+       publication=jsonb_set(publication,'{authorization,fingerprint}',to_jsonb(social_publication_fingerprint(${q(JSON.stringify(intent))}))),run_after=now() where id=${q(replacement.job)}`)
     const second = claim(replacement, 'version-two')
     assert.equal(sql(`select begin_social_publication(${q(replacement.job)},'version-two',${q(second.fence)})`), 'f')
     sql(`update background_jobs set status='cancelled' where id in (${q(f.job)},${q(replacement.job)})`)

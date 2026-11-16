@@ -45,6 +45,75 @@ client was found or assumed; no LinkedIn publishing entitlement was verified.
 
 ## Implemented locally
 
+### 16 November continuation — exact staff confirmation in the existing queue
+
+The authorization core now provides **preview → explicit confirmation → durable
+queue receipt**, one channel/account at a time. Preview writes nothing. Confirmation
+re-reads the server candidate, requires an active manager/admin and the exact
+preview fingerprint, and uses fresh server-owned Teams/provider/media evidence.
+Request bodies cannot supply an actor, caption, asset hash, readiness flag or
+permission proof. Unknown fields, stale/foreign evidence, changed source, past
+times and expired credentials fail closed. Bodies are bounded while streaming;
+errors/receipts expose no provider credentials, delivery URLs or internal evidence.
+
+The fingerprint binds client, deliverable, approved revision, route/channel,
+connection/account, path/hash/MIME, caption and exact time using UTF-8 byte-length
+prefixes shared by TypeScript and SQL. It is a stale-preview detector, **not a
+bearer permission**. Reconnection/retargeting cannot silently replace the recorded
+intent; repeated and concurrent confirmations preserve the original receipt.
+
+The existing unapplied queue migration now stores the immutable confirmation and
+safe preflight provenance in `background_jobs.publication.authorization`, atomically
+with enqueue. No new table, queue, calendar or production dependency is introduced.
+The worker's SQL begin barrier now requires that stored, matching, unrevoked
+confirmation plus its active authorizer. A raw internal enqueue alone cannot
+authorize provider mutation. A private loader recovers that original confirmation
+for the worker's future trusted current-context adapter; it never mints a grant.
+
+Revocation cancels an unstarted queued/claimed job and invalidates its lease. If an
+operation has already begun, it records withdrawal while preserving in-flight/
+posted truth and permitting status/receipt reconciliation. It does **not** claim
+to cancel/delete a provider post or make a started mutation reversible. Repeat
+withdrawals preserve the same audit fact; foreign-client lookups cannot mutate it.
+
+`socialPublicationAuthorization.ts` and `socialPublicationAuthorizationStore.ts`
+are a tested server action core and service-only RPC ports. They are **not exposed
+through a deployed Edge endpoint, ChatGPT tool or staff button yet**. Trusted
+current-context/Teams/media adapters and the existing staff interface must be
+connected before registration. No native provider access/OAuth or caller checkbox
+is promoted into proof. Worker bindings remain unregistered; publishing and
+deployment remain disabled. No live user/client/post/Teams record was changed.
+
+Security review reproduced a candidate RLS gap in real isolated PostgreSQL:
+the generic job policy let an original requester still read publication payloads
+after their role became client/staff or inactive. A new **restrictive SELECT policy
+for social_publish only** requires an active manager/admin. The negative test first
+failed with `Publication leaked to client/true`; the policy closes that case while
+preserving generic job visibility. This is a local candidate fix, not evidence of
+live social publication data or a production incident. No browser grants were
+added to the authorization RPCs; they remain service-only, invoker/search-path safe.
+
+The queue migration candidate `20261115104948_social_publishing_queue.sql` was
+revised in place because it is still unapplied. Any later rollout must review the
+current PR contents, not an earlier c0b21145/ec06d3a7 migration snapshot. Existing
+OAuth migration, credentials and server settings are unchanged. Publication reads
+are narrowed as described above; generic job visibility is preserved.
+
+Final acceptance for this continuation: **4424 total /4394 passed /30 skipped /
+0 failures**, Node24.16.0, including real isolated PostgreSQL. There are28 new
+regressions:19 authorization/HTTP/worker-read checks and9 additional PostgreSQL
+subtests. The101 affected checks pass (82 policy/OAuth/provider/authorization +
+19 PostgreSQL), included in the full total. The expected failing RLS reproduction
+was followed by the passing19-test PostgreSQL run and this final full run.
+Build/emitted app-code bundle, scoped ESLint, strict helper typing and diff pass.
+No UI was changed; no additional browser/phone/hosted Edge/provider acceptance
+is claimed. Generated access-matrix outputs restored and owned QA container stopped.
+Logs: `%TEMP%/cg-social-authorization-final-acceptance.log`,
+`%TEMP%/cg-social-authorize-focused.log`, `%TEMP%/cg-social-authorization-pg-final.log`,
+`%TEMP%/cg-social-authorization-rls-repro.log` and `%TEMP%/cg-social-authorization-build.log`.
+This supersedes the earlier4423 run, before the final privacy regression/policy.
+Vercel Git deployments remain disabled; no PR checks/deployment were triggered.
+
 ### 16 November continuation — private Facebook photo delivery
 
 Continued the same draft PR991 after confirming the isolated checkout was clean,
@@ -82,7 +151,7 @@ dimensions/codec/rights qualification, which remains a separate preflight gate.
 
 These are **unregistered private ports**, not an enabled publishing path. The
 worker still has no provider bindings and no public enqueue producer. Current
-context/authorization persistence, Teams instruction verification and provider
+context/staff-action wiring, Teams instruction verification and provider
 media/app-review acceptance must be completed before registration. Native Suite
 access and OAuth alone do not satisfy those gates. No migration or new setting
 was added in this increment; no live API, consent, publication or deployment ran.
@@ -166,7 +235,7 @@ queue, calendar, production dependency or background schedule was introduced.
 
 | Provider | Submission/timing path | Required before activation |
 | --- | --- | --- |
-| Facebook Pages | Due-time Page photo submission now has private versioned Graph, encrypted exact-Page credential and approved-hash snapshot delivery ports. Video/Reel uploads remain separate adapters. Native scheduling is not assumed. | Complete trusted current-context/authorization producer, full media preflight, app review/advanced access and any content-specific permission; register in the durable worker only after review. Live Page discovery also requires `pages_show_list`; analytics OAuth is insufficient. |
+| Facebook Pages | Due-time Page photo submission now has private versioned Graph, encrypted exact-Page credential and approved-hash snapshot delivery ports. Video/Reel uploads remain separate adapters. Native scheduling is not assumed. | Complete trusted current-context adapter/staff-action wiring, full media preflight, app review/advanced access and any content-specific permission; register in the durable worker only after review. Live Page discovery also requires `pages_show_list`; analytics OAuth is insufficient. |
 | Instagram professional accounts | Facebook Login: `instagram_basic`, `instagram_content_publish`, `pages_read_engagement`; Instagram Login uses the different `instagram_business_*` permissions. Create container, poll, publish, read media at due time. JPEG images; video/Reel checks separate. | Confirm actual login route/account, conditional Business Manager requirements, app review and publishing limit dynamically. No claim that analytics OAuth grants publishing. Container FINISHED is not publication. Transport adapter not implemented here. |
 | TikTok Business / Accounts API | Approved app exposes Business video/photo publication and publish-status endpoints. OAuth, encrypted storage and refresh are implemented/tested locally. Dynamics due-time submission/polling; no assumed native scheduling field. | Review/deploy the candidate OAuth schema/functions/form, configure dedicated server settings privately, obtain exact-account consent, then verify the actual granted permissions. Publishing transport/media eligibility remains a separate pilot gate; metadata eligibility defaults to not_approved. No consumer Direct Post fallback. |
 | LinkedIn organizations | Media initialize/upload/readiness, then versioned `/rest/posts` at due time, followed by read-back. | Community Management access/review, correct organization role and `w_organization_social` / `r_organization_social`. Use supported monthly `LinkedIn-Version` plus Rest.li header; do not ship retiring 202511. Member scope is not organization authority. Adapter remains to implement. |
@@ -199,8 +268,9 @@ No universal hard-coded media size, quota or native scheduling window is inferre
    `TIKTOK_BUSINESS_TOKEN_KEY_VERSION`. No values belong in chat or handovers.
    Never reuse the consumer Login Kit secret or an existing Meta/Instagram key.
 3. The first Facebook photo adapter now has private encrypted token/mapping and
-   approved-hash snapshot delivery ports. Complete the trusted current-context,
-   media qualification and authorization producer before registering it. Add provider status reconciliation jobs,
+   approved-hash snapshot delivery ports. Exact preview/confirmation persistence
+   and revocation now exist in the same queue. Complete trusted current-context,
+   media qualification and staff-action wiring before registering it. Add provider status reconciliation jobs,
    per-provider polling cadence and a staff-authorized publication producer using
    fresh server preflight. Register those private bindings only after review.
    `SOCIAL_PUBLISHING_ENABLED` remains false; OAuth enablement never enables it.
