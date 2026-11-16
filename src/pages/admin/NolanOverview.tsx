@@ -49,7 +49,7 @@ export default function NolanOverview() {
       setSnapshot(previous => previous?.scope === readScope ? previous : null)
       try {
         const [taskRead, videoRead, scheduleRead, clientRead, staffRead] = await withNolanVerifiedViewer({ userId: user!.id, profileId: profile!.id, role: profile!.role }, () => Promise.all([
-          captureNolanSource(() => listTasks()), captureNolanSource(() => listPipelineVideos()),
+          captureNolanSource(() => listTasks({ requireCompleteSources: true })), captureNolanSource(() => listPipelineVideos()),
           captureNolanSource(() => listMonthlyDeliverablesByMonth(month)), captureNolanSource(() => listActiveClients()), captureNolanSource(() => listStaffProfiles()),
         ]))
         const tasks = taskRead.result ?? { data: [], error: { message: taskRead.error } }

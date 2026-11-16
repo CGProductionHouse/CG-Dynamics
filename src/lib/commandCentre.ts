@@ -305,6 +305,8 @@ function plannerTaskToCommandTask(
 }
 
 export interface ListTaskOptions {
+  /** Workbook snapshots must not silently omit Planner or assignment evidence. */
+  requireCompleteSources?: boolean
   activeOnly?: boolean
 }
 
@@ -329,12 +331,12 @@ export async function listTasks(options: ListTaskOptions = {}) {
 
   if (nativeResult.error) return nativeResult
   if (plannerResult.error) {
-    if (plannerResult.error.message?.includes('does not exist') || plannerResult.error.code === '42P01') {
+    if (!options.requireCompleteSources && (plannerResult.error.message?.includes('does not exist') || plannerResult.error.code === '42P01')) {
       return nativeResult
     }
     return { data: nativeResult.data ?? [], error: plannerResult.error }
   }
-  if (assignmentResult.error && !isMissingPlannerAssignmentRpcError(assignmentResult.error)) {
+  if (assignmentResult.error && (options.requireCompleteSources || !isMissingPlannerAssignmentRpcError(assignmentResult.error))) {
     return { data: nativeResult.data ?? [], error: assignmentResult.error }
   }
 
@@ -353,10 +355,12 @@ export async function listTasks(options: ListTaskOptions = {}) {
   }
 
   if (bucketIds.length > 0) {
-    const { data: buckets } = await supabase
+    const { data: buckets, error: bucketError } = await supabase
       .from(PLANNER_BUCKETS_TABLE)
       .select('id, name')
       .in('id', bucketIds)
+
+    if (options.requireCompleteSources && bucketError) return { data: [], error: bucketError }
 
     for (const bucket of (buckets ?? []) as PlannerBucketRow[]) {
       bucketNames.set(bucket.id, bucket.name)

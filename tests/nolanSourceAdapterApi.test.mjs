@@ -15,7 +15,7 @@ test('actual Nolan source modules execute through genuine same-origin SDK roles'
   await mkdir(resolve(path,'..'),{recursive:true});await writeFile(path,result.outputFiles[0].text);api=await import(path)
   const login=async role=>{await api.supabase.auth.signOut();const a=app.manifest.accounts[role];const r=await api.supabase.auth.signInWithPassword({email:a.email,password:a.password});assert.equal(r.error,null,'Real sign-in '+role)}
   const scenario=async action=>{const r=await fetch(app.origin+'/__nolan_acceptance/scenario',{method:'POST',headers:{'content-type':'application/json','x-nolan-fixture-control':app.manifest.fixtureControl},body:JSON.stringify({action})});assert.equal(r.status,204)}
-  const reads=()=>Promise.all([api.listTasks(),api.listStaffProfiles(),api.listActiveClients(),api.listPipelineVideos(),api.listMonthlyDeliverablesByMonth(app.manifest.sources.month)])
+  const reads=()=>Promise.all([api.listTasks({requireCompleteSources:true}),api.listStaffProfiles(),api.listActiveClients(),api.listPipelineVideos(),api.listMonthlyDeliverablesByMonth(app.manifest.sources.month)])
   await login('admin')
   const verifiedReads=role=>api.withNolanVerifiedViewer({userId:app.manifest.accounts[role].id,profileId:app.manifest.accounts[role].id,role},reads)
   const guardedReads=()=>verifiedReads('manager')

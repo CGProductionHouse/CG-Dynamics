@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs'
 const page = readFileSync(new URL('../src/pages/admin/NolanOverview.tsx', import.meta.url), 'utf8')
 const work = readFileSync(new URL('../src/pages/admin/MyWorkPage.tsx', import.meta.url), 'utf8')
 test('Nolan overview composes existing canonical readers, never another write authority', () => {
-  for (const reader of ['listTasks()', 'listPipelineVideos()', 'listMonthlyDeliverablesByMonth(month)']) assert.ok(page.includes(reader))
+  for (const reader of ['listTasks({ requireCompleteSources: true })', 'listPipelineVideos()', 'listMonthlyDeliverablesByMonth(month)']) assert.ok(page.includes(reader))
   assert.doesNotMatch(page, /supabase\.from|localStorage|\.insert\(|\.update\(|service_role|fetch\(/)
 })
 test('Nolan tab keeps existing manager boundary and deep links', () => {
