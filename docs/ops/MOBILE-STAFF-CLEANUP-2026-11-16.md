@@ -34,6 +34,16 @@ PR #993/worktree; do not create competing Clients changes. Source only.
 
 ## Verification and limits
 
+Follow-up: CA reported the client login zooming in on iPhone and staying zoomed
+after entry. Both login inputs used 14px utility text while the existing viewport
+already specified device width / initial scale 1. Added the same explicit mobile
+16px form rule to the Login and shared recovery/setup auth shells, including
+password reveal mode. No forced scale-reset script, pinch-zoom restriction,
+desktop text-size change or authentication logic change. Three new regressions
+render the actual login/recovery components, compile the real Tailwind stylesheet
+and preserve the accessible viewport contract. Focused set: 19 pass; fresh
+production build/scoped lint/diff pass. Real iPhone acceptance remains unverified.
+
 175 relevant tests pass, including executing the actual mobile navigation model
 for admin/manager/staff, search and deduplication, package unknown/zero handling,
 native-sheet lifecycle/cleanup/focus, existing role/navigation/mobile/assistant

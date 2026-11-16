@@ -1,5 +1,11 @@
 ## 16 November — mobile staff cleanup, source candidate only
 
+Client-login follow-up in the same PR: auth inputs now inherit explicit 16px
+phone sizing, preventing Safari focus zoom from carrying into the portal; normal
+pinch zoom and the device-width initial viewport remain. Actual rendered-component
+and compiled-CSS regressions plus 19 focused tests/build/lint/diff pass. Source
+only, physical-iPhone acceptance unverified; no cloud or production action.
+
 CA expanded PR #993 to simplify phone staff/admin use. Same isolated worktree:
 searchable all-workspace More menu (same role gates), compact client cards,
 native action sheets, direct login copy, explicit reset/disable confirmations,

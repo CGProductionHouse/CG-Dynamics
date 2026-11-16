@@ -68,9 +68,13 @@ textarea {
   }
 }
 
-/* Staff forms must not zoom the whole iPhone page when a search/filter is
-   focused. Leave client pages, checkboxes, radios and desktop sizes alone. */
+/* Auth and staff forms must not zoom the whole iPhone page on focus. Login
+   focus-zoom can otherwise persist after navigating into the client portal.
+   Keep pinch zoom available; leave checkboxes/radios and desktop sizes alone. */
 @media (max-width: 767px) {
+  [data-auth-shell] input:not([type='checkbox']):not([type='radio']),
+  [data-auth-shell] select,
+  [data-auth-shell] textarea,
   [data-staff-shell] input:not([type='checkbox']):not([type='radio']),
   [data-staff-shell] select,
   [data-staff-shell] textarea {
