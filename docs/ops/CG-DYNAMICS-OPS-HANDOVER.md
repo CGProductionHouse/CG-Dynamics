@@ -1,3 +1,24 @@
+## 16November — Wiseman internal send authorised; delivery access blocked
+
+Owner explicitly asks to send amendments to CG Picasso Approvals once updates are
+done. No additional send permission is pending; captions must remain unsigned.
+DP01/DP02/DP04 sources are R6 and DP03 source is R7. Official DP03 master transfer
+still awaits the previously requested exact two-call approval; no deletion replay.
+
+Current chat reports local browser access unavailable. Native WhatsApp target
+returned no accessibility state and its captured image did not verify WhatsApp or
+the sender account. No input/send was attempted through that unverified target.
+This is a chat connection limitation, not evidence that the MSI is offline.
+No connected WhatsApp send tool was found. No cloud-browser account transfer,
+other-agent interruption, restart, permissions expansion or credential operation.
+
+Current source links, four hash-checked unsigned captions and clearly marked
+480x600 references are together in the existing MSI Claude handover folder's
+CURRENT R6-R7 AMENDMENTS - 2026-11-16 subfolder. This is a file handover, not agent
+dispatch or delivery. Genuine HD export/inspection and actual history coverage
+remain outstanding. Zero new HD exports and zero messages sent. Existing #948/
+draft#956 lane; no runtime, deployment, production-data or spending changes.
+
 ## 16November — DP03 R7 source seam fix ready, master approval pending
 
 Owner rejects the bakkie poster's hard horizontal background join. Saved source
