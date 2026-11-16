@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useEffectEvent, useState } from 'react'
+import { Suspense, useEffect, useEffectEvent, useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { MyDayContextStoreProvider } from '../../contexts/MyDayContextStore'
@@ -8,8 +8,6 @@ import { mobileNavigationGroups } from '../../lib/mobileStaffNavigation'
 import { roleLabel } from '../../lib/roles'
 import { primaryNavItems, performanceNavItems, adminNavItems, canShowNavItem, isNavItemActive, isSharedNavZonePath, resolveNavZone, type NavItem, type NavZone } from './adminNavigation'
 import { dismissAssistantNotification, listMyNotifications, markAllNotificationsRead, markNotificationRead, refreshAssistantDayNotifications, safeNotificationLink, snoozeAssistantNotification, unreadNotificationCount, type AppNotification } from '../../lib/notifications'
-
-const GlobalAssistantComposer = lazy(() => import('../../components/assistant/GlobalAssistantComposer').then(module => ({ default: module.GlobalAssistantComposer })))
 
 const NOTIFICATION_POLL_MS = 30_000
 const ZONE_STORAGE_KEY = 'cg-nav-zone-v1'
@@ -122,11 +120,6 @@ export default function AdminLayout() {
   const [unreadCount, setUnreadCount] = useState(0)
   const [notificationsLoading, setNotificationsLoading] = useState(true)
   const [notificationsError, setNotificationsError] = useState<string | null>(null)
-  // True while CG Assistant owns the whole mobile screen. The bottom navigation
-  // stands down and the page behind leaves the accessibility tree, so the
-  // assistant is a single focused surface rather than another floating layer.
-  const [assistantFullscreen, setAssistantFullscreen] = useState(false)
-  const [backgroundReady, setBackgroundReady] = useState(false)
   const [selectedZone, setSelectedZone] = useState<NavZone>(() => {
     const routeZone = resolveNavZone(location.pathname)
     if (!isSharedNavZonePath(location.pathname)) return routeZone
@@ -149,7 +142,6 @@ export default function AdminLayout() {
   const mobilePrimaryItems = zone === 'performance'
     ? zoneItems.slice(0, 4)
     : primaryItems.filter(item => MOBILE_PRIMARY_PATHS.includes(item.to))
-  const assistantVisible = location.pathname !== '/admin/assistant'
   const closeMobile = () => { setMobileMenuOpen(false); setMenuSearch('') }
   const mobileGroups = mobileNavigationGroups(currentRole, menuSearch)
 
@@ -179,7 +171,6 @@ export default function AdminLayout() {
   useEffect(() => {
     let poll: number | null = null
     const cancelIdle = scheduleWhenIdle(() => {
-      setBackgroundReady(true)
       pollNotifications()
       poll = window.setInterval(pollNotifications, NOTIFICATION_POLL_MS)
     })
@@ -338,32 +329,25 @@ export default function AdminLayout() {
 
       <MyDayContextStoreProvider>
         <main
-          className={`min-w-0 flex-1 overflow-auto md:h-screen ${assistantVisible ? 'pb-[calc(3.5rem+env(safe-area-inset-bottom))] md:pb-16' : 'pb-[calc(3.5rem+env(safe-area-inset-bottom))] md:pb-0'}`}
-          aria-hidden={assistantFullscreen || undefined}
-          inert={assistantFullscreen || undefined}
+          className="min-w-0 flex-1 overflow-auto pb-[calc(3.5rem+env(safe-area-inset-bottom))] md:h-screen md:pb-0"
         >
           <Suspense fallback={<div className="min-h-[40vh]" aria-label="Loading page" />}><Outlet /></Suspense>
         </main>
 
-        {/* The bottom navigation is removed — not merely covered — while the
-            assistant is full-screen, so it cannot be tapped through and does not
-            compete with the keyboard. It returns as soon as the sheet closes. */}
-        {!assistantFullscreen && (
-          <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-black/92 backdrop-blur md:hidden" aria-label="Primary mobile navigation">
-            <div className="grid grid-cols-5 gap-1 px-2 pt-1.5" style={{ paddingBottom: 'max(0.375rem, env(safe-area-inset-bottom))' }}>
-              {mobilePrimaryItems.map(item => <MobileNavItem key={item.to} item={item} active={isNavItemActive(location.pathname, item)} />)}
-              <button
-                type="button"
-                onClick={() => { setNotificationOpen(false); setMobileMenuOpen(true) }}
-                className="min-h-11 min-w-11 rounded-md px-1 text-center text-[11px] font-bold text-brand-primary transition-colors hover:text-white"
-                aria-expanded={mobileMenuOpen}
-                aria-controls="staff-mobile-navigation"
-              >
-                More
-              </button>
-            </div>
-          </nav>
-        )}
+        <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-black/92 backdrop-blur md:hidden" aria-label="Primary mobile navigation">
+          <div className="grid grid-cols-5 gap-1 px-2 pt-1.5" style={{ paddingBottom: 'max(0.375rem, env(safe-area-inset-bottom))' }}>
+            {mobilePrimaryItems.map(item => <MobileNavItem key={item.to} item={item} active={isNavItemActive(location.pathname, item)} />)}
+            <button
+              type="button"
+              onClick={() => { setNotificationOpen(false); setMobileMenuOpen(true) }}
+              className="min-h-11 min-w-11 rounded-md px-1 text-center text-[11px] font-bold text-brand-primary transition-colors hover:text-white"
+              aria-expanded={mobileMenuOpen}
+              aria-controls="staff-mobile-navigation"
+            >
+              More
+            </button>
+          </div>
+        </nav>
 
         {notificationOpen && (
           <section
@@ -425,7 +409,6 @@ export default function AdminLayout() {
           </section>
         )}
 
-        {backgroundReady && <Suspense fallback={null}><GlobalAssistantComposer onMobileFullscreenChange={setAssistantFullscreen} /></Suspense>}
       </MyDayContextStoreProvider>
     </div>
   )

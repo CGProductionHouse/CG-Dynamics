@@ -41,7 +41,6 @@ const IntegrationsPage = lazyRoute(() => import('./pages/admin/IntegrationsPage'
 const MetaIntegrationPage = lazyRoute(() => import('./pages/admin/MetaIntegrationPage'))
 const GoogleAdsIntegrationPage = lazyRoute(() => import('./pages/admin/GoogleAdsIntegrationPage'))
 const TikTokIntegrationPage = lazyRoute(() => import('./pages/admin/TikTokIntegrationPage'))
-const AssistantPage = lazyRoute(() => import('./pages/admin/AssistantPage'))
 const MyAssistantPage = lazyRoute(() => import('./pages/admin/MyAssistantPage'))
 const PackageMasterPage = lazyRoute(() => import('./pages/admin/PackageMasterPage'))
 const ClientSchedulePage = lazyRoute(() => import('./pages/admin/ClientSchedulePage'))
@@ -134,7 +133,7 @@ export default function App() {
               <Route path="/admin/master-schedule" element={<Navigate to="/admin/client-schedule?view=year" replace />} />
               <Route path="/admin/clients" element={<ClientsList />} />
               <Route path="/admin/reports" element={<ReportsManagement />} />
-              <Route path="/admin/assistant" element={<AssistantPage />} />
+              <Route path="/admin/assistant" element={<Navigate to="/admin/my-assistant" replace />} />
               <Route path="/admin/my-assistant" element={<MyAssistantPage />} />
               <Route path="/admin/client-dashboard" element={<PublishedPreview />} />
               <Route path="/admin/published" element={<PublishedPreview />} />

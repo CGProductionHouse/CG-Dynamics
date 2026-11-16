@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { PageContainer } from '../../components/layout/PageShell'
@@ -7,11 +8,8 @@ import {
   listArtifactApprovals,
   listArtifactHistory,
   listArtifactVersions,
-  listCampaignOptions,
   listMarketingArtifacts,
   recordMarketingDecision,
-  routeMarketingRequest,
-  runMarketingSpecialist,
   SPECIALIST_LABELS,
   WORKFLOW_CHAIN,
   type MarketingApproval,
@@ -19,7 +17,6 @@ import {
   type MarketingArtifactVersion,
   type MarketingSpecialist,
   type MarketingTransition,
-  type RunResult,
 } from '../../lib/marketingWorkflow'
 
 // Marketing AI Department — internal staff workspace.
@@ -70,11 +67,6 @@ export default function MarketingAiDepartmentPage() {
 
   const [clients, setClients] = useState<ActiveClientOption[]>([])
   const [clientId, setClientId] = useState('')
-  const [campaigns, setCampaigns] = useState<Array<{ campaign_id: string; campaign_name: string | null }>>([])
-  const [campaignId, setCampaignId] = useState('')
-  const [request, setRequest] = useState('')
-  const [manualSpecialist, setManualSpecialist] = useState<'' | MarketingSpecialist>('')
-  const [routePreview, setRoutePreview] = useState<{ specialist: MarketingSpecialist; reason: string } | null>(null)
 
   const [artifacts, setArtifacts] = useState<MarketingArtifact[]>([])
   const [selectedId, setSelectedId] = useState('')
@@ -86,7 +78,6 @@ export default function MarketingAiDepartmentPage() {
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [lastRun, setLastRun] = useState<RunResult | null>(null)
   const [decisionNote, setDecisionNote] = useState('')
 
   const selected = useMemo(() => artifacts.find(a => a.id === selectedId) ?? null, [artifacts, selectedId])
@@ -109,17 +100,6 @@ export default function MarketingAiDepartmentPage() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     refreshArtifacts()
   }, [refreshArtifacts])
-
-  useEffect(() => {
-    if (!clientId) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setCampaigns(() => [])
-      return
-    }
-    listCampaignOptions(clientId).then(res => {
-      if (!res.error) setCampaigns((res.data ?? []) as Array<{ campaign_id: string; campaign_name: string | null }>)
-    }).catch(() => {})
-  }, [clientId])
 
   const loadArtifactDetail = useCallback(async (id: string) => {
     const [v, h, a] = await Promise.all([
@@ -145,35 +125,6 @@ export default function MarketingAiDepartmentPage() {
     setCompareId('')
   }, [selectedId, loadArtifactDetail])
 
-  async function previewRoute() {
-    if (!request.trim()) return
-    setRoutePreview(await routeMarketingRequest(request.trim()))
-  }
-
-  async function run(opts: { artifactId?: string; specialist?: MarketingSpecialist; regenerate?: boolean; changeNote?: string } = {}) {
-    if (!clientId) { setError('Choose an active client first.'); return }
-    setBusy(true); setError(null); setNotice(null)
-    try {
-      const chosenCampaign = campaigns.find(c => c.campaign_id === campaignId) ?? null
-      const result = await runMarketingSpecialist({
-        clientId,
-        request: request.trim() || undefined,
-        artifactId: opts.artifactId,
-        specialist: opts.specialist ?? (manualSpecialist || undefined),
-        campaignId: campaignId || null,
-        campaignName: chosenCampaign?.campaign_name ?? null,
-        regenerate: opts.regenerate,
-        changeNote: opts.changeNote,
-      })
-      setLastRun(result)
-      if (!result.ok) { setError(result.error ?? 'The specialist could not be run.'); return }
-      if (result.insufficientEvidence) { setNotice(result.message ?? 'Not enough approved knowledge.'); return }
-      setNotice(`${result.specialistName} produced version ${result.version?.version}. ${result.nextSpecialist ? `Next: ${SPECIALIST_LABELS[result.nextSpecialist]}.` : 'Ready for human approval.'}`)
-      await refreshArtifacts()
-      if (result.artifact) { setSelectedId(result.artifact.id); await loadArtifactDetail(result.artifact.id) }
-    } finally { setBusy(false) }
-  }
-
   async function decide(decision: 'approved' | 'rejected' | 'changes_requested' | 'returned', returnSpecialist?: MarketingSpecialist) {
     if (!selected || !currentVersion) return
     setBusy(true); setError(null); setNotice(null)
@@ -196,83 +147,24 @@ export default function MarketingAiDepartmentPage() {
   return (
     <PageContainer gap={false} className="space-y-5">
       <header>
-        <h1 className="text-xl font-black text-white md:text-2xl">Marketing AI Department</h1>
+        <h1 className="text-xl font-black text-white md:text-2xl">Marketing artifact history</h1>
         <p className="mt-1 max-w-3xl text-sm text-brand-primary/65">
-          Strategist → Copywriting → Brand Guardian, then human approval. Everything here is an internal
-          draft built only from approved Skill Cards for the selected client. Nothing publishes, spends
-          budget, changes client records or activates knowledge without an authorised human decision.
+          Built-in AI generation controls have been removed from this workspace. Use the CG Dynamics connector in ChatGPT or Nolan
+          for its existing supported business actions. Existing artifacts,
+          versions and human decisions remain available here.
         </p>
       </header>
 
-      {/* ── New request ─────────────────────────────────────────────────── */}
-      <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-        <h2 className="text-sm font-black text-white">New request</h2>
-        <div className="mt-3 grid gap-3 md:grid-cols-2">
-          <label className="block">
-            <span className="text-[10px] font-black uppercase tracking-wide text-brand-primary/55">Active client</span>
-            <select
-              value={clientId}
-              onChange={e => { setClientId(e.target.value); setCampaignId(''); setSelectedId('') }}
-              className="mt-1 w-full rounded-lg border border-white/10 bg-[#121614] px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-teal"
-            >
-              <option value="">Choose a client…</option>
-              {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-          </label>
-          <label className="block">
-            <span className="text-[10px] font-black uppercase tracking-wide text-brand-primary/55">Campaign (optional)</span>
-            <select
-              value={campaignId}
-              onChange={e => setCampaignId(e.target.value)}
-              disabled={campaigns.length === 0}
-              className="mt-1 w-full rounded-lg border border-white/10 bg-[#121614] px-3 py-2 text-sm text-white disabled:opacity-40 focus:outline-none focus:ring-1 focus:ring-brand-teal"
-            >
-              <option value="">{campaigns.length === 0 ? 'No linked campaigns' : 'No specific campaign'}</option>
-              {campaigns.map(c => <option key={c.campaign_id} value={c.campaign_id}>{c.campaign_name ?? c.campaign_id}</option>)}
-            </select>
-          </label>
-        </div>
-        <label className="mt-3 block">
-          <span className="text-[10px] font-black uppercase tracking-wide text-brand-primary/55">What do you need?</span>
-          <textarea
-            value={request}
-            onChange={e => { setRequest(e.target.value); setRoutePreview(null) }}
-            rows={3}
-            placeholder="e.g. Build a Q4 campaign strategy and launch copy for the new range"
-            className="mt-1 w-full resize-y rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white placeholder:text-brand-primary/40 focus:outline-none focus:ring-1 focus:ring-brand-teal"
-          />
+      <section className="rounded-2xl border border-white/10 p-4">
+        <Link to="/admin/my-assistant" className="text-brand-teal underline">ChatGPT setup and personal workspace</Link>
+        <label className="mt-3 block text-sm text-white">Filter saved artifacts by client
+          <select value={clientId} onChange={e => { setClientId(e.target.value); setSelectedId('') }} className="ml-2 rounded bg-brand-surface p-2">
+            <option value="">All active clients</option>
+            {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
         </label>
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <label className="flex items-center gap-2">
-            <span className="text-[10px] font-black uppercase tracking-wide text-brand-primary/55">Specialist</span>
-            <select
-              value={manualSpecialist}
-              onChange={e => setManualSpecialist(e.target.value as '' | MarketingSpecialist)}
-              className="rounded-lg border border-white/10 bg-[#121614] px-3 py-1.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-teal"
-            >
-              <option value="">CG Assistant routes automatically</option>
-              {Object.entries(SPECIALIST_LABELS).map(([key, label]) => <option key={key} value={key}>{label}</option>)}
-            </select>
-          </label>
-          <button type="button" onClick={() => void previewRoute()} disabled={!request.trim()} className="rounded-full border border-white/12 px-3 py-1.5 text-sm font-bold text-brand-primary hover:text-white disabled:opacity-40">
-            Preview routing
-          </button>
-          <button type="button" onClick={() => void run()} disabled={busy || !clientId || !request.trim()} className="rounded-full bg-brand-teal px-4 py-1.5 text-sm font-black text-black disabled:opacity-40">
-            {busy ? 'Working…' : 'Start workflow'}
-          </button>
-        </div>
-        {routePreview && (
-          <p className="mt-2 rounded-lg border border-brand-teal/25 bg-brand-teal/[0.06] px-3 py-2 text-xs text-brand-primary/85">
-            Would route to <strong className="text-white">{SPECIALIST_LABELS[routePreview.specialist]}</strong> — {routePreview.reason}
-          </p>
-        )}
-        {notice && <p className="mt-2 rounded-lg border border-amber-400/25 bg-amber-400/[0.07] px-3 py-2 text-xs text-amber-100">{notice}</p>}
-        {error && <p className="mt-2 text-xs text-red-300">{error}</p>}
-        {lastRun?.insufficientEvidence && (
-          <p className="mt-2 text-[11px] text-brand-primary/60">
-            The Skill Card review gate is intentionally closed until cards are approved. No draft is invented in the meantime.
-          </p>
-        )}
+        {notice && <p role="status" className="mt-2 text-brand-primary">{notice}</p>}
+        {error && <p role="alert" className="mt-2 text-red-300">{error}</p>}
       </section>
 
       <div className="grid min-w-0 gap-4 lg:grid-cols-[20rem_minmax(0,1fr)]">
@@ -342,14 +234,6 @@ export default function MarketingAiDepartmentPage() {
                   </span>
                 </ol>
 
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <button type="button" onClick={() => void run({ artifactId: selected.id })} disabled={busy || selected.status === 'human_approved'} className="rounded-full bg-brand-teal px-3 py-1.5 text-xs font-black text-black disabled:opacity-40">
-                    Hand off to next specialist
-                  </button>
-                  <button type="button" onClick={() => void run({ artifactId: selected.id, regenerate: true, changeNote: decisionNote.trim() || undefined })} disabled={busy || selected.status === 'human_approved'} className="rounded-full border border-white/12 px-3 py-1.5 text-xs font-bold text-brand-primary hover:text-white disabled:opacity-40">
-                    Regenerate current step
-                  </button>
-                </div>
               </div>
 
               {/* Current version */}

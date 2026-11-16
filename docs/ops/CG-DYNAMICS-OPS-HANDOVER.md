@@ -1,3 +1,11 @@
+## 16 November — minimal staff-AI containment alternative, NOT LIVE
+
+Existing #995 task prepared an isolated frontend-only extraction against main206f4df9.
+No new tools, migrations or backend changes in phase A; optional separate two-handler
+410 phase B also needs no migration. PR995 full-parity source remains unchanged.
+[Scope, cached-client risk and narrow release gates](STAFF-AI-PHASED-CONTAINMENT-2026-11-16.md).
+No deployment, main merge, settings changes or spending authorized/performed.
+
 ## 16 November — Madison current portal accepted; narrow guide fix LIVE
 
 CA prioritised Madison Wear7b47afb0-fa55-4916-85f6-09c57e5905b9. Real issued login
