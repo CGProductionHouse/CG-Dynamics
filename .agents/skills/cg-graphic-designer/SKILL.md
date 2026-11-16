@@ -38,6 +38,17 @@ Its inspected480x600 native previews are not HD export or human creative approva
 Invalidate stale delivery exports after visual amendments: keep them as history,
 but never leave the old HD file selected for a newly revised poster.
 
+A verified palette does not authorise every colour for every role. Read the
+exact-client background-role policy before composing. Wiseman's16November
+review supersedes the R4 execution acceptance: photo-led or charcoal backgrounds,
+restrained honeycomb, and brand colours only in text/small accents. Do not replace
+an unwanted white field with a large brand-colour field. Reference posters are
+style evidence, not permission to reuse their photographs or outdated footer roster.
+Check the actual render after changing dark/light treatment: the R5 white school
+headline initially disappeared into the vehicle. Matched source-preserving light
+control across both base and registered overlap cap corrected it; alpha stayed exact.
+This client-specific preference must not become a forced style for other clients.
+
 1. Read the owning GitHub issue and current exact-client/month authority.
 2. Fail closed if the exact logo, font licence/file, colour values, branch, product/service fact or source rights are unresolved.
 3. Build or refresh the compact Brand Pack for the exact `client_id + brand_scope`; do not borrow a sibling brand kit.
@@ -189,6 +200,7 @@ The private HTML import path is now exercised with actual Piek drafts. Use `scri
 - Native filled vector panels may be visible in the rendered poster but absent from the connector's editable text/image list. A successful photo replacement therefore does not prove the old tilted frame/panel disappeared. Inspect the rendered page. If required shapes cannot be edited, cancel the trial and rebuild a clean native composition; never cover the defect with another arbitrary crop or call it fixed. Transfer only into the permitted working lane and clearly distinguish superseded agent drafts from current candidates. Do not delete protected or staff pages.
 - Save authorised work at short checkpoints, read it back and retain a private source/asset/element receipt. An overnight transaction expired in the real pilot; local scenes/recipes preserved recovery. Avoid keeping the only finished work in a long-lived unsaved transaction.
 - After a page merge, resolve actual page IDs and headline/asset records rather than assuming the requested source order was retained. In the real two-page transfer, returned pages appeared in reverse order. Page-list thumbnails also showed stale pre-insert artwork, including workflow headers under new page IDs. Use fresh transaction thumbnails for changed/transferred pages and compare semantic native records before claiming a saved design was verified. Reject a contact sheet made from mismatched cached previews.
+- If a large master rejects native editing while its page-index thumbnails remain stale, a bounded disposable copy of only the owned amended pages can verify the actual copied layers. The Wiseman R5 proof copied four official pages: all27live text/21media records and geometry matched saved sources, and four actual480x600 renders matched exactly. Label that copy TEMP QA ONLY, never a second official file, and retain its cleanup limitation if deletion is unavailable. This proves the copied composition, not a genuine HD export or human creative approval.
 - Follow the owner's existing save authority; do not ask repeatedly for routine internal saves. Page restructuring still needs grounded exact-operation authority. `planApprovedScaffoldReplacement` permits only an explicitly approved contiguous block of registered, superseded agent pages, with a fresh boundary read after deletion; it cannot remove staff work, headers, saved proofs or protected history.
 
 ### Finishing and delivery lessons

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "clientId": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
   "month": "2027-01-01",
-  "status": "automotive-r4-native-preview-accepted-held-HD-and-delivery",
+  "status": "charcoal-r5-official-native-verified-held-HD-and-review",
   "ownerMonthConfirmedAt": "2026-11-14",
   "packageBaseline": {
     "designPosters": 4,
@@ -11,7 +11,7 @@
     "videoExcludedFromThisTask": true
   },
   "productionLane": {
-    "state": "four-automotive-r4-posters-replaced-official-master-held-HD-and-browser-policy",
+    "state": "four-R5-posters-verified-in-official-master-held-HD-export-and-review",
     "masterDesignId": "DAHEfeuQzP4",
     "scheduleMeaning": "Creative windows only; no dated rows, UUIDs, scheduling or publication created. DP numbering is not authoritative posting order.",
     "excludedPackages": [
@@ -151,7 +151,7 @@
       "nextAction": "Use the verified Group website to find the appropriate business.",
       "januaryRelevance": "Returning to ordinary driving after a longer summer journey. This is a proposed creative window, not a schedule.",
       "headlineCandidates": [
-        "THE HOLIDAY\u00e2\u20ac\u2122S OVER. THE KILOMETRES STAY."
+        "THE HOLIDAYÃ¢â‚¬â„¢S OVER. THE KILOMETRES STAY."
       ],
       "mechanism": "actual Group vehicle with registered roof/type overlap, large tightly stacked centred live headline, top-right logo and right-aligned footer",
       "sourceRequirement": "Retain the original owned candidate photograph; historical vehicle-wrap marks are documentary, not current Hi-Q promotion.",

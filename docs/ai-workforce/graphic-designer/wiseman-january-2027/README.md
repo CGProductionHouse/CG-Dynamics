@@ -1,3 +1,17 @@
+## 16November — R5 charcoal amendments in the official master
+
+All four R4 executions are superseded by the supplied internal-review direction.
+The owner-approved replacement completed; all98other IDs/order are preserved.
+Current working40–43: `PBmNQ8vPYLNQVCX0`, `PB6P34HTGg2wPGPH`,
+`PBTBdbgn3ZgmMcdj`, `PBhYTQBSt8MDhc02`. Four actual copied-page native renders,
+27live text/21media records and64px important-item insets verified. New HD export,
+creative approval and delivery remain pending; no resend/forward. See
+[full R5 evidence and limitations](CHARCOAL-FEEDBACK-2026-11-16.md).
+
+The prepared replacement plan is consumed; do not replay it. Earlier page maps,
+preview acceptances and exports below are historical. The local current selector
+now selects `production-r2/delivery-r2/delivery-manifest-r5-held.json`.
+
 ## 15November — automotive R4 saved; owner accepts previews; HD delivery blocked
 
 Owner retained the concepts but rejected flat/dated execution, hard offset font

@@ -4,8 +4,8 @@
     "id": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
     "name": "Wiseman Group"
   },
-  "observedAt": "2026-11-15",
-  "status": "verified-kit-rebuilt-internal-candidates-unapproved",
+  "observedAt": "2026-11-16",
+  "status": "charcoal-r5-native-and-transfer-verified-held-HD-and-review",
   "sourceAuthority": "CG Dynamics exact-client guide v1 plus owner month/tone instructions; OneDrive remains media authority",
   "scopes": [
     {
@@ -74,19 +74,19 @@
     "ownedJanuaryWorkingPageIds": [
       {
         "slot": "DP01",
-        "id": "PB8Jj94kZ5d19Xhq"
+        "id": "PBmNQ8vPYLNQVCX0"
       },
       {
         "slot": "DP02",
-        "id": "PBrfWh0vpT9XHfPs"
+        "id": "PB6P34HTGg2wPGPH"
       },
       {
         "slot": "DP03",
-        "id": "PBsdXDCfCsJzF829"
+        "id": "PBTBdbgn3ZgmMcdj"
       },
       {
         "slot": "DP04",
-        "id": "PBYNFX2VmFY7GnBY"
+        "id": "PBhYTQBSt8MDhc02"
       },
       {
         "slot": "F01",
@@ -106,7 +106,9 @@
       }
     ],
     "other94PageIdsAndOrderPreserved": true,
-    "additionalJanuaryPagePreserved": "PBcymBNbhmR8JW6X"
+    "additionalJanuaryPagePreserved": "PBcymBNbhmR8JW6X",
+    "other98PageIdsAndOrderPreserved": true,
+    "nativeVerification": "Official102-page transaction rejected; copied only current40–43 into labelled four-pageQA. All27text/21media and geometry match savedR5 sources; actual480x600 previews identical. Not HD/export proof."
   },
   "releaseGates": [
     "Actual relevant social and approval artwork coverage",
@@ -124,14 +126,29 @@
   ],
   "captionFooterContract": "Retrieve current exact-client task_type=caption packet; both required footer fields verified against official HQ contact page15November. Local receipt only; no contacts copied into a second database.",
   "ownerDirectionUpdate": {
-    "id": "8c8ca9a8-1191-429d-ac79-c5aa43585ec1",
+    "id": "b6e113f5-39e0-457d-8900-c38854b7d5da",
     "kind": "content_direction",
     "reviewState": "unreviewed",
-    "recordedOn": "2026-11-15",
+    "recordedOn": "2026-11-16",
     "retrievalVerified": true,
-    "source": "Agency-owner working brief, not client creative approval; canonical append returned by get_client_context. Guidev1 unchanged."
+    "source": "Agency-owner working brief, not client creative approval; canonical append returned by get_client_context. Guidev1 unchanged.",
+    "previousId": "8c8ca9a8-1191-429d-ac79-c5aa43585ec1"
   },
   "ownerVisualRefinement": {
+    "source": "Owner-supplied16November screenshots of Ger-Marie internal review09:07/09:10/09:21; source references retained privately",
+    "revision": "charcoal-r5",
+    "direction": "ALL FOUR Group posters: photo-led or charcoal neutral backgrounds only; subtle honeycomb; brand colours in text/small accents, never replacement background fields.",
+    "supersedes": "automotive-r4 execution acceptance, not concepts or photo-post slots",
+    "ownerPreviewAccepted": false,
+    "actualPreviewDimensions": [
+      480,
+      600
+    ],
+    "newHdExportVerified": false,
+    "officialMasterTransferCompleted": true,
+    "deliveryState": "Official current pages replaced; actual copied native records/render verified. New HD/export, human approval and delivery held."
+  },
+  "previousVisualRefinement": {
     "source": "Owner15November direct feedback and acceptance of actual revised previews; issue948",
     "direction": "Modern mature automotive graphics and realistic materials; no hard offset duplicate type or toy steering icons. Concepts retained.",
     "revision": "automotive-r4",
@@ -143,5 +160,31 @@
     "newHdExportVerified": false,
     "other98MasterPageIdsAndOrderPreserved": true,
     "deliveryState": "Owner-authorised but blocked by Computer Use URL-policy stop; no sends or tag"
+  },
+  "backgroundRolePolicy": {
+    "scope": "WISEMAN_GROUP",
+    "authority": "Owner-supplied internal Ger-Marie feedback16November2026; unreviewed into guide",
+    "allowedBackgrounds": [
+      "source-faithful-photo-led",
+      "charcoal-neutral"
+    ],
+    "forbiddenBackgrounds": [
+      "white-page-background",
+      "brand-colour-replacement-field"
+    ],
+    "brandColourRole": "Live typography and small accent elements only; source-photo colours and exact logos are not artificial background fields.",
+    "pattern": "Low-contrast restrained honeycomb; avoid excessive density.",
+    "applyTo": [
+      "DP01",
+      "DP02",
+      "DP03",
+      "DP04"
+    ],
+    "doesNotAuthorise": [
+      "reuse of reference photographs",
+      "obsolete Hi-Q franchise footer",
+      "client approval",
+      "schedule or publication"
+    ]
   }
 }

@@ -1,3 +1,35 @@
+## 16November — Wiseman R5 amendments verified in official master
+
+Owner supplied four Ger-Marie feedback screenshots and explicitly approved the
+exact five-call replacement. All four designed posters now use photo-led/charcoal
+backgrounds, restrained honeycomb and brand colours only in text/small accents.
+Four existing source workbenches saved/read back headlessly; no desktop takeover.
+DP04's actual heading contrast failure was corrected with matched source-preserving
+light control on base/cap; original cap alpha retained. No generative photo edit.
+
+Official `DAHEfeuQzP4` remains102pages; all98other IDs/order preserved, including
+photo posts and protected/staff work. Current40–43 IDs: DP01`PBmNQ8vPYLNQVCX0`,
+DP02`PB6P34HTGg2wPGPH`, DP03`PBTBdbgn3ZgmMcdj`, DP04`PBhYTQBSt8MDhc02`.
+Consumed plan must never be replayed. Master native editing still rejects102pages.
+Page-index thumbnails showed old R4 colours, so actual native content was checked
+via disposable four-page copy`DAHbEAm7hbs`, marked TEMP QA ONLY / NOT PRODUCTION.
+All27live text/21media records and geometry match savedR5; four480x600 native
+renders match exactly;27text/fourlogo64px inset checks pass. QA deletion unsupported;
+retain labelled artefact, never make it a second official file. No HD claim.
+
+CG Dynamics exact-client feedback update`b6e113f5-39e0-457d-8900-c38854b7d5da`
+recorded/read back; remains unreviewed, guide unchanged, no client approval inferred.
+Brand Pack/skill/private selectors now distinguish background roles and currentR5
+from supersededR4. Local Claude send packet explicitly held; no new WhatsApp send,
+tag or signature. New real HD export/inspection, current social/approval coverage,
+human creative approval and authoritative January order remain open. Normal company
+ChatGPT end-to-end remains unverified. Internal OneDrive R5 recovery ZIP uploaded,
+exact name/39,129,408-byte metadata read back; local117-entry CRC/SHA checked,
+remoteSHA not claimed, sharing unchanged. No originals/fonts/credentials/signed URLs.
+R0; no runtime/production code, deployment, migration or dependency change. Existing
+#948/draft#956 lane only; Nolan/Picasso processes untouched. See
+`docs/ai-workforce/graphic-designer/wiseman-january-2027/CHARCOAL-FEEDBACK-2026-11-16.md`.
+
 ## 15November — Browser/Chrome bundle restoration; host reload still unverified
 
 Used the running desktop app's bundled CLI to reinstall the already-enabled
