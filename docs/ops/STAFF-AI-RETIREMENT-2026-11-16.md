@@ -1,5 +1,7 @@
 # Built-in staff AI retirement — 16 November 2026
 
+Current release-readiness authority: [staged release packet](STAFF-AI-RELEASE-PACKET-2026-11-16.md). Native Deno compatibility checking and real isolated GoTrue/PostgREST/native-handler acceptance supplement the earlier source/PGlite receipts below. Hosted/installed acceptance and all production actions remain unperformed.
+
 ## Current gap closure — same PR #995, not live
 
 Five added tools now bring the connector to 64 tools (32 read / 32 write); the fifth

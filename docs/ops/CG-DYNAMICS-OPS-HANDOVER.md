@@ -1,3 +1,13 @@
+## 16 November — PR #995 release-readiness packet, NOT LIVE
+
+Native Deno compatibility check and disposable real GoTrue/PostgREST/native-handler
+acceptance prepared in the same lane. No production connection or credentials used;
+workbook832c0cc guard drafts tested unchanged only in isolated DB. Runtime merge preview
+has only handover-doc conflict. Original remote esm.sh check blocked by environment403;
+explicit npm map/sloppy-import/frontend-type conditions are recorded, not hidden.
+[Staged packet, exact order, approval owners and remaining gates](STAFF-AI-RELEASE-PACKET-2026-11-16.md).
+No PR-body retry, merge, deployment or production migration. Git deployments stay off.
+
 ## 16 November — PR #995 remaining governed parity, NOT LIVE
 
 Same branch adds admin-only source/rights browsing (verified permitted public-domain
