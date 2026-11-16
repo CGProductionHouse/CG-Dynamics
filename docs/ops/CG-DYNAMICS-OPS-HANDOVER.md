@@ -1,4 +1,34 @@
-## Latest 16 November — Instagram durable phases, local only
+## Latest 16 November — Instagram private prerequisites verified locally
+
+Same draft PR #991 / #220. Concrete private exact-account encrypted credential
+checks now distinguish Instagram Login from Facebook Login, without reporting or
+plaintext fallback, added scopes, consent or credential writes. Shared Meta app/
+token diagnostics preserve the existing Facebook path. Private composition joins
+original approved bytes/hash, mandatory strict JPEG decode and existing durable
+container/publish/status stages; it remains UNREGISTERED in every activation path.
+No default decoder or caller-supplied qualification. Conservative original baseline
+JFIF only; rejected metadata/profiles are never stripped or converted.
+
+Reproduced/fixed async preflight clock errors and last-slot quota blocking status
+verification. Completion-clock freshness/expiry and captured Teams proof are
+rechecked; exhausted quota cannot admit/create/publish but GET-only reconciliation
+continues. Full local **4597 total /4567 pass /30 skipped /0 failures**, including
+27 actual PostgreSQL checks;154 focused tests pass. Five real JPEG decodes against
+an integrity-checked official jpeg-js0.4.4 archive in task-only TEMP pass, including
+corrupt entropy and maximum admitted solid/high-detail images. Build/emitted app,
+scoped lint, typing bridge and diff pass. No native Edge/provider/UI/phone proof.
+
+Production dependency adoption is still UNAPPROVED: manifest/lock/shared
+node_modules unchanged. Exact source-only jpeg-js0.4.4 adoption proposal and SRI
+are in the [existing receipt](SOCIAL-PUBLISHING-220-2026-11-15.md). Do not install into
+the shared node_modules junction or copy npm's unrelated lock pruning. Instagram
+canonical candidate/confirmation/release wiring, caption/disclosure qualification
+and actual provider acceptance remain gates. FOUR prior migrations stay unapplied;
+no new migration, production SQL/data/Edge/config/secret/OAuth/provider/Microsoft/
+Vercel operation. Existing Facebook/TikTok gates remain off. Main4af41304; Nolan
+PR990 untouched. Google Control Centre target unidentified; no guessed writes.
+
+## Earlier 16 November — Instagram durable phases, local only
 
 Same draft PR #991 / #220 / #236. Added source-only single-JPEG container/readiness/
 one-way publish/owner-verification stages over existing background_jobs. New

@@ -122,6 +122,15 @@ test('publish stage addresses only the recorded container; publication receipt r
   await assert.rejects(t.request('POST', '/123/media', { image_url: 'https://foreign.invalid', caption: 'other' }), /CONTRACT_REQUIRED/)
 })
 
+test('a real preflight can finish after transport construction without looking like future credential evidence', async () => {
+  const g = graphFixture(fixture().intent)
+  const t = await g.make('publish', { resolveCredential: async () => {
+    g.clock.value += 1000
+    return { ...g.credential, verifiedAt: new Date(g.clock.value).toISOString() }
+  } })
+  assert.ok(t.request)
+})
+
 for (const [name, result, attempted, mediaId, state] of [
   ['ready', { id: '456', status_code: 'FINISHED' }, false, null, 'processing'],
   ['ready after attempted publication', { id: '456', status_code: 'FINISHED' }, true, null, 'unknown_outcome'],

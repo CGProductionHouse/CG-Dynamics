@@ -1,6 +1,79 @@
 # Social publishing — 15 November 2026
 
-## Latest 16 November — durable Instagram photo protocol, SOURCE ONLY
+## Latest 16 November — concrete Instagram credentials and JPEG qualification, SOURCE ONLY
+
+Same draft PR #991 / #220, with no worker activation or production change. Both
+Instagram routes now have private read-only credential adapters over the EXISTING
+encrypted stores and exact active client/account/connection mappings. Instagram
+Login verifies the stored app/grant/confirmed-asset provenance, current professional
+and app-scoped identity, and publishing-permission quota endpoint on
+graph.instagram.com. Facebook Login separately checks encrypted USER-token app
+diagnostics, current grants, mapped Page tasks, Page-token identity and its linked
+Instagram identity on graph.facebook.com. It does not require the unrelated
+pages_manage_posts scope. Shared Meta token diagnostics were extracted from the
+existing Facebook provider; all existing Facebook regressions still pass. No
+reporting fallback, plaintext fallback, token refresh/write, added scope or consent.
+
+Private Instagram composition now joins those checks to the existing durable
+create/publish/status protocol and original approved-file hash/signing. It is
+deliberately NOT registered in an Edge entry, worker or MCP action, and requires
+an actual private decoder function; there is no passing qualification default.
+Canonical Instagram candidate/confirmation/release-policy wiring remains future
+work. No caller-supplied proof can activate this composition.
+
+JPEG qualification admits only original baseline 8-bit single-scan JFIF in a
+conservative greyscale/YCbCr profile: <=8 MB for Instagram, <=4 MP, width 320..1440,
+aspect 0.8..1.91. Other profiles, progressive/EXIF/ICC/Adobe/MPO extensions, trailing
+payloads and mismatched source hashes fail closed; nothing is converted, stripped
+or recompressed. Marker/header checks alone never qualify a file: bounded strict
+pixel decode is REQUIRED and dimensions/RGBA output must match. Decoder settings
+cap resolution/memory and disable tolerant decoding. These application bounds
+are a supported pilot subset, not a claim to support every provider-valid JPEG.
+
+Three integration defects were reproduced before fixing: asynchronous credential
+evidence compared with the pre-request clock; fresh preparation evidence treated
+as future-dated after a slow verifier; and exhausted publication quota preventing
+GET-only reconciliation of the last submitted post. Freshness/token margin and
+captured Teams proof now use completion time. Zero remaining quota blocks NEW
+admission/create/publish, while authenticated status reads can still verify the
+existing receipt. No replay or quota bypass was added.
+
+Final full local acceptance: **4,597 total / 4,567 passed / 30 skipped / 0 failures**,
+including all 27 real isolated PostgreSQL checks. Focused acceptance: 154/154,
+including 41 credential/composition, 44 Instagram protocol/transport, 41 Facebook,
+11 JPEG and 17 preparation checks. Synthetic provider/storage transports exercise
+actual encryption helpers and composition; they are not live provider acceptance.
+Build/emitted app bundle, scoped lint, helper TypeScript bridge and diff pass.
+No new UI or browser/physical phone/native Deno acceptance is claimed. FOUR prior
+candidate migrations remain unapplied; this increment adds no migration.
+
+`scripts/qa/publication-jpeg-codec.mjs` separately exercises an official integrity-
+checked `jpeg-js@0.4.4` archive in task-only TEMP, without installing it in the app.
+Five real decode calls pass, including corrupt entropy rejection and solid/high-
+detail 1440x1800 images. Original fixture bytes remain unchanged. Desktop decode
+timing is NOT a hosted Edge CPU/memory receipt. Repository package.json/lock and
+shared node_modules are unchanged; no production dependency is approved or added.
+
+### Exact source-only decoder adoption proposal — requires dependency approval
+
+AGENTS.md requires "no new production dependencies without approval". Proposed
+next increment: pin ONLY `jpeg-js` to `0.4.4` and its one lock entry, preserve
+upstream licensing notices, add a private facade importing `npm:jpeg-js@0.4.4`, and
+pass its strict decode implementation to the already tested Instagram composition.
+No worker registration/activation, other media profile, provider call, live setting,
+SQL, upload, publication, OAuth or deployment is included. The package has no
+runtime dependencies. Verified archive SRI:
+`sha512-WZzeDOEtTOBK4Mdsar0IqEU5sMr3vSV2RqkAIzUEV2BHnUfKGyswWFPFwK5EeDo93K3FohSHbLAjj0s1Wzd+dg==`.
+Do not copy npm's generated proposal lock wholesale: it pruned unrelated existing
+entries. A minimal reviewed lock delta and isolated dependencies are required;
+this checkout's node_modules junction must not be mutated. Native Edge acceptance,
+caption/tag/disclosure constraints and exact rollout authorization remain separate.
+
+Current main remains 4af41304; Nolan PR #990 has no overlapping publishing files.
+Teams scheduling/Microsoft sync hold and all other provider prerequisites below
+are preserved. Google Control Centre target remains unidentified; no guessed write.
+
+## Earlier 16 November — durable Instagram photo protocol, SOURCE ONLY
 
 Same draft PR #991 / #220 / #236; no competing scheduler or Nolan lane. Reproduced the
 ready-container gap before the change: FINISHED could only remain processing;

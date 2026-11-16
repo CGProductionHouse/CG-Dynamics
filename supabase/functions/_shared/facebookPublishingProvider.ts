@@ -1,6 +1,5 @@
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { readMetaStoredToken } from './metaTokenStorage.ts'
-import { inspectMetaAccessToken } from './metaTokenDiagnostics.ts'
+import { resolveMetaPublishingCredential, type MetaPublishingCredentialPorts } from './metaPublishingCredential.ts'
 import { readFacebookPhotoStatus, submitFacebookPhoto } from './facebookPublishing.ts'
 import { facebookPhotoTransport, verifyFacebookPageAccess } from './facebookPublishingTransport.ts'
 import { approvedSnapshotDelivery, inspectPublicationSnapshot } from './socialPublishingMedia.ts'
@@ -18,34 +17,17 @@ export interface FacebookServerConfig {
  * Read-only diagnostics verify the current app, scopes and token lifetime.
  */
 type CredentialTarget = Pick<PublishingIntent, 'platform' | 'route' | 'accountId' | 'clientId' | 'connectionId'>
-type CredentialPorts = { inspect?: typeof inspectMetaAccessToken; now?: () => number }
+type CredentialPorts = MetaPublishingCredentialPorts
 async function facebookPublishingCredential(sb: SupabaseClient, intent: Readonly<CredentialTarget>, config: FacebookServerConfig,
   ports: CredentialPorts = {}) {
   function fail(): never { throw new Error('Exact Facebook publishing credential unavailable.') }
   if (intent.platform !== 'facebook' || intent.route !== 'facebook_page' || !/^\d+$/.test(intent.accountId)
     || !/^v\d+\.\d+$/.test(config.graphVersion) || !/^\d+$/.test(config.appId)) fail()
   try {
-    const [client, mapping, connection, token] = await Promise.all([
-      sb.from('clients').select('id').eq('id', intent.clientId).eq('active', true).maybeSingle(),
-      sb.from('meta_client_assets').select('id').eq('client_id', intent.clientId).eq('connection_id', intent.connectionId)
-        .eq('facebook_page_id', intent.accountId).eq('is_active', true).maybeSingle(),
-      sb.from('meta_connections').select('id').eq('id', intent.connectionId).eq('status', 'connected').maybeSingle(),
-      sb.from('meta_connection_tokens').select('encrypted_access_token').eq('connection_id', intent.connectionId).maybeSingle(),
-    ])
-    if ([client, mapping, connection, token].some(r => r.error || !r.data) || !token.data) fail()
-    const stored = await readMetaStoredToken(token.data.encrypted_access_token, intent.connectionId, config.encryptionKey, config.keyVersion)
-    // Existing reporting may still diagnose legacy plaintext; new publishing
-    // cannot use that fallback or silently rewrite the credential.
-    if (!stored.encryptedAtRest) fail()
-    const diagnostics = await (ports.inspect ?? inspectMetaAccessToken)({ graphBaseUrl: `https://graph.facebook.com/${config.graphVersion}`,
-      appId: config.appId, appSecret: config.appSecret, accessToken: stored.accessToken })
-    const now = (ports.now ?? Date.now)()
-    const expiry = Date.parse(diagnostics.expiresAt ?? '')
-    const dataExpiry = diagnostics.dataAccessExpiresAt === null ? Infinity : Date.parse(diagnostics.dataAccessExpiresAt)
-    if (diagnostics.state !== 'valid' || diagnostics.tokenType !== 'USER' || !Number.isFinite(now)
-      || !Number.isFinite(expiry) || expiry <= now + 120_000 || !(dataExpiry > now + 120_000)
-      || ['pages_show_list', 'pages_manage_posts', 'pages_read_engagement'].some(s => !diagnostics.grantedScopes.includes(s))) fail()
-    return { accessToken: stored.accessToken, tokenValidUntil: new Date(Math.min(expiry, dataExpiry)).toISOString(), grantedScopes: [...diagnostics.grantedScopes] }
+    const mapping = await sb.from('meta_client_assets').select('id').eq('client_id', intent.clientId).eq('connection_id', intent.connectionId)
+      .eq('facebook_page_id', intent.accountId).eq('is_active', true).maybeSingle()
+    if (mapping.error || !mapping.data) fail()
+    return await resolveMetaPublishingCredential(sb, intent, config, 'facebook_photo', ports)
   } catch { return fail() }
 }
 

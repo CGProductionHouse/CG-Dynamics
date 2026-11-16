@@ -4,9 +4,10 @@ import { PUBLISHING_PATHS, type PublishingIntent } from './socialPublishing.ts'
 export class InstagramPublishingTransportError extends Error {
   constructor(readonly code: string) { super(code); this.name = 'InstagramPublishingTransportError' }
 }
-interface PrivateInstagramCredential {
+export interface PrivateInstagramCredential {
   clientId: string; connectionId: string; accountId: string; route: 'instagram_login' | 'instagram_facebook_login'
   accessToken: string; tokenValidUntil: string; verifiedAt: string; grantedScopes: readonly string[]
+  availablePublishSlots?: number
 }
 const token = (s: unknown): s is string => typeof s === 'string' && s.length > 0 && s.length <= 16_384 && !/\s/.test(s)
 const object = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v)
@@ -34,10 +35,11 @@ export async function instagramPhotoTransport(input: {
   const appSecret = input.appSecret, base = `https://${i.route === 'instagram_login' ? 'graph.instagram.com' : 'graph.facebook.com'}/${version}`
   const fetcher = input.fetch ?? fetch, resolved = now()
   const c = await input.resolveCredential(i).catch(() => fail('INSTAGRAM_CURRENT_CREDENTIAL_REQUIRED'))
-  const checked = Date.parse(c.verifiedAt), expiry = Date.parse(c.tokenValidUntil)
+  const received = now(), checked = Date.parse(c.verifiedAt), expiry = Date.parse(c.tokenValidUntil)
   if (c.clientId !== i.clientId || c.connectionId !== i.connectionId || c.accountId !== i.accountId || c.route !== i.route || !token(c.accessToken)
-    || !Number.isFinite(resolved) || !Number.isFinite(checked) || checked < resolved - 60_000 || checked > resolved
-    || !(expiry > resolved + 120_000) || !Array.isArray(c.grantedScopes) || PUBLISHING_PATHS[i.route].scopes.some(s => !c.grantedScopes.includes(s))) fail('INSTAGRAM_CURRENT_CREDENTIAL_REQUIRED')
+    || !Number.isFinite(resolved) || !Number.isFinite(received) || received < resolved || received - resolved >= 120_000
+    || !Number.isFinite(checked) || checked < received - 60_000 || checked > received
+    || !(expiry > received + 120_000) || !Array.isArray(c.grantedScopes) || PUBLISHING_PATHS[i.route].scopes.some(s => !c.grantedScopes.includes(s))) fail('INSTAGRAM_CURRENT_CREDENTIAL_REQUIRED')
   // Copy credential scalars so a caller cannot change the token after validation.
   const accessToken = c.accessToken
   let appProof: string | undefined

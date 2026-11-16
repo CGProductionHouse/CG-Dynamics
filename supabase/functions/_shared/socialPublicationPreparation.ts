@@ -60,11 +60,14 @@ export function publicationCandidateReader(sb: SupabaseClient, checks: PrivatePu
     try {
       ;[provider, media] = await Promise.all([checks.verifyProvider(target), checks.verifyMedia(Object.freeze({ ...snapshot, bytes: snapshot.bytes.slice() }), target)])
     } catch { stop('PRIVATE_PREFLIGHT_UNAVAILABLE') }
+    const completed = (checks.now ?? Date.now)()
+    if (!Number.isFinite(completed) || completed < now || completed - now > 300_000) stop('PRIVATE_PREFLIGHT_UNAVAILABLE')
+    if (!fresh(schedule.capturedAt, completed) || !fresh(schedule.checkedAt, completed)) stop('FRESH_TEAMS_EVIDENCE_REQUIRED')
     const b = provider.binding
-    if (!fresh(provider.checkedAt, now) || b.clientId !== target.clientId || b.connectionId !== target.connectionId || b.accountId !== target.accountId || b.route !== target.route
-      || b.active !== true || b.appAccessVerified !== true || b.accountPublishingVerified !== true || !(Date.parse(b.tokenValidUntil ?? '') > now + 120_000)
+    if (!fresh(provider.checkedAt, completed) || b.clientId !== target.clientId || b.connectionId !== target.connectionId || b.accountId !== target.accountId || b.route !== target.route
+      || b.active !== true || b.appAccessVerified !== true || b.accountPublishingVerified !== true || !(Date.parse(b.tokenValidUntil ?? '') > completed + 120_000)
       || !Array.isArray(b.grantedScopes) || !['pages_show_list', 'pages_manage_posts', 'pages_read_engagement'].every(scope => b.grantedScopes.includes(scope))) stop('CURRENT_PROVIDER_PROOF_REQUIRED')
-    if (media.verified !== true || !fresh(media.checkedAt, now) || typeof media.profile !== 'string' || !/^[a-z0-9][a-z0-9_.:-]{0,127}$/.test(media.profile)) stop('REVIEWED_PROVIDER_MEDIA_PROOF_REQUIRED')
+    if (media.verified !== true || !fresh(media.checkedAt, completed) || typeof media.profile !== 'string' || !/^[a-z0-9][a-z0-9_.:-]{0,127}$/.test(media.profile)) stop('REVIEWED_PROVIDER_MEDIA_PROOF_REQUIRED')
     // Copy selected evidence only; private adapter extras/credentials never flow
     // into context, preview, queue, receipts or diagnostics.
     const context: PublishingContext = { review: { id: r.id, deliverable_id: r.deliverable_id, client_id: r.client_id, state: r.state,
@@ -77,7 +80,7 @@ export function publicationCandidateReader(sb: SupabaseClient, checks: PrivatePu
       connectionId: b.connectionId, accountId: b.accountId, route: b.route, scheduledAt: r.scheduled_at, assetSha256: snapshot.assetSha256 } })
     if (!prepared.intent) stop('PREPARATION_SOURCE_CHANGED')
     const fingerprint = await socialPublicationFingerprint(prepared.intent)
-    return { context, evidence: { intentFingerprint: fingerprint, checkedAt: new Date(now).toISOString(), teamsRecordId: schedule.recordId,
+    return { context, evidence: { intentFingerprint: fingerprint, checkedAt: new Date(completed).toISOString(), teamsRecordId: schedule.recordId,
       teamsRevision: schedule.revision, mediaProfile: media.profile } }
   }
 }

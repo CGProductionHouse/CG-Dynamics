@@ -49,6 +49,24 @@ function fixture() {
 }
 const run = f => preparation.publicationCandidateReader(f.sb, f.checks)(f.target, f.actorId)
 
+test('provider completion after thirty seconds is checked against completion time rather than a stale entry clock', async () => {
+  const f = fixture(); let clock = NOW
+  f.checks.now = () => clock
+  f.checks.verifyProvider = async () => { clock += 31_000; return { ...f.providerProof, checkedAt: new Date(clock).toISOString() } }
+  const result = await run(f)
+  assert.equal(result.evidence.checkedAt, new Date(clock).toISOString())
+})
+
+test('capture and token freshness must still hold after a long private preflight', async () => {
+  for (const scenario of ['capture', 'token']) {
+    const f = fixture(); let clock = NOW
+    f.checks.now = () => clock
+    if (scenario === 'token') f.binding.tokenValidUntil = new Date(NOW + 140_000).toISOString()
+    f.checks.verifyProvider = async () => { clock += scenario === 'capture' ? 301_000 : 31_000; return f.providerProof }
+    await assert.rejects(run(f))
+  }
+})
+
 test('canonical preparation derives the approved hash without URLs/writes and returns only bounded server evidence', async () => {
   const f = fixture(), result = await run(f)
   assert.equal(result.context.assetSha256, digest); assert.equal(result.context.authorization, null)
