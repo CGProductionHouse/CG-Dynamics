@@ -18,7 +18,7 @@ test('existing read-only reporting is reused, source timestamps separated and fu
  const parent=readFileSync('src/pages/admin/NolanOverview.tsx','utf8')
  const panel=readFileSync('src/components/admin/WebsitePerformancePanel.tsx','utf8')
  for(const text of ['4 reviewed reporting mappings, not the full website fleet','canSave={false} showFreshness','Directory read time is not','Retry connections','if (cancelled) return','listClients(\'active\')']) assert.ok(page.includes(text))
- assert.ok(parent.includes('<NolanWebsiteConnections key={generation} />'))
+ assert.ok(parent.includes('<NolanWebsiteConnections key={`${scope}:${generation}`} />'))
  assert.ok(parent.includes("lane !== 'master' && lane !== 'systems'"))
  assert.ok(panel.includes("report?.generatedAt ?? 'Not available'"))
  assert.doesNotMatch(page,/access_token|Authorization|service_role|fetch\(|as Client|saveWebsitePerformanceDraft/)

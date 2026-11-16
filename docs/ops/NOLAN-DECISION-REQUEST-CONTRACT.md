@@ -158,3 +158,17 @@ schema/profile policies, real concurrent sessions and legitimate same-origin
 test identities before enabling UI. Alternatively an explicitly authorized,
 isolated non-production database could host the synthetic fixture; production
 and new billable branches are not substitutes without separate authorization.
+
+## 16 November recovery regression receipt
+
+Recovered published head a6190cb into an isolated checkout. The complete Nolan
+source/synthetic test selection exposed two stale assertions from before the
+identity/month scope isolation change. Updated them to require the scope-aware
+read dependency and website remount key; added an explicit snapshot scope check.
+No application guard, source behavior, database SQL or activation flag changed.
+All 79 executable Nolan tests pass; the disposable PostgreSQL test remains
+skipped because no permitted runtime is available. TypeScript/Vite build and diff
+check pass. Full-suite verification is not claimed: a run with synthetic port
+54321 hit an unrelated portal fixture that hardcodes port 1; that fixture passes
+all six cases with matching port 1. Real database/concurrent-session and signed-in
+browser acceptance remain open. No migration, merge or deployment.
