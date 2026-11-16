@@ -1,3 +1,15 @@
+## 16 November — owner-authorised Claude library reconciliation (#999)
+
+Ordered handover: #984 merged to main b524a9f9 with local31/31 brand/video tests,
+build and scoped lint passing; no deploy or brand migration replay. #999 stays
+inside PR910's codex/nolan-office-research-874 branch, not main. Its original
+69ca2f87 already contains current PR910 base e61e4374, so no redundant merge,
+rebase or force-push is needed. Removed one generated mapdata Python cache and
+ignored future caches. Exact checks/merge receipt are recorded on #999.
+PR910's separate base conflict remains its owner's decision. Device installation,
+CURRENT sync receipts and actual media/sound acceptance are not established by
+publication. No new renderer/tracker, production write or hosting action.
+
 ### 16 November — exact Nolan Codex MSI claims and portal linkage
 
 CA resumed this lane and explicitly requested all MSI video ownership/progress,
