@@ -172,3 +172,67 @@ check pass. Full-suite verification is not claimed: a run with synthetic port
 54321 hit an unrelated portal fixture that hardcodes port 1; that fixture passes
 all six cases with matching port 1. Real database/concurrent-session and signed-in
 browser acceptance remain open. No migration, merge or deployment.
+
+
+## 16 November cloud PostgreSQL acceptance (supersedes runtime blocker above)
+
+The fresh saved CG-Dynamics cloud runtime provides Debian 13 x86_64, Node
+24.19.0, npm 11.9.0 and an independently accessible Docker 28.4.0 daemon.
+No PostgreSQL binary/image was preinstalled. The official Docker Library image
+`postgres:17-alpine` was downloaded from the recognized Docker Hub source:
+`postgres@sha256:a77aa70e641402a21411b92b721c58d10f23b50ae5fdd2333efd22d166e1e5f7`.
+It reports PostgreSQL 17.12. This is the fresh cloud runtime, not a retry of the
+previous denied Windows/Dot route. No sandbox/security setting was changed.
+
+The unchanged draft SQL executed successfully on the synthetic dependency tables.
+The expanded real PostgreSQL fixture passes 12 tests, zero failures/skips. Seven
+subtests use separate psql sessions and verify `pg_stat_activity.wait_event_type`
+is `Lock` before releasing the first transaction: identical retry deduplication,
+conflicting key reuse, response/withdrawal in both orders, source edit versus
+create, source edit versus response, and recipient revocation versus response.
+Additional checks cover client/team/staff/inactive/unknown/anonymous RPC denial,
+direct table/helper denial, integer-overflow rollback, and explicit >500 coverage
+failure. Original role/revision/idempotency/non-mutating-response checks remain.
+
+An actual fixture startup race was reproduced and fixed: `pg_isready` could accept
+the image entrypoint's temporary bootstrap server before its restart. Readiness
+now also requires container PID 1 to be postgres. No application/SQL defect was
+found by these cases; no application, SQL, dependency or activation change.
+
+Reproduce from the repository root with the image already present:
+
+```sh
+RUN_NOLAN_DECISION_DB_TESTS=1 node --test tests/nolanDecisionDatabase.test.mjs
+```
+
+Every database fixture uses `--pull=never --network none`, tmpfs data, no host
+ports or mounts, synthetic identities and exact generated-container cleanup.
+No production credentials/env files, hosted database, paid branch, MSI/social
+checkout, migration, merge or Vercel operation was used. `NOLAN_DECISIONS_ACCEPTED`
+and `git.deploymentEnabled` remain false.
+
+This closes only isolated PostgreSQL execution and the listed synthetic-schema
+transaction cases. Full canonical schema/profile-policy migration replay,
+same-origin authenticated UI/test-identity and desktop/mobile acceptance remain
+open. Synthetic auth.uid() is a fixture identity, not real authentication proof.
+Promotion to an automatic migration, UI activation and release remain separately
+gated; the SQL stays under docs/ops/sql.
+
+
+Local dependency setup used the unchanged lockfile:
+`npm ci --ignore-scripts --no-audit --no-fund --cache /tmp/nolan-npm-cache`.
+The initial default-cache attempt failed because `/home/agent/.npm/_cacache` was
+not writable/available; using the permitted /tmp cache required no permission or
+sandbox change. No dependency versions or package manifests changed.
+
+Local `npm run build` passed with `VITE_SUPABASE_URL=http://127.0.0.1:1` and
+`VITE_SUPABASE_PUBLISHABLE_KEY=synthetic-test-key`. The emitted
+`dist/assets/MyWorkPage-Bqki3EFh.js` contains the real Needs You disabled-state
+application text. Scoped `npx eslint tests/nolanDecisionDatabase.test.mjs` and
+`git diff --check` pass. No production env file was read.
+
+
+Final full suite: **4,414 tests, 4,384 pass, 30 optional skips, zero failures or
+cancellations**, exit 0 in 222.99 seconds, including all 12 real PostgreSQL checks.
+Command: `VITE_SUPABASE_URL=http://127.0.0.1:1 VITE_SUPABASE_PUBLISHABLE_KEY=synthetic-test-key RUN_NOLAN_DECISION_DB_TESTS=1 npm test`.
+All generated Nolan database containers were absent after completion.

@@ -1,3 +1,14 @@
+## 16 November — Nolan isolated database acceptance, still draft
+
+Existing #990 now has real PostgreSQL 17.12 acceptance in the fresh saved cloud
+runtime: 12 fixture tests pass, including seven overlapping-session lock/CAS/
+idempotency/revision/revocation cases. Fixed a reproduced test startup race;
+application and draft SQL unchanged. See [exact runtime and acceptance limits](NOLAN-DECISION-REQUEST-CONTRACT.md#16-november-cloud-postgresql-acceptance-supersedes-runtime-blocker-above).
+Canonical schema/profile-policy replay and legitimate signed-in browser/device
+acceptance remain open. Needs You activation and Git deployment remain false;
+no production migration, merge, release or change to the MSI social task/checkout.
+Other lane ownership and protected gates remain unchanged.
+
 ## 15 November — Nolan workbook evidence disclosure, local continuation
 
 Existing draft #990 remains the native workbook owner. The core-only candidate
