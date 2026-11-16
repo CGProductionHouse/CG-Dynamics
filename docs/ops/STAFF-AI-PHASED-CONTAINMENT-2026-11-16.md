@@ -164,3 +164,51 @@ separate runtime/test/docs delta is not merged/tested here. Workbook41bda9a9 rem
 separately owned. Original A/B commits and full parity PR995 remain unchanged.
 The current candidate includes the correction; original standalone A/B patches
 need the additional phase-c-retirement-test-contracts.patch for current tests.
+
+## Current main reconciliation and executable release boundary
+
+Main8bb8d455 is now integrated in cca33931; reportStats and its winner test are
+byte-identical to main. Only the handover conflicted; its complete main content
+and containment entries are preserved. The handler test now compiles the real
+normalizeAction declaration: undefined/null/empty/unknown/malformed actions become
+chat; diagnostics/test_provider/specialist_status retain their real names. The
+real handler runs with that normalizer and fail-fast provider/write dependencies.
+No production handler behavior changed.
+
+27 affected checks pass: real normalization/handler gates, main report-winner test,
+and PR990's unchanged navigation repair temporarily tested against this runtime.
+The latter remains owned by workbook41bda9a9, not copied into this branch. Its
+smallest correct repair replaces obsolete renderNav(false,closeMobile) assumptions
+with actual mobileNavigationGroups role checks and the retained Work-to-Import link.
+No navigation runtime change is needed. Coordinate its owner-held landing/extraction;
+do not claim the retained baseline tests are green. Build passes, changed lint clean.
+No redundant full suite was rerun. [Exact evidence](staff-ai-containment-artifacts/main-reconciliation-receipt.json).
+
+Read-only metadata reconfirms project prj_jHVsExoStNjI7ikqlJyXZx26Ahuu / team
+team_SK5vvWv1AIXFkPNV8JFYL205. Deployment dpl_GwQE8n9fRXGdr13L4Gbjj8VV2iM5 is
+READY/production-target, URL cg-dynamics-n70blq59q-cg-dynamics-projects.vercel.app,
+but returned aliases are empty; project live=false/domains=[] does not establish
+serving status. This is a candidate inventory ID, NOT a certified rollback or outage.
+Require actual serving domain/aliases and known-good rollback confirmation, plus
+the two current Edge closure/JWT inventories, before release. No production app
+or database request was used for this metadata investigation.
+
+Billing Nov1-Nov16 exceeded the connector 4MiB limit; the prescribed one-day
+Nov15-Nov16 range succeeded with1588 records. Partial data cannot establish the
+actual billing cycle/headroom/reserve, so no partial cost total is advertised.
+Use a complete current-cycle export or bounded complete adjacent windows after
+confirming the cycle boundary; refresh at release. A prebuilt upload still has
+storage/delivery costs: zero incremental spend is unproven until the release owner
+confirms sufficient already-paid allowance and an explicit serving/storage reserve.
+No cap increase, resource purchase or deployment is implied.
+
+The owner's removal request covers ordinary implementation, reconciliation, tests
+and preservation pushes. This turn expressly forbids deployment; #679 additionally
+requires the exact release packet/window/operator and budget/rollback evidence.
+Once that packet authorizes A+B, proceed through its covered ordinary steps without
+repeated permission: capture rollback -> two handler closures/401-403-410 checks ->
+one production-configured prebuilt upload without domain assignment -> legitimate
+read-only staff/admin/client and desktop/mobile changed-route acceptance -> promote
+the same accepted artifact -> uptime/usage checks. Missing session or failed
+acceptance stops promotion. No new staging database, five-tool migrations or full
+plugin-parity rollout is required. PR995 remains separately pending and not live.

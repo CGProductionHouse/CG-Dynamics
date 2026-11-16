@@ -1,0 +1,39 @@
+{
+  "previous_head": "72aee0162f2034cf088148bd80511ec0db9b49c8",
+  "main": "8bb8d45538295dadcd61edbc36b06e9e9e710cc6",
+  "main_merge": "cca33931bc0d995bdf5357f6ed7777642208f9d2",
+  "workbook": "41bda9a96c2e73616f2a469ba9038a7b11c01af8",
+  "parity_pr995": "d5a02c0ce69c97e3c454c6500538f3abe1daf242",
+  "tests": {
+    "passed": 27,
+    "failed": 0,
+    "skipped": 0,
+    "selection": [
+      "staffAiHandlerContainment: actual source normalizeAction + real handler/fail-fast dependencies",
+      "reportPlatformWinnerTruth: current main test unchanged",
+      "commandCentreNavigation: PR990 test file temporarily exercised unchanged; not committed here"
+    ]
+  },
+  "build": "tsc -b and Vite pass; Vite 12.60s",
+  "lint": "changed test and main reportStats/test clean",
+  "full_suite": "Not rerun: prior 4243 passed/2 independently reproduced base navigation failures/23 skips. Current affected checks run; not a new full-suite pass.",
+  "navigation_owner": "PR990 already owns the test-only correction. Runtime navigation unchanged; no duplicate repair absorbed. Coordinate landing exact owner test or approved extraction before calling baseline suite green.",
+  "metadata_observed_utc": "2026-11-16T16:55:00Z",
+  "frontend_project": "prj_jHVsExoStNjI7ikqlJyXZx26Ahuu",
+  "team": "team_SK5vvWv1AIXFkPNV8JFYL205",
+  "ready_production_target_candidate": "dpl_GwQE8n9fRXGdr13L4Gbjj8VV2iM5",
+  "rollback_limit": "Project live=false/domains=[] and deployment alias=[] in returned metadata. READY is not proof of current serving or known-good rollback. No outage inference or production navigation performed.",
+  "billing_limit": "Nov1-Nov16 query exceeded connector 4MiB response limit. Nov15 00:00 through Nov16 00:00 UTC succeeded (1588 records). No partial total reported as cycle usage/headroom. Actual cycle boundary, current accrued usage, reserve and incremental-cost feasibility still unverified.",
+  "remaining": [
+    "Legitimate existing authorized staff/admin/client read-only acceptance sessions on a supported browser",
+    "Confirm actual serving aliases/domain, known-good frontend rollback and both current Edge closures/JWT configuration",
+    "Fresh complete current-cycle usage/headroom with declared reserve and zero incremental-spend feasibility",
+    "Exact reviewed SHA/window/operator release authorization under #679; current task expressly excludes deployment",
+    "Resolve owner-held navigation test repair or explicitly document its known baseline status"
+  ],
+  "log_sha256": {
+    "containment-main-normalizer-tests.log": "8e96b06a97a751042e9bcf2ac7d659a122c69bd971d056846990106426b19ef1",
+    "containment-main-build.log": "83408f2765548cacdc4c6ce355a22505018eb349c29c0fae32f840bda42946d8",
+    "containment-main-lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

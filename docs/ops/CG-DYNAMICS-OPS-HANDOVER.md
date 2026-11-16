@@ -1,3 +1,13 @@
+## 16 November — containment reconciled with main8bb8d455
+
+Main report-winner fix preserved; handover conflict retains both owners' entries.
+Real normalizeAction/handler plus report winner and temporary PR990 navigation
+repair:27 checks pass; build/scoped lint pass. Navigation test repair stays with
+workbook41bda9a9; no navigation runtime or parity change. Complete cycle budget,
+reserve, serving/rollback inventory, legitimate acceptance session and exact
+release window remain gates. [Receipt](staff-ai-containment-artifacts/main-reconciliation-receipt.json).
+No deployment, spending, main merge or PR-description retry.
+
 ## 16 November — containment test-contract correction
 
 Same draft containment branch fixes obsolete reads of deleted AI UI files across

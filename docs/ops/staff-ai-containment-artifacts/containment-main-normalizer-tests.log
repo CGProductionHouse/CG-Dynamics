@@ -1,0 +1,35 @@
+✔ Command Centre nav entry is manager/admin-gated and points at the real route (2.542892ms)
+✔ /admin/command-centre renders the real Command Centre page, not a redirect (0.313815ms)
+✔ Morning List Import has a first-class nav entry opening the import experience (0.263481ms)
+✔ Work stays the staff-visible destination with no admin gate (0.774686ms)
+✔ Team Work and Morning List Import never render for staff/team roles (0.350749ms)
+✔ desktop and mobile retain Work and role-gated Team Work across shell versions (71.683074ms)
+✔ mobile quick-nav is role-stable and never displaces Content or Calendar (1.902463ms)
+✔ managers reach Morning List Import through Work even when mobile menu removes the duplicate shortcut (28.89915ms)
+✔ removing Team Work or Morning List Import fails this regression suite (0.512261ms)
+✔ Work page links managers to Command Centre and Morning List Import (0.74828ms)
+✔ morning list parser still splits staff headings and bullet items (1.146705ms)
+✔ morning list parser resolves clients with confidence and flags uncertainty (1.245136ms)
+✔ morning list import never creates tasks before explicit review confirmation (0.249426ms)
+✔ platform ranking requires complete observed reach across at least two reporting platforms (2048.682912ms)
+✔ real normalizer maps default/unknown inputs to chat and preserves only existing diagnostic/status actions (1.124265ms)
+✔ retired chat/default returns 410 without model/data access: staff (94.977497ms)
+✔ retired marketing execution returns 410 without artifact/provider access: staff (46.854824ms)
+✔ retired chat/default returns 410 without model/data access: team (37.729233ms)
+✔ retired marketing execution returns 410 without artifact/provider access: team (81.57189ms)
+✔ retired chat/default returns 410 without model/data access: manager (19.672638ms)
+✔ retired marketing execution returns 410 without artifact/provider access: manager (25.55097ms)
+✔ retired chat/default returns 410 without model/data access: admin (32.568282ms)
+✔ retired marketing execution returns 410 without artifact/provider access: admin (43.104415ms)
+✔ retired chat/default returns 410 without model/data access: owner (28.538736ms)
+✔ retired marketing execution returns 410 without artifact/provider access: owner (31.37225ms)
+✔ auth and method gates remain ahead of retirement: supabase/functions/cg-assistant-chat/index.ts (120.32518ms)
+✔ auth and method gates remain ahead of retirement: supabase/functions/marketing-workflow/index.ts (102.407512ms)
+ℹ tests 27
+ℹ suites 0
+ℹ pass 27
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2601.37451
