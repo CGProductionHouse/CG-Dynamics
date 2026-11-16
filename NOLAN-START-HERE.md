@@ -1,6 +1,13 @@
 # Nolan Studio — current start here
 
-Maintained entry point for MSI, Office PC/BC and any new laptop. Updated 11 November 2026.
+Maintained entry point for MSI, Office PC/BC and any new laptop. Updated 16 November 2026.
+
+**16 November live custody:** this Codex laptop claims actual films as
+**Nolan Codex MSI** (legacy alias Nolan MSI). Follow the [tracker/portal standard](.agents/skills/cg-video-story-editor/references/video-tracker-and-portal-standard.md)
+while editing: saved ownership/progress, exact revision/hash, verified client
+portal files/direct Dynamics links, and readback at each handoff. Preserve other
+agents' ownership and approval distinctions. PR985 registration is live. Never
+fill an unknown approved-file identity with a guessed final.
 
 **16 November Claude motion library:** CA merged the Claude-lane motion library into this system. Read [the overview](.agents/skills/cg-video-story-editor/references/claude-motion-library-20261116.md) for the browser seek-to-MP4 productions, four new documented families (57 in total, not 57 mastered) and CG's own house brand brief. CG brand rules were updated in Dynamics the same day with CA's approval.
 

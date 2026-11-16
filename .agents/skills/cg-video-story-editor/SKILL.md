@@ -5,6 +5,15 @@ description: Plan, assemble, review, and hand off CG Production House client vid
 
 # CG video story editor
 
+**16 November mandatory live tracking:** maintain the existing Dynamics Video
+Pipeline while editing, not only at retrospective closeout. This Codex laptop
+lane's exact editor identity is **Nolan Codex MSI** (legacy alias Nolan MSI);
+never claim PC/Claude/staff work. Apply the [tracker and client-portal standard](references/video-tracker-and-portal-standard.md)
+at claim, revision/export, review delivery, feedback/approval and portal filing.
+Saved/read-back ownership, exact revision/hash, real progress and verified direct
+OneDrive links are part of the job. No invented run/slot, duplicate card or
+approval promotion. Unresolved final-file identity stays explicitly unresolved.
+
 ## Mandatory source-transfer gate — CA, 13 November 2026
 
 Before any source-byte read, inventory only the exact client's brief-relevant folders using metadata, then screen available OneDrive thumbnails/streaming previews or already-local proxies. Metadata is not visual review. Record an explicit shortlist (item ID/path, preview evidence, reason, useful interval when known, local availability and expected bytes) in the existing project/source record and link from Dynamics.

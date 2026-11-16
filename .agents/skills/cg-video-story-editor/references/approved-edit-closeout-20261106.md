@@ -39,6 +39,12 @@ but its final approval is still pending. These are different evidence states.
 
 ## Closeout is structured, not only a chat acknowledgement
 
+**16 November:** the [live tracker/portal standard](video-tracker-and-portal-standard.md)
+applies at claim and each revision/delivery/feedback checkpoint, not only here.
+This Codex lane is **Nolan Codex MSI**, legacy alias Nolan MSI. Existing-film
+registration/name preservation went live through PR985 on11November; older
+missing-registration statements below are historical, not today's blocker.
+
 The existing client kit needs all of these reconciled at the same checkpoint:
 
 1. OWNER-DECISIONS: field-level keep/change/reject with the exact authority.
@@ -70,9 +76,9 @@ saved. Preserve uncertainty and earlier approved baselines. This does not replac
 the pipeline, permit raw SQL, or create a new schedule/board. Company-wide tasks
 cannot be attached as client-specific follow-up IDs; reference them in prose.
 
-The live pipeline cannot currently register standalone archive films through its
-exposed workflow. Record this gap rather than fabricating a Content Run, promoting
-a draft, changing an unrelated monthly slot or silently dropping the film.
+Historical pre-PR985 limitation: standalone-film registration was unavailable.
+PR985 resolved that gap without inventing a Content Run. Still never fabricate a
+run, promote a draft or change an unrelated slot/editor to bypass missing data.
 See [the verified MSI reconciliation](../../../../scripts/video-editing/studio-phase2/MSI-DYNAMICS-VIDEO-RECONCILIATION-20261111.md).
 
 Today's exact receipts remain in the existing private Jenkor/RC client libraries
