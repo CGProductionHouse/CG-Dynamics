@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "client": {
+    "clientId": "6b313cac-283e-48c4-9df6-ba43af2f7353",
+    "name": "Central Canvas"
+  },
+  "authority": {
+    "identity": "CG Dynamics exact-client context",
+    "files": "OneDrive",
+    "approvedFinals": "CG Dynamics Client Portal Library",
+    "discoveryOnly": ["Canva Brand Kit", "Canva approved design references"]
+  },
+  "assets": {
+    "oneDriveRoot": {
+      "provider": "OneDrive",
+      "path": "Clients/Central Canvas/",
+      "itemId": "A2AC9FE4B255F52F!32429",
+      "access": "read-only"
+    },
+    "logos": [
+      {
+        "provider": "OneDrive",
+        "path": "Clients/Central Canvas/Brand Identity/Logo/Final Color.png",
+        "itemId": "A2AC9FE4B255F52F!36957",
+        "access": "read-only",
+        "role": "Inspected original candidate; current production variant not yet selected",
+        "format": "PNG"
+      },
+      {
+        "provider": "OneDrive",
+        "path": "Clients/Central Canvas/Brand Identity/Logo/png-03.png",
+        "itemId": "A2AC9FE4B255F52F!36955",
+        "access": "read-only",
+        "role": "Historical white variant in local v10 study; owner-selected20-year mark supersedes it for current January proof",
+        "format": "PNG"
+      },
+      {
+        "provider": "OneDrive",
+        "path": "Clients/Central Canvas/Brand Identity/Logo/Central Canvas20.png",
+        "itemId": "A2AC9FE4B255F52F!sab5fda068d1547c3a67f2a97544aa2e3",
+        "access": "read-only",
+        "role": "Exact20-year mark expressly required by owner14November2026; original pixels on full-width white footing in saved native proof",
+        "format": "PNG"
+      }
+    ],
+    "photography": {
+      "provider": "OneDrive",
+      "path": "Clients/Central Canvas/Photos/",
+      "itemId": "A2AC9FE4B255F52F!s93c464ab48d74cb2823037db77350683",
+      "access": "read-only"
+    },
+    "graphicDesign": {
+      "provider": "OneDrive",
+      "path": "Clients/Central Canvas/Graphic Design/",
+      "itemId": "A2AC9FE4B255F52F!sea2efaf1877045cfbaa5f928d63f95a1",
+      "access": "read-only"
+    }
+  },
+  "typography": [
+    {
+      "role": "Kit family; Regular exercised in the private composition study; original page-specific roles remain unresolved",
+      "family": "Bebas Neue",
+      "style": "Regular",
+      "availability": "job-local-licensed",
+      "source": "Exact kit kAGX9eNfJ7Y; private unmodified Google Fonts BebasNeue-Regular.ttf SHA256 08e4623805102d819f58601e46e345648846075e363b2ceb23313c2d1c83ec73, OFL1.1 retained and embedded. https://github.com/google/fonts/blob/main/ofl/bebasneue/OFL.txt ; no OS font installation",
+      "fallback": null
+    },
+    {
+      "role": "Kit family; page-specific role and weight unresolved",
+      "family": "Bernoru",
+      "style": null,
+      "availability": "canva-only",
+      "source": "Read-only exact CENTRAL CANVAS kit kAGX9eNfJ7Y Fonts panel, 2026-11-14",
+      "fallback": null
+    },
+    {
+      "role": "Kit family; page-specific role and weight unresolved",
+      "family": "Araboto",
+      "style": null,
+      "availability": "canva-only",
+      "source": "Read-only exact CENTRAL CANVAS kit kAGX9eNfJ7Y Fonts panel, 2026-11-14",
+      "fallback": null
+    }
+  ],
+  "colours": [
+    {"name": "Kit orange", "value": "#D76028", "source": "Exact kit palette rendered DOM RGB(215,96,40), 2026-11-14"},
+    {"name": "Kit deeper orange", "value": "#B44815", "source": "Exact kit palette rendered DOM RGB(180,72,21), 2026-11-14"},
+    {"name": "Kit green accent", "value": "#1E6431", "source": "Exact kit palette rendered DOM RGB(30,100,49), 2026-11-14"},
+    {"name": "Kit charcoal", "value": "#444444", "source": "Exact kit palette rendered DOM RGB(68,68,68), 2026-11-14"},
+    {"name": "Kit deep charcoal", "value": "#202020", "source": "Exact kit palette rendered DOM RGB(32,32,32), 2026-11-14"},
+    {"name": "Kit black", "value": "#000000", "source": "Exact kit palette rendered DOM RGB(0,0,0), 2026-11-14"},
+    {"name": "Kit white", "value": "#FFFFFF", "source": "Exact kit palette rendered DOM RGB(255,255,255), 2026-11-14"}
+  ],
+  "creativeRules": [
+    "Charcoal and orange are primary; green is an accent, per exact-client later style correction.",
+    "Preserve real products, vehicles, stitching, materials, branding, proportions and people.",
+    "Use the exact20-year logo per explicit14November owner direction; preserve geometry and colours.",
+    "Inspect source, grade and actual Canva HD output; improve contrast/detail without gray veiling or mismatched foreground lighting.",
+    "Use purposeful source overlap, actual material texture and varied hierarchy; do not repeat a template or logo position across the grid.",
+    "Copy stays practical, local and product-specific; captions add context instead of repeating artwork. No em dashes; maximum five relevant hashtags.",
+    "Preserve all other designers' existing work and all Drafts/Posted/Scheduled history.",
+    "Check actual social and approval artwork as well as source hashes, near-duplicates, shoot, visible-person review tags, concept and mechanism before any internal send.",
+    "Do not duplicate the existing January 2027 New Year candidate PBStl89NNplqp448 without reconciling its status and allocation."
+  ],
+  "approvedClaims": [],
+  "referenceDesigns": [
+    {"provider": "Canva", "path": "Central Canvas master, 222 pages observed 2026-11-14", "designId": "DAGGISDPrDU", "access": "read-only"},
+    {"provider": "Canva", "path": "CENTRAL CANVAS Brand Kit kAGX9eNfJ7Y", "access": "discovery-only"}
+  ],
+  "limitations": [
+    "Discovery pack, not production clearance. January package, dates and final claims are unconfirmed.",
+    "Bernoru and Araboto remain Canva-only. Bebas Neue Regular is privately available with its original OFL1.1 notice; actual exported glyph bounds match the exact file. No OS font installation or licensed-font commit.",
+    "Owner explicitly selected20-year mark; source freshness and creative approval remain unresolved.",
+    "Native editing rejected222-page master. Temporary one-page native proof saved in exact folderFAFGzOsSrxQ; master insertion remains unperformed.",
+    "Piek's lane guard cannot represent this master's reversed working-header order; do not force it to pass.",
+    "Private source samples and history comparisons are bounded; no unused-source certificate or biometric database."
+  ]
+}

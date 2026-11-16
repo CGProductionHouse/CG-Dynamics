@@ -1,3 +1,648 @@
+## 16November — Wiseman internal send authorised; delivery access blocked
+
+Owner explicitly asks to send amendments to CG Picasso Approvals once updates are
+done. No additional send permission is pending; captions must remain unsigned.
+DP01/DP02/DP04 sources are R6 and DP03 source is R7. Official DP03 master transfer
+still awaits the previously requested exact two-call approval; no deletion replay.
+
+Current chat reports local browser access unavailable. Native WhatsApp target
+returned no accessibility state and its captured image did not verify WhatsApp or
+the sender account. No input/send was attempted through that unverified target.
+This is a chat connection limitation, not evidence that the MSI is offline.
+No connected WhatsApp send tool was found. No cloud-browser account transfer,
+other-agent interruption, restart, permissions expansion or credential operation.
+
+Current source links, four hash-checked unsigned captions and clearly marked
+480x600 references are together in the existing MSI Claude handover folder's
+CURRENT R6-R7 AMENDMENTS - 2026-11-16 subfolder. This is a file handover, not agent
+dispatch or delivery. Genuine HD export/inspection and actual history coverage
+remain outstanding. Zero new HD exports and zero messages sent. Existing #948/
+draft#956 lane; no runtime, deployment, production-data or spending changes.
+
+## 16November — DP03 R7 source seam fix ready, master approval pending
+
+Owner rejects the bakkie poster's hard horizontal background join. Saved source
+`DAHa6dj_8iU` now feathers only upper-background alpha across the independent photo/
+light-shaping pair. Original source RGB/ICC and RGBA below row330 retained; actual
+preview shows the hard line removed. Six text/one logo64px checks pass; all native
+type/logo/roof-cap records and caption unchanged. First internal ICC omission was
+caught/corrected, excluded from current selection. Actual photo-region preview
+differs from R6 (MAE1.03/max71); no full rendered-RGB identity or cause asserted.
+
+R7 is saved/read back in the source only. Official R6 page42 remains
+`PBQVQGkmNhkLjGgb` until the pending exact two-call approval: delete only42, insert
+sourcepage1 after41, retain all101otherIDs/order. Private plan prepared/not executed;
+earlier R5/R6 plans consumed. Current selector and local Claude packet hold delivery
+against the old seam; other three R6 sources/artwork unchanged.17-entry11,629,167-byte
+SOURCE WORKING recovery ZIP backed up to existing internal OneDrive, local CRC/SHA
+and remote name/size verified, remoteSHA not claimed, sharing unchanged. No new HD,
+send, tag, client publication, schedule, runtime/dependency/deployment or spend.
+Same #948/draft#956 lane. See BAKKIE-SOFT-JOIN-2026-11-16.md for actual limits.
+
+## 16November — Wiseman R6 colour/clarity supersedes R5
+
+Owner says R5 removed too much colour and DP02's errand metaphor is unclear.
+Four existing sources now use purposeful yellow/orange/red graphic areas/type on
+the retained photographic/charcoal structure. DP02 is literal: parts/tyres, find
+the right store, details online; revised caption points to the Group directory.
+No new stock, branch, shared-location, routing, price or warranty claims. Fresh
+exact-client caption/footer and transport checks pass; other captions unchanged.
+
+Owner approved exact fresh five-call replacement, executed once with readback
+after each operation. Official `DAHEfeuQzP4` remains102pages and all98other IDs/order
+are exact. Current40–43: DP01`PB258Wybnc7kxczK`, DP02`PBs46FTZyDXFvlPR`,
+DP03`PBQVQGkmNhkLjGgb`, DP04`PBvs3sSwG8V6xkFL`. Plans R5/R6 consumed.
+Source original-photo/logo/mask/prop records retained. Actual four-page master-copy
+QA`DAHbET8uSHs` (labelled TEMP QA ONLY / NOT PRODUCTION) verifies27live text/21media
+and geometry against saved sources; actual480x600 renders match exactly. All27text/
+fourlogo64px margin checks pass. Master102-page editing limit/stale-index-preview
+hazard remain; labelled QA cleanup cannot be done with the present connector.
+
+CG owner correction`183f24ca-43c2-41de-aafb-ccabfa93c4ba` recorded/retrieved,
+unreviewed into guide. Skill/Brand Pack now explicitly reject a blanket monochrome
+rule; proposal/current private registry and DP02 caption binding reconciled. Current
+manifest`delivery-manifest-r6-held.json`; Claude packet held, no concurrent delivery.
+Internal OneDrive R6 recovery ZIP:79entries,28,517,592bytes; local CRC/SHA checked,
+remote name/size read back, remoteSHA not claimed, sharing unchanged. No raw libraries,
+licensed fonts, credentials, signed URLs or claimed HD exports included.
+No new genuineHD, WhatsApp send/tag, client publication or scheduling. Live relevant
+history, human creative approval, January order and normal-company-ChatGPT round
+trip remain unverified. R0; no new generation, editor, runtime dependency, deployment,
+migration or Nolan/Picasso process change. See the R6 colour/clarity evidence file.
+
+## 16November — Wiseman R5 amendments verified in official master
+
+Owner supplied four Ger-Marie feedback screenshots and explicitly approved the
+exact five-call replacement. All four designed posters now use photo-led/charcoal
+backgrounds, restrained honeycomb and brand colours only in text/small accents.
+Four existing source workbenches saved/read back headlessly; no desktop takeover.
+DP04's actual heading contrast failure was corrected with matched source-preserving
+light control on base/cap; original cap alpha retained. No generative photo edit.
+
+Official `DAHEfeuQzP4` remains102pages; all98other IDs/order preserved, including
+photo posts and protected/staff work. Current40–43 IDs: DP01`PBmNQ8vPYLNQVCX0`,
+DP02`PB6P34HTGg2wPGPH`, DP03`PBTBdbgn3ZgmMcdj`, DP04`PBhYTQBSt8MDhc02`.
+Consumed plan must never be replayed. Master native editing still rejects102pages.
+Page-index thumbnails showed old R4 colours, so actual native content was checked
+via disposable four-page copy`DAHbEAm7hbs`, marked TEMP QA ONLY / NOT PRODUCTION.
+All27live text/21media records and geometry match savedR5; four480x600 native
+renders match exactly;27text/fourlogo64px inset checks pass. QA deletion unsupported;
+retain labelled artefact, never make it a second official file. No HD claim.
+
+CG Dynamics exact-client feedback update`b6e113f5-39e0-457d-8900-c38854b7d5da`
+recorded/read back; remains unreviewed, guide unchanged, no client approval inferred.
+Brand Pack/skill/private selectors now distinguish background roles and currentR5
+from supersededR4. Local Claude send packet explicitly held; no new WhatsApp send,
+tag or signature. New real HD export/inspection, current social/approval coverage,
+human creative approval and authoritative January order remain open. Normal company
+ChatGPT end-to-end remains unverified. Internal OneDrive R5 recovery ZIP uploaded,
+exact name/39,129,408-byte metadata read back; local117-entry CRC/SHA checked,
+remoteSHA not claimed, sharing unchanged. No originals/fonts/credentials/signed URLs.
+R0; no runtime/production code, deployment, migration or dependency change. Existing
+#948/draft#956 lane only; Nolan/Picasso processes untouched. See
+`docs/ai-workforce/graphic-designer/wiseman-january-2027/CHARCOAL-FEEDBACK-2026-11-16.md`.
+
+## 15November — Browser/Chrome bundle restoration; host reload still unverified
+
+Used the running desktop app's bundled CLI to reinstall the already-enabled
+`browser@openai-bundled` and `chrome@openai-bundled`, version26.1111.21308.
+Both previously empty skills directories are now restored. Supported bootstrap
+still returns `Trusted RPC service is not configured: browser`; this does not
+prove a Chrome-extension fault. Official app-server documentation provides
+`config/mcpServer/reload`, but this chat exposes no callable GUI reload endpoint;
+the public managed-daemon control socket is not reachable. No private transport,
+native-host repair, auth/token replay or policy bypass attempted.
+
+The next isolated-host recovery test is a controlled Codex restart, not a proven
+fix. It has NOT been executed because three other chats were active and owner
+instructions require preserving other lanes. Private repair checkpoint retained.
+Personal Desktop Commander pairing/startup unchanged. Four current R4 HD exports,
+WhatsApp messages and Amonique tag remain outstanding; Claude handover still owns
+delivery until receipt/coordination is reconciled. No production change or spend.
+
+## 15November — Desktop Commander npm installer failure repaired locally
+
+Owner supplied real npm Invalid Version error from official Windows remote launcher.
+Log showed Arborist deduplication failure upgrading old cached0.2.46 tree to0.3.3.
+After path containment/reparse/process-use checks, preserved only that NPX directory
+in a quarantine folder; no cache deletion or broad cleanup. Clean0.3.3 CLI resolves
+successfully; exact original @latest remote command plus --help passes from
+C:\Windows\System32, exit0. Help exits before pairing; no duplicate device launched.
+Personal pinned0.3.1 runtime, saved pairing and running automatic startup unchanged.
+No company connection repair claimed: connector still authenticates to a different
+account and its registered MSI remains offline. Browser trusted service still absent;
+new R4 HD exports/messages remain outstanding, Claude delivery handover retained.
+Private local repair receipt retained. R0; no production dependency/deployment,
+Nolan/Picasso change, security setting or new account/authorization.
+
+## 15November — four-poster delivery handed to MSI Claude by owner
+
+Owner requested a local handover for MSI Claude to export/send the four revised
+Wiseman R4 posters with exact captions, then mention Amonique. The actual Desktop
+now contains `CLAUDE - SEND WISEMAN POSTERS.txt` and the dated handover folder with
+four canonical caption files/hashes, current source/master IDs,480x600 reference
+previews explicitly marked NOT HD, empty HD export directory and pending receipt.
+**New R4 HD files remain unexported; nothing sent/tagged.** Claude has delivery-only
+ownership; originating Codex must not send concurrently. Same #948/#956 development
+lane remains; no new agent/branch, artwork, deployment or permissions changed.
+Current private pointer records the handover owner/path and pending export/send.
+
+## 15November — Browser service root cause confirmed; current four still unsent
+
+Owner again authorised four revised Wiseman HD+caption messages to CG Picasso
+Approvals, then Amonique tag, no signatures. Supported Browser bootstrap and the
+owner-requested retry both return `Trusted RPC service is not configured: browser`.
+Chrome is running; documented extension diagnostics show enabled installation;
+native-host manifest/registry checks pass. Non-secret local profile metadata
+identifies the existing company account; no browser session/account sign-in was
+claimed verified. Do not blame a disconnected/disabled extension, change permissions,
+repair native host or bypass runtime policy with other browser automation. This
+chat needs the supported Browser service provisioned before export/delivery.
+
+R4 working recovery ZIP uploaded to the existing internal OneDrive helper and
+exact name/4,900,835-byte metadata read back, sharing unchanged. Local65-entry ZIP
+CRC/SHA checked; remote SHA not claimed. Original libraries/fonts/credentials absent.
+Current four official R4 pages and source drafts remain saved; prior HD exports
+remain deselected. No send/tag, deployment, runtime code or new spend. User send
+authority persists; no fresh send approval is required once access is restored.
+
+## 15November — automotive R4 saved; owner accepts previews; HD delivery blocked
+
+Owner retained the concepts but rejected flat/dated execution, hard offset font
+shadows and the childish steering motif. All four existing poster source drafts
+were refined and committed; no new official file. Removed four duplicate text
+shadows, added original independent tyre-tread/route/brake engineering graphics,
+and one separate built-in-generated generic photorealistic steering wheel. No client
+photo/logo/person was generated. Exact original photographs, logos, live copy and
+allocated footer-r3 captions are preserved. Four photo posts unchanged.
+
+Actual saved480x600 Canva outputs inspected. Fresh readback confirms27live text,
+21media records and all12protected photo/logo/registered-layer records unchanged;
+27text frames and4reviewed logos pass64px insets. Owner said perfect and authorised
+HD+caption delivery of only these four, then an Amonique tag. This is owner preview
+acceptance, not a claim that the new full-resolution exports have been inspected.
+
+After fresh exact owner approval, the four official copies at40–43 were replaced.
+All98other IDs/order, including F01–F04, are preserved; master remains102pages.
+The combined five-operation merge failed INVALID_ARGUMENT without side effects.
+The separately approved delete timed out but full98-ID readback proved completion;
+it was not replayed. Four individual insertions succeeded. New current master IDs:
+DP01 `PB8Jj94kZ5d19Xhq`, DP02 `PBrfWh0vpT9XHfPs`,
+DP03 `PBsdXDCfCsJzF829`, DP04 `PBYNFX2VmFY7GnBY`.
+Four original photo posts remain44–47; protected Drafts/Posted remain48/49.
+
+**No sends or Amonique tag.** Supported local window enumeration worked, but the
+Computer Use policy stopped browser observation because the current Chrome URL
+could not be determined confidently enough to enforce policy. No subsequent UI
+input, bypass or alternate-browser automation attempted. This is a URL-policy
+block, not a laptop outage or a request for broader permissions. Canva connector
+editing remains supported. Final HD export/WhatsApp access still needs a supported
+route; do not upscale the480x600 previews and call them HD. Prior R2 HD files are
+history and explicitly deselected. Current private pointer selects
+`delivery-manifest-r4-held.json`; source drafts/current captions remain safe.
+R0 additional spend; one built-in generation call, no paid API or allowance purchase.
+No new data append, deployment, SQL/migration, schedule/task write or Nolan/Picasso
+change in this refinement; the earlier authorised unreviewed direction note remains.
+
+## Earlier15November — approved Wiseman replacement complete; caption contract guard added
+
+Same #948/draft#956 lane/worktree. Owner approved the exact nine-call plan. Before
+writing, fresh IDs revealed one additional January page at39, so only the eight
+owned rejected copies at40–47 were deleted and replaced. Current102-page master
+DAHEfeuQzP4 preserves all94other IDs/order, including original93 and the additional
+pagePBcymBNbhmR8JW6X. Protected Drafts/Posted remain48/49. New owned IDs are in
+the Wiseman Brand Pack; old page numbers must not authorise edits. Approved plan
+is marked executed/do-not-replay. Source workbenches/recovery remain retained.
+
+Actual verification: native full layer records for four photo posts plus DP04 at99
+pages and DP03 at100pages; read-only transactions cancelled. All four posters' live
+text extracted from final master and all eight actual400x500 transferred previews
+inspected against source HD. Final102-page editing request explicitly rejected;
+no full-resolution master export claimed. Source2160x2700 exports/media unchanged.
+New January page received a seven-source reuse check:0matches/0errors, bounded
+evidence. Its month/package assignment is unknown; not counted as a new batch slot.
+
+Fresh exact-client task_type=caption packet requires HQ phone+website; former
+website-only captions did not meet it. Official contact page cross-check completed.
+Eight footer-only R3 revisions pass transport+new exact-client footer guard; bodies,
+hashtags and image hashes unchanged. New CLI fails wrong-client/effective scope,
+missing/ambiguous/unready contracts and duplicate/misplaced footers.37focused JS
+checks pass. January scheduled-date read still0rows/has_more=false; undated work
+excluded. No fabricated dates or deliverable IDs. Data impact: one owner-authorised,
+append-only exact-client content-direction note8c8ca9a8-1191-429d-ac79-c5aa43585ec1,
+read back through get_client_context, review_state=unreviewed. Guidev1 unchanged;
+no meeting, task, schedule rewrite or direct production SQL/migration.
+
+R2 asset backup remains99,864,838bytes; current53-entry R3 transfer/caption patch
+1,611,173bytes uploaded to existing internal OneDrive helper, exact item/name/size
+read back, sharing unchanged. A canonical Graph item fetch through the existing
+OneDrive connector now privately retrieves actual raw bytes: R3 downloaded SHA256
+matches the uploaded ZIP and CRC passes; one selected7,476,556-byte original also
+matches its prior exact SHA256. Browser-facing URL403 was not a source-access
+verdict. Recipe saved in the designer skill; no public links or auth changes.
+R2's large asset pack remains metadata-only remotely verified. This clears selected
+source retrieval without browser control, not company local execution/WhatsApp.
+Current private pointerCONTINUE-CURRENT.json selects
+delivery-manifest-r3.json; prior caption versions remain historical, not current.
+
+**No Wiseman sends.** Browser-control tools are not exposed in this resumed chat;
+plugin discovery found no matching WhatsApp connector. Prior active-elsewhere
+failure is historical, not a newly observed laptop outage. Desktop Commander
+company connection lists devices offline, while local worker/startup task runs
+with a different saved Gmail pairing. User-requested personal autostart already
+enabled/running with mutex/fallback; no settings, credentials or pairing changed.
+Do not overwrite it or report the laptop off. Company remote execution and normal
+company-ChatGPT end-to-end remain unverified pending authorised matching pairing.
+Human creative/source-cycle review, latest approval history, master HD export and
+authoritative January posting order remain gates. No portal finals/publication,
+new hosting/dependency/spend, deployment or Nolan/Picasso changes. Control Centre
+exact edit target unavailable; no guessed tracker row.
+Internal review delivery remains authorised; access/history block it. Human
+acceptance and verified posting order gate client/GDA release. Current Node24.16.0
+checks:37focused JS tests, month-plan, skill validator and TypeScript/Vite7.3.6
+build pass; existing Browserslist/chunk warnings unchanged.
+
+## Earlier15November — Wiseman eight rebuilt; HD checked, delivery held
+
+Same #948/draft#956 worktree/owner, no competing agent. All four poster revisions
+and four replacement photo posts are saved natively; all eight actual2160x2700
+exports inspected. First-pass art remains rejected/do-not-send. Current IDs and
+changes are in the Wiseman README/proposal. Native Impact/Mokoto picker evidence
+is verified; portable local font coverage and normal-company-ChatGPT end-to-end
+are not. Production blocks remain explicit, not silently cleared.
+
+Five full originals completed4,185 comparisons against837 retained artworks;
+four flags were visually different photos with shared background/equipment.
+Raw findings retained, thresholds unchanged, no biometric matching. DP03/F03 share
+an EXIF capture date: possible shoot/day overlap stays a human-review flag. Bounded
+386Canva/442published-cover/9queued evidence is not global non-use or taste approval.
+
+**No Wiseman sends.** Latest WhatsApp refresh is blocked: old company tab says
+active elsewhere, active-window focus/read fails, another tab reports debugger
+unattached. Do not force Use here, declare the laptop offline or send concurrently.
+Some Canva save/read calls timed out; actual fresh editor/HD proved DP03/F03 saved
+corrections, not blind retries. F04 folder-move readback remains unresolved. Official
+101-page master still contains old owned eight in In Progress; all93 original pages
+remain untouched. No protected-history deletion or new official master.
+
+Earlier9,070,411-byte DP04 OneDrive backup was uploaded/read back. New108-entry
+all-eight99,864,838-byte recovery ZIP is CRC-checked locally and uploaded to the
+existing internal helper; exact item/name/size read back, sharing unchanged. This
+is metadata verification, not remote SHA256 comparison. Eight clean caption guards pass; caption/photo pairs
+staged but held. Human approval, latest-history refresh, supported official-file
+replacement and authoritative January schedule remain gates. R0 new spend; no portal
+finals, client publication, production data/deployment or Nolan/Picasso code changes.
+Google Control Centre exact edit target remains unavailable; do not invent a row.
+Current TypeScript/Vite7.3.6 build passes with2GB Node heap; existing Browserslist/
+chunk warnings unchanged. Revised month-plan validation and skill validation pass
+with production blocks retained. Six safe documentation/plan files changed; private
+media/fonts/model/credentials remain outside Git.
+
+## 14November — Wiseman first eight rejected; service-specific rebuild active
+
+Same #948/draft#956 branch/worktree. Owner rejected the first eight candidates after
+the HD grid, particularly all4 photo posts, awkward subjects, flat yellow DP02,
+wide type leading, repetitive footers/logo placement and DP04's vague service copy.
+**No Wiseman artwork sent. All first-pass versions are do-not-send.** Technical
+passes/source audit are not creative approval. Owner explicitly expands Group photo
+sources to suitable Supa Quick, Wise Ride, Midas and Dunlop Zone; Hi-Q taken down,
+excluded despite the older website listing. Separate package quantities stay separate.
+
+Before rejection, exact owner-approved eight inserts added only owned In Progress
+pages39–46 to officialDAHEfeuQzP4, preserving all93 prior IDs/order; Drafts/Posted
+dividers now47/48. Actual native editing then rejected101-page master; no transaction
+opened. Retain source workbenches pending a supported amendment/transfer route. No
+silent protected-page deletion or new official client master. Transferred HD readback
+is not complete and the rejected set must not be delivered.
+
+New DP04 rebuild proofDAHa640Ndpc/pagePBy3kczyp68tqm9B uses selected hash-verified
+Supa Quick October original3Q7A0701.JPG, actual brake/hub work, exact existing approved
+monochrome logo,9 live type records including native Mokoto-looking service type,
+6 independent photo/mask/graphic/logo records. Actual native preview inspected and
+fit and leading corrected; actual font picker/final amended HD/human approval still
+pending. Source against442 published covers +9 queued artworks +386 Canva history
+pages:0 supported matches,0 decode errors. Others still need rebuilding. No normal-company-ChatGPT execution acceptance.
+
+Caption transport guard7new tests pass;26focused JavaScript checks pass. Earlier18
+Python checks remain unchanged. Current TypeScript/Vite7.3.6 build passes with a2GB
+Node heap; existing Browserslist/chunk warnings remain. Private
+source/media/fonts/model not committed. An internal OneDrive working folder exists,
+but backup upload has not occurred. R0 incremental spend; no deployment, production
+data, portal final release, schedule or client publication. Nolan/Picasso untouched.
+
+## 14November18:44 — Wiseman January active; offline cutout and native amendment proof
+
+Same authorised #948/draft#956 branch/worktree, no new agent. Owner confirmed
+**Wiseman Group January2027,4designed+4photo**; separate franchise packages excluded.
+Exact guide/kit/logo/current public contacts reconciled; no January schedule rows
+or immutable deliverable IDs assigned. Stopped bulk hydration remains stopped.
+
+Actual progress: DP01 R2 native13-layer proof with2160x2700 export/clean hair join;
+DP04 native14-layer school-return proof with a separate generic decorative bag,
+exact logo and live text. DP04 support-line-only test retains every element ID,
+changes only the target record and0 preview pixels outside its frame; test canceled,
+original wording retained. Four genuine Group-office photo candidates saved as
+native TEMP workbenches with privacy/texture preserved; their HD/cycle/history
+gates remain open. DP02/DP03 are unfinished. **No Wiseman WhatsApp sends, official
+master insertion, portal final release, client publication or scheduling.**
+
+Reuse audit caught an exact old portrait in two historical posters; excluded and
+superseded. Another machine flag was visibly a different building photo; retain
+both finding and actual visual dismissal.386Canva+12social artworks retained;
+uncaptioned/older approval coverage still limited. No global unused certification
+or biometric identity database. Keep all protected master93pages untouched.
+
+New local-only pinned U2-Net helper uses existing ONNX Runtime1.31.0 CPU,
+Apache2 checkpoint retained privately,0.590s sample inference/1.934s command,
+prepared RGB equality true. Seven invariants pass; total37focused JS/Python checks
+and TypeScript/Vite7.3.6 build pass. No new production dependency, paid API, hosting
+or service. Model/photos/fonts stay outside Git. R0 incremental cost. Existing
+Canva background-removal connector also works; preview proof is not full-resolution
+RGB equality or normal-company-ChatGPT integration acceptance.
+
+Central Canvas pair remains delivered16:09/16:12; both messages later show thumbs-up
+reactions. Do not resend or infer client approval/schedule authority from reactions.
+Nolan/Picasso production code unchanged. Control Centre exact target unavailable;
+no guessed write. Continue current Wiseman designs and actual HD/history checks.
+See `docs/ai-workforce/graphic-designer/wiseman-january-2027/README.md`.
+
+## 14November16:12 — Central review pair delivered; Wiseman next
+
+Same #948/draft#956 lane. Both owner-revised Central Canvas posters now live as
+editable working pages in official master DAGGISDPrDU: DP03/page54 stable ID
+PBCvnPgF5fHf2KBV; DP02/page55 ID PBR2M5RkvMT8wP46. Protected dividers/history and
+existing human New Year preserved. Actual selected-page2160x2700 exports checked;
+DP03 pixel-identical after transfer, new DP02 photo/source joins inspected, all
+important native text/logo frames pass64px.
+
+Actual verified Nolan/company-Chrome delivery to CG Picasso Approvals: DP02 at
+16:09 and DP03 at16:12, each HD2048x2560 with exact clean caption, no signature.
+Unique message IDs, actual image dimensions/captions and Delivered state retained
+privately in month-candidates-v2/send-plan.json. DO NOT RESEND. The16:00 PNG
+explicitly failed and must NEVER be retried; JPEG fallback succeeded. No causal
+claim that PNG caused the error. Official source PNGs retained. No posts deleted.
+
+Internal draft delivery is not client publication, formal creative approval,
+confirmed January package or schedule. Bounded source/history checks and same-shoot
+review flag remain recorded. R0, no production/deploy/hosting/portal final/Nolan
+video/Picasso source change. Latest proof: central-canvas-january-2027/README.md.
+
+Wiseman Group now next: exact4designed+4photo for Group itself, franchise packages
+excluded. Confirm month/guide/kit/contact conflict, recover old unapproved workbench,
+select-first and do NOT restart stopped bulk hydration. Production queue records
+owner scope. No new branch/agent. Control Centre exact target unavailable.
+
+## 14November — Central official revisions; delivery recovery; Wiseman queued
+
+Same #948/draft#956 lane, no new agent/branch. Owner required stronger Central
+execution, a better DP02 photo and lower DP03 anniversary-logo placement.
+Two distinct source-faithful layered drafts are now in official master
+**DAGGISDPrDU** after the exact owner-approved insert. Current226pages:
+**DP03=PBCvnPgF5fHf2KBV/page54**, **DP02=PBR2M5RkvMT8wP46/page55**.
+Protected Drafts/Posted IDs retain relative order at56/57; existing human photo
+pages51/52 and New Year candidate unchanged. Merge reversed source page order;
+index thumbnails initially returned stale dividers. Actual live pages, editable
+records and selected-page HD export verified instead.
+
+DP02 replacement uses the exact camera JPEG contained in3Q7A6366.CR3: real
+two-person job check beside the tarp, source proportions and skin retained.
+DP03 photo/foreground and accepted type remain intact; official2160x2700 export
+is pixel-identical to its accepted R2 source export. Every important text/logo
+frame passes64px. A browser export-field race pasted2 onto owned DP03; the exact
+paste was undone and removal verified before export. No protected page targeted.
+
+Reuse evidence:222 retained Canva previews, two additional live human pages,
+six unique recent social artworks and relevant actual approval history. New
+source has0 supported matches/0 decode errors; same source shoot as DP03 remains
+an explicit review flag, not a global-unused/person-identity claim. No biometrics.
+January package/dates remain unverified; baseline3DP/4photo/1video only.
+
+Fresh inventory resolves swapped numeric browser IDs: company
+cgproductionhouse.com/original extension, actual site profile **Nolan** works.
+DP02 HD photo+exact clean caption was submitted to **CG Picasso Approvals**, but
+WhatsApp explicitly failed it, including one retry of the same failed message.
+Private receipt preserves its ID/state; session recovery in progress. **No Central
+delivery-success claim yet; DP03 unsent.** Do not duplicate the failed message.
+Piek13 already delivered to Graphic Design Approvals earlier; do not resend.
+
+Wiseman Group is next after Central, **four posters+four photo posts for Group
+itself**, franchise packages excluded. Verify month/package/guide/kit/contact
+conflict, recover prior unapproved workbench, select originals before download;
+**do not restart stopped bulk hydration**.
+[Production queue](../ai-workforce/graphic-designer/PRODUCTION-QUEUE.md).
+R0, no production data/deploy/hosting/portal final/client release. Nolan video and
+Picasso source unchanged. Control Centre exact target unavailable; no guessed write.
+
+## 14 November14:15 — Piek13 sent; Central Canvas native proof saved
+
+Same #948/#955/draft#956 lane. On the owner's renewed direct instruction, sent
+all13 current Piek posters freshly through verified Nolan/company Chrome to
+**GRAPHIC DESIGN APPROVALS**, one HD photo plus its exact signature-free caption
+per message. Serialized saved creative sequence: DP01, DP04, DP11, DP07, DP05,
+DP10, DP02, DP08, DP06, DP09, latest DP03 R9, DP12, EXTRA01. Every outgoing row,
+unique message ID, completed HD image/badge and exact caption witnessed privately.
+Do not resend this set. Latest private `send-plan-owner-directed.json` supersedes
+earlier held registries. Transmission does not create posting dates, change
+package/schedule rows or certify every design approved. Actual January posting
+order remains unverified; owner directed the saved creative sequence now.
+
+Owner explicitly requires Central Canvas's20-year logo, superseding the earlier
+anniversary-suitability question. Exact OneDrive logo, kit typography and stronger
+source-preserving photo finish form a **saved native Canva one-page working proof**,
+`DAHa40G8t38`, in existing CENTRAL CANVAS folder `FAFGzOsSrxQ`. Six live text/nine
+separate image records read back after commit. Actual Canva2160x2700 export and
+arm/type detail inspected. CTA-only test preserves every other exposed native
+record; zero preview pixels change outside CTA and restoration is pixel-identical.
+This is an internal technical proof with a same-shoot reuse hold, not a cleared
+January final or PSD. Official222-page master, human New Year candidate and all
+protected history remain untouched. A copied logo inspection is clearly TEMP
+REFERENCE ONLY, not a second official file. Master connector limit remains.
+
+Four decorative graphics initially imported opaque white mattes; corrected before
+commit. New opt-in headless transparent PNG rendering is exercised on actual alpha
+pixels; default rendering unchanged. No Central send, portal final, client release,
+schedule/production/deployment or spend change. Nolan Studio PC November lapa R07
+untouched. Control Centre exact target unavailable; no guessed write. Next: clear
+fresh sources/history and January allocations, then an authorised bounded master
+operation. Do not force Piek's incompatible lane guard.
+
+## 14 November13:15 — Central Canvas local layered proof; release holds retained
+
+Same #948/draft#956 lane. Implemented small local Poster Studio support for exact
+job-local font embedding with required licence notices/hash provenance and1..4x
+PNG scaling; no new dependency, account, hosted app or OS font installation.
+Central private study has17 layers/6 live text, exact real photo/standard white
+logo, independent source mask/light fields and actual2160x2700 PNGs. CTA-only
+amendment preserves16 other layers/resource hashes and changes zero pixels outside
+the CTA. Embedded Bebas Neue Regular raster ink bounds match the exact licensed
+face within1px. Actual full/HD inspection caught and corrected mask/lighting joins
+and face-obscuring type; no human creative approval claim.
+
+This remains an unreleased study, **not a fresh-source January final**: alternate
+inspection image is closely related to a used frame; same-shoot/social/approval
+coverage is incomplete. Six more source samples hash-match OneDrive; second222
+preview pass flags three further candidates. Live website services and approved
+caption-context footer retrieved. Actual dam-liner approval artwork and one unique
+social lapa artwork retained; timed-out social batch yielded duplicate downloads,
+not complete coverage. No WhatsApp send/forward/reply, Canva edit, portal final,
+schedule/production/data/deployment or spend change. Nolan Studio PC untouched.
+
+Fresh Piek client updates and available group searches still expose no January
+order. Verified13-item forwarding registry remains unsubmitted; December review
+posts are not January schedule authority. Owner clarification is still pending.
+Central's222-page native editing limit, source clearance and January allocations
+remain open. [Proof and limits](../ai-workforce/graphic-designer/central-canvas-january-2027/README.md).
+No new branch/agent. Control Centre exact target unavailable; no guessed write.
+
+## 14 November12:37 — Piek ordered handoff prepared; Central Canvas preflight
+
+Owner now asks for Piek to Graphic Design Approvals in posting order, then Central
+Canvas January. Same #948/#955/draft#956 lane, no duplicate branch or agent. Latest
+DP03 R9 has a positive reaction. A private registry resolves all13 current artwork
+versions, unchanged signature-free captions and original unique send witnesses;
+every current file/hash checked. **No forward submitted.** Fresh January Piek
+dated schedule query returns0rows/errornull; the saved12-item windows are proposals,
+and the extra wash lacks a slot. Exact order/proposal choice is pending owner
+clarification. No guessed dates or claims that all creative is formally approved.
+
+Central Canvas exact-client preflight started read-only while the handoff waits.
+Current baseline is3DP/4photo/1video, January not confirmed; dated January query0rows
+does not exclude undated/legacy records. Exact Canva kit/fonts/palette inspected,
+canonical OneDrive folders identified;12 bounded source hashes match. Retained all
+222 master previews, compared all222 with0decode errors;4March source candidates
+flagged across4preview pages and visually checked. Reuse is not cleared. Existing
+human January New Year page35 preserved, not duplicated. Private3-slot proposal
+keeps that candidate and gates two practical service stories on actual source/facts.
+
+Native transaction on222-page master fails as unsupported; no transaction/content
+change. This is a connector limit, not Canva document capacity. Piek's lane guard
+also cannot represent Central Canvas's reversed working-header order; do not force
+it to pass. No second official file, desktop design takeover, send, portal final,
+client release, schedule/production/data/deployment or spend change. Nolan Studio
+PC November lapa R07 remains untouched. Exact Control Centre target unavailable;
+no guessed tracker write. [Central preflight](../ai-workforce/graphic-designer/central-canvas-january-2027/README.md).
+Next: confirmed Piek order for serialized internal forwarding; resolve Central's
+supported bounded native path and fresh sources before claiming a completed poster.
+
+## 14 November12:07 — owner-directed single DP03 review delivered
+
+After the incomplete reuse coverage was disclosed, owner explicitly said "Send
+it please". Sent only the prepared R9 DP03 through verified Nolan/company Chrome
+to CG Picasso Approvals as one HD photo with unchanged signature-free caption.
+Actual unique new message ID, HD badge, exact outgoing caption textContent,
+completed image and Delivered state witnessed privately. No concurrent send,
+duplicate, other-poster resend, generic reply or full-set forward. Preparation
+receipt retained historically; latest private delivery-plan-r9.json is current.
+
+This is an explicit owner-directed internal review exception, **not** reuse
+clearance, full creative approval, client/portal release or schedule authority.
+Reuse gaps remain documented. Graphic Design Approvals forwarding still needs
+all current posters approved and authoritative January posting order. No artwork,
+production/data/deployment, other agent lane or spend change in this send step.
+
+## 14 November — annotated DP03 prepared; reuse and delivery held
+
+Existing #948/#955/draft#956 lane only. Followed owner's actual10:11–10:12
+annotation on DP03/page79: existing cup enlarged lower-right, genuinely below
+the original blue gradient; obsolete countertop shadow removed. Actual2160×2700
+export/detail inspected, native readback verifies84 other pages and all85 page
+IDs/order/notes/text unchanged. Photo/gradient/logo exact;64px frame gate passes.
+Private clean PNG is pixel-identical to raw export, allocated caption unchanged,
+no signature. Prepared file and hash/QA/handoff receipt for Nolan here; **not sent**.
+
+Mandatory pre-send reuse check has retained actual35Piek Instagram post images,
+revalidated352Canva history preview hashes,9recent Piek approval captions and
+3distinct visually verified approval artworks. Bounded comparisons show no
+supported exact source match; older/carousel/video/Facebook/full approval coverage
+and same-shoot/person uncertainty remain unresolved. WhatsApp viewer text ran
+ahead of screenshots:4captures were only3distinct images, explicitly corrected.
+Do not certify unused or human-approved. **Hold internal draft delivery.**
+
+No WhatsApp attachment/send/reply/forward, portal final, client publication,
+schedule/production/deployment or new spend. Nolan coordinates any later serialized
+delivery only after clearance; no competing delivery lane. Full-set forwarding
+still requires all posts approved and authoritative January posting order.
+[Targeted evidence](../ai-workforce/graphic-designer/piek-january-2027/TARGETED-FEEDBACK-2026-11-13.md).
+Next: close bounded reuse gaps, then coordinate one DP03 review send. Normal
+company-ChatGPT create/amend/export and package/schedule acceptance remain open.
+Exact Control Centre target unavailable; no guessed tracker write.
+
+## 14 November — single College Brew contact revision sent
+
+Existing #948/#955/draft #956 lane only. Latest review rejected the R7.1 cup as
+still floating; school revision has a positive reaction. Changed only College
+Brew DP03/page 79: lower-angle included ceramic stock cup physically on the real
+wooden counter, with independent aligned contact shadow. Actual client photo,
+lighting field, live copy and exact mark retained; all 85 IDs/order/notes and 84
+non-target pages unchanged. Fresh saved readback and 64px frame checks pass.
+
+Caught inherited media-crop corruption and a front-edge placement issue before
+sending. Inspected the final actual 2160×2700 export/contact close-up; only one
+HD photo+clean-caption message sent through Nolan to CG Picasso Approvals.
+Outgoing HD badge, exact caption/new ID and Sent state witnessed; not read/creative
+approval. No signature, generic reply, unchanged-poster resend or deletion. R0,
+no new subscriptions, production/portal/client release, deployment or other lane
+changes. See [targeted evidence](../ai-workforce/graphic-designer/piek-january-2027/TARGETED-FEEDBACK-2026-11-13.md).
+Next: new specific review only; normal-company-ChatGPT create/amend/true-export
+and package/schedule acceptance remain open. Exact Control Centre target is still
+unavailable; no guessed tracker write.
+
+## 13 November afternoon — targeted Piek review amendments delivered
+
+Existing #948/#955/draft #956 only. Five new review notes mapped to the exact
+posters; only66/79/80/82/83 changed, all85 page identities/order and80 non-target
+pages retained. Five actual HD photo+clean-caption messages delivered through
+Nolan to CG Picasso Approvals. Three live follow-ups then corrected the floating
+cup, incomplete nozzle context and insufficient school imagery; only79/80/82
+changed and three further HD messages delivered. Eight sends across five affected
+posters, no full-set resend, no agent signatures or generic replies. Current
+five-message mapping and older receipts remain private/versioned. Positive
+reactions on individual posters are not full creative approval.
+
+Owner explicitly approved generic licensed ceramic-cup and school-uniform stock;
+both showed Pro included with existing Canva Teams, R0 incremental cost. Actual
+client source photographs, exact marks and live type retained. Fresh saved-state
+and native margin checks pass45text/23reviewed marks at64px; school mark IDs
+rebound after exact-asset restacking. Footer occlusion caught before saving;
+functional source context and contact/edge grounding added to the designer skill.
+See [targeted evidence](../ai-workforce/graphic-designer/piek-january-2027/TARGETED-FEEDBACK-2026-11-13.md).
+No other agent lane, client release, portal final, production/deployment, dependency
+or spend change. Company-ChatGPT create/amend/true-export and package/schedule
+acceptance remain open. Exact Control Centre target unavailable; no guessed write.
+Next: specific new review amendments only; no unchanged full-set resend.
+
+## 13 November — Piek feedback revised and clean-caption HD review delivered
+
+Existing #948/#955/draft #956 only; main reconciled, no competing lane. All15
+original review notes captured across successive virtualised WhatsApp viewports;
+two subsequent owner notes requested preserving the New Year year/canopy overlap.
+Ten creative revisions and13-page margin pass saved. Official Canva DAHaD4mJnGY
+has85 pages, current selection43,63,66-69,76-77,79-83; Drafts/Posted84/85 protected,
+all72 non-target pages intact. Then moved only live year80px to restore accepted
+depth while keeping the photo-gap fix. Fresh saved readback: exactly one text
+position changed, all other native records retained. Latest frame checks:
+45text/23reviewed logos,64px inset,0findings; this is not creative approval.
+
+Owner explicitly authorised internal delivery through Nolan to CG Picasso
+Approvals, then **prohibited agent signatures in forwardable poster captions**.
+All13 current true-HD2160x2700 exports inspected;13 individual HD photo+caption
+messages verified by unique IDs, actual HD badges and Sent/Delivered state.
+Eight previously signed captions edited and exactly verified clean. One
+accidental standard-quality College Brew duplicate deleted for everyone after
+owner confirmation; HD copy remains. The distinct earlier New Year revision is
+review history. No generic group reply/introduction or client publication.
+
+Company Chrome retained; Canva site account must be m.productions.cg@gmail.com,
+not the browser-profile info account. Existing Google sign-in required owner
+completion; no passwords/reset/new permissions. Export events/choosers and caption
+contenteditable were unreliable; private receipts prevented blind Send retries.
+See [evidence and reusable lessons](../ai-workforce/graphic-designer/piek-january-2027/FEEDBACK-REWORK-2026-11-13.md).
+Await actual review feedback; no repeated sends or approval inferred. No portal
+finals, production DB/service/deployment, new dependencies/spend or Nolan/Picasso
+source changes. January package/naming/IDs and ordinary company-ChatGPT
+create/amend/true-export acceptance remain open. Exact Control Centre target
+unavailable; no guessed tracker write.
+
 ## 11 November — existing-film registration repair, local candidate only
 
 CA asked MSI to finish all possible video tracking reconciliation. Sixteen
@@ -6335,6 +6980,72 @@ Post-launch / next milestone candidates, re-read live issue before acting:
 - #220 Canva/publishing
 - #396 Client Portal Library/Brand Hub
 - #404 CG Hours client bridge
+
+### #948 Graphic Designer / Poster Studio — isolated development lane
+
+CA explicitly started the Graphic Designer takeover with Red Oak as the first pilot. Issue #948 is the master authority. Work is isolated on `codex/graphic-designer-948`; it must not touch Nolan (#871/#874), Picasso (#878), their PRs, production services, client publication or protected Client Portal Library writes.
+
+Owner update 5 November: issue #955 makes Piek Group January 2027 the first complete monthly acceptance pilot. Red Oak remains a technical rapid-amendment fixture, but owner review rejected its visual direction as off-brand; do not present it as a creative success or use it as a style template. Routine design must run through headless connectors/local commands, not desktop takeover.
+
+Verified local proof state on 2026-11-05:
+
+- real Red Oak OneDrive photography and exact logo originals are staged only under the private local proof root, outside Git;
+- a deterministic scene-graph renderer now emits editable SVG, PNG review, asset/layer/output hashes and an amendment receipt;
+- the v1/v2 Red Oak proof records 15 layers and two exact source assets; changing the fictional price modifies only `offer-price`, leaving 14 layers unchanged;
+- the engine now embeds exact image bytes in the portable SVG after a real Affinity import exposed broken external file links; deterministic tests reject `file://` image references and both v1/v2 manifests retain identical photo/logo hashes;
+- Affinity 3.3.1 opened the complete regenerated SVG and saved native `.af` v1/v2 documents locally. This verifies the no-cost editable fallback but is not a PSD claim;
+- exact Canva typography was verified as `Zuume Rough Bold` (title) and `Rustic Printed Stamp` (subtitle), but neither is locally installed or available through the checked OneDrive/Adobe Fonts paths, so the present proof discloses mechanical substitutes and is not yet brand-exact typography;
+- Photoshop 2026 and UXP Developer Tools are installed; a narrow user-selected-job-folder `.psjs` renderer is prepared, but Photoshop currently stops at an Adobe device-authentication dialog. Real PSD support remains unverified until authorised interactive sign-in plus an actual Photoshop round trip and Layers-panel inspection pass;
+- no deployment, production migration, hosted app, purchase, paid API call, public upload or client publication occurred.
+
+Piek January implementation on the same branch now includes:
+
+- read-only confirmation that the latest package baseline remains 12 design posters + 4 professional videos, while the January dated Client Schedule query returns zero rows; all 12 planning IDs remain provisional with null deliverable IDs;
+- four independently gated Brand Pack scopes for Piek Group, Engen, Sasol and Get Together with the exact Canva Brand Kit IDs verified and production blocked until exact logos/fonts/colours/reference annotations are complete;
+- a 12-row January proposal (three per scope), 12 distinct creative mechanisms, exact New Year/school-calendar facts and explicit source/fact/consent blockers;
+- a headless creative ledger with SHA-256, pHash, shoot, visible-person tag, product/service/branch/concept/headline/mechanism and publication-state checks. It rejects biometric vector fields and supports human as well as AI-created work;
+- a validated `.agents/skills/cg-graphic-designer/SKILL.md` reusable workflow. This is not proof of normal company ChatGPT invocation yet.
+
+The exact Google Control Centre write-back could not be grounded: connected Drive searches for `CG Control Centre`, `Control Centre` and `Supervisor 381` returned no accessible canonical tracker, matching the existing handover warning. No replacement sheet, guessed file or guessed cell write was made. GitHub #948, #381 and this handover carry the current receipts.
+
+5 November follow-up: exact four-scope Canva kit fonts/palettes are now recorded, and Canva/OneDrive connector reads have succeeded. A separate two-page Canva test copy (`DAHaDQgOO1M`) was created from master template pages 46/49; its native text, photo and logo elements were read successfully and the inspection transaction was cancelled without edits. This is a temporary test scaffold, not January artwork. Owner correction: Piek has ONE official client file (`DAGcXGWhDhI`). Normal new work may be edited directly in verified In Progress/Templates or To Be Approved lanes. The former blanket master-edit prohibition was an agent overrestriction and is superseded. The guard now permits registered new-work pages while checking their current lane; Drafts and Posted/Scheduled remain protected against edits/moves/deletes. Transfer useful test designs into the official file, verify layers, then remove the test copy. January has 12 proposed creative windows led by New Year, summer return travel and hospitality, with school-return content aligned to 13 January. A bounded private source audit inspected 15 exact OneDrive JPEGs; freshness, branch specificity and human creative approval remain unresolved. Full production, native PSD and a normal company ChatGPT creation/amend/export round trip remain unverified.
+
+Before merge advice, review the actual private preview and the draft PR, require human creative approval, and keep the font-licensing gap explicit. The intended company ChatGPT surface remains a future narrow CG Dynamics/local-bridge contract; it has not yet passed end-to-end normal-ChatGPT invocation and must not be described as live.
+
+Later 5 November creative proof: a real Get Together summer draft was built through Canva connector calls in the existing temporary copy, with locally corrected source photography, a separate original-photo foreground mask, live native typography and exact retained logo assets. Alternative compositions and alignment failures were kept internal. The connector retains crop state on image replacement; final foreground placement was measured against the final background and inserted with fixed canvas dimensions. A text-only amendment changed exactly one element while all photo/logo asset records stayed unchanged. All 352 historical page previews and copy ranges were checked for the selected source/candidate wording: no geometrically verified source match or exact phrase match was detected, with the usual preview/semantic limitations; this is not an unused-source guarantee. The new private source-history matcher has a controlled positive/negative test. Candidate is still unsaved pending the Canva connector's explicit preview approval, not client-approved or published. Inherited template presenter notes remain stale and must be replaced before any production handoff; the present connector exposes notes read-only. After approval and exact permitted merge, transfer useful work to the ONE official file and remove the temporary copy. Normal company ChatGPT creation/export acceptance and complete January production remain open.
+
+5 November saved-state follow-up: owner explicitly approved saving the Get Together summer candidate. Canva committed transaction `8042824266452258728` into temporary design `DAHaDQgOO1M`, page 2 (`PBchP5dl0NZ3cp1l`). A fresh read-only transaction verified final wording, three native text elements and four independent photo/logo elements, then was cancelled without changes. This supersedes the earlier unsaved status, not the outstanding production/notes/normal-ChatGPT gates. The authorised single-page transfer before Drafts failed with `NOT_PERMITTED — Page limit reached`; master still reports 352 pages versus Canva's documented maximum of 350. Working pages 24–49 contain existing artwork/reference boards; none was a safe blank destination. The To Be Approved header is verified as `PBz6Ds1Q01l3g6ty` (observed page 41) and now protected explicitly. The guard checks capacity before proposing a merge. Keep the saved temporary copy until an owner capacity decision enables a verified transfer. Do not silently archive/delete history, overwrite existing work or make another official file. R0; no desktop takeover, main-file mutation, scheduling, client publication, deployment or production migration.
+
+5 November owner capacity decision: a dated official Piek continuation is explicitly authorised, superseding the prior requirement to consolidate everything into the over-limit file. Created `DAHaD4mJnGY`, titled `PIEK GROUP OF COMPANIES | ACTIVE FROM 05 NOV 2026 | JAN 2027`, with 52 pages. Copied source pages 1–51 (brand/reference assets, all unfinished In Progress/To Be Approved work and empty Drafts/Posted dividers), then inserted the saved summer candidate at new page 50. No existing scheduled/posted artwork was copied or modified. The old 352-page `DAGcXGWhDhI` remains read-only for Amonique's existing scheduled/posted exports and anti-repetition history. Copied first-49-page text matches exactly after whitespace normalisation; summer candidate retains three native text elements and four separate images/logos with exact asset IDs/geometry. New header IDs and editable summer page ID are in the lane policy. Read-only verification transaction closed without edits. Merge API currently supports only one operation per call despite its array schema; the first multi-operation request was rejected without creating a design, and the two supported single-operation calls succeeded. Dynamics scheduled-date query 2026-11-01–2027-01-31 returned zero rows and excludes undated/legacy due-date-only work, so calendar cutoff is unresolved, not evidence of no scheduled posts. Temporary test design remains marked TEMP because connector design deletion is unavailable. No desktop takeover, publication, scheduling/data writes, production deployment or spend. Continue January in the new active file, not the old master or test copy.
+
+Subsequent execution: the new official continuation now has 53 pages after inserting a separate Engen proof in In Progress (page ID `PBFhjhnLG7KsvSkM`, observed index 41; To Be Approved 42, summer candidate 51, Drafts 52, Posted/Scheduled 53). It uses exact OneDrive Grape Valley source `3Q7A0483.JPG`, privately hash-verified and conservatively prepared, plus separate shade/native footer/logo/text layers. All 352 history previews decoded, with no verified source match; this is not an unused certificate. An isolated headline amendment changed only its target while all image records stayed identical; restored `HEADING HOME?`. **Engen candidate is unsaved pending owner preview approval**, open transaction `8413245340408441155`. Notes remain inherited/stale. Text resizing must specify width only; explicit height fails. SharePoint's OneDrive browser-link fetch returned serviceReadOnly/403, but fetching the same exact authorised item via its documented Graph item URL succeeded and local SHA-256 matched. This is a connector locator workaround, not a permission bypass. Update transaction state after owner review; do not claim committed artwork or normal-ChatGPT acceptance prematurely.
+
+5 November Engen save approval: owner replied `Save the Engen proof`. Transaction `8413245340408441155` committed successfully into active `DAHaD4mJnGY`, In Progress page `PBFhjhnLG7KsvSkM` (41). Fresh read-only transaction `3521210244763904770` verified final `HEADING HOME?`, all three text records and all four image/shade/footer/logo records exactly match pre-save state, then was cancelled without edits. This supersedes the preceding unsaved state. Both summer and Engen proofs are now saved in the active continuation. Presenter-note correction, complete January creative acceptance, actual schedule cutoff and normal company ChatGPT create/amend/export acceptance remain unresolved. No publication, scheduling or other production mutation occurred.
+
+5 November owner creative feedback on Engen: direction accepted positively, but photo finish too weak, actual sign should overlap lettering, footer not fully bled. Revised only registered page 41 from the original photo: documented tonal curve/local sign lift/colour/sharpening, independent exact-photo GrabCut foreground, live headline reposition and exact-blue bleed extension around transparent footer padding. Initial old-crop foreground was rejected after detecting a double edge; final background re-registration yielded 577/622 inliers, median 0.11 preview-pixel error. Complete bottom row is exact #134094, side-edge colour error at most one channel level in the 480×600 preview. Six independent image/overlay/logo layers and three live text layers remain; target wording and all non-target page text/image records match the pre-edit state. **New revision unsaved pending preview approval**, transaction `8646306621875119084`; earlier saved Engen version remains committed. Skill now requires visually evidenced finishing, final-crop mask alignment and rendered bleed checks. No desktop takeover, source reconstruction, publication, schedule write or spend.
+
+
+6 November current Graphic Designer receipt (supersedes all earlier unsaved counts): **12 January internal candidates are committed in the single active official Piek continuation `DAHaD4mJnGY`, now 63 pages**. In Progress 23, candidates 41–51 plus 61, To Be Approved 52, Drafts 62 and Posted/Scheduled 63. Exact current page IDs and proof receipts are versioned in `docs/ai-workforce/graphic-designer/piek-january-2027/production-evidence-2026-11-06.json`. The Engen depth/bleed revision is saved. Old `DAGcXGWhDhI` and staff/history pages remain untouched. Ten superseded agent-only scaffolds were replaced under exact scoped authority; all 101 non-target text and 169 image records matched. Completed scaffold receipts confer no further deletion authority.
+
+The actual new `canva-native-package.mjs` CLI privately generated the Sasol Langenhoven Park night replacement, with three live text / three image records and verified exact native-logo bindings; all other pages matched. The owner explicitly confirms Piek’s live website as current branch/service authority. Unverified burger provenance was rejected rather than guessed. Ten source-preserving contrast derivatives passed no-added-RGB-clipping assertions after an earlier trial failed internally. A further saved College Brew amendment removed a repeated pause concept; only two text records changed. A real 12-candidate ledger run (13 originals including a human-history reference) took 3.456 seconds, found no exact/pHash/headline/scope blockers, and retained branch, concept and same-shoot warnings plus unresolved people/venue provenance. This is not complete historical identity coverage, a 6,000-photo benchmark or human creative approval.
+
+Twelve signed caption drafts are staged privately. Owner authorises sending HD image + caption in one message to Picasso approvals through Nolan’s WhatsApp, but **no HD export, WhatsApp message or final portal artwork upload has happened**. Current Canva connector has editing/previews/import but no true export operation; local browser use reports disabled in Work settings even with Canva open, and no WhatsApp send connector exists. Owner has been asked to restore that connection; do not bypass it with desktop takeover, upscale previews or substitute a personal sender. Empty canonical portal folders `Graphic Design/2027/2027_01_JAN` were created under explicit owner storage authority, without file uploads, permission changes or fabricated Dynamics links. Actual staff export/page naming, January package/allocation/schedule IDs, final creative approval and normal-company-ChatGPT end-to-end create/amend/export remain open. No Nolan/Picasso source changes, production DB/migration, deployment, purchase or incremental spend. PR #956 remains the isolated lane; no competing branch/agent. Canonical Google Control Centre reference remains unavailable; no guessed tracker write.
+
+6 November owner-rejection/rework update (supersedes the prior delivery-blocked receipt): browser access is enabled. Twelve original 2x HD exports and seven corrected HD+caption approval-group messages had actually occurred before the owner stopped/rejected the design execution; one accidental early uncaptioned DP02 preview was followed by a signed correction and the proper send. Further sends are held. Do not describe those messages as creative approval. A normal-company-ChatGPT Piek Project read-only Canva invocation also succeeded, but Poster Studio skill discovery and a normal-ChatGPT create/amend/export round trip remain unverified.
+
+Current graphic-design state supersedes the six-revision checkpoint: after owner rejected continued flatness/logo plates, nine clean graphic-depth revisions are saved in the ONE official `DAHaD4mJnGY`, pages 64-72 (74 pages total). Heading Home 41, Reset 44 and Summer 61 retained. Drafts/Posted 73/74 remain protected. All 56 other existing native-page records match; nine replaced own drafts only gained visible warning banners and lost current edit/export eligibility; all 65 old IDs/order preserved. No pages deleted/moved. Six real subject masks, transparent exact Get Together logo, independent gradients/halftone/texture/curved fields, live kit typography and accurate photo/type overlap replace the flatter layouts. 27 live text + 68 independent image/graphic records, isolated live-caption amendment and final native binding checks pass. Genuine 2160x2700 exports cover all twelve current candidates. HD caught a cropped Engen footer: exact source-aspect correction saved and re-exported; sourceDimensions guard/regression added. Private actual-HD board and receipts live under graphic-depth-20261106. No new WhatsApp sends/portal finals, no desktop takeover, paid tool or deployment. Native connectors do creative work; the signed-in background browser remains needed only for true-HD download. Human creative acceptance, January authority/naming and normal-company-ChatGPT authoring/export remain open. Existing #948/#955/#956 lane only; Google Control Centre target still inaccessible, no guessed write.
+
+Latest 6 November **variety/positive-action checkpoint supersedes that artwork mapping**: ten monthly candidates revised, two retained, plus one owner-requested extra car-wash concept; monthly package/schedule unchanged. Official file now **81 pages**, current export `41,61,64-67,73-79`, protected Drafts/Posted headers **80/81**. New pages 73–79 contain three lighter, distinct parent compositions representing Sasol/Engen/College Brew, contained white-led school-date layout, rebuilt Reset, real active smiling Kroonstad attendant, and extra verified Langenhoven Park wash concept. Heading Home, Convenience and two Get Together pages amended in place for depth/placement variety. Primary mark positions vary within every brand. All 64 other old native-page records match; six replaced own drafts gain only one warning each; all 74 old IDs/order preserved. No deletion/reordering or staff/history edits. Exact saved readback, native bindings, isolated date amendment/restoration and thirteen genuine 2160x2700 exports pass. New real sources scanned against 352 bounded previews; an alternative reused exterior was rejected. One independent bubble decoration generated through existing ChatGPT, no private-photo input or paid API; real photos/logos/text retained. Private board/receipts: `variety-rework-20261106`; shared current IDs/evidence and reusable skill updated in existing #948/#955/draft #956 lane. No new WhatsApp sends, portal finals, desktop takeover, deployment, production changes, dependencies or spend. Creative approval, exact January schedule/naming, whole-cycle person/shoot checks and normal-company-ChatGPT author/amend/export are still open. Google Control Centre remains inaccessible, no guessed write. See `VARIETY-REWORK-2026-11-06.md` for actual changes and limitations; prior checkpoints remain historical evidence.
+
+The final source-colour audit also caught a real DP06 error: untagged DCF R03 Adobe RGB was treated as sRGB. A tested shared `photo_colour.py` now resolves embedded ICC/EXIF/DCF evidence and converts before finishing, failing unknown/conflicting cases. Actual original-source conversion used the existing local Adobe ICC, preserved the original hash, changed only the one registered photo asset, and passed a fresh isolated true-HD export. Five Python regression tests plus 24 focused Node tests, month/skill validators and the current full build pass. No ICC/profile files are committed or installed.
+
+Latest 6 November **focused owner-correction checkpoint supersedes the R3 artwork map**: Back to It 74 only lost the stray January label (zero HD pixel changes outside its box). Owner-rejected school/wash now have saved replacements at **80/81**, actual IDs `PB7wNQkrQFvYcVGG` / `PB9nWtgdrjBJ1vgY`; official file **83 pages**, protected Drafts/Posted **82/83**, current 13 export selection **41,61,64-67,74-75,77-81**. School has a real rack silhouette/contact shadow, calendar card, CTA and graphic fields; wash uses real 0L8A3607 soapy-glass/sponge/hands detail with tighter live headline and visible separate bubbles. This is a service detail, not a confirmed wide wash-bay view; that wider view remains unresolved. A different wash source was rejected for a historical match. New source checked against 352 previews with no supported match, not unused/person/shoot clearance. All 81 old IDs/order retained: 78 unchanged, two own rejected drafts gained only warnings, one bounded label removal. Three new true-HD exports plus ten retained current exports verified, final native bindings and 83-page guard pass. Current ledger has zero deterministic blockers but retains branch/service/subject/concept/same-shoot warnings. Human creative acceptance, January authority/naming and normal-company-ChatGPT create/amend/true-export remain open. No new sends, portal finals, desktop takeover, deployment, production/dependency changes or spend. Reusable skill records actual source relevance, photo-history-before-masking, craft/leading/contrast and bounded amendments. See `CRAFT-REWORK-2026-11-06.md` and current evidence in existing #948/#955/draft #956 lane. Google Control Centre remains inaccessible; no guessed write.
+
+Latest 6 November **full-set craft R5 checkpoint supersedes the sending hold**: owner explicitly requested improvement of every current poster, then HD image+caption delivery to Picasso approvals. All13 current candidates revised/saved in place; official83 pages, current selection41,61,64-67,74-75,77-81, protected82/83, stable IDs unchanged. All70 non-target pages match; live wording,21 checked real photo/cutout asset/geometry bindings and22 exact mark records preserved. Thirteen new true2160x2700 HD exports verified, all changed fromR4. New local overlay_preflight.py reproduces six actual failed-preview occlusion/tinting blockers and clears final foreground overlays;11 declared background planes explicitly unchecked, no native-z/glyph/creative-approval claim. Five meaningful Python regressions added;25 Node/five colour tests and month/skill checks pass. Graphic mechanisms vary by poster; private board/receipts under full-craft-rework-20261106, see FULL-SET-CRAFT-2026-11-06.md. Company browser briefly disappeared/recovered under a new ID with the same profile/extension; background Playwright export succeeded after AX-click timeouts. Delivery pending active Nolan Studio WhatsApp-tab lease, not a laptop-off claim; do not steal its tab or click Use here to displace its upload. No R5 send yet. No native desktop takeover, client publication, portal finals, production/DB/deployment/dependency changes or spend. Human creative acceptance, January authority/naming, wider actual wash-bay photo, whole-cycle source/person/shoot review and normal-company-ChatGPT author/amend/export remain open. Existing #948/#955/draft #956 lane only; no duplicate worker/branch. Control Centre exact reference inaccessible; no guessed write.
+
+9 November R5 recovery supersedes the earlier WhatsApp-lease snapshot: saved final face-clear Canva state reverified identical,83 pages/current IDs preserved; DP09's one HD-detected decorative face-crossing curve removed by transaction7135349062903102811, all other native records match, true2160x2700 export completed9November. All13 current HD/caption items staged privately. Six overlay regressions now include strict temporary source-feature clearance; actual failed face graphic gives1 blocker, corrected0, final text-region preflight0 with11 background assertions explicitly unchecked. No identity database or false exported-RGB identity claim. Current laptop and WhatsApp run, but fresh browser inventory has NO connected Chrome profiles, even after owner reconnection confirmation. Latest-round sent/attempted messages0; this is a browser-connection blocker, not a laptop-off claim or assumed ongoing Nolan lease. Do not substitute a personal sender or native desktop takeover. Latest source/skill/evidence in existing #948/#955/draft #956; no competing lane, production/DB/deploy/dependency change or spend. Human creative acceptance, January authority/naming and normal-company-ChatGPT create/amend/export remain open. Control Centre exact target remains inaccessible; no guessed write.
+
+9 November R5 **approval-group delivery COMPLETE**: owner renewed send instruction; fresh company Chrome discovery recovered the same profile/extension, sender verified Nolan, exact group CG Picasso Approvals. All13 current HD posters sent as13 individual photo+caption messages, each signed PICASSO, plus one signed introduction. HD explicitly selected per upload; WhatsApp2048x2560 versus source2160x2700. Thirteen unique new IDs/source hashes/same-message captions witnessed and privately recorded; initial witness states1Delivered/12Sent, no all-recipient-read claim. No desktop takeover, competing tab lease, new account/permissions or spend. Earlier connection/lease blocker is cleared. Production evidence, private delivery ledger and FULL-SET-CRAFT-2026-11-06.md reconciled in existing #948/#955/draft #956 lane. Await internal creative feedback; no approval/scheduling/client publication/portal finals inferred. Normal-company-ChatGPT author/amend/export and January authority/naming remain open. Control Centre exact reference still unavailable; no guessed write.
 
 Do not start one of these merely because it is open if #505/#513 launch closure is still the priority.
 
