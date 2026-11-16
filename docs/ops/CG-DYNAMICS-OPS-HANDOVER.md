@@ -1,3 +1,15 @@
+## 16 November — owner-authorised Claude library reconciliation (#999)
+
+Ordered handover: #984 merged to main b524a9f9 with local31/31 brand/video tests,
+build and scoped lint passing; no deploy or brand migration replay. #999 stays
+inside PR910's codex/nolan-office-research-874 branch, not main. Its original
+69ca2f87 already contains current PR910 base e61e4374, so no redundant merge,
+rebase or force-push is needed. Removed one generated mapdata Python cache and
+ignored future caches. Exact checks/merge receipt are recorded on #999.
+PR910's separate base conflict remains its owner's decision. Device installation,
+CURRENT sync receipts and actual media/sound acceptance are not established by
+publication. No new renderer/tracker, production write or hosting action.
+
 ### 16 November — exact Nolan Codex MSI claims and portal linkage
 
 CA resumed this lane and explicitly requested all MSI video ownership/progress,
@@ -43,6 +55,28 @@ Local TypeScript/Vite build and diff check pass. No new dependency, app deployme
 hosting/DNS/budget/security change or client/public message. PR910 stays draft;
 PR875 remains MSI production evidence. Private proof folder is
 Videos/CG-AI-Editing/Nolan-Studio-Private/Dynamics-Reconciliation-20261116.
+
+### 16 November — Claude motion library merged into Nolan; CG brand rules updated
+
+CA asked for Claude's motion-graphics library and everything it used to join the
+official Nolan system so every agent is briefed on CG's brand. Additive only:
+stacked draft PR from `claude/nolan-motion-library-20261116` onto the PR910
+branch (base `codex/nolan-office-research-874` at `3e73bfb5`). It adds the
+overview `references/claude-motion-library-20261116.md`, CG house brief, two case
+studies (CG websites R01-R06, Property Gain Wilgehof R01-R02), four documented
+technique families (57 total, not mastered), owner rules MAP-01/SCENARIO-01/
+ENDCARD-01 and study code with byte-identical regeneration receipts. No new
+renderer, tracker or registry; no deploy (Git deploys OFF).
+
+Production data, CA-approved in chat 16 Nov: `client_brand_rules` — retired
+`1fefef98` (MacBook from above with keyboard, rejected R05); added six CG
+Production House rules and two house rules (end-card full-size check; phone
+number before a listing video's first render). Read back by id. CG websites
+video record `11833c8d` still shows internal_review; CA to approve or request
+changes in Dynamics. Property Gain is not a Dynamics client; nothing created.
+Drive START HERE tab 1 carries the same pointer.
+Merge/release order, Drive inventory and open items for Codex:
+`docs/ops/CLAUDE-NOLAN-HANDOVER-2026-11-16.md` (#984 → main via #679 gate; #999 → PR910 lane).
 
 ### Historical 11 November — registration LIVE and safe MSI pause
 

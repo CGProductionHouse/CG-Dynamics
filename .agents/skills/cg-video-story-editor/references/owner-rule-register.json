@@ -226,6 +226,21 @@
       "id": "FILING-01",
       "requirement": "After exact-version owner clearance, file approved MP4, cover and clean caption in the verified client OneDrive portal and link durable items to the actual existing Dynamics calendar/schedule deliverable. CA6Nov says a sent revision with no outstanding feedback proceeds to client: establish this through a successful current-thread check, never unreadable/partial/stale history. Record owner workflow clearance separately from client approval/public posting; no duplicate/overwrite, invented production identity/date or false app/calendar completion.",
       "evidence_source": "CA6November approved-video portal filing request; release-and-learning-loop.md"
+    },
+    {
+      "id": "MAP-01",
+      "requirement": "Location graphics are designed from real geodata (OpenStreetMap or a verified client plan), never a Google Maps screenshot or an invented layout. Centre on a verified position, keep north-up or mark north, place landmarks in their true direction, label distances as straight-line/approximate unless measured by road, and credit OpenStreetMap.",
+      "evidence_source": "CA12Nov2026 Property Gain brief; designed-area-map card; property-gain-wilgehof-case-study.md"
+    },
+    {
+      "id": "SCENARIO-01",
+      "requirement": "Aspirational use scenarios (build a home, open a salon) must be logical for the actual site and must not imply a permission it lacks: add an on-screen approval note (for example zoning) when a use is not already permitted, and never alter listing facts.",
+      "evidence_source": "CA12Nov2026 Property Gain brief; photo-anchored-3d-build card"
+    },
+    {
+      "id": "ENDCARD-01",
+      "requirement": "Inspect every end-card and CTA word at full output size before the full render and on the encoded export: no clipped glyphs, ghost copies outside masks, overlapping logo/text or pre-trigger outlines. Get the client/agent contact number before the first render.",
+      "evidence_source": "CA11Nov2026 CG websites R06; CA12Nov2026 Wilgehof R01; Dynamics house rules"
     }
   ]
 }
