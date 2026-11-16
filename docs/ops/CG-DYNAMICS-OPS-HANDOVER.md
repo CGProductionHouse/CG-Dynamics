@@ -1,3 +1,49 @@
+## 16 November — approved mobile staff/client viewport release LIVE
+
+CA approved PR #993 release. Exact runtime ccbb6ec7 is LIVE at
+dpl_B8eMyLViZqYRNxae4cR9HXqLhwhB: one local production-target prebuild, protected
+stage SHA256 verification, same-deployment promotion; zero cloud application
+compilation. Apex/www and login/client/plan/performance serve exact candidate
+HTML; changed JS/CSS chunks match. 205 affected tests/build/lint/diff pass.
+No DB/provider/auth-account/config/spend-limit change; git deploy remains OFF.
+Rollback dpl_DZ5RJ8F6gbRsSSvFtsHHhVXS3744 retained. Billing window preflight recovered
+and conservative included-budget headroom verified; lag/physical-phone/browser
+limits remain explicit. [Current release receipt](MOBILE-STAFF-CLEANUP-2026-11-16.md).
+Older source-only notes immediately below are historical and superseded.
+
+### Historical pre-approval state
+
+Latest client screenshot: live HTML/assets independently confirm old 14px login
+and absent candidate CSS; current deployment/source/rollback recorded in the
+mobile cleanup receipt. Added bounded portal header/Overview shrink/wrap fixes
+and portal form sizing; 41 focused fixture-env tests/build/lint/diff pass. No
+deployment/cloud build or production mutation. #679/no-Vercel release hold and
+unverified current budget remain; do not tell CA the live phone view changed.
+
+Client-login follow-up in the same PR: auth inputs now inherit explicit 16px
+phone sizing, preventing Safari focus zoom from carrying into the portal; normal
+pinch zoom and the device-width initial viewport remain. Actual rendered-component
+and compiled-CSS regressions plus 19 focused tests/build/lint/diff pass. Source
+only, physical-iPhone acceptance unverified; no cloud or production action.
+
+CA expanded PR #993 to simplify phone staff/admin use. Same isolated worktree:
+searchable all-workspace More menu (same role gates), compact client cards,
+native action sheets, direct login copy, explicit reset/disable confirmations,
+staff input zoom prevention and 44px phone buttons. Tasks/calendar/provider and
+other agent lanes untouched. [Scope and verification](MOBILE-STAFF-CLEANUP-2026-11-16.md).
+175 relevant tests/build/lint/diff pass; rendered browser acceptance pending.
+NOT LIVE; no production writes or Vercel usage. #679 gate remains.
+
+## 16 November — client login message copy, source candidate only
+
+CA requested one forwardable link/username/password message directly on the Clients
+card. Bounded #399 correction on `fix/client-login-message-copy` adds admin-only
+copy on desktop/mobile cards and enabled Client Access rows, with fresh exact-ID
+mapping checks and iPhone user-gesture clipboard handling. No account reset or
+production mutation. [Evidence and limitations](CLIENT-LOGIN-MESSAGE-COPY-2026-11-16.md).
+Local tests/build/lint/diff green; browser acceptance unverified. NOT LIVE; #679
+hosting gate and other agent lanes remain unchanged.
+
 ## 11 November — existing-film registration repair, local candidate only
 
 CA asked MSI to finish all possible video tracking reconciliation. Sixteen

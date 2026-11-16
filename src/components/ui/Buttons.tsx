@@ -21,7 +21,7 @@ export function ActionButton({
   className = '',
   ...props
 }: ActionButtonProps) {
-  const baseClasses = 'inline-flex items-center justify-center font-bold rounded-md transition-all focus:outline-none focus:ring-2 focus:ring-brand-accent focus:ring-offset-2 focus:ring-offset-brand-bg disabled:opacity-60 disabled:cursor-not-allowed'
+  const baseClasses = 'inline-flex min-h-11 items-center justify-center font-bold rounded-md transition-all focus:outline-none focus:ring-2 focus:ring-brand-accent focus:ring-offset-2 focus:ring-offset-brand-bg disabled:opacity-60 disabled:cursor-not-allowed sm:min-h-0'
 
   const variantClasses = {
     primary: 'bg-brand-accent text-black shadow-[0_8px_24px_rgba(200,121,42,0.18)] hover:brightness-110',
@@ -79,8 +79,8 @@ export function IconButton({ children, variant = 'ghost', size = 'md', ariaLabel
   }
 
   const sizeClasses = {
-    sm: 'h-8 w-8',
-    md: 'h-10 w-10',
+    sm: 'h-11 w-11 sm:h-8 sm:w-8',
+    md: 'h-11 w-11 sm:h-10 sm:w-10',
     lg: 'h-12 w-12',
   }
 
