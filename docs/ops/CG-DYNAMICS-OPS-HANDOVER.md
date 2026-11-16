@@ -1,3 +1,55 @@
+## Latest 16 November — concrete private TikTok Business status credentials
+
+Same DRAFT PR991/#220/#269. Missing status resolver now has a concrete encrypted
+Business-store + native inspection/profile implementation and private status
+composition. No new store/route/tool/worker/env activation. Exact active client/
+connection/authorization, original confirmed handle, current app/creator/scopes,
+AES-GCM connection/access AAD, expiry/refresh/revocation and post-inspection
+canonical/token reread enforced. Native extra scopes are not adopted; refresh
+token/consumer credentials never selected. No refresh, eligibility or last-verified
+write. A read credential is NOT publication/app-review/rollout approval.
+
+Official token inspector is POST-read with app_id/access_token JSON, returning
+app_id/creator_id/scope; exact username profile GET needs user.info.username.
+Sources retrieved through Firecrawl after bounded company Chrome control timeout;
+no browser/profile/security change or sign-in demand. Shared JSON reader keeps
+64KiB/time/UTF8 bounds; rejected-body resource leak reproduced/fixed. SDK/HTTP
+cancellation and concurrent rotation/revocation are covered.76 new/222 affected
+checks, actual Deno typing, lint/build/emitted app pass. Frozen full run:
+**4835 total /4804 pass /31 skips /0 failures** at concurrency2. Opt-in SQL
+remains skipped; no new SQL claim/restart of previously blocked container.
+Unrelated generated issue519 artifacts restored; private-source self-review passes.
+No live credentials/DB/API execution or product UI/device proof. No new dependency/
+migration; FOUR candidates unapplied. Main62f7a88a/PR997 and other owner's exact
+Novus/fleet/live/phone receipt below preserved; Teams/sync hold/Nolan/staff separate.
+Backend/config/consent/native acceptance/uploader/durable registration remain
+held; no publication/deploy/OAuth/SQL/config/secret/permission/provider mutation/
+Microsoft/Vercel/cost action. [Existing evidence](SOCIAL-PUBLISHING-220-2026-11-15.md).
+Tracker exact target unknown; no guessed write.
+
+## 16 November — Novus actual client login/current plan accepted; fleet continued
+
+CA requested Novus client-ready and exact forwardable credentials, then other
+active clients. Real issued login200/exact client profile; report/post/fact/Ads
+reads200, actual foreign Cape report denied403. Existing Brand Hub logo opens
+through protected Edge200. No reset, credential disclosure in repo, permissions
+or provider/website change. October report remains published; reviewed November
+canonical strategy v5 deliberately approved/published via guarded existing RPC
+at15:23:09UTC, actual CLIENT reads ten gold fields/1video/4photos/4posters.
+Decemberv4/Januaryv2 are cleaned real drafts, not published/scheduled media.
+[Exact acceptance and remaining limits](NOVUS-CLIENT-READINESS-2026-11-16.md).
+
+Same hourly normal author now has real Novus and Forklift January save/readbacks;
+earlier zero-save wording below is historical. Do not confuse separate failing
+OpenCode GitHub jobs with this successful normal-Chat task or replace its model.
+Destination metadata discrepancy remains read-only investigation, no new task.
+62-client inventory frozen with explicit snapshot boundary;46enabled mappings
+are not46tested logins. All Around PVC October refreshed14posts/no duplicates/
+staffhash unchanged, remains draft. AV Event Life Facebook exact provider code10
+permission hold; Instagram fresh. No global blocker, guessed scope/dates or consent.
+No code/migration/Vercel or other agent changes. Google Control Centre exact target
+unavailable; no guessed tracker write.
+
 ## Latest 16 November — TikTok Business task-status source path
 
 Same DRAFT PR991/#220/#269. Official v1.3 status contract read in company Chrome;

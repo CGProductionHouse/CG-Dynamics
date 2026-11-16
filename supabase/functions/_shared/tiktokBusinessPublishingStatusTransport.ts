@@ -1,4 +1,4 @@
-import { boundedPublishingRead } from './socialPublishingRead.ts'
+import { boundedPublishingRead, readPublishingJson } from './socialPublishingRead.ts'
 import { isTikTokBusinessReceipt, TikTokBusinessReadError, tiktokReadDeadlineError,
   type TikTokBusinessReadBinding, type TikTokBusinessStatusReadPort } from './tiktokBusinessPublishingStatus.ts'
 import type { PublishingIntent } from './socialPublishing.ts'
@@ -48,28 +48,13 @@ export async function tiktokBusinessPublishingStatusTransport(input: {
       try {
         const response = await fetcher(url.href, { method: 'GET', headers: { 'Access-Token': accessToken, Accept: 'application/json' }, redirect: 'error', signal })
         if (signal.aborted) fail('TIKTOK_READ_ABORTED')
-        if (!response.ok) fail(response.status === 401 || response.status === 403 ? 'TIKTOK_READ_ACCESS_UNVERIFIED'
-          : response.status === 429 ? 'TIKTOK_READ_RATE_LIMITED' : 'TIKTOK_READ_HTTP_UNVERIFIED')
-        const declared = response.headers.get('content-length')
-        if (response.redirected || (declared !== null && (!/^\d+$/.test(declared) || Number(declared) > MAX_READ_BYTES))
-          || response.headers.get('content-type')?.split(';')[0].trim().toLowerCase() !== 'application/json' || !response.body) fail('TIKTOK_READ_RESPONSE_UNVERIFIED')
-        const reader = response.body.getReader(), chunks: Uint8Array[] = []
-        let size = 0
-        const cancel = () => { void reader.cancel().catch(() => {}) }
-        signal.addEventListener('abort', cancel, { once: true })
-        try {
-          while (true) {
-            const next = await reader.read()
-            if (signal.aborted) fail('TIKTOK_READ_ABORTED')
-            if (next.done) break
-            size += next.value.length
-            if (size > MAX_READ_BYTES) fail('TIKTOK_READ_RESPONSE_UNVERIFIED')
-            chunks.push(next.value)
-          }
-        } finally { signal.removeEventListener('abort', cancel); cancel(); reader.releaseLock() }
-        const bytes = new Uint8Array(size)
-        let offset = 0; for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.length }
-        const result: unknown = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes))
+        if (!response.ok) {
+          void response.body?.cancel().catch(() => {})
+          fail(response.status === 401 || response.status === 403 ? 'TIKTOK_READ_ACCESS_UNVERIFIED'
+            : response.status === 429 ? 'TIKTOK_READ_RATE_LIMITED' : 'TIKTOK_READ_HTTP_UNVERIFIED')
+        }
+        const result = await readPublishingJson(response, signal, { maxBytes: MAX_READ_BYTES,
+          invalid: () => new TikTokBusinessReadError('TIKTOK_READ_RESPONSE_UNVERIFIED'), aborted: () => new TikTokBusinessReadError('TIKTOK_READ_ABORTED') })
         const complete = now()
         if (!Number.isFinite(complete) || complete < time || complete - received >= 120_000 || expiry <= complete + 15_000) fail('TIKTOK_READ_CREDENTIAL_RECHECK_REQUIRED')
         return result

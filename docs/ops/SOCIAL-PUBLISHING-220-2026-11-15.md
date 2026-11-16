@@ -1,6 +1,83 @@
 # Social publishing — 15 November 2026
 
-## Latest 16 November — exact TikTok Business publication-status reads, SOURCE ONLY
+## Latest 16 November — concrete TikTok Business status credentials, SOURCE ONLY
+
+Same draft PR #991 / #220 / #269. Implemented the previously missing PRIVATE
+status-credential resolver against the existing candidate Business OAuth tables,
+plus `readStoredTikTokBusinessStatus` composition. No competing connection/token
+store, env parser, route/tool/worker registration, publishing authorization or
+production data change. Existing public/consumer analytics and OAuth flow remain
+untouched. Canonical migrations are still UNAPPLIED; this is source capability,
+not a claim a live Business account is connected.
+
+Verified current official references using Firecrawl's documentation skill after
+two bounded company-browser control timeouts (no repeated recovery/settings
+changes or user sign-in request):
+
+- [Token inspector](https://business-api.tiktok.com/portal/docs/get-the-authorized-tiktok-account-permission-scopes-via-access-token/v1.3):
+  POST `/tt_user/token_info/get/` with app_id/access_token JSON; verify returned
+  app_id, creator_id and current comma-separated scopes. This is a documented
+  **read/inspection POST**, not publication, token refresh or a permission write.
+- [Exact profile](https://business-api.tiktok.com/portal/docs/get-profile-data-of-a-tiktok-account/v1.3):
+  GET `/business/get/` for the app-specific account, requesting only username.
+  That field requires `user.info.username`; native inspection must also confirm
+  the already-requested `video.publish` for this conservative status profile.
+
+Resolver verifies active exact client/connection, the bound Business authorization
+and canonical consent scopes; refuses refresh-in-progress, revoked/mismatched/
+expired/ambiguous records. Reads ONLY the encrypted access envelope, never the
+refresh credential or consumer token. Actual existing AES-GCM connection+access
+AAD and dedicated key/version verification are reused. Native inspection pins
+the configured app and app-specific creator ID; username must match the stored
+confirmed handle and any known canonical profile handle. No display-name or URL
+redirect identity fallback; short profile URLs are never fetched.
+
+After provider verification, rereads canonical scope and the encrypted access
+record. Concurrent revocation, mapping/scope change, rotation or refresh prevents
+a credential reaching the status GET. Returned scopes are the intersection of
+canonical consent and current native grants; extra native grants are not adopted
+or persisted. verifiedAt is ephemeral, not a database write. Eligibility remains
+unchanged: a readable status credential does NOT turn not_approved into approval
+or establish production app review/media/publication eligibility.
+
+The concrete composition performs at most the two credential inspections and one
+task-status GET, with no retry/polling loop or refresh. Shared bounded JSON reader
+retains the existing64KiB/UTF8/type bounds and propagates cancellation. Review
+reproduced unread response bodies surviving rejection, then added cancellation
+for rejected HTTP/oversized responses; all old TikTok/LinkedIn cases still pass.
+Signals also reach SDK reads; late SDK/HTTP completion cannot continue credential
+transmission after deadline. No credentials are serialized by the composed
+status result. No app secret is required for these documented inspection reads.
+
+**76 new credential/composition regressions /222 affected checks pass**, using
+the actual encryption primitive, private HTTP composition and synthetic SDK/
+provider responses. Cases include wrong app/account/key/AAD, revoked/missing
+scopes, rotation/revocation races, expiry, cancellation, native errors, response
+limits, no scope adoption, and no secret/refresh/consumer/publication access.
+Actual Deno type check, scoped lint and build/emitted app pass. Frozen-source
+full run: **4,835 total / 4,804 passed / 31 skipped / 0 failures**, concurrency2
+with the existing Git Bash/OpenSSL in process PATH. Opt-in SQL stays skipped;
+no fresh SQL proof or restart of the previously blocked container is claimed.
+Restored only the two unrelated generated issue519 artifacts after completion.
+Evidence in task TEMP: `cg-tiktok-concrete-credential-focused.log`,
+`cg-tiktok-concrete-credential-types.log`, `cg-tiktok-concrete-credential-lint.log`,
+`cg-tiktok-concrete-credential-build.log`, `cg-tiktok-concrete-credential-full.log`,
+and failing-before-fix `cg-tiktok-credential-body-repro.log`. Self-review passes
+for the private read-only source increment; native consent/runtime/provider
+rollout gates remain explicit. No new product UI/device check for unchanged UI.
+
+Merged main62f7a88a/PR997 by preserving BOTH the other owner's new Novus/fleet
+receipt and all source-lane history. Their files are unchanged against main;
+no recertification of their live/device evidence by this lane. Product UI is
+unchanged, no new product browser/device or real TikTok API acceptance claimed.
+No new dependency/schema/migration/permission/config/secret/Edge/OAuth/Microsoft/
+Vercel/hosting/cost action or live provider call; no Docker restart. FOUR prior
+migrations remain unapplied. Backend/config rollout, real one-time Business
+consent, native read/pilot acceptance, uploader/source-to-share_id provenance
+and durable registration/audit integration remain gates. Teams/sync hold/staff/
+Nolan preserved. Google Control Centre exact target unknown; no guessed write.
+
+## Earlier 16 November — exact TikTok Business publication-status reads, SOURCE ONLY
 
 Same draft PR #991 / #220 / #269. Read the current official Business API v1.3
 [publishing-status reference](https://business-api.tiktok.com/portal/docs/get-the-publishing-status-of-a-tiktok-post/v1.3)
