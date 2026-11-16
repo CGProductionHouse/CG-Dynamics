@@ -1,4 +1,25 @@
-## Latest 16 November — approved JPEG source adoption and honest publishing controls
+## Latest 16 November — standalone native Deno JPEG qualification
+
+Same DRAFT PR991/#220. Added QA-only native Deno acceptance for the actual
+approved npm codec/private adapter/runtime: **6/6 pass**, actual type checking,
+real pixels/original bytes on both IG routes, corrupt entropy/sanitized failure,
+independent codec resolution bound, frozen exact-release isolation and maximum
+1440x1800 synthetic profiles. No Vite/decoder mock/type bridge. Official Deno
+2.9.8 archive SHA256 verified in task TEMP, isolated cache/public package types;
+no system/shared-node_modules/browser setup change. Cached test execution denies
+net/env/run/write/ffi/sys, permits only fixture read and asserts its own grants.
+Zero provider/database calls. Build/emitted app/lint/diff pass; no full/browser/
+SQL rerun for unchanged runtime. Standalone Windows Deno import/decoding gap is
+closed; **hosted Supabase Edge CPU/import/version, real-account/media/provider
+acceptance remain unverified**. Publishing composition remains UNREGISTERED.
+
+No production/deploy/provider/OAuth/SQL/Microsoft/Vercel/cost action, no database
+restart/bypass, FOUR migrations unapplied; prior test/review limits below remain.
+Current main already included, active staff/Nolan/Teams lanes and sync hold
+preserved. [Native test recipe/evidence](SOCIAL-PUBLISHING-220-2026-11-15.md).
+Tracker exact target unavailable; no guessed write.
+
+## Earlier 16 November — approved JPEG source adoption and honest publishing controls
 
 Same DRAFT PR991/#220. CA approved exact pinned `jpeg-js@0.4.4` and private
 adapter; adoption is no longer pending. Minimal manifest/lock addition only,

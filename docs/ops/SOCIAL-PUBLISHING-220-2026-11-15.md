@@ -1,6 +1,66 @@
 # Social publishing — 15 November 2026
 
-## Latest 16 November — approved JPEG adapter and accurate scheduling controls, SOURCE ONLY
+## Latest 16 November — native Deno codec qualification, SOURCE ONLY
+
+Same draft PR #991 / #220. Closed the **standalone native Deno import/decoding**
+gap for CA's already-approved `jpeg-js@0.4.4` private adapter. Added only
+`scripts/qa/instagram-publication-codec-deno.test.ts`; production code, dependency
+manifests, queue/migrations, entrypoints and registration are unchanged. No
+concrete production defect was found or speculative runtime fix introduced.
+
+Six native tests pass with the actual `npm:jpeg-js@0.4.4` default import and
+actual private adapter/runtime, without Vite, CommonJS test transpilation,
+decoder mocks or type-declaration bridges. Deno's own type check also passes
+against the real npm/SDK declarations. Covered: denied runtime permissions,
+real RGBA pixels and unchanged source bytes on both Instagram login routes,
+corrupt entropy and sanitized failure, the codec's independent resolution
+ceiling, inactive composition/exact frozen-release isolation before SDK access,
+and maximum-profile 1440x1800 solid/high-detail synthetic originals.
+
+The official standalone Deno 2.9.8 Windows archive was downloaded into task
+TEMP only and SHA256-verified against its official release metadata:
+`cba84b26e0df5ae7f74fc66b86a95b866872a86292ebd84fa1e959927edd93bf`.
+No system installation, startup/browser/profile change, persistent PATH edit or
+shared node_modules modification. Public package/type downloads populated only
+the task's isolated DENO_DIR before execution; test execution was cached-only,
+no-prompt, with net/env/write/run/ffi/sys DENIED and read limited to the one
+synthetic JPEG fixture. The test asserts those permission states itself.
+No credential values or production data were read. Zero provider/database calls.
+
+Reproduce using the verified task-local executable (or an explicitly verified
+compatible Deno), keeping cache preparation separate from sandboxed execution:
+
+```powershell
+$qaDenoRoot = Join-Path $env:TEMP 'cg-social-220-deno-20261116-v2.9.8'
+$qaDeno = Join-Path $qaDenoRoot 'bin/deno.exe'
+$env:DENO_DIR = Join-Path $qaDenoRoot 'cache'
+& $qaDeno cache --no-config --no-lock --node-modules-dir=none scripts/qa/instagram-publication-codec-deno.test.ts
+$qaFixture = (Resolve-Path 'tests/fixtures/publication-baseline-320.jpg').Path
+& $qaDeno test --no-config --no-lock --node-modules-dir=none --cached-only --no-prompt --deny-net --deny-env --deny-run --deny-write --deny-ffi --deny-sys "--allow-read=$qaFixture" scripts/qa/instagram-publication-codec-deno.test.ts
+```
+
+Evidence: task TEMP `cg-social-220-deno-20261116-v2.9.8/native-tests.log`;
+**6 passed / 0 failed**, build/emitted app, scoped ESLint and PR diff pass.
+Final native maximum-profile measurements: 138ms solid / 383ms high-detail on
+this Windows host. These are NOT hosted Supabase Edge CPU/memory measurements.
+Standalone Deno is not Supabase's hosted isolate/version, an app-specific grant,
+signed-media retrieval or native Instagram publication acceptance. Those remain
+separate rollout gates; the adapter stays unregistered and publishing stays off.
+
+No new browser/device check or full app/SQL suite rerun is claimed for this
+QA-only increment. Prior 630e9a0f's full-run Vite timeout, isolated 9/9 recovery,
+31 skips and blocked local PostgreSQL restart remain accurately recorded below.
+No Docker restart or alternate database execution attempted. Current main is
+already an ancestor; other PR/staff/Nolan/Teams work and sync hold preserved.
+No production SQL/data/Edge/config/secrets/OAuth/mappings/permissions/provider/
+Microsoft/Vercel/cost action; FOUR migrations remain unapplied. Google Control
+Centre exact target remains unavailable; no guessed write.
+
+References: [official Deno release](https://github.com/denoland/deno/releases/tag/v2.9.8),
+[permissions](https://docs.deno.com/runtime/fundamentals/security/),
+[test command](https://docs.deno.com/runtime/reference/cli/test/).
+
+## Earlier 16 November — approved JPEG adapter and accurate scheduling controls, SOURCE ONLY
 
 CA explicitly approved the exact `jpeg-js@0.4.4` dependency and private adapter.
 That approval is now consumed for source adoption; it is **not pending** and does
