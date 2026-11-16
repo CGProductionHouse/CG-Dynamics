@@ -20,6 +20,7 @@ import {
   type PackageSettings,
 } from '../../lib/db/clients'
 import { ClientLogo } from '../../components/ClientLogo'
+import { CopyClientLoginButton } from '../../components/clients/CopyClientLoginButton'
 import { PACKAGE_NUMBER_FIELDS, type PackageVerificationReceipt } from '../../lib/packageAuthority'
 import { loadActiveClientPackageEvidenceMatrix, type ActiveClientPackageEvidence } from '../../lib/packageEvidence'
 import { PackageEvidenceReviewModal } from '../../components/clients/PackageEvidenceReviewModal'
@@ -420,6 +421,7 @@ export default function ClientsList() {
                           <td className="px-4 py-3">
                             <div className="flex flex-wrap gap-1.5">
                                <ClientActionLink to={`/admin/client-dashboard?client=${c.id}`} label="Client Dashboard" teal />
+                              {isAdmin && <CopyClientLoginButton clientId={c.id} />}
                               {!isAdmin && <ClientActionLink to={`/admin/published?client=${c.id}&view=setup`} label="Setup preview" />}
                             </div>
                           </td>
@@ -616,6 +618,7 @@ function ClientQuickActions({
       <ClientActionLink to={`/admin/client-dashboard?client=${client.id}`} label="Client Dashboard" teal />
       <ClientActionLink to={`/admin/client-schedule?view=calendar&client=${client.id}`} label="Client Schedule" />
       <ClientActionLink to={`/admin/package-master?client=${client.id}`} label="Package" />
+      {isAdmin && <CopyClientLoginButton clientId={client.id} />}
       <ClientMoreActions client={client} isAdmin={isAdmin} onEdit={onEdit} onArchive={onArchive} />
     </div>
   )

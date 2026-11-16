@@ -1,3 +1,13 @@
+## 16 November — client login message copy, source candidate only
+
+CA requested one forwardable link/username/password message directly on the Clients
+card. Bounded #399 correction on `fix/client-login-message-copy` adds admin-only
+copy on desktop/mobile cards and enabled Client Access rows, with fresh exact-ID
+mapping checks and iPhone user-gesture clipboard handling. No account reset or
+production mutation. [Evidence and limitations](CLIENT-LOGIN-MESSAGE-COPY-2026-11-16.md).
+Local tests/build/lint/diff green; browser acceptance unverified. NOT LIVE; #679
+hosting gate and other agent lanes remain unchanged.
+
 ## 11 November — existing-film registration repair, local candidate only
 
 CA asked MSI to finish all possible video tracking reconciliation. Sixteen

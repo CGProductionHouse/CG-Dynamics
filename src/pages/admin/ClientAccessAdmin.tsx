@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import { CopyClientLoginButton } from '../../components/clients/CopyClientLoginButton'
 import {
   listClientPortalAccess,
   provisionClientPortalAccess,
@@ -13,6 +15,8 @@ function message(error: unknown, fallback: string) {
 }
 
 export default function ClientAccessAdmin() {
+  const [searchParams] = useSearchParams()
+  const selectedClientId = searchParams.get('client')
   const [rows, setRows] = useState<ClientPortalAccessRow[]>([])
   const [usernames, setUsernames] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
@@ -51,12 +55,13 @@ export default function ClientAccessAdmin() {
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLowerCase()
-    if (!needle) return rows
-    return rows.filter(row =>
+    const selected = selectedClientId ? rows.filter(row => row.client_id === selectedClientId) : rows
+    if (!needle) return selected
+    return selected.filter(row =>
       row.client_name.toLowerCase().includes(needle) ||
       (row.username ?? row.proposed_username).toLowerCase().includes(needle)
     )
-  }, [query, rows])
+  }, [query, rows, selectedClientId])
 
   async function provision(row: ClientPortalAccessRow) {
     setBusyId(row.client_id)
@@ -223,6 +228,7 @@ export default function ClientAccessAdmin() {
                     </button>
                   ) : (
                     <>
+                      {row.enabled && <CopyClientLoginButton clientId={row.client_id} />}
                       <button
                         type="button"
                         disabled={busy}
