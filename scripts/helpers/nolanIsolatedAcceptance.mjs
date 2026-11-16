@@ -110,6 +110,22 @@ export async function startNolanIsolatedAcceptance(origin, reportPath, {signal}=
     sql(`update public.profiles set is_active=${active},role='${effectiveRole}' where id='${accounts[role].id}'`)
    },
    applyDraft(){sql(readFileSync('docs/ops/sql/nolan_source_active_reads.draft.sql','utf8'))},
+   applyContentDraft(){sql(readFileSync('docs/ops/sql/nolan_content_definer_active.draft.sql','utf8'))},
+   applyIdentityDraft(){sql(readFileSync('docs/ops/sql/nolan_identity_definer_active.draft.sql','utf8'))},
+   serviceIdentityCount(){return Number(sql('begin;set local role service_role;select count(*) from public.cg_staff_identity_candidates();rollback;'))},
+   seedContentRoutes(){
+    const runId=randomUUID(),foreignRunId=randomUUID(),newRunId=randomUUID(),guidelineId=randomUUID(),foreignGuidelineId=randomUUID()
+    sql(`insert into public.content_runs(id,client_id,name,run_date) values
+     ('${runId}','${clientId}','Synthetic source run','2026-11-01'),
+     ('${foreignRunId}','${foreignClientId}','Synthetic foreign run','2026-11-01'),
+     ('${newRunId}','${clientId}','Synthetic creation run','2026-11-01');
+     insert into public.content_guidelines(id,content_run_id,client_id,title,month,status,client_published_at) values
+     ('${guidelineId}','${runId}','${clientId}','Synthetic own guideline','2026-11-01','published',now()),
+     ('${foreignGuidelineId}','${foreignRunId}','${foreignClientId}','Synthetic foreign guideline','2026-11-01','published',now());
+     update public.content_guide_ideas set content_guideline_id='${guidelineId}',position=1,video_number=1,script='Synthetic own script' where id='${videoId}';
+     update public.content_guide_ideas set content_guideline_id='${foreignGuidelineId}',position=1,video_number=1,script='Synthetic foreign script' where id='${foreignVideoId}';`)
+    return {runId,newRunId,guidelineId,foreignGuidelineId}
+   },
    helperMissingIdentity(){return sql(`begin;set local role authenticated;
     select set_config('request.jwt.claim.sub','',true);
     select public.nolan_source_reader_active();
@@ -119,7 +135,7 @@ export async function startNolanIsolatedAcceptance(origin, reportPath, {signal}=
    audit(){return JSON.parse(sql(`select json_build_object(
     'policies',(select json_agg(p) from pg_policies p where schemaname='public' and tablename in ('profiles','clients','client_aliases','command_centre_tasks','planner_tasks','planner_task_assignees','planner_activity_log','planner_boards','planner_buckets','monthly_deliverables','content_guide_ideas')),
     'views',(select json_agg(v) from (select c.relname,c.reloptions,pg_get_viewdef(c.oid) definition from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relkind='v') v),
-    'source_definer_routes',(select json_agg(f) from (select p.proname,pg_get_function_identity_arguments(p.oid) arguments,pg_get_functiondef(p.oid) definition from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.prosecdef and has_function_privilege('authenticated',p.oid,'execute') and p.prosrc ~ '(command_centre_tasks|planner_tasks|content_guide_ideas|monthly_deliverables|public.clients|public.profiles)') f),
+    'source_definer_routes',(select json_agg(f) from (select p.proname,p.proacl,has_function_privilege('anon',p.oid,'execute') anon_execute,has_function_privilege('service_role',p.oid,'execute') service_execute,pg_get_function_identity_arguments(p.oid) arguments,pg_get_functiondef(p.oid) definition from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.prosecdef and has_function_privilege('authenticated',p.oid,'execute') and p.prosrc ~ '(command_centre_tasks|planner_tasks|planner_task_assignees|planner_activity_log|planner_boards|planner_buckets|content_guide_ideas|monthly_deliverables|client_aliases|clients|profiles)') f),
     'functions',(select json_agg(f) from (select p.proname,p.prosecdef,p.proconfig,p.proacl,pg_get_functiondef(p.oid) definition from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and (p.proname in ('is_staff','is_manager','is_admin','my_client_id','nolan_source_reader_active','update_command_centre_task_status','admin_set_package_classification') or p.proname like 'list_planner_%')) f))`))},
   }
   return {accounts,taskId,plannerTaskId,sources,scenario,report,exchange,policyAcceptance,stop(){for(const a of agents.values())a.destroy();stop()}}

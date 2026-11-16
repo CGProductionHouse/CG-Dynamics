@@ -1,3 +1,27 @@
+## 16 November — Novus published; existing strategy author through January
+
+CA explicitly approved Novus October publication: exact report940f3153 is now
+published16Nov14:33UTC; independent client-role reads verify12posts/13ready facts
+and no foreign reports. GoogleAds historical/paused campaign and no-campaign-data
+truth retained; Wix disconnected. No package/provider/credential changes.
+CA also confirms Cape Lumber now opens correctly on the actual phone; this is
+owner device acceptance of #994, superseding the unverified wording below.
+
+Existing normal Chat **December Strategy Rollout** / task6ae868361b6c81918b6b333508a47a50
+now **CG Client & Industry Research** is independently UI-verified Active, hourly,
+RepeatON/endNever. Same author updated/read back January-preparation instructions;
+no new writer/model/task. New recovery performed0canonical saves; source triage
+is not substantive completion. #731 latest author receipt6919535126.
+Small three-file connector release admits current+nextTWO months (Nov→Jan)
+without changing automatic worker cadence/schema/staff/source/publication guards.
+136tests/build/lint/diff/full hosted Deno check pass. Existing MCPv83 ACTIVE:
+all41 deployed files match candidate, other38/auth unchanged; actual NovusJan
+brief ready, February refused, client-context authoring denied. Same author
+notified to continue January; no saved January row claimed at release acceptance.
+[Exact evidence, coverage and release boundary](STRATEGY-JANUARY-PLANNING-2026-11-16.md).
+Other agent work untouched; no Vercel. Google Control Centre target unavailable;
+no guessed tracker write.
+
 ## 16 November — client opening crop corrective release LIVE
 
 CA's new screenshot confirms #993 reached the phone but the opening view still
@@ -75,6 +99,12 @@ separate/additive. Shared editorial library remains PR910. Hosting #679 release
 gate remains; this candidate is not a claim of completed live-board backfill.
 
 ## 16 November — Nolan inactive-source server-policy draft
+
+Follow-up adds six independently owned Content Guideline/identity definer guards
+after real inactive-JWT reproductions; existing active/client/service-role access
+is preserved. PR995 exclusively owns the ownership-summary RPC. Broader inventory
+is not system-wide revocation acceptance. The handover preserves exact main
+`1c1bd36` strategy entries. [Definer evidence and remaining scope](NOLAN-DEFINER-ACCEPTANCE-2026-11-16.md).
 
 PR #990 adds an unapplied restrictive-policy draft for ten existing source tables
 and profiles, preserving self-read and existing active-role/client visibility.
