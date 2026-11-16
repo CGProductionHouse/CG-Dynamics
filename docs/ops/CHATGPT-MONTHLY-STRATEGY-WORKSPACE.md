@@ -1,5 +1,27 @@
 # Company ChatGPT monthly strategy workspace — #731
 
+## 16 November — January planning candidate and existing task readback
+
+CA requested preparation through January 2027 in the SAME ordinary Chat. The
+bounded connector candidate accepts the current Johannesburg month and the next
+two first-of-month dates; November can therefore plan January across year-end.
+Past/malformed/later dates fail before database access. Automatic current/next
+seeding remains unchanged. Existing exact-client source, version, staff-edit,
+idempotency and draft-only contracts remain. No new schema/store/scheduler.
+
+The existing task is now **CG Client & Industry Research**, same task ID and
+ordinary **December Strategy Rollout** conversation. Native UI independently
+shows Active, Repeat ON, every one hour, end Never and the updated #731 direction;
+author readback confirms January preparation and next16November17:00SAST.
+Latest recorded14:00 run completed14:20; repeated error notifications have no
+exposed cause, so do not claim their root cause was repaired. Source triage is
+still not substantive completion. Novus fresh Nov/Dec briefs incorporate its
+newly published October report; existing staff drafts preserved, zero new saves.
+
+[Release/coverage receipt](STRATEGY-JANUARY-PLANNING-2026-11-16.md).
+Earlier current/next-only descriptions below are historical for this connector
+candidate; automatic worker cadence and source-admission rules remain current.
+
 ## 2 November — latest: tool-budget-safe end-to-end batches
 
 Supersedes Monday-only scheduling below. Actual first run #731comment6580576482
