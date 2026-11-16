@@ -1,3 +1,14 @@
+## 16 November — PR #995 model-free connector continuation, NOT LIVE
+
+Same retirement lane now exposes reviewed generic/specialist skills and current
+platform evidence, exact-client legacy Marketing history, and externally authored
+immutable drafts/human decisions through three new MCP tools (62total). Fifth plugin
+skill added; original four preserved. Atomic service-only actor/client/version/evidence/
+receipt migration is UNAPPLIED. No provider calls, production changes, profile helper
+or #990 RLS edits; #996 strategy-date logic retained for integration review.
+[Coverage, limits and expanded release gates](STAFF-AI-RETIREMENT-2026-11-16.md).
+My Assistant and all Library governance surfaces remain. Not a live/full-parity claim.
+
 ## 16 November — built-in staff AI retirement candidate, NOT LIVE
 
 Owner requested removal of the broken in-app model. Isolated branch

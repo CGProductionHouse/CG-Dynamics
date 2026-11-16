@@ -58,6 +58,7 @@ test('read tools cover exact staff, task, calendar, schedule, lead, client conte
     'list_content_guideline_videos', 'get_content_video_readiness',
     'get_content_run_plan', 'get_content_run_closeout', 'verify_content_run_upload',
     'read_my_recent_entries',
+    'get_marketing_knowledge', 'read_marketing_artifacts',
     'get_content_guideline_share',
   ])
 })
@@ -103,13 +104,13 @@ test('server instruction states the shared-connection contract and forbids unsaf
   assert.doesNotMatch(instructions, /Project name.*identity/i)
 })
 
-test('catalog contains exactly 59 tools: 29 read + 30 write', () => {
+test('catalog contains exactly 62 tools: 31 read + 31 write', () => {
   const tools = catalog.CG_DYNAMICS_MCP_TOOLS
-  assert.equal(tools.length, 59)
+  assert.equal(tools.length, 62)
   const reads = tools.filter(t => t.annotations.readOnlyHint)
   const writes = tools.filter(t => !t.annotations.readOnlyHint)
-  assert.equal(reads.length, 29)
-  assert.equal(writes.length, 30)
+  assert.equal(reads.length, 31)
+  assert.equal(writes.length, 31)
 })
 
 test('every tool maps to a declared dependency and no tool references an unknown upstream', () => {

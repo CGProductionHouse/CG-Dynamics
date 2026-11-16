@@ -1,5 +1,54 @@
 # Built-in staff AI retirement — 16 November 2026
 
+## Continuation: usable model-free connector parity, still NOT LIVE
+
+PR #995 now adds three tools (62 total:31read/31write) and a fifth plugin skill.
+`get_marketing_knowledge` pages reviewed/current generic or specialist-targeted
+Skill Cards, exact-client/exact-branch evidence, practical how-to guidance and the
+existing ten specialist briefs. Optional platform/surface reads include only current
+verified/observed platform knowledge, with limitations and freshness. No raw source
+document/full-text retrieval or knowledge activation is exposed. Selected evidence
+fields are neutralised/redacted; query errors remain unavailable, never empty success.
+
+`read_marketing_artifacts` resolves an exact-client parent before versions/decisions/
+transitions, returns bounded history pages and excludes private actor/provider fields.
+`write_marketing_artifact` saves ChatGPT/Nolan-authored structured drafts and immutable
+versions, or explicit human current-version decisions. It never invokes a provider.
+Drafts require current reviewed exact-scope evidence and expected_version. Closed
+artifacts cannot be overwritten; approve/reject stays manager/admin-only. Client
+Projects cannot write legacy artifacts. Staff/company-admin writes bind the effective
+active actor AND active connection; non-manager connections cannot impersonate others.
+
+New UNAPPLIED migration `20261116160000_model_free_marketing_connector.sql` provides
+one service-only transaction and private RLS receipt table: exact-client lock/version
+checks, append-only history/audit and actor/key/hash replay committed together. Reused
+keys with different inputs fail. Inactive actors are denied even for retries. Generic
+MCP status receipts are bypassed for this tool so no successful replay loses original
+IDs. No legacy helper, profile policy or RLS migration from #990 was changed. No
+production database access or permission expansion occurred. #996 owns strategy-date
+work; its runtime logic was not edited. Shared index/catalog need normal integration
+review with #996 before release.
+
+The earlier source-only preservation gap below is HISTORICAL and superseded for
+these named workflows. This is not blanket parity: no legacy campaign reassignment,
+raw-source/full-text browsing, knowledge activation, client-Project artifact writes,
+provider generation or live connector/device acceptance is claimed. Existing campaign
+bindings/history survive. Human review and source governance stay in their current
+UI/role authority. Content Guidelines remain canonical ChatGPT-authored operations,
+without a new Content Director/provider dependency.
+
+Release packet now includes ONE new migration plus the changed MCP index/catalog,
+new marketingKnowledge module and its unchanged shared skill dependencies, in addition
+to the two retired Edge handlers/frontend. Verify deployed migration/receipt permissions
+and active actor/client/version denial before exposing write tools. Keep migration,
+MCP, Edge and frontend undeployed until the final reviewed packet is approved. The
+schema change adds no new authenticated/anon grants. Do not roll it back by deleting
+history or receipts. Preserve My Assistant/staff_assistant_profiles and all Library
+management surfaces. #679 hosting gates and legitimate browser/ChatGPT/Nolan acceptance
+remain mandatory.
+
+## Original removal candidate and receipt (historical; see continuation above)
+
 Status: SOURCE CANDIDATE ONLY. Not merged or deployed. Owner request: remove the
 broken in-app model while preserving Dynamics operations through ChatGPT/Nolan.
 Base: main `f89fefea70108bfe417953d00330476530aa9c4d`.

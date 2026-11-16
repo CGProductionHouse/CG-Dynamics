@@ -60,16 +60,25 @@ for what remains (acceptance run, then workspace enablement).
 and anything owned by #311/#313/#307. This lane is packaging, skills, metadata, validation
 and connection handoff only.
 
-## Built-in model retirement (16 November candidate)
+## Model-free operations after built-in retirement (PR #995 candidate)
 
-ChatGPT and Nolan operate Dynamics through the existing authenticated connector,
-not the in-app chat model. All four skills, Project context, tool permissions and
-business actions remain unchanged. Use fresh tool discovery and the current
-`get_my_assistant_bootstrap` coexistence policy; do not treat older fallback-only
-skill wording as authority over the live policy. Missing tools are gaps to report,
-not permission to call retired chat/generation endpoints or invent a result.
+The existing four skills and Project-context contract remain. The additional
+`marketing-knowledge-and-artifacts` skill uses three new tools:
 
-See [retirement coverage and release gates](../../docs/ops/STAFF-AI-RETIREMENT-2026-11-16.md).
-Legacy Marketing artifact review remains in Dynamics. External drafting does not
-itself save a legacy artifact version. No live acceptance or deployment is implied
-by this source package.
+- `get_marketing_knowledge`: approved/current shared and exact-client Skill Cards,
+  practical guidance and all ten specialist briefs; optional current platform/surface
+  evidence. Paged, scoped, redacted and model-free.
+- `read_marketing_artifacts`: exact-client legacy draft/version/decision/handoff reads.
+- `write_marketing_artifact`: externally authored draft/version saves or explicit
+  current-version human decisions, with an atomic actor-scoped retry receipt.
+
+These are source candidates, not installed/live capabilities until the reviewed
+migration and MCP release execute. Missing tools or database seam means unavailable.
+No in-app model, Content Director generation, provider spend, raw full-text document,
+knowledge activation or client publication is added. Canonical ChatGPT-authored
+Content Guidelines retain their existing add/edit/read/share tools.
+
+Use the current `get_my_assistant_bootstrap` coexistence policy; older fallback-only
+skill wording does not override live policy. My Assistant Today/Leads/Project setup,
+Library/Client Guides/Review/Sources/Registration and shared skill consumers remain.
+See [coverage and release gates](../../docs/ops/STAFF-AI-RETIREMENT-2026-11-16.md).

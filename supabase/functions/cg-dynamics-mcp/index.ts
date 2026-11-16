@@ -1,3 +1,4 @@
+import { getMarketingKnowledge, readMarketingArtifacts, writeMarketingArtifact } from './marketingKnowledge.ts'
 // cg-dynamics-mcp — Private authenticated MCP connector for ChatGPT ↔ CG Dynamics.
 //
 // Streamable HTTP MCP endpoint. POST /mcp with JSON-RPC 2.0.
@@ -3576,6 +3577,7 @@ const handleRevokeContentGuidelineShare: ToolHandler = (staff, input) => manageG
 // ── Tool Router ─────────────────────────────────────────────────────────────
 
 const WRITE_TOOLS = new Set([
+  'write_marketing_artifact',
   'submit_monthly_strategy_draft',
   'amend_monthly_strategy_draft',
   'create_task',
@@ -3617,6 +3619,9 @@ const CANONICAL_RECEIPT_REPLAY_TOOLS = new Set([
 ])
 
 const toolHandlers: Record<string, ToolHandler> = {
+  get_marketing_knowledge: getMarketingKnowledge,
+  read_marketing_artifacts: readMarketingArtifacts,
+  write_marketing_artifact: writeMarketingArtifact,
   publish_content_guideline: handlePublishContentGuideline,
   get_content_guideline_share: handleGetContentGuidelineShare,
   revoke_content_guideline_share: handleRevokeContentGuidelineShare,
@@ -3751,6 +3756,7 @@ async function handleToolsCall(
 
   const rawIdempotencyKey = toolInput.idempotency_key as string | undefined
   const isWrite = WRITE_TOOLS.has(toolName)
+  const marketingWrite = toolName === 'write_marketing_artifact'
 
   if (isWrite && (!rawIdempotencyKey || typeof rawIdempotencyKey !== 'string' || rawIdempotencyKey.trim().length === 0)) {
     return jsonRpcError(id, -32602, 'Write tools require an idempotency_key.')
@@ -3771,7 +3777,7 @@ async function handleToolsCall(
   // with different input is still refused.
   let replayThroughCanonicalKey = false
   const operationalCreate = ['create_task', 'create_recurring_task', 'update_task', 'upsert_calendar_event'].includes(toolName)
-  if (isWrite && canonicalIdempotencyKey) {
+  if (isWrite && canonicalIdempotencyKey && !marketingWrite) {
     const inputHash = ['submit_monthly_strategy_draft', 'amend_monthly_strategy_draft'].includes(toolName)
       ? await strategyMcpInputHash(toolInput) : await computeInputHash(toolInput)
     let existing: { duplicate: boolean; result?: unknown }
@@ -3814,7 +3820,7 @@ async function handleToolsCall(
       result = withGuidelineWriteReceipt(result, toolName, staff.profileId, canonicalIdempotencyKey)
     }
 
-    if (isWrite && canonicalIdempotencyKey && !replayThroughCanonicalKey && !ownsOperationalReceipt(toolName, result) && !(operationalCreate && hasError)) {
+    if (isWrite && canonicalIdempotencyKey && !replayThroughCanonicalKey && !marketingWrite && !ownsOperationalReceipt(toolName, result) && !(operationalCreate && hasError)) {
       const inputHash = ['submit_monthly_strategy_draft', 'amend_monthly_strategy_draft'].includes(toolName)
         ? await strategyMcpInputHash(toolInput) : await computeInputHash(toolInput)
       await recordIdempotency(staff.supabase, staff.profileId, toolName, canonicalIdempotencyKey, inputHash, hasError ? 'error' : 'success', audit, result)
@@ -3830,7 +3836,7 @@ async function handleToolsCall(
       isError: !!isError,
     })
   } catch (err) {
-    if (isWrite && canonicalIdempotencyKey && !operationalCreate && !handlerCompleted) {
+    if (isWrite && canonicalIdempotencyKey && !marketingWrite && !operationalCreate && !handlerCompleted) {
       const inputHash = ['submit_monthly_strategy_draft', 'amend_monthly_strategy_draft'].includes(toolName)
         ? await strategyMcpInputHash(toolInput) : await computeInputHash(toolInput)
       try {
