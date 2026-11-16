@@ -39,15 +39,23 @@ Invalidate stale delivery exports after visual amendments: keep them as history,
 but never leave the old HD file selected for a newly revised poster.
 
 A verified palette does not authorise every colour for every role. Read the
-exact-client background-role policy before composing. Wiseman's16November
-review supersedes the R4 execution acceptance: photo-led or charcoal backgrounds,
-restrained honeycomb, and brand colours only in text/small accents. Do not replace
-an unwanted white field with a large brand-colour field. Reference posters are
-style evidence, not permission to reuse their photographs or outdated footer roster.
+exact-client background-role policy and its latest owner clarification. Wiseman's
+16November review favoured a dark/photo-led foundation, but the owner rejected the
+near-monochrome R5 interpretation as overkill. Retain purposeful brand-colour type
+and designed graphic areas while preserving photo depth and restrained honeycomb.
+Do not turn a measured low chromatic-pixel fraction into a creative objective or
+apply a blanket colour ban. Reference posters are style evidence, not permission
+to reuse their photographs or outdated footer roster.
 Check the actual render after changing dark/light treatment: the R5 white school
 headline initially disappeared into the vehicle. Matched source-preserving light
 control across both base and registered overlap cap corrected it; alpha stayed exact.
 This client-specific preference must not become a forced style for other clients.
+
+When a reviewer does not understand a concept, fix the message on the artwork,
+not only its caption. Wiseman DP02's errand/road-trip joke was replaced with the
+literal need, action and destination: parts/tyres, find the right store, details
+online. Its caption explains the Group directory. Keep the road prop illustrative;
+do not imply an actual branch map, nearest-store routing, shared location or stock.
 
 1. Read the owning GitHub issue and current exact-client/month authority.
 2. Fail closed if the exact logo, font licence/file, colour values, branch, product/service fact or source rights are unresolved.

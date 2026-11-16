@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "clientId": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
   "month": "2027-01-01",
-  "status": "charcoal-r5-official-native-verified-held-HD-and-review",
+  "status": "balanced-colour-r6-official-native-verified-held-HD-and-review",
   "ownerMonthConfirmedAt": "2026-11-14",
   "packageBaseline": {
     "designPosters": 4,
@@ -11,7 +11,7 @@
     "videoExcludedFromThisTask": true
   },
   "productionLane": {
-    "state": "four-R5-posters-verified-in-official-master-held-HD-export-and-review",
+    "state": "four-R6-posters-replaced-and-native-verified-held-HD-and-creative-review",
     "masterDesignId": "DAHEfeuQzP4",
     "scheduleMeaning": "Creative windows only; no dated rows, UUIDs, scheduling or publication created. DP numbering is not authoritative posting order.",
     "excludedPackages": [
@@ -87,7 +87,7 @@
       ],
       "mechanism": "original smiling portrait against a textured tyre-wave field; separate sculptural steering motif, right-aligned live typography and bottom-right exact logo",
       "sourceRequirement": "Actual authorised Dunlop library portrait, intact original-pixel face/body; no generative reconstruction.",
-      "sourceStatus": "native-saved-actual-HD-inspected",
+      "sourceStatus": "R6-native-saved-actual-copy-preview-verified-HD-unverified",
       "avoid": [
         "No named current staff role; no automatic clipped-data recovery or skin smoothing.",
         "Reused people/photographs, near-frame substitutes, generic footer templates and unverified offers."
@@ -96,12 +96,12 @@
       "qaState": "blocked-production-local-font-runtime-and-human-approval",
       "workingCanvaDesignId": "DAHa7Hy-_Xs",
       "supersededWorkingDesignId": "DAHa50-3QfY",
-      "nativeDraftQualityState": "Actual saved480x600 native R4 output inspected; source/logo/copy preserved. New HD export unverified, superseded R2 image deselected.",
-      "masterPageId": "PB8Jj94kZ5d19Xhq",
+      "nativeDraftQualityState": "R6 saved/copy records and actual480x600 previews verified; no new full-resolution export or human creative approval.",
+      "masterPageId": "PB258Wybnc7kxczK",
       "masterPageNumber": 40,
       "officialCopyTransferred": true,
-      "artRevision": "automotive-r4",
-      "ownerPreviewAccepted": true
+      "artRevision": "balanced-colour-r6",
+      "ownerPreviewAccepted": false
     },
     {
       "provisionalId": "2027_01_WISEMAN_DP02",
@@ -113,15 +113,15 @@
       "audienceTension": "An unclear destination can turn a simple task into extra stops.",
       "proposition": "Explore the appropriate listed business before setting out; no routing-speed guarantee.",
       "proof": "Ready exact-client guide and current official Group directory; primary government calendar only where relevant.",
-      "emotion": "Recognised and informed; local wit without an invented claim.",
-      "nextAction": "Use the verified Group website to find the appropriate business.",
+      "emotion": "Practical and immediately understandable; no caption-dependent errand joke.",
+      "nextAction": "Use the Group website for store/contact details before travelling.",
       "januaryRelevance": "A customer deciding where to go before leaving home. This is a proposed creative window, not a schedule.",
       "headlineCandidates": [
-        "DON'T MAKE AN ERRAND A ROAD TRIP."
+        "NEED PARTS OR TYRES? FIND THE RIGHT STORE."
       ],
-      "mechanism": "independent sculptural asphalt detour asset on a light material field, live offset headline, bottom-left exact monochrome logo and separated right CTA",
+      "mechanism": "Illustrative sculptural road/pin with purposeful orange route graphic on charcoal, live literal need/action headline and store-details-online CTA; not a real branch map.",
       "sourceRequirement": "Generated decorative road prop only, never a real branch map or client photograph. Exact logo and all text independent.",
-      "sourceStatus": "native-saved-actual-HD-inspected",
+      "sourceStatus": "R6-native-saved-actual-copy-preview-verified-HD-unverified",
       "avoid": [
         "Avoid the old relationship/therapist concept, sound-effects decoding and another office-portrait template.",
         "Reused people/photographs, near-frame substitutes, generic footer templates and unverified offers."
@@ -130,12 +130,12 @@
       "qaState": "blocked-production-local-font-runtime-and-human-approval",
       "workingCanvaDesignId": "DAHa7HhAotA",
       "supersededWorkingDesignId": null,
-      "nativeDraftQualityState": "Actual saved480x600 native R4 output inspected; source/logo/copy preserved. New HD export unverified, superseded R2 image deselected.",
-      "masterPageId": "PBrfWh0vpT9XHfPs",
+      "nativeDraftQualityState": "R6 saved/copy records and actual480x600 previews verified; no new full-resolution export or human creative approval.",
+      "masterPageId": "PBs46FTZyDXFvlPR",
       "masterPageNumber": 41,
       "officialCopyTransferred": true,
-      "artRevision": "automotive-r4",
-      "ownerPreviewAccepted": true
+      "artRevision": "balanced-colour-r6",
+      "ownerPreviewAccepted": false
     },
     {
       "provisionalId": "2027_01_WISEMAN_DP03",
@@ -151,11 +151,11 @@
       "nextAction": "Use the verified Group website to find the appropriate business.",
       "januaryRelevance": "Returning to ordinary driving after a longer summer journey. This is a proposed creative window, not a schedule.",
       "headlineCandidates": [
-        "THE HOLIDAYÃ¢â‚¬â„¢S OVER. THE KILOMETRES STAY."
+        "THE HOLIDAYÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢S OVER. THE KILOMETRES STAY."
       ],
       "mechanism": "actual Group vehicle with registered roof/type overlap, large tightly stacked centred live headline, top-right logo and right-aligned footer",
       "sourceRequirement": "Retain the original owned candidate photograph; historical vehicle-wrap marks are documentary, not current Hi-Q promotion.",
-      "sourceStatus": "native-saved-actual-HD-inspected",
+      "sourceStatus": "R6-native-saved-actual-copy-preview-verified-HD-unverified",
       "avoid": [
         "Avoid duplicating the current tyre-clues/fitment artwork, an existing source, or asserting that every car needs the same work.",
         "Reused people/photographs, near-frame substitutes, generic footer templates and unverified offers."
@@ -164,12 +164,12 @@
       "qaState": "blocked-production-local-font-runtime-and-human-approval",
       "workingCanvaDesignId": "DAHa6dj_8iU",
       "supersededWorkingDesignId": null,
-      "nativeDraftQualityState": "Actual saved480x600 native R4 output inspected; source/logo/copy preserved. New HD export unverified, superseded R2 image deselected.",
-      "masterPageId": "PBsdXDCfCsJzF829",
+      "nativeDraftQualityState": "R6 saved/copy records and actual480x600 previews verified; no new full-resolution export or human creative approval.",
+      "masterPageId": "PBQVQGkmNhkLjGgb",
       "masterPageNumber": 42,
       "officialCopyTransferred": true,
-      "artRevision": "automotive-r4",
-      "ownerPreviewAccepted": true
+      "artRevision": "balanced-colour-r6",
+      "ownerPreviewAccepted": false
     },
     {
       "provisionalId": "2027_01_WISEMAN_DP04",
@@ -189,7 +189,7 @@
       ],
       "mechanism": "actual brake-work photograph and registered subject/type depth against a curved orange service field, top-left exact logo and separate black right website button",
       "sourceRequirement": "Actual authorised Supa Quick brake/hub-work original and exact logo; no generated client people or products.",
-      "sourceStatus": "native-saved-actual-HD-inspected",
+      "sourceStatus": "R6-native-saved-actual-copy-preview-verified-HD-unverified",
       "avoid": [
         "No generated children, reconstructed client photograph, school endorsement, price, opening-hours or blanket service claim.",
         "Reused people/photographs, near-frame substitutes, generic footer templates and unverified offers."
@@ -198,12 +198,12 @@
       "qaState": "blocked-production-local-font-runtime-and-human-approval",
       "workingCanvaDesignId": "DAHa640Ndpc",
       "supersededWorkingDesignId": "DAHa6EwI0Mk",
-      "nativeDraftQualityState": "Actual saved480x600 native R4 output inspected; source/logo/copy preserved. New HD export unverified, superseded R2 image deselected.",
-      "masterPageId": "PBYNFX2VmFY7GnBY",
+      "nativeDraftQualityState": "R6 saved/copy records and actual480x600 previews verified; no new full-resolution export or human creative approval.",
+      "masterPageId": "PBvs3sSwG8V6xkFL",
       "masterPageNumber": 43,
       "officialCopyTransferred": true,
-      "artRevision": "automotive-r4",
-      "ownerPreviewAccepted": true
+      "artRevision": "balanced-colour-r6",
+      "ownerPreviewAccepted": false
     }
   ],
   "photoPosts": [
@@ -287,5 +287,5 @@
     "creativeReview": "Generic New Year launch differs from specific wheel-balancing enquiry; retain it in the whole-month concept check and do not count it as one of the new batch automatically.",
     "reviewFlag": "Apparent Hi-Q mark in its footer; owner excludes Hi-Q from this campaign. Existing page left untouched for staff review, not included in this new batch."
   },
-  "ownerDirectionUpdateId": "8c8ca9a8-1191-429d-ac79-c5aa43585ec1"
+  "ownerDirectionUpdateId": "183f24ca-43c2-41de-aafb-ccabfa93c4ba"
 }

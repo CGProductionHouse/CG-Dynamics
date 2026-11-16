@@ -1,3 +1,34 @@
+## 16November — Wiseman R6 colour/clarity supersedes R5
+
+Owner says R5 removed too much colour and DP02's errand metaphor is unclear.
+Four existing sources now use purposeful yellow/orange/red graphic areas/type on
+the retained photographic/charcoal structure. DP02 is literal: parts/tyres, find
+the right store, details online; revised caption points to the Group directory.
+No new stock, branch, shared-location, routing, price or warranty claims. Fresh
+exact-client caption/footer and transport checks pass; other captions unchanged.
+
+Owner approved exact fresh five-call replacement, executed once with readback
+after each operation. Official `DAHEfeuQzP4` remains102pages and all98other IDs/order
+are exact. Current40–43: DP01`PB258Wybnc7kxczK`, DP02`PBs46FTZyDXFvlPR`,
+DP03`PBQVQGkmNhkLjGgb`, DP04`PBvs3sSwG8V6xkFL`. Plans R5/R6 consumed.
+Source original-photo/logo/mask/prop records retained. Actual four-page master-copy
+QA`DAHbET8uSHs` (labelled TEMP QA ONLY / NOT PRODUCTION) verifies27live text/21media
+and geometry against saved sources; actual480x600 renders match exactly. All27text/
+fourlogo64px margin checks pass. Master102-page editing limit/stale-index-preview
+hazard remain; labelled QA cleanup cannot be done with the present connector.
+
+CG owner correction`183f24ca-43c2-41de-aafb-ccabfa93c4ba` recorded/retrieved,
+unreviewed into guide. Skill/Brand Pack now explicitly reject a blanket monochrome
+rule; proposal/current private registry and DP02 caption binding reconciled. Current
+manifest`delivery-manifest-r6-held.json`; Claude packet held, no concurrent delivery.
+Internal OneDrive R6 recovery ZIP:79entries,28,517,592bytes; local CRC/SHA checked,
+remote name/size read back, remoteSHA not claimed, sharing unchanged. No raw libraries,
+licensed fonts, credentials, signed URLs or claimed HD exports included.
+No new genuineHD, WhatsApp send/tag, client publication or scheduling. Live relevant
+history, human creative approval, January order and normal-company-ChatGPT round
+trip remain unverified. R0; no new generation, editor, runtime dependency, deployment,
+migration or Nolan/Picasso process change. See the R6 colour/clarity evidence file.
+
 ## 16November — Wiseman R5 amendments verified in official master
 
 Owner supplied four Ger-Marie feedback screenshots and explicitly approved the

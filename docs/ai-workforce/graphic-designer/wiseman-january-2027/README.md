@@ -1,3 +1,14 @@
+## 16November — R6 restores colour and clarifies DP02
+
+Owner correction supersedes the near-monochrome R5 interpretation. All four R6
+revisions are saved and verified in official40–43; all98other IDs/order preserved.
+DP02 now states the actual need and next step: parts/tyres, find the right store,
+store details online. Only its caption changed. Current IDs and evidence are in
+[R6 colour/clarity proof](COLOUR-BALANCE-AND-CLARITY-2026-11-16.md). Current selector
+uses `delivery-manifest-r6-held.json`. Native/source/preview and margin checks pass;
+new HD, human creative approval and sending remain pending. Never replay either
+consumed R5/R6 page-replacement plan.
+
 ## 16November — R5 charcoal amendments in the official master
 
 All four R4 executions are superseded by the supplied internal-review direction.
