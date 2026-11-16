@@ -1,5 +1,22 @@
 # Client portal opening viewport correction
 
+## LIVE corrective release
+
+PR #994 runtime89b2083077f35aebd93c5a897377911d432b260f is LIVE on
+www.cgdynamics.co.za atdpl_GwQE8n9fRXGdr13L4Gbjj8VV2iM5. One local prebuild,
+one protected production-target prebuilt stage, verified then promoted unchanged.
+Zero cloud application compilation/preview churn. Login/client/plan/performance
+HTTP200 and exact HTML/JS/CSS byte matches; invalid guideline capability404.
+Live assets index-BP2mPX54.js / index-bhfP52Cz.css; HTML SHA256
+69ff3e31f71df7b3f1c6d08eb12d9a3fdb9d4bc1e4bed4a05b5fb10f81e2c51f.
+Rollback dpl_B8eMyLViZqYRNxae4cR9HXqLhwhB retained. Production/schema/account/
+provider/config/budget unchanged; git deployments OFF. Local build's generated
+lockfile-only drift was restored before upload. No other agent checkout changed.
+Native physical-iPhone acceptance remains unverified; local browser reproduction
+and deployed bytes are not a claim that CA's actual handset was remotely checked.
+
+The source-only release preparation below is retained as the preflight receipt.
+
 Owner: #389 / #381. Follows merged #993; CA's post-release screenshot still
 shows a cropped header/Overview despite the new single-column signal cards.
 The prior live-file checks were accurate but did not prove the phone opening
@@ -51,3 +68,7 @@ Fresh30-day billing reads at2026-11-16T13:46:28Z all succeed: conservatively
 at least3.79USD headroom,3USD reserve, at most0.10USD incremental corrective-release
 allowance. No cap/budget/config change. Charges are delayed, not a real-time guarantee.
 Physical iPhone acceptance remains unverified; no every-device completion claim.
+
+API/behavior references (not evidence of this handset's exact cause):
+https://developer.mozilla.org/en-US/docs/Web/API/VisualViewport and
+https://webkit.org/blog/7367/new-interaction-behaviors-in-ios-10/.
