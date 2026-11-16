@@ -1,3 +1,23 @@
+### 16 November — Claude motion library merged into Nolan; CG brand rules updated
+
+CA asked for Claude's motion-graphics library and everything it used to join the
+official Nolan system so every agent is briefed on CG's brand. Additive only:
+stacked draft PR from `claude/nolan-motion-library-20261116` onto the PR910
+branch (base `codex/nolan-office-research-874` at `3e73bfb5`). It adds the
+overview `references/claude-motion-library-20261116.md`, CG house brief, two case
+studies (CG websites R01-R06, Property Gain Wilgehof R01-R02), four documented
+technique families (57 total, not mastered), owner rules MAP-01/SCENARIO-01/
+ENDCARD-01 and study code with byte-identical regeneration receipts. No new
+renderer, tracker or registry; no deploy (Git deploys OFF).
+
+Production data, CA-approved in chat 16 Nov: `client_brand_rules` — retired
+`1fefef98` (MacBook from above with keyboard, rejected R05); added six CG
+Production House rules and two house rules (end-card full-size check; phone
+number before a listing video's first render). Read back by id. CG websites
+video record `11833c8d` still shows internal_review; CA to approve or request
+changes in Dynamics. Property Gain is not a Dynamics client; nothing created.
+Drive START HERE tab 1 carries the same pointer.
+
 ### 11 November — registration LIVE, seven missing films reconciled; MSI paused
 
 CA requested safe pause for laptop shutdown. Resume tomorrow from this receipt,
