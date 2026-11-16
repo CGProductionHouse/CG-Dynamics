@@ -3,7 +3,7 @@
 import { GOLD_STANDARD_FIELDS, readStrategyData, type ActionPlanKey } from '../../../src/lib/strategyEngine.ts'
 import { selectMonthlyStrategyEvidence, validateMonthlyStrategyProposal } from '../_shared/monthlyStrategyProposal.ts'
 import type { StrategyAutopilotClient } from '../_shared/monthlyStrategyAutopilot.ts'
-import { loadMonthlyStrategyWorkspace, strategyMcpInputHash, strategyMonthIsCurrentOrNext } from './monthlyStrategyWorkspace.ts'
+import { loadMonthlyStrategyWorkspace, strategyMcpInputHash, strategyMonthIsInPlanningWindow } from './monthlyStrategyWorkspace.ts'
 
 type FieldChange = { path: string; expected: string | string[]; replacement: string | string[] }
 const GOLD_PATHS = new Set(GOLD_STANDARD_FIELDS.map(field => `goldStandard.${field.key}`))
@@ -50,7 +50,7 @@ export async function amendMonthlyStrategyFields(
   },
   dependencies: NonNullable<Parameters<typeof loadMonthlyStrategyWorkspace>[4]> = {},
 ) {
-  if (!strategyMonthIsCurrentOrNext(input.today, input.strategyMonth)) return { error: 'CURRENT_OR_NEXT_MONTH_REQUIRED' }
+  if (!strategyMonthIsInPlanningWindow(input.today, input.strategyMonth)) return { error: 'CURRENT_OR_NEXT_TWO_MONTHS_REQUIRED' }
   if (!Number.isSafeInteger(input.expectedVersion) || input.expectedVersion < 1) return { error: 'INVALID_EXPECTED_VERSION' }
   if (!validChanges(input.changes)) return { error: 'INVALID_STRATEGY_FIELD_CHANGES' }
   if (!Array.isArray(input.sourceIds) || !input.sourceIds.length || input.sourceIds.length > 25 || input.sourceIds.some(id => typeof id !== 'string')) return { error: 'INVALID_STRATEGY_CITATIONS' }
