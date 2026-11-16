@@ -1,4 +1,28 @@
-## Latest 16 November — Instagram caption qualification, source only
+## Latest 16 November — LinkedIn private GET-only receipt core
+
+Same draft PR991/#220. Added private fixed-host/versioned GET transport and exact
+organization/post/image status verification; no LinkedIn OAuth/mapping store,
+provider/analytics claim or Edge/MCP/worker registration. #493 connection milestone
+is separate. Credential resolver remains a REQUIRED unimplemented server port
+for current app/role/active exact mappings, with no token/default grant fallback.
+READER public version/media-owner proof is distinct from AUTHOR drafts: later
+unpublished edits cannot hide the original public post; older public copy cannot
+prove a newer job posted. Draft/public regression reproduced/fixed in review.
+Reader404 may use exact pending author evidence; auth/rate/transport errors never
+become absence/healthy. No automatic retry, search, upload or publication. Body/
+time/cancellation/receipt and route bounds enforced; no image URL is fetched.
+CG creative hash/provenance, native rich-commentary/version/provider acceptance
+and actual role/scope entitlement remain gates.69 new/109 affected checks, build/
+emitted app, lint and helper typing pass. Final frozen-source full acceptance:
+**4711 total /4681 pass /30 skipped /0 failures**, including all29 actual isolated
+PostgreSQL checks. Generated unrelated artifacts restored; owned network-none QA
+container stopped. Source review passes within this private read-only increment;
+see the [existing receipt](SOCIAL-PUBLISHING-220-2026-11-15.md).
+No new UI/device/native/provider evidence. FOUR prior migrations unapplied;
+decoder approval pending; no new dependency or production/provider/OAuth/SQL/
+Edge/Microsoft/Vercel action. Main4ee7d503/staff/Nolan preserved; tracker unknown.
+
+## Earlier 16 November — Instagram caption qualification, source only
 
 Same draft PR991/#220. Integrated main4ee7d503/PR993, resolving only this handover's
 prepend conflict and preserving the staff/mobile owner's runtime and release

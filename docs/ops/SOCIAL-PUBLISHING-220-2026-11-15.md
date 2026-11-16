@@ -1,6 +1,66 @@
 # Social publishing — 15 November 2026
 
-## Latest 16 November — Instagram caption qualification and current-main integration, SOURCE ONLY
+## Latest 16 November — LinkedIn read-only photo receipt verification, SOURCE ONLY
+
+Same draft PR #991 / #220. Added private LinkedIn photo status core and a real
+GET-only versioned HTTP transport with REQUIRED server credential resolver. No
+OAuth/mapping/token store, account connection, Edge/MCP/worker registration or
+first-class provider/analytics ownership is introduced. #493's separate connection
+milestone and prerequisites remain its owner's concern; this is publishing-core
+source work under the existing mission, not a new client provider rollout.
+
+Exact client/connection UUID, organization URN, post receipt and image receipt
+are pinned before async work. No post search, inferred IDs, arbitrary URL, upload,
+POST/PUT, permission enlargement, credential refresh or automatic request retry.
+Public verification requires the exact READER version's commentary and recorded
+image, PUBLIC/main-feed distribution without targeting/ad/reshare/group context,
+publication time and AVAILABLE image with the same organization owner. It does
+NOT establish CG creative provenance or image SHA256: a future qualified uploader
+must first bind that recorded image URN to the immutable approved source/hash.
+
+Review reproduced a subtle draft/public mismatch in the new core before fixing:
+a later unpublished AUTHOR edit could hide the already-public original. The
+public reader now wins when it exactly matches the recorded job. Conversely, an
+old public version cannot prove a newer pending caption is posted. A reader404
+or older/unpublished same-post reader may use exact AUTHOR pending/failed evidence;
+permission/rate/network errors remain unavailable. Existing receipts survive every
+outcome. No draft/readiness
+or plain PUBLISHED author marker is sufficient to claim a public photo.
+
+Transport uses only api.linkedin.com/rest, encoded fixed receipt URNs, bearer
+headers, explicit monthly LinkedIn-Version and Rest.li2.0 headers, no redirects
+or downloadUrl follow. Last12-calendar-month admission is a conservative SOURCE
+window, not a claim every version is available/entitled. No latest/unversioned
+fallback; exact version needs native acceptance (202511 is outside this window
+on16 November). Credentials require current exact scope/identity metadata, fresh
+verification and expiry margin; source resolution is still an UNIMPLEMENTED
+private port that must check actual app/role/active mappings before registration.
+Post reads use r_organization_social; Images GET has a separate eligible-scope/
+role requirement. This organic profile does not fall back to member/ads grants.
+Fetch plus body is bounded, cancellation propagated, JSON<=256KiB, fixed sanitized
+diagnostics and maximum three resource GETs per status invocation. No polling loop.
+
+Current primary references: [Posts/reader view](https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/posts-api?view=li-lms-2026-09),
+[post schema](https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/post-api-schema?view=li-lms-2026-09),
+[Images API/access](https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/images-api?view=li-lms-2026-09),
+[versioning](https://learn.microsoft.com/en-us/linkedin/marketing/versioning?view=li-lms-2026-09).
+Exact commentary equality and publishedAt are conservative proof requirements;
+native little-text/rich-commentary projection remains a future qualification gate.
+
+69 new LinkedIn regressions /109 affected checks pass, including actual private
+HTTP composition with synthetic fetch, pending/public/draft states, owner/scope/
+account isolation, permission/rate errors, size/MIME/JSON bounds and cancellation.
+Build/emitted app, scoped lint and TypeScript helper check pass. Final frozen-source
+full acceptance: **4,711 total / 4,681 passed / 30 skipped / 0 failures**, including
+all29 actual isolated PostgreSQL checks. Generated unrelated artifacts restored;
+owned network-none QA container stopped. Source review passes within this private
+read-only increment, not registration/rollout authorization. No native
+Deno/live provider/browser/phone evidence. Existing pipeline integrations and UI
+are unchanged. No new production dependency or migration (FOUR prior candidates
+unapplied); decoder approval remains pending. No production data/SQL/Edge/config/
+provider/OAuth/Microsoft/Vercel action; Teams/sync hold and Nolan remain untouched.
+
+## Earlier 16 November — Instagram caption qualification and current-main integration, SOURCE ONLY
 
 Same draft PR #991 / #220. Brought main4ee7d503 (PR993) into this branch; only
 handover prepend conflict required resolution. Preserved BOTH the staff/mobile
