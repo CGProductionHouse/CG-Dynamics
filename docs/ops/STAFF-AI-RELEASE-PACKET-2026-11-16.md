@@ -3,7 +3,7 @@
 Status: PREPARED, NOT RELEASE AUTHORITY. No production connection, hosted acceptance,
 PR merge to main, production migration application or deployment was used for this readiness pass. Current main was integrated into this candidate only. The final
 preparation commit is identified in the task handoff; freeze its exact SHA before any
-release. Recovered candidate: `0b1a7b895bdb9597450a289cd23993ef35aff510`. Main integration commit: `092f929d66f11a64d275f09be12d47cb8573b551`. The final tested code and receipt SHAs are recorded in the combined receipt below.
+release. Recovered candidate: `0b1a7b895bdb9597450a289cd23993ef35aff510`. Main integration commit: `092f929d66f11a64d275f09be12d47cb8573b551`. The tested code SHA is recorded in the combined receipt below; the receipt-only final head is reported in the task handoff.
 
 ## Scope and compatibility freeze
 
@@ -240,3 +240,25 @@ separate explicit authorization. No need to rebuild the feature or duplicate #99
 PR-description publication remains previously rejected by automatic review and was not
 retried. This committed packet and the task handoff are the current review evidence;
 the old PR body is not a current parity or release receipt.
+
+## Final combined verification receipt
+
+[Machine-readable receipt](STAFF-AI-COMBINED-VERIFICATION-2026-11-16.json) pins tested
+code `412fa43cec6cd75e164e5689b0cea4e01152cf6e`, main `34c4552e`, workbook
+`49136f9c`, and temporary combined tree `f18282fe7b42adbf1fd8f642a48ffef2d161c4fa`.
+Candidate: 456/456 selected tests, production TypeScript/Vite build, lint zero errors
+(17 warnings), all three native Deno dependency graphs, and nine real-Auth assertion
+groups passed. Combined tree: 503/503 selected tests and production build passed.
+The combined tree has identical Edge, monthly-strategy parser and dependency files;
+workbook source was never absorbed into this candidate. Log digests preserve provenance;
+raw logs remain local and are not hosted CI artifacts.
+
+The final refetch found main `206f4df9cc845a1b818f96fa4ab43ef1922b7772` (#1000),
+which only removes the hourly dispatch schedule. It was integrated in
+`6df3bfb70e5ad76b78b0039414fd4a79960dab9c` after testing. That workflow delta was
+inspected, not executed; application/test source is byte-identical to the tested head.
+Workbook remains `49136f9c693f83565605d2fcdc7dc1b5807e697c`. Final receipt changes
+are documentation only. This does not extend acceptance to later remote advancement.
+Hosted target compilation/JWT/RLS, installed ChatGPT/Nolan and authenticated browser
+acceptance, exact-SHA approval, current budget/reserve and rollback inventory remain
+required before release. No cloud operation was performed.

@@ -1,0 +1,64 @@
+{
+  "tested_candidate": "412fa43cec6cd75e164e5689b0cea4e01152cf6e",
+  "tested_candidate_tree": "2c05c457b319c5850c99100246d82cab24bfcede",
+  "tested_main": "34c4552ec5108d1bb0aab49140da7ee2807de08b",
+  "latest_integrated_main": "206f4df9cc845a1b818f96fa4ab43ef1922b7772",
+  "late_main_merge": "6df3bfb70e5ad76b78b0039414fd4a79960dab9c",
+  "late_main_change": "Only removes hourly dispatch schedule; inspected, not executed. Application source remains identical to tested candidate.",
+  "workbook_head": "49136f9c693f83565605d2fcdc7dc1b5807e697c",
+  "workbook_tree": "290777f28d5a48697193b0bcb0310d95b699a1ec",
+  "temporary_combined_tree": "f18282fe7b42adbf1fd8f642a48ffef2d161c4fa",
+  "candidate_tests": {
+    "pass": 456,
+    "fail": 0,
+    "skip": 0
+  },
+  "combined_tests": {
+    "pass": 503,
+    "fail": 0,
+    "skip": 0
+  },
+  "builds": "candidate and temporary combined tree tsc -b / Vite passed",
+  "lint": {
+    "errors": 0,
+    "warnings": 17
+  },
+  "native_deno": "Three Edge graphs pass with documented validation-only npm map, sloppy imports and browser env types; as-authored esm.sh blocked by environment403",
+  "real_auth": {
+    "completed": true,
+    "checks": [
+      "GoTrue signup/password JWTs; metadata cannot promote profile role",
+      "real JWT canonical review/activation; role/client/source isolation; private storage projection",
+      "tampered JWT, wrong password and direct private receipt reads denied by actual Auth/REST",
+      "all five native Deno MCP additions: real Auth getUser, source/knowledge/activation/history/draft, replay, foreign-client/role/direct-RPC denial",
+      "actual retired handlers: active staff/manager/admin 410; client/inactive 403; missing bearer 401; outbound provider network unavailable",
+      "ownership-summary RPC: active manager succeeds and same real JWT is denied after account deactivation",
+      "latest five workbook guards unchanged: all five MCP tools, retries, foreign-client/role/inactive denial and retired handlers pass together",
+      "new debrief guard: active admin reaches canonical missing-record validation; same JWT after deactivation is denied before record access",
+      "already-issued real JWT denied after profile deactivation; restored only in synthetic fixture"
+    ],
+    "images": {
+      "db": "postgres@sha256:a77aa70e641402a21411b92b721c58d10f23b50ae5fdd2333efd22d166e1e5f7",
+      "auth": "supabase/gotrue@sha256:1736a63078f5922b198c4cbe50f80ab9a2d3b54fe8b7b6cfb2e9dc5dbbc12c6b",
+      "rest": "postgrest/postgrest@sha256:c7cd7e265a85b05248abf53f4473fcec7e327c282d0bd0cf60f1551996d09fcf"
+    },
+    "canonical_files_applied": 205,
+    "known_historical_replay_gaps": 11
+  },
+  "compatibility_limits": [
+    "Temporary combined tree only: workbook not merged into candidate",
+    "Five workbook guard drafts applied unchanged solely to disposable DB",
+    "Combined tree Edge graphs, monthlyStrategySeed and package/lock files identical to tested candidate",
+    "No hosted, installed ChatGPT/Nolan or browser acceptance claimed",
+    "No production connection, migration apply, merge to main, deployment or spending"
+  ],
+  "local_log_sha256": {
+    "cg-412fa43c-regression.log": "d38072600626a739149be87b16d20691339bf2482a58c9d9f6cc9e88062c3bfb",
+    "cg-412fa43c-build.log": "2bac136bd0e16b7c80da42dc9eedbefc8be880ba26b921ad48027cf2d336e73f",
+    "cg-412fa43c-lint.log": "d6817ed974f291fba6f6be0354ed277371178dabc9ac750034ce601cbc823c8e",
+    "cg-412fa43c-deno.log": "13cd01a146a8e9f1c6ea19962dcb202ae545de5a9b35c14a26d67d0f72486b1f",
+    "cg-412fa43c-auth.log": "401733b187b581d446bd1cb755824b842af5ac1edbb87ee1c4b9917969a7d75b",
+    "cg-combined-tree-tests.log": "60a4f449512be7d6c5923705994e5eeaf551ced4e26e3226c9c8fb600c7e9d88",
+    "cg-combined-tree-build.log": "e1735f118855a563c69d8dd6ad50b33063af9064458e60a72d55f88f621277a4"
+  }
+}

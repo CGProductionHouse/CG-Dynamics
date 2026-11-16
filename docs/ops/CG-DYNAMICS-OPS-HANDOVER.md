@@ -1,3 +1,13 @@
+## 16 November — PR #995 final local compatibility receipt, NOT LIVE
+
+Tested code412fa43c: 456 tests, build, native Deno and nine real-Auth groups pass;
+combined workbook49136f9c tree: 503 tests/build pass. Lint zero errors/17 warnings.
+Main206f4df9 integrated after testing: only removes hourly dispatch; app source unchanged.
+Main Madison handover preserved verbatim. No workbook guard source absorbed.
+[Exact refs and limits](STAFF-AI-COMBINED-VERIFICATION-2026-11-16.json);
+[staged release gates](STAFF-AI-RELEASE-PACKET-2026-11-16.md). Hosted/installed/browser
+acceptance remains pending. No deployment, production migration, spend or PR-body retry.
+
 ## 16 November — PR #995 integrated-main / workbook compatibility checkpoint
 
 Main34c4552 integrated in092f929d, preserving Madison and all prior handovers; no PR
