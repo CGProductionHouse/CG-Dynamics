@@ -1,5 +1,54 @@
 # Cape Lumber — January 2027 working production
 
+## 16 November delivery complete — current authority
+
+The owner accepted the artwork and explicitly authorised HD export/checks and
+delivery of these four drafts. All four were sent once from verified Nolan in
+company Chrome to **CG Picasso Approvals**, individually with their allocated
+unsigned captions, at **18:36, 18:37, 18:38 and 18:39 SAST**. Fresh readback shows
+four distinct message IDs, all **Delivered**, an HD icon on each, exact caption
+text and 2048x2560 WhatsApp media. Genuine source exports remain2160x2700.
+**Do not resend.** Internal delivery does not establish client approval,
+authoritative posting dates, scheduling or portal-final promotion.
+
+Corrected DP01 R4 was exported through Canva PNG High2x and its actual HD timber
+edge inspected. The other three verified R3 exports remain selected. All four
+clean derivatives preserve decoded export pixels; no invented ICC certificate.
+Eight presenter-note readbacks (four source and four official master) match the
+current phone-first caption files exactly. Existing footer/transport checks pass.
+
+Bounded actual-image reuse evidence now includes234 official-master history
+previews, all73 visible Instagram post covers,20 observed Facebook images and
+eight9November Cape approval-queue artworks. Actual boards were visually reviewed;
+the additional101 social/queue images completed source comparison with zero read
+errors and no suspected matches. Actual Instagram interiors/complete lifetime
+Facebook history are not exhausted; available WhatsApp web history is limited.
+This is an internal-review gate pass, never a global unused-photo certificate.
+The seasonal procurement theme recurs in prior work; exact source photographs,
+headlines and composition differ. DP01/02 and DP03/04 same-shoot pairings remain
+visible, without biometric identity processing.
+
+Private current evidence: `current-export-selector.private.json`,
+`HD-r4/export-receipt.private.json`, `caption-note-sync-receipt.private.json`,
+`bounded-reuse-check-final.private.json`, `instagram-source-comparison.private.json`,
+`facebook-queue-source-comparison.private.json`, `delivery-ledger-final.private.json`
+and `whatsapp-delivery-proof.jpg` under the job root below. Originals, photos,
+message IDs and private chat screenshots stay outside Git.
+
+Next: await actual internal creative feedback; amend only changed owned working
+pages and send only changed drafts when authorised. The historical checkpoint
+below records how this state was reached; its pending-export/notes/send statements
+are superseded by this delivery receipt. R0 incremental cost, no production,
+schedule, hosting, dependency or other-agent changes.
+
+Verification for this delivery: four exact-caption/unique-message/HD/dimension
+receipt assertions pass; all four transport and footer checks pass; `git diff
+--check` and `npm run build` pass. Build retains existing stale Browserslist and
+large-chunk advisories. This checkpoint changes four documentation/Brand Pack
+files only; no application runtime, data or role/access changes.
+
+## Earlier saved-artwork checkpoint — superseded pending items
+
 Owner request16November: create four fresh designed posters first. Continue #948 /
 draft PR#956 on the existing branch. Four photo posts were an estimate: current
 Dynamics package is **4DP / 3photo / 0video**. Photo work is deferred. January has

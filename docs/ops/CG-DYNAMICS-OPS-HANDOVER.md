@@ -1,4 +1,27 @@
-## 16November — Cape Lumber January four drafts saved and inserted
+## 16November18:39 — Cape Lumber four HD drafts delivered
+
+Supersedes pending-export/notes/send statements in the earlier checkpoint below.
+Owner accepted the artwork and explicitly requested export/checks/send. Corrected
+DP01 R4 genuine2160x2700 PNG exported and inspected; other three current R3 HDs
+retained. All eight source/official caption notes match allocated unsigned
+phone-first files. Actual bounded reuse evidence includes234 Canva history pages,
+73 Instagram covers,20 observed Facebook images and eight queued Cape artworks;
+101 additional-image comparisons complete with zero read errors/no suspected
+matches. Carousel interiors/lifetime Facebook/limited web-chat history and
+same-shoot pairings remain explicit limits; no global unused-photo certificate.
+
+Four individual HD photo+caption messages sent once from verified Nolan in the
+existing company Chrome to **CG Picasso Approvals**,18:36–18:39 SAST. Fresh readback:
+four unique IDs, all **Delivered**, all HD icons, exact unsigned captions,
+2048x2560 WhatsApp media versus2160x2700 source exports. Private ledger and screenshot
+retained under the Cape job root. **Do not resend.** Await internal feedback;
+no client approval, posting order/date, portal-final or publication inferred.
+Official238-page master/all234old IDs preserved; no further merge/restructure.
+Same #948/draft#956 lane; R0, no deployment/production SQL/schedule/dependency,
+account-access, restart or other-agent changes. Control Centre exact reference
+remains unavailable; no guessed write. See current Cape README and production queue.
+
+## Earlier16November — Cape Lumber January four drafts saved and inserted
 
 Owner starts four fresh January2027 posters, photo posts later. Current Dynamics
 package4DP/3photo/0video; January dated rows empty. Same #948/draft#956 branch,

@@ -53,7 +53,7 @@
     ],
     "phone": "+27 71 353 4261",
     "email": "info@capelumbermarketing.co.za",
-    "savedNotesNeedSync": true
+    "savedNotesNeedSync": false
   },
   "restrictions": [
     "Supplier, not contractor or installer",
@@ -72,12 +72,21 @@
     "newHosting": false
   },
   "deliverableState": {
-    "DP01": "Saved R4 native; current genuine HD export pending",
+    "DP01": "Saved R4 native; genuine 2160x2700 HD checked; delivered internal review",
     "DP02": "Saved R3; genuine 2160x2700 HD checked",
     "DP03": "Saved R3; genuine 2160x2700 HD checked",
     "DP04": "Saved R3; genuine 2160x2700 HD checked",
-    "humanCreativeApproval": false,
+    "humanCreativeApproval": true,
+    "approvalScope": "Owner accepted for internal review; client approval pending",
+    "clientApproval": false,
     "masterInserted": true,
-    "messagesSent": 0
+    "messagesSent": 4,
+    "messagesDelivered": 4,
+    "deliveryDate": "2026-11-16",
+    "deliveryTimesSAST": ["18:36", "18:37", "18:38", "18:39"],
+    "deliveryGroup": "CG Picasso Approvals",
+    "captionSignatures": false,
+    "whatsappMediaDimensions": [2048, 2560],
+    "deliveryReplay": "DO NOT RESEND; await actual feedback"
   }
 }

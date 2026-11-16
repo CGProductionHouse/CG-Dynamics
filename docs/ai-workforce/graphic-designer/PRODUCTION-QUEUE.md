@@ -6,9 +6,14 @@ Current16November: **Cape Lumber January2027 four posters** are the active owner
 request. Saved source DAHbFhGSrvg and exact-approved official DAGVuJURh6I insertion
 complete (master238pages, all234prior IDs/order preserved). New actual27–30 order
 is DP04/DP03/DP02/DP01; no posting dates assigned. Current source DP01R4, othersR3.
-Three current HD files checked; corrected DP01R4 HD export and caption-note sync
-pending browser recovery. Actual live-social/approval-history reuse gate and human
-creative approval remain outstanding. No sends. See
+All four current genuine2160x2700 exports checked, corrected DP01R4 included;
+all eight source/master caption notes synchronised and read back. Owner accepted
+the artwork and authorised delivery. Actual234-page Canva /73 Instagram cover /
+20 Facebook image /8 queued-artwork checks retained with explicit coverage limits.
+Four individual unsigned HD photo-plus-caption messages are **Delivered** to
+CG Picasso Approvals from Nolan,16November18:36–18:39 SAST. WhatsApp media2048x2560;
+four unique IDs/exact captions/HD icons verified privately. **Do not resend.**
+Await internal feedback; client approval, January dates and portal finals remain open. See
 [cape-lumber-january-2027/README.md](cape-lumber-january-2027/README.md).
 
 Wiseman four revised HD poster-plus-caption messages and separate Amonique mention
