@@ -12,7 +12,20 @@ test('same-origin acceptance runner preserves production guards and never substi
  assert.doesNotMatch(browser,/add_init_script|storage_state\s*=|connect_over_cdp|args\s*=|setSession\(/)
  assert.match(await readFile('src/lib/nolanDecisionApi.ts','utf8'),/NOLAN_DECISIONS_ACCEPTED = false/)
  assert.equal(JSON.parse(await readFile('vercel.json','utf8')).git.deploymentEnabled,false)
- const parsed=spawnSync('python3',['-c',"import ast; ast.parse(open('scripts/nolan-same-origin-browser.py').read())"],{encoding:'utf8'})
+ const parsed=spawnSync('python3',['-c',`
+import ast
+tree = ast.parse(open('scripts/nolan-same-origin-browser.py').read())
+parents = {child: parent for parent in ast.walk(tree) for child in ast.iter_child_nodes(parent)}
+for action in ['revoke-manager', 'restore-manager']:
+    calls = [n for n in ast.walk(tree) if isinstance(n, ast.Call) and isinstance(n.func, ast.Name)
+             and n.func.id == 'scenario' and n.args and isinstance(n.args[0], ast.Constant)
+             and n.args[0].value == action]
+    assert len(calls) == 1, action
+    parent = parents.get(calls[0])
+    while parent:
+        assert not (isinstance(parent, ast.If) and "manifest['decisions']" in ast.unparse(parent.test)), action + ' must cover read-only mode'
+        parent = parents.get(parent)
+`],{encoding:'utf8'})
  assert.equal(parsed.status,0,parsed.stderr)
 })
 

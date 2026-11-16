@@ -150,8 +150,15 @@ gate remains; this candidate is not a claim of completed live-board backfill.
 Latest integration follow-up: main `34c4552ec5108d1bb0aab49140da7ee2807de08b`
 adds Madison acceptance; its complete entry is preserved above. Separate commit
 `1b39dfece9106292571cd7ad0e0cba03096ea4e8` removes only hourly autonomous schedule;
-manual dispatch is unchanged. Effective only after separately approved main merge.
+manual dispatch is unchanged. Extracted draft PR1000 was independently approved
+and merged as `206f4df9cc845a1b818f96fa4ab43ef1922b7772`; main now has no hourly
+schedule. PR990 cleanly integrates with that exact main (no merge/rebase here).
 Local build passed; no workflow execution, duplicate-PR closure or issue churn.
+
+Read-only browser-runner coverage repaired: manager revocation/recovery now runs
+with Needs You off too. Local guards/AST/cancellation: 2 pass, 1 API skip; browser
+remains unexecuted, requiring an approved normal-sandbox same-host engine.
+[Exact runnable commands and limits](NOLAN-SAME-ORIGIN-ACCEPTANCE-2026-11-16.md).
 
 PR990 functional checkpoint `dcf24f98098b5da0fc1c2ef217588989fd26a556`: 12 genuine
 Auth/API tests passed, local build/lint passed. Debrief atomicity, sync create/

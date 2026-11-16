@@ -54,6 +54,13 @@ def run(manifest_path):
                 page.get_by_role('button', name='Sign out', exact=True).first.click()
                 page.wait_for_url('**/login', timeout=30000)
 
+            def scenario(action):
+                # Private fixture administration, never app session/auth injection.
+                response = context.request.post(origin + '/__nolan_acceptance/scenario',
+                                                headers={'x-nolan-fixture-control': manifest['fixtureControl']},
+                                                data={'action': action})
+                assert response.status == 204, 'Isolated scenario failed'
+
             login('admin')
             page.goto(origin + '/admin/work?tab=nolan&nolan_view=master')
             expect(page.get_by_role('heading', name='Master schedule', exact=True)).to_be_visible()
@@ -84,13 +91,6 @@ def run(manifest_path):
             expect(page.get_by_role('heading', name='Master schedule', exact=True)).to_be_visible()
             page.get_by_role('navigation', name='Work views').get_by_role('button', name='Needs You', exact=True).click()
             if manifest['decisions']:
-                def scenario(action):
-                    # Private fixture administration, never app session/auth injection.
-                    response = context.request.post(origin + '/__nolan_acceptance/scenario',
-                                                    headers={'x-nolan-fixture-control': manifest['fixtureControl']},
-                                                    data={'action': action})
-                    assert response.status == 204, 'Isolated scenario failed'
-
                 def prepare_question(question):
                     page.get_by_label('Native Dynamics task UUID', exact=True).fill(manifest['taskId'])
                     page.get_by_role('button', name='Read source and eligible recipients', exact=True).click()
@@ -148,21 +148,32 @@ def run(manifest_path):
                 expect(page.get_by_text('Synthetic stale-response question', exact=True)).to_be_visible()
                 expect(page.get_by_text('Source changed or recipient unavailable.', exact=False)).to_be_visible()
                 expect(page.get_by_role('button', name='Record response only', exact=True)).to_have_count(0)
-                scenario('revoke-manager')
-                page.get_by_role('button', name='Refresh requests', exact=True).click()
-                expect(page.locator('section[aria-label="Explicit decision requests"]').get_by_role('alert')).to_be_visible()
-                expect(page.get_by_text('Synthetic stale-response question', exact=True)).to_have_count(0)
-                page.get_by_role('navigation', name='Work views').get_by_role('button', name='Master schedule', exact=True).click()
+            else:
+                expect(page.get_by_text('Needs You is not activated.', exact=False)).to_be_visible()
+            logout()
+            # Required for the read-only release too, independent of Needs You.
+            login('manager')
+            page.goto(origin + '/admin/work?tab=nolan&nolan_view=master')
+            expect(page.get_by_role('heading', name='Master schedule', exact=True)).to_be_visible()
+            expect(page.get_by_text('Task source read completed.', exact=False)).to_be_visible()
+            scenario('revoke-manager')
+            try:
+                if manifest['decisions']:
+                    page.get_by_role('navigation', name='Work views').get_by_role('button', name='Needs You', exact=True).click()
+                    page.get_by_role('button', name='Refresh requests', exact=True).click()
+                    expect(page.locator('section[aria-label="Explicit decision requests"]').get_by_role('alert')).to_be_visible()
+                    expect(page.get_by_text('Synthetic stale-response question', exact=True)).to_have_count(0)
+                    page.get_by_role('navigation', name='Work views').get_by_role('button', name='Master schedule', exact=True).click()
                 page.get_by_role('button', name='Refresh status', exact=True).click()
                 expect(page.locator('.native-error')).to_contain_text('Current account authorization changed')
                 expect(page.locator('.nolan-master-task')).to_have_count(0)
+            finally:
                 scenario('restore-manager')
-                page.get_by_role('button', name='Refresh status', exact=True).click()
-                expect(page.get_by_text('Task source read completed.', exact=False)).to_be_visible()
+            page.get_by_role('button', name='Refresh status', exact=True).click()
+            expect(page.get_by_text('Task source read completed.', exact=False)).to_be_visible()
+            if manifest['decisions']:
                 page.get_by_role('navigation', name='Work views').get_by_role('button', name='Needs You', exact=True).click()
                 expect(page.get_by_text('Synthetic stale-response question', exact=True)).to_be_visible()
-            else:
-                expect(page.get_by_text('Needs You is not activated.', exact=False)).to_be_visible()
             logout()
             for role in ['staff', 'client']:
                 login(role)

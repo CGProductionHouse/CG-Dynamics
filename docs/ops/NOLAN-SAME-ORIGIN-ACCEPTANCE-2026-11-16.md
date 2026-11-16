@@ -5,6 +5,35 @@ Remote branch and main (`f89fefea70108bfe417953d00330476530aa9c4d`) checked befo
 work. No production code, auth, schema, activation or deployment configuration
 changed. The existing synthetic review artifact is untouched.
 
+## Read-only acceptance coverage follow-up — 16 November
+
+Reconciled PR990 `49136f9` with main `206f4df9cc845a1b818f96fa4ab43ef1922b7772`;
+local merge-tree is clean. PR995 remains separately owned at observed `0b1a7b8`.
+The browser runner previously placed manager revocation/recovery inside the
+Needs You opt-in branch. It now signs in as manager and verifies Master access,
+revoked-profile data clearing and restored-profile refresh in **both** modes.
+Decision-specific checks remain opt-in; fixture profile restoration uses finally.
+No production code or guard changes, invented evidence or new source authority.
+
+On an approved same-host normal-sandbox runtime only:
+
+```sh
+# Shell 1: actual app + genuine isolated services, read-only scope first.
+node scripts/nolan-same-origin-acceptance.mjs --serve
+# Shell 2: use the exact privateManifest path printed by shell 1.
+NOLAN_APPROVED_SANDBOX_HOST=1 NOLAN_APPROVED_CHROMIUM=/approved/chromium \
+  python3 scripts/nolan-same-origin-browser.py /exact/private-browser-manifest.json
+```
+
+Checklist: admin Master/search/details/failure recovery/navigation; manager normal
+access/revocation/data clearing/reactivation; staff/client exclusion; 390/1440
+emulated widths. Stop Shell 1 with Ctrl-C for cleanup. A separate run with
+`--enable-decisions-for-isolated-acceptance` adds the existing real create/retry/
+stale-response journey. Neither run has executed in this blocked browser runtime.
+Local runner guard/AST and cancellation checks passed (2 pass, 1 API test skipped);
+these are not browser or new API acceptance. Existing genuine API receipts retain
+their original scope. No browser launch/download, remote session, tunnel or spend.
+
 ## Structured execution evidence investigation: bounded stop
 
 The canonical task schemas/readers (`CommandCentreTask`, `PlannerTask`, ordered
