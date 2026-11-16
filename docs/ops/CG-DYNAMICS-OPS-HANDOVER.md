@@ -1,3 +1,27 @@
+## 16 November — Madison current portal accepted; narrow guide fix LIVE
+
+CA prioritised Madison Wear7b47afb0-fa55-4916-85f6-09c57e5905b9. Real issued login
+200/exact client, October report published15:51:30UTC and manually reviewed current
+November strategyv5 published15:56:51UTC. Actual client reads report/22facts across
+FB/IG/TikTok, Plan ten fields/2videos8photos8posters, protected logo PNG200;
+foreign real Novus posts/facts/Ads/calendar denied403, asset404, no draft leakage.
+No credentials in repo/issues, reset, provider permission/mapping, package,
+website, schema/migration, Vercel or other-agent change.
+
+33Meta posts refreshed;35historical rows retained/two not-returned Facebook posts
+guardedly excluded from current comparisons pending confirmation, NOT deleted.
+Staff report hash unchanged. TikTok1video refreshed, native semantics preserved;
+missing unique viewers stays null. No Ads mapping is not zero or entitlement.
+Decemberv3/Januaryv1 real drafts; actual assets/dates not invented.
+
+Parser omitted approved guide's Content directions heading, producing false
+EXACT_STRATEGY_EVIDENCE_UNAVAILABLE. One-word alias, no trust-gate/data change;
+two failing-before regressions now pass,138focused/245broader strategy tests,
+build/lint/full hosted Deno/diff green. Existing MCPv84 exact41-file readback,
+other40/auth unchanged; actual brief admits same approved guide. No frontend or
+worker release implied. [Exact receipt/limits](MADISON-CLIENT-READINESS-2026-11-16.md).
+Same normal author/hourly task continues. Tracker target unavailable, no guessed write.
+
 ## 16 November — Novus actual client login/current plan accepted; fleet continued
 
 CA requested Novus client-ready and exact forwardable credentials, then other
