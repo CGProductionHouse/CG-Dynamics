@@ -197,10 +197,13 @@ the existing lockfile with scripts disabled and a temporary cache; no dependency
    fresh billing/headroom/reserve, maximum incremental spend, prior rollback deployment,
    one local prebuilt artifact/stage/promotion and affected-domain uptime evidence.
    Keep `vercel.json` git.deploymentEnabled=false. Push is not deploy authorization.
-5. Separately approve and deploy only the two changed existing Edge entry files with
-   their unchanged dependency closures/settings/JWT/auth. Verify deployed bytes and
-   legitimate-role410 plus client/anonymous denial, no usage/artifact writes. No SQL.
-   Roll out Edge retirement before the frontend so stale generation requests fail closed.
+5. Separately approve the two additive migrations, changed MCP entry/catalog/module
+   and the two retired Edge entry files with their shared dependency closures and
+   unchanged JWT/auth settings. Apply reviewed migrations before exposing MCP writes;
+   verify receipt permissions and active-account/exact-client/version denial, including
+   the ownership-summary RPC. Verify retired Edge bytes and legitimate-role410 plus
+   client/anonymous denial, with no provider usage or generation writes. Roll out Edge
+   retirement before the frontend so stale generation requests fail closed.
 6. Promote the reviewed frontend only after the above. Verify emitted/source assets,
    legacy-link handoff, absence of composer chunks and real staff/manager behavior.
    Old already-open bundles can still contain deterministic RPC UI until reloaded;
