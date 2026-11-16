@@ -26,8 +26,8 @@ keys with different inputs fail. Inactive actors are denied even for retries. Ge
 MCP status receipts are bypassed for this tool so no successful replay loses original
 IDs. No legacy helper, profile policy or RLS migration from #990 was changed. No
 production database access or permission expansion occurred. #996 owns strategy-date
-work; its runtime logic was not edited. Shared index/catalog need normal integration
-review with #996 before release.
+work; its runtime logic was not edited. Main1c1bd36 (#996) is integrated; both existing
+January strategy rules and new catalog entries are verified together.
 
 The earlier source-only preservation gap below is HISTORICAL and superseded for
 these named workflows. This is not blanket parity: no legacy campaign reassignment,
@@ -46,6 +46,26 @@ schema change adds no new authenticated/anon grants. Do not roll it back by dele
 history or receipts. Preserve My Assistant/staff_assistant_profiles and all Library
 management surfaces. #679 hosting gates and legitimate browser/ChatGPT/Nolan acceptance
 remain mandatory.
+
+### Continuation verification
+
+Integrated runtime/source tree: merge `1c77695` includes main `1c1bd36` (#996).
+Final focused suite:322pass/0fail/0skip (19.27s). This includes the actual MCP
+routing/canonical-key path, existing MCP context/client/operational/strategy contracts,
+shared approval freshness, retirement guards, new knowledge/scope/redaction fixtures,
+and real isolated PostgreSQL execution. SQL tests exercise atomic append/replay/conflict,
+wrong-client/stale-version/unapproved/expired/foreign-scope evidence denial, explicit
+human decisions, manager-only approval, history immutability, inactive-actor retry
+refusal, connection impersonation denial and authenticated receipt/RPC denial.
+The existing operational PostgreSQL fixture also ran (not skipped).
+
+PGlite was installed only under `/tmp/cg-marketing-db`, with no production dependency
+or lockfile change. The new module/catalog pass strict TypeScript against the existing
+Supabase client types using a validation-only URL mapping. Scoped runtime lint and
+final application build are recorded on the PR. These checks do not substitute for
+native hosted Deno, real installed connector sessions or production migration acceptance.
+The initial candidate's full-suite result below is historical; a new full-suite pass
+is not claimed for this continuation. No paid generation or live writes performed.
 
 ## Original removal candidate and receipt (historical; see continuation above)
 

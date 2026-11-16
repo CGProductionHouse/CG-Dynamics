@@ -5,7 +5,7 @@ platform evidence, exact-client legacy Marketing history, and externally authore
 immutable drafts/human decisions through three new MCP tools (62total). Fifth plugin
 skill added; original four preserved. Atomic service-only actor/client/version/evidence/
 receipt migration is UNAPPLIED. No provider calls, production changes, profile helper
-or #990 RLS edits; #996 strategy-date logic retained for integration review.
+or #990 RLS edits; #996/main1c1bd36 integrated without changing its strategy-date logic.
 [Coverage, limits and expanded release gates](STAFF-AI-RETIREMENT-2026-11-16.md).
 My Assistant and all Library governance surfaces remain. Not a live/full-parity claim.
 
