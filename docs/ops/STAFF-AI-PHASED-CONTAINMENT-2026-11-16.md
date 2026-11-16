@@ -101,3 +101,11 @@ cached PGlite passed all 18 tests with zero skips. Production tsc/Vite build pas
 Byte comparison confirms the entire supabase tree, chatgpt-plugin, src/lib,
 package files and vercel.json are unchanged from the exact base. The original
 parity worktree remains untouched. These are local results, not browser acceptance.
+
+Phase B separated verification: 12 handler tests passed (chat/default/unknown and
+Marketing run across five staff roles; client/inactive/unauthenticated/method gates),
+zero failures/skips. Scoped ESLint and native Deno check of both complete entry graphs
+passed using #995's explicit validation-only npm map/sloppy imports/browser env types.
+As-authored hosted esm.sh resolution remains unverified. Frontend build is reused
+from byte-identical phase A. Exact eight-line backend delta matches the previously
+real-Auth-tested #995 handlers; no new real-Auth run is claimed for this local split.

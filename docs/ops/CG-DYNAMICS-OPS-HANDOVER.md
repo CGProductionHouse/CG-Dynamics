@@ -4,6 +4,8 @@ Existing #995 task prepared an isolated frontend-only extraction against main206
 No new tools, migrations or backend changes in phase A; optional separate two-handler
 410 phase B also needs no migration. PR995 full-parity source remains unchanged.
 [Scope, cached-client risk and narrow release gates](STAFF-AI-PHASED-CONTAINMENT-2026-11-16.md).
+Phase A is local066b1a15. Separate phase B adds only two authenticated 410 guards;
+12 handler tests/native Deno pass, no schema/plugin changes. Both are review artifacts.
 No deployment, main merge, settings changes or spending authorized/performed.
 
 ## 16 November — Madison current portal accepted; narrow guide fix LIVE
