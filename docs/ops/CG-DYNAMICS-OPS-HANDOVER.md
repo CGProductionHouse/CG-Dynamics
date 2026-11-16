@@ -34,6 +34,29 @@ Read [scope, parity limits and release gates](STAFF-AI-RETIREMENT-2026-11-16.md)
 staff-desktop operation; #679 remains mandatory. Live external acceptance and raw
 legacy marketing artifact/skill-search parity are explicitly not claimed.
 
+## 16 November — Novus actual client login/current plan accepted; fleet continued
+
+CA requested Novus client-ready and exact forwardable credentials, then other
+active clients. Real issued login200/exact client profile; report/post/fact/Ads
+reads200, actual foreign Cape report denied403. Existing Brand Hub logo opens
+through protected Edge200. No reset, credential disclosure in repo, permissions
+or provider/website change. October report remains published; reviewed November
+canonical strategy v5 deliberately approved/published via guarded existing RPC
+at15:23:09UTC, actual CLIENT reads ten gold fields/1video/4photos/4posters.
+Decemberv4/Januaryv2 are cleaned real drafts, not published/scheduled media.
+[Exact acceptance and remaining limits](NOVUS-CLIENT-READINESS-2026-11-16.md).
+
+Same hourly normal author now has real Novus and Forklift January save/readbacks;
+earlier zero-save wording below is historical. Do not confuse separate failing
+OpenCode GitHub jobs with this successful normal-Chat task or replace its model.
+Destination metadata discrepancy remains read-only investigation, no new task.
+62-client inventory frozen with explicit snapshot boundary;46enabled mappings
+are not46tested logins. All Around PVC October refreshed14posts/no duplicates/
+staffhash unchanged, remains draft. AV Event Life Facebook exact provider code10
+permission hold; Instagram fresh. No global blocker, guessed scope/dates or consent.
+No code/migration/Vercel or other agent changes. Google Control Centre exact target
+unavailable; no guessed tracker write.
+
 ## 16 November — Novus published; existing strategy author through January
 
 CA explicitly approved Novus October publication: exact report940f3153 is now

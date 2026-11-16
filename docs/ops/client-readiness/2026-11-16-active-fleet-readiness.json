@@ -1,0 +1,3210 @@
+{
+  "schemaVersion": 1,
+  "observedDate": "2026-11-16",
+  "snapshotBoundary": "Read-only production inventory in this session, before Novus November publication at 2026-11-16T15:23:09.340364Z. Later exact-client receipts supersede individual states.",
+  "authority": "clients.active=true; canonical package settings, portal mappings, report/strategy rows and provider checkpoints. Mapping is separate from entitlement. Null quantities are unknown or non-recurring context, never zero or not-included.",
+  "acceptance": "Inventory only: enabled mapping is not a tested login; draft is not approved; nonblank is not quality; scheduled-date count is not all work; no bulk publication or package/provider change.",
+  "clients": [
+    {
+      "id": "893992a5-23cd-4ee6-b5d9-ccf7b17fe071",
+      "name": "Agri-Secure",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": null,
+        "reels": null,
+        "video": null,
+        "poster": null
+      },
+      "enabled_exact_login": false,
+      "mapped_meta": null,
+      "meta_freshness": null,
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": null,
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 0,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "fd16ebae-a50b-4920-afe0-94c2631f8f06",
+      "name": "All Around PVC",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": 3,
+        "reels": null,
+        "video": 1,
+        "poster": 3
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": true
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "instagram",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T09:23:17.22279+00:00"
+        },
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T09:23:12.248878+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "5598a192-ce42-47e5-bf94-9631e7863839",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 5,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 2,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "3b85973f-bcad-49eb-b8f1-c27f7c7f1aba",
+      "name": "AV Event Life",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": 4,
+        "reels": null,
+        "video": null,
+        "poster": 4
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": true
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified",
+          "status": "complete",
+          "platform": "instagram",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T14:19:16.386642+00:00"
+        },
+        {
+          "health": "sync_error",
+          "status": "failed",
+          "platform": "facebook",
+          "watermark": "2026-11-02T08:00:00+00:00",
+          "last_success": "2026-11-03T02:08:13.481884+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "0349bf9b-9b00-4e0c-82a2-650643f9b272",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 4,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 3,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 0,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "32bd9db3-5339-4404-825b-5a615cadec6a",
+      "name": "Bat Hill Royale",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": null,
+        "reels": null,
+        "video": null,
+        "poster": null
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": true
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified",
+          "status": "complete",
+          "platform": "instagram",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T09:24:21.086793+00:00"
+        },
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T09:24:15.895294+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "69365380-103c-4e28-b707-17ccf9bd5679",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 0,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "b28af30a-3d44-490a-8290-1e56dac7b127",
+      "name": "Bloem Action Sports",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": 4,
+        "reels": null,
+        "video": 1,
+        "poster": 4
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": null,
+      "meta_freshness": null,
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": null,
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 4,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 3,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "89e0ad6d-e08c-4a75-8b8e-abea71af581c",
+      "name": "Bloem Marble & Granite",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": null,
+        "reels": null,
+        "video": 2,
+        "poster": 4
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": true
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified",
+          "status": "complete",
+          "platform": "instagram",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T15:05:45.892796+00:00"
+        },
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T15:05:39.023896+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "47152dc2-f491-40e8-b421-4c5147c814c8",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 4,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 2,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 0,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "2d16262d-8450-458d-ae7e-084ef9ff662d",
+      "name": "Bloem Vascular",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": null,
+        "reels": null,
+        "video": null,
+        "poster": null
+      },
+      "enabled_exact_login": false,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": true
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "instagram",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T09:25:18.682576+00:00"
+        },
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T09:25:13.401406+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "ef04bd8f-5e21-4120-b555-0abf8c869b6c",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "5dfdf4bd-9d94-4cc6-9dee-0e480a2234cb",
+      "name": "Bohemia Quick Stop",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": null,
+        "reels": null,
+        "video": null,
+        "poster": 2
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": false
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T15:13:11.779033+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "cb037352-d1ef-4e6d-8aa1-acd5e2f0ccbc",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 4,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 2,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 0,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "8e448cf9-1534-4ba1-89a4-93e4c8b83d2f",
+      "name": "Bouwer & Coetzee Attorneys",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": null,
+        "reels": null,
+        "video": 1,
+        "poster": 7
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": false
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T15:14:14.941188+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "5db2b6d2-1c81-498d-ad77-529490f2c013",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 5,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 2,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "6b67a2df-e2ab-418b-bcee-03aef5963d37",
+      "name": "Braize",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": 4,
+        "reels": null,
+        "video": null,
+        "poster": 4
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": true
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified",
+          "status": "complete",
+          "platform": "instagram",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T14:59:19.949881+00:00"
+        },
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T14:59:13.189548+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": [
+        {
+          "status": "connected",
+          "connected_at": "2026-09-23T17:22:59.824+00:00"
+        }
+      ],
+      "october_reports": [
+        {
+          "id": "6a0e27bf-9622-47bc-90b8-74ea42a6c459",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 6,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 2,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "afb62c53-d6d3-4ef8-9393-def88ed899d8",
+      "name": "C&L Innovations",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": 2,
+        "reels": null,
+        "video": null,
+        "poster": 2
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": true
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "instagram",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T14:57:19.949118+00:00"
+        },
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T14:57:13.383851+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "52e5f18a-ddc9-46b5-a997-d52931eb564a",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 4,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 3,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa",
+      "name": "Cape Lumber",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": 3,
+        "reels": null,
+        "video": 0,
+        "poster": 4
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": true
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified",
+          "status": "complete",
+          "platform": "instagram",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T14:18:30.04775+00:00"
+        },
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T14:18:24.344776+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 1,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "93d58684-7913-4c57-9d4e-b2168e2a9a03",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "published"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "published",
+          "version": 10,
+          "published": true
+        },
+        {
+          "month": "2026-12-01",
+          "status": "published",
+          "version": 7,
+          "published": true
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 4
+    },
+    {
+      "id": "079df21e-783a-4648-b3fa-0acae6e68867",
+      "name": "Case Bloemfontein",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": null,
+        "reels": null,
+        "video": 2,
+        "poster": 12
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": true
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified",
+          "status": "complete",
+          "platform": "instagram",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T15:13:19.905822+00:00"
+        },
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T15:13:15.073248+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "994b048e-1957-4c32-89b4-0612dd31897b",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 5,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 4,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "6b313cac-283e-48c4-9df6-ba43af2f7353",
+      "name": "Central Canvas",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": 4,
+        "reels": null,
+        "video": 1,
+        "poster": 3
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": false
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T15:14:17.864371+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "5bca0f00-e6e0-4b49-becd-d6010164a9c5",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 4,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 2,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "c27d2185-08e4-4c49-be48-2572564ceecf",
+      "name": "CG Production House",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": 8,
+        "reels": null,
+        "video": 4,
+        "poster": 4
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": true
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified",
+          "status": "complete",
+          "platform": "instagram",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T15:09:28.508559+00:00"
+        },
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T15:09:20.671253+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": [
+        {
+          "status": "connected",
+          "connected_at": "2026-09-23T14:05:07.765+00:00"
+        }
+      ],
+      "october_reports": [
+        {
+          "id": "d9b2bb8a-6d5e-4a82-a122-4e8a4877a645",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 6,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 2,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 0,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "3404f726-a693-4b2d-8c13-c9d3dfd17bbc",
+      "name": "Daisy & Co",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": 3,
+        "reels": null,
+        "video": 1,
+        "poster": 3
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": false
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T15:15:19.990397+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "117e47ed-3d75-4e18-a283-f589f2f34395",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 4,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 3,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 0,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "06b20bb1-ed4a-4aa1-9f48-8c6cb0531aba",
+      "name": "Delta Gas",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": 3,
+        "reels": null,
+        "video": 1,
+        "poster": 3
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": true
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "instagram",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T14:57:22.086742+00:00"
+        },
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T14:57:16.551894+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "95714ed3-2027-404f-8666-e226db5c9ac5",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 6,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 2,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "2aed8a31-bd53-4ad1-a3dc-432865adfb3d",
+      "name": "Dulux Paint & Paper Bloemfontein",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": 4,
+        "reels": null,
+        "video": 2,
+        "poster": 4
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": true
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified",
+          "status": "complete",
+          "platform": "instagram",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T14:56:23.387404+00:00"
+        },
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T14:56:15.860392+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": [
+        {
+          "status": "connected",
+          "connected_at": "2026-09-23T18:40:15.957+00:00"
+        }
+      ],
+      "october_reports": [
+        {
+          "id": "b7a7c8f8-0ac8-4f33-a787-4f15e2475e5e",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 4,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 3,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 0,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "61acf81b-1011-404e-9fae-2e209be65fca",
+      "name": "Econofoods",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": null,
+        "reels": null,
+        "video": 5,
+        "poster": null
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": null,
+      "meta_freshness": null,
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": null,
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 0,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "ec643c75-51f5-4839-829f-3f5b7f48829a",
+      "name": "Ehrlich Park Butchery",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": 3,
+        "reels": null,
+        "video": 1,
+        "poster": 4
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": false
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T15:17:13.761541+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "e37eb8db-49d7-4e60-b8cc-ebfd8ff4f20f",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 5,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 2,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "7b7d244f-77b4-4b2a-88f0-8ce3f7e1c202",
+      "name": "Elcheck",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": 3,
+        "reels": null,
+        "video": 1,
+        "poster": 3
+      },
+      "enabled_exact_login": false,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": false
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T09:20:15.192868+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "e27652b3-f20a-4096-a344-c031af858db2",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": null,
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "d53d8e62-9e6a-4bb9-be3f-554f40942d45",
+      "name": "Emmanuel Funerals",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": 3,
+        "reels": null,
+        "video": 1,
+        "poster": 4
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": false
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T14:46:11.368435+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "c41dcfcf-987e-4e3c-b126-e08b7b021611",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 4,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 2,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 0,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "217a547c-7b22-45cc-bf88-9d45a8e93dfe",
+      "name": "Emoya Estate Driving Range",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": 4,
+        "reels": null,
+        "video": 1,
+        "poster": 4
+      },
+      "enabled_exact_login": false,
+      "mapped_meta": null,
+      "meta_freshness": null,
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": null,
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 4,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 3,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "c8d34a97-8400-4f52-8b0d-843491fe3d3b",
+      "name": "First Technology Central",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": null,
+        "reels": null,
+        "video": null,
+        "poster": null
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": false
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T09:17:11.42374+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "bd611d0d-7ff0-4199-bc8b-cabe03dad6dc",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "4424ed69-7270-4d30-a1ea-0b77d76912df",
+      "name": "Forklift Trucks",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": 3,
+        "reels": null,
+        "video": 1,
+        "poster": 3
+      },
+      "enabled_exact_login": false,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": true
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "instagram",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T09:22:18.943931+00:00"
+        },
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T09:22:15.036529+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": [
+        {
+          "status": "connected",
+          "connected_at": "2026-09-23T17:42:11.424+00:00"
+        }
+      ],
+      "october_reports": [
+        {
+          "id": "6853e307-aabc-4fbe-8817-452154738702",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 5,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 3,
+          "published": false
+        },
+        {
+          "month": "2027-01-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 0,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "b6052710-417d-4b3b-8348-0f126bfea671",
+      "name": "Germoparts",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": null,
+        "reels": null,
+        "video": 2,
+        "poster": 12
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": true
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified",
+          "status": "complete",
+          "platform": "instagram",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T09:19:22.845922+00:00"
+        },
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T09:19:17.38625+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 3,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "fa41abdc-44ad-40c1-8ffa-2c836f2a09d4",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 4,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 2,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "1007e58b-3fea-4515-88b7-ddaa85763de6",
+      "name": "Hino Trucks",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": null,
+        "reels": null,
+        "video": 2,
+        "poster": null
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": null,
+      "meta_freshness": null,
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": null,
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 0,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "572555e0-d4d0-404a-8d67-beeeeed6a1f2",
+      "name": "HMHI",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": null,
+        "reels": null,
+        "video": null,
+        "poster": 3
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": false
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T09:18:10.509156+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "a2b0e052-b828-4100-bcd0-6a9f8a111272",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 4,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 3,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "816c7f59-d56c-46a3-ba15-f76971d83769",
+      "name": "Human Auto",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": null,
+        "reels": null,
+        "video": 3,
+        "poster": null
+      },
+      "enabled_exact_login": false,
+      "mapped_meta": null,
+      "meta_freshness": null,
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": null,
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "2e643855-e2ad-481f-a6c6-3d934b9f4a50",
+      "name": "Ipopeng Office Supplies",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": null,
+        "reels": null,
+        "video": null,
+        "poster": null
+      },
+      "enabled_exact_login": false,
+      "mapped_meta": null,
+      "meta_freshness": null,
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": null,
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 0,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "a5eab798-3e00-44cc-947e-463386fdac39",
+      "name": "Jenkor",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": null,
+        "reels": null,
+        "video": 1,
+        "poster": 3
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": null,
+      "meta_freshness": null,
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": null,
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "aece5a86-c962-4234-a1fe-7904c20f03ff",
+      "name": "JFJ Electrical",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": 3,
+        "reels": null,
+        "video": 1,
+        "poster": 3
+      },
+      "enabled_exact_login": false,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": true
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T09:26:11.180142+00:00"
+        },
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "instagram",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T09:26:15.019816+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "857e54e6-2f3d-4d2b-8b0a-86628a2efb01",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": null,
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "f322151b-bdab-4fc4-951b-7fa8e9fd6bb1",
+      "name": "Jodrico Killian",
+      "package_verification": null,
+      "recorded_scope": {
+        "photo": null,
+        "reels": null,
+        "video": null,
+        "poster": null
+      },
+      "enabled_exact_login": false,
+      "mapped_meta": null,
+      "meta_freshness": null,
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": null,
+      "strategy_months": null,
+      "enabled_libraries": 0,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "5e4e3335-a89c-4629-9efc-b6a194bec80c",
+      "name": "Kundedienste",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": null,
+        "reels": null,
+        "video": null,
+        "poster": null
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": null,
+      "meta_freshness": null,
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": null,
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "1a6d6c62-7e5e-4e1e-93e6-21d9157f0a01",
+      "name": "LHP Student Village & Block",
+      "package_verification": null,
+      "recorded_scope": {
+        "photo": null,
+        "reels": null,
+        "video": null,
+        "poster": null
+      },
+      "enabled_exact_login": false,
+      "mapped_meta": null,
+      "meta_freshness": null,
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": null,
+      "strategy_months": null,
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "2a5ea019-64f5-4f8e-8a61-61a28940aa6e",
+      "name": "Local Deli",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": null,
+        "reels": null,
+        "video": null,
+        "poster": null
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": true
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "instagram",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T15:08:19.956144+00:00"
+        },
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T15:08:12.403889+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "94fc7114-5b6b-4273-9c0d-532a128d79d1",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "21300630-6755-4591-9a49-e22abbaf7e3d",
+      "name": "Loraclox",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": 3,
+        "reels": null,
+        "video": null,
+        "poster": 3
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": true
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T15:05:18.529857+00:00"
+        },
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "instagram",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T15:05:23.126964+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "af0af83a-5b2b-4bba-b465-0f264a75ea79",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 3,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 3,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "7b47afb0-fa55-4916-85f6-09c57e5905b9",
+      "name": "Madison Wear",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": 8,
+        "reels": null,
+        "video": 2,
+        "poster": 8
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": true
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified",
+          "status": "complete",
+          "platform": "instagram",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T15:10:36.151886+00:00"
+        },
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T15:10:24.427448+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": [
+        {
+          "status": "connected",
+          "connected_at": "2026-09-23T18:59:01.418+00:00"
+        }
+      ],
+      "october_reports": [
+        {
+          "id": "f313a7ed-7794-4806-8989-be57c82e63f5",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 4,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 2,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "e276f019-a580-44c5-a7ab-e43840c33a64",
+      "name": "Mimosa Mall",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": null,
+        "reels": null,
+        "video": null,
+        "poster": null
+      },
+      "enabled_exact_login": false,
+      "mapped_meta": null,
+      "meta_freshness": null,
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": null,
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 0,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "94fe2568-3cf1-47dc-801e-d8d5396a0965",
+      "name": "NCNA",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": null,
+        "reels": null,
+        "video": null,
+        "poster": null
+      },
+      "enabled_exact_login": false,
+      "mapped_meta": null,
+      "meta_freshness": null,
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": null,
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "3c20fae1-8e91-41d5-98eb-1c331600e6e3",
+      "name": "Neshora Oxygen",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": 4,
+        "reels": null,
+        "video": 1,
+        "poster": 4
+      },
+      "enabled_exact_login": false,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": false
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T09:26:12.091229+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": [
+        {
+          "status": "connected",
+          "connected_at": "2026-09-23T19:12:11.119+00:00"
+        }
+      ],
+      "october_reports": [
+        {
+          "id": "a512ba3e-0b29-43b6-ba06-e233eb0c3941",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "4236a60a-990f-484f-8d19-13d2f92fbe3b",
+      "name": "Novus Steel",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": 4,
+        "reels": null,
+        "video": 1,
+        "poster": 4
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": true
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified",
+          "status": "complete",
+          "platform": "instagram",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T09:29:18.703286+00:00"
+        },
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T09:29:13.56407+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 4,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "940f3153-f49b-42f0-89c6-89b671e95b59",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "published"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 5,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 3,
+          "published": false
+        },
+        {
+          "month": "2027-01-01",
+          "status": "draft",
+          "version": 2,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b",
+      "name": "Peyper Bonds",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": 3,
+        "reels": null,
+        "video": 1,
+        "poster": 3
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": true
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "instagram",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T15:06:19.562352+00:00"
+        },
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T15:06:14.377708+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "768d3f2c-9b75-4d9e-bb33-9ab4e797a63e",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 4,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 2,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
+      "name": "Piek Group",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": null,
+        "reels": null,
+        "video": 4,
+        "poster": 12
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": false
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T15:07:12.462465+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "a8f0ffac-0d9f-4646-a4a0-4d8c758060c4",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 5,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 2,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "29a28efd-c998-45e2-a57c-4a751e779e66",
+      "name": "PSG Bloemfontein",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": null,
+        "reels": null,
+        "video": 1,
+        "poster": 3
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": false
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T15:11:12.264618+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "458b2b84-63c7-496c-9864-294d51cebc2d",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 3,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 2,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "4f6106de-c437-404e-8cef-fbe848de0665",
+      "name": "RC-Polypipe",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": 3,
+        "reels": null,
+        "video": 1,
+        "poster": 4
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": true
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified",
+          "status": "complete",
+          "platform": "instagram",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T14:58:19.643925+00:00"
+        },
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T14:58:14.110621+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 1,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "8e1dfa1c-0711-432c-8d40-30934429600b",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 4,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 2,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 0,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "cdb11a82-339e-4b46-9b09-bde1a23efeaf",
+      "name": "Red Oak",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": 2,
+        "reels": null,
+        "video": 8,
+        "poster": null
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": false
+        }
+      ],
+      "meta_freshness": null,
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": [
+        {
+          "status": "connected",
+          "connected_at": "2026-09-23T16:32:44.24+00:00"
+        }
+      ],
+      "october_reports": [
+        {
+          "id": "7447e470-8f11-4298-bfdb-68fc666250c6",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 0,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "ac4c5e0c-c5d3-4512-8472-fe59192abeca",
+      "name": "Rusoord Farmstay",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": null,
+        "reels": null,
+        "video": null,
+        "poster": null
+      },
+      "enabled_exact_login": false,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": true
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified",
+          "status": "complete",
+          "platform": "instagram",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T09:25:21.310464+00:00"
+        },
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T09:25:16.733421+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "fd10ac66-0f47-490a-a88d-410c279acc7b",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 0,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "917d6f7c-1c2a-4c20-82f0-daa41b9062f5",
+      "name": "SecuriForce",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": 4,
+        "reels": null,
+        "video": 4,
+        "poster": 4
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": true
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified",
+          "status": "complete",
+          "platform": "instagram",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T15:09:25.440703+00:00"
+        },
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T15:09:19.70941+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "388b3d37-9365-4010-999f-a7d5b2ebf11b",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 4,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 3,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+      "name": "Supa Quick BFN",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": null,
+        "reels": null,
+        "video": 1,
+        "poster": 3
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": false
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T09:21:12.205384+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "9127a2b4-ce1f-4f25-a216-75edf79e9789",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 5,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 2,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "e2870110-930c-4e63-b2fe-c858030f7258",
+      "name": "Supa Quick Centurion",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": null,
+        "reels": null,
+        "video": 1,
+        "poster": 3
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": false
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T15:11:13.758566+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "310e410a-e787-4cbf-bdd1-3f9c209bd03d",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 4,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 2,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "a36ba938-e9dc-4ecf-bb67-4853608b1c01",
+      "name": "TBS Brokers",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": 4,
+        "reels": null,
+        "video": null,
+        "poster": 4
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": true
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified",
+          "status": "complete",
+          "platform": "instagram",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T15:12:22.443325+00:00"
+        },
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T15:12:15.522166+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "e0cc6f41-64b3-4c1f-9911-6560b6259a86",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 4,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 3,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+      "name": "The Staffordshire",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": 4,
+        "reels": null,
+        "video": 4,
+        "poster": 4
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": false
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T09:21:14.633601+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": [
+        {
+          "status": "connected",
+          "connected_at": "2026-09-23T19:02:04.568+00:00"
+        }
+      ],
+      "october_reports": [
+        {
+          "id": "97f0636b-ee78-4cea-94a9-d0025da7cc7d",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 4,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 2,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "204f4f22-14c7-42ed-a956-da57af102706",
+      "name": "Tobich Optics",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": 4,
+        "reels": null,
+        "video": null,
+        "poster": 4
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": false
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T09:22:11.981851+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "7331c7cd-52d8-4cde-a5d6-2c1e98102df9",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 4,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 3,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "e2ad6d57-5b06-46e1-b75b-b67f017d57f1",
+      "name": "Toyota Bloemfontein",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": null,
+        "reels": null,
+        "video": 4,
+        "poster": null
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": null,
+      "meta_freshness": null,
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": null,
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "bbd1629e-79fb-4c41-b1e4-88a1f160bd34",
+      "name": "VCS Cleaning Solutions",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": null,
+        "reels": null,
+        "video": 1,
+        "poster": 8
+      },
+      "enabled_exact_login": false,
+      "mapped_meta": null,
+      "meta_freshness": null,
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": null,
+      "strategy_months": null,
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "1f0406bb-d643-4b83-bc3e-b1ebe87eeb89",
+      "name": "Vrystaat Kunstefees",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": null,
+        "reels": null,
+        "video": null,
+        "poster": null
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": true
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified",
+          "status": "complete",
+          "platform": "instagram",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T10:05:07.81381+00:00"
+        },
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T10:05:03.22887+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "26982c09-c47e-44ea-85b5-654ed70aef6f",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 0,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "e1cb958e-3f68-4a77-b5ea-b471ea62bdef",
+      "name": "Watch Addict",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": 1,
+        "reels": null,
+        "video": 1,
+        "poster": 2
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": true
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified",
+          "status": "complete",
+          "platform": "instagram",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T09:19:20.817282+00:00"
+        },
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T09:19:15.913466+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": [
+        {
+          "status": "connected",
+          "connected_at": "2026-09-23T18:54:17.239+00:00"
+        }
+      ],
+      "october_reports": [
+        {
+          "id": "f039307e-e0c5-4188-abff-d3c6da7e4f0a",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 4,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 2,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "2b953772-e791-4dff-a278-d4dd3521f02e",
+      "name": "We Ar Fuels",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": 4,
+        "reels": null,
+        "video": 1,
+        "poster": 3
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": true
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified",
+          "status": "complete",
+          "platform": "instagram",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T15:12:23.380495+00:00"
+        },
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T15:12:17.822416+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "44208258-a0b8-4cee-b100-1356757b47c1",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 4,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 3,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
+      "name": "Wiseman Group",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": 4,
+        "reels": null,
+        "video": 1,
+        "poster": 4
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": true
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified",
+          "status": "complete",
+          "platform": "instagram",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T15:02:30.340423+00:00"
+        },
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T15:02:24.719225+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": [
+        {
+          "status": "connected",
+          "connected_at": "2026-09-23T18:00:25.026+00:00"
+        }
+      ],
+      "october_reports": [
+        {
+          "id": "82a87b95-2235-4cd9-b2d3-ef2a1223d017",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 5,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 3,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "504113ee-fba9-4993-807e-a86066615212",
+      "name": "WiseRide",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": 2,
+        "reels": null,
+        "video": null,
+        "poster": 2
+      },
+      "enabled_exact_login": false,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": false
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T09:28:08.236544+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "c17cea74-5df3-40ac-8b8d-9b396d386687",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 1,
+      "dated_upcoming_items": 0
+    },
+    {
+      "id": "0c01d90f-ba5e-4251-a597-bf3c83f990fa",
+      "name": "Zooz Lifestyle WFF",
+      "package_verification": "confirmed",
+      "recorded_scope": {
+        "photo": null,
+        "reels": null,
+        "video": null,
+        "poster": null
+      },
+      "enabled_exact_login": true,
+      "mapped_meta": [
+        {
+          "facebook": true,
+          "meta_ads": false,
+          "instagram": true
+        }
+      ],
+      "meta_freshness": [
+        {
+          "health": "verified_partial",
+          "status": "complete",
+          "platform": "facebook",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T14:45:51.235787+00:00"
+        },
+        {
+          "health": "verified",
+          "status": "complete",
+          "platform": "instagram",
+          "watermark": "2026-11-16T08:00:00+00:00",
+          "last_success": "2026-11-16T14:45:57.22171+00:00"
+        }
+      ],
+      "google_ads_campaign_links": 0,
+      "tiktok_connection": null,
+      "october_reports": [
+        {
+          "id": "8f07f61c-c613-43bf-b000-28cbaf93c236",
+          "end": "2026-10-31",
+          "start": "2026-10-01",
+          "status": "draft"
+        }
+      ],
+      "strategy_months": [
+        {
+          "month": "2026-11-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        },
+        {
+          "month": "2026-12-01",
+          "status": "draft",
+          "version": 1,
+          "published": false
+        }
+      ],
+      "enabled_libraries": 0,
+      "dated_upcoming_items": 0
+    }
+  ]
+}
