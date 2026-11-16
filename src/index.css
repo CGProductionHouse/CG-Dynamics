@@ -3,6 +3,9 @@
 @tailwind utilities;
 
 @layer components {
+  .client-action-list > a {
+    @apply justify-start rounded-lg border-0 bg-transparent px-3 py-3 text-sm font-medium hover:bg-white/5;
+  }
   .input {
     @apply min-h-11 w-full rounded-lg border border-white/10 bg-black/25 px-3 py-2 text-sm text-white placeholder:text-white/30 focus:border-brand-teal/50 focus:outline-none;
   }
@@ -61,6 +64,16 @@ textarea {
 @media (max-width: 640px) {
   [data-assistant-composer] input,
   [data-assistant-composer] textarea {
+    font-size: 16px;
+  }
+}
+
+/* Staff forms must not zoom the whole iPhone page when a search/filter is
+   focused. Leave client pages, checkboxes, radios and desktop sizes alone. */
+@media (max-width: 767px) {
+  [data-staff-shell] input:not([type='checkbox']):not([type='radio']),
+  [data-staff-shell] select,
+  [data-staff-shell] textarea {
     font-size: 16px;
   }
 }

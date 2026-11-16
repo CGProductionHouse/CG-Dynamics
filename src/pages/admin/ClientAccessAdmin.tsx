@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { CopyClientLoginButton } from '../../components/clients/CopyClientLoginButton'
+import { ActionSheet } from '../../components/ui/ActionSheet'
 import {
   listClientPortalAccess,
   provisionClientPortalAccess,
@@ -15,7 +16,7 @@ function message(error: unknown, fallback: string) {
 }
 
 export default function ClientAccessAdmin() {
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const selectedClientId = searchParams.get('client')
   const [rows, setRows] = useState<ClientPortalAccessRow[]>([])
   const [usernames, setUsernames] = useState<Record<string, string>>({})
@@ -25,6 +26,9 @@ export default function ClientAccessAdmin() {
   const [lastAction, setLastAction] = useState<(ClientPortalAccessReceipt & { client_name: string }) | null>(null)
   const [copyStatus, setCopyStatus] = useState<string | null>(null)
   const [query, setQuery] = useState('')
+  const [manageId, setManageId] = useState<string | null>(null)
+  const [confirmation, setConfirmation] = useState<'reset' | 'disable' | null>(null)
+  const managedRow = rows.find(row => row.client_id === manageId)
   const readyRef = useRef<HTMLDivElement>(null)
 
   async function load(quiet = false) {
@@ -73,8 +77,10 @@ export default function ClientAccessAdmin() {
       if (result.error || !result.data) throw result.error ?? new Error('Could not provision client access.')
       setLastAction({ ...result.data, client_name: row.client_name })
       await load(true)
+      return true
     } catch (error) {
       setError(message(error, 'Could not provision client access.'))
+      return false
     } finally {
       setBusyId(null)
     }
@@ -90,8 +96,10 @@ export default function ClientAccessAdmin() {
       if (result.error || !result.data) throw result.error ?? new Error('Could not reset client access.')
       setLastAction({ ...result.data, client_name: row.client_name })
       await load(true)
+      return true
     } catch (error) {
       setError(message(error, 'Could not reset client access.'))
+      return false
     } finally {
       setBusyId(null)
     }
@@ -134,7 +142,7 @@ export default function ClientAccessAdmin() {
         <div>
           <h2 className="text-xl font-semibold text-white">Client access</h2>
           <p className="mt-1 max-w-2xl text-sm text-brand-primary">
-            Provision the shared client portal login for current active-package clients. Existing client users are preserved.
+            Copy a client login message, or manage an account when needed.
           </p>
         </div>
         <input
@@ -144,6 +152,8 @@ export default function ClientAccessAdmin() {
           className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3.5 py-2.5 text-sm text-white placeholder:text-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-accent sm:max-w-xs"
         />
       </div>
+      <p className="mb-4 text-xs text-brand-primary/65">Messages include the link, username and issued starter password. Custom passwords cannot be retrieved.</p>
+      {selectedClientId && <button type="button" className="mb-4 min-h-11 text-sm font-semibold text-brand-teal" onClick={() => { const next = new URLSearchParams(searchParams); next.delete('client'); setSearchParams(next) }}>Show all client logins</button>}
 
       {lastAction && (
         <div ref={readyRef} className="mb-5 scroll-mt-6 rounded-xl border border-brand-accent/30 bg-brand-accent/10 p-4">
@@ -175,7 +185,7 @@ export default function ClientAccessAdmin() {
         <p className="py-8 text-sm text-brand-primary">Loading client access…</p>
       ) : (
         <div className="overflow-hidden rounded-xl border border-brand-muted bg-brand-surface">
-          <div className="hidden grid-cols-[minmax(13rem,1.3fr)_minmax(12rem,1fr)_7rem_12rem] gap-3 border-b border-brand-muted px-4 py-3 text-xs font-bold uppercase tracking-[0.12em] text-brand-primary md:grid">
+          <div className="hidden gap-3 border-b border-brand-muted px-4 py-3 text-xs font-bold uppercase tracking-[0.12em] text-brand-primary lg:grid lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_auto_minmax(0,1.4fr)]">
             <span>Client</span>
             <span>Username</span>
             <span>Status</span>
@@ -185,7 +195,7 @@ export default function ClientAccessAdmin() {
           {filtered.map(row => {
             const busy = busyId === row.client_id
             return (
-              <div key={row.client_id} className="grid gap-3 border-b border-brand-muted px-4 py-4 last:border-0 md:grid-cols-[minmax(13rem,1.3fr)_minmax(12rem,1fr)_7rem_12rem] md:items-center">
+              <div key={row.client_id} className="grid gap-3 border-b border-brand-muted px-4 py-4 last:border-0 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_auto_minmax(0,1.4fr)] lg:items-center">
                 <div>
                   <p className="font-semibold text-white">{row.client_name}</p>
                   <p className="mt-0.5 text-xs text-brand-primary">
@@ -195,14 +205,7 @@ export default function ClientAccessAdmin() {
                   </p>
                 </div>
 
-                <input
-                  value={usernames[row.client_id] ?? row.proposed_username}
-                  onChange={event => setUsernames(current => ({ ...current, [row.client_id]: event.target.value }))}
-                  disabled={busy}
-                  autoCapitalize="none"
-                  spellCheck={false}
-                  className="w-full rounded-lg border border-brand-muted bg-brand-bg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-brand-accent disabled:opacity-60"
-                />
+                <p className="min-w-0 break-all text-sm text-brand-primary">{row.username ?? 'Not set up'}</p>
 
                 <div>
                   <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
@@ -216,46 +219,26 @@ export default function ClientAccessAdmin() {
                   </span>
                 </div>
 
-                <div className="flex flex-wrap gap-2 md:justify-end">
+                <div className="flex flex-wrap items-start gap-2 md:justify-end">
                   {!row.provisioned ? (
                     <button
                       type="button"
                       disabled={busy}
-                      onClick={() => void provision(row)}
-                      className="rounded-lg bg-brand-accent px-3 py-2 text-xs font-bold text-black transition hover:brightness-110 disabled:opacity-50"
+                      onClick={() => { setManageId(row.client_id); setConfirmation(null) }}
+                      className="min-h-11 rounded-lg bg-brand-accent px-3 py-2 text-xs font-bold text-black transition hover:brightness-110 disabled:opacity-50"
                     >
-                      {busy ? 'Setting up…' : 'Provision'}
+                      Set up login
                     </button>
                   ) : (
                     <>
-                      {row.enabled && <CopyClientLoginButton clientId={row.client_id} />}
+                      {row.enabled && <CopyClientLoginButton clientId={row.client_id} compact />}
                       <button
                         type="button"
                         disabled={busy}
-                        onClick={() => void provision(row)}
-                        className="rounded-lg border border-brand-muted px-3 py-2 text-xs font-semibold text-brand-primary transition hover:border-brand-accent/40 hover:text-white disabled:opacity-50"
+                        onClick={() => { setManageId(row.client_id); setConfirmation(null) }}
+                        className="min-h-11 rounded-lg px-3 py-2 text-xs font-semibold text-brand-primary transition hover:text-white disabled:opacity-50"
                       >
-                        Save username
-                      </button>
-                      <button
-                        type="button"
-                        disabled={busy}
-                        onClick={() => void reset(row)}
-                        className="rounded-lg border border-brand-muted px-3 py-2 text-xs font-semibold text-brand-primary transition hover:border-brand-accent/40 hover:text-white disabled:opacity-50"
-                      >
-                        Reset
-                      </button>
-                      <button
-                        type="button"
-                        disabled={busy}
-                        onClick={() => void toggle(row)}
-                        className={`rounded-lg border px-3 py-2 text-xs font-semibold transition disabled:opacity-50 ${
-                          row.enabled
-                            ? 'border-red-400/20 text-red-300 hover:bg-red-400/10'
-                            : 'border-emerald-400/20 text-emerald-300 hover:bg-emerald-400/10'
-                        }`}
-                      >
-                        {row.enabled ? 'Disable' : 'Enable'}
+                        Manage
                       </button>
                     </>
                   )}
@@ -269,6 +252,27 @@ export default function ClientAccessAdmin() {
           )}
         </div>
       )}
+      {managedRow && <ActionSheet title={`${managedRow.client_name} login`} onClose={() => { if (!busyId) { setManageId(null); setConfirmation(null) } }}>
+        <div className="space-y-4">
+          <label className="block text-sm font-medium text-brand-primary">Username
+            <input value={usernames[managedRow.client_id] ?? managedRow.proposed_username} onChange={event => { setConfirmation(null); setUsernames(current => ({ ...current, [managedRow.client_id]: event.target.value })) }} disabled={!!busyId} autoCapitalize="none" spellCheck={false} className="input mt-2" />
+          </label>
+          <p className="text-xs leading-5 text-brand-primary/70">Saving a username or resetting access sets the issued starter password. Existing client users are preserved.</p>
+          {error && <p role="alert" className="text-sm text-red-300">{error}</p>}
+          <button type="button" disabled={!!busyId || (managedRow.provisioned && usernames[managedRow.client_id] === managedRow.username)} onClick={async () => { if (await provision(managedRow)) setManageId(null) }} className="min-h-11 w-full rounded-lg bg-brand-accent px-3 text-sm font-bold text-black disabled:opacity-50">{busyId ? 'Saving…' : managedRow.provisioned ? 'Save username' : 'Set up login'}</button>
+          {managedRow.provisioned && <div className="space-y-2 border-t border-white/10 pt-3">
+            <button type="button" disabled={!!busyId} onClick={() => setConfirmation('reset')} className="min-h-11 w-full text-left text-sm font-semibold text-brand-primary">Reset password</button>
+            <button type="button" disabled={!!busyId} onClick={() => { if (managedRow.enabled) setConfirmation('disable'); else void toggle(managedRow) }} className="min-h-11 w-full text-left text-sm font-semibold text-brand-primary">{managedRow.enabled ? 'Disable login' : 'Enable login'}</button>
+          </div>}
+          {confirmation && <div className="rounded-lg border border-amber-300/20 bg-amber-300/5 p-3">
+            <p className="text-sm text-amber-100">{confirmation === 'reset' ? 'Replace this client’s password with the issued starter password?' : 'Prevent this client from signing in?'}</p>
+            <div className="mt-3 flex gap-3">
+              <button type="button" disabled={!!busyId} className="min-h-11 px-3 text-sm font-semibold text-amber-200" onClick={async () => { if (confirmation === 'reset') { if (await reset(managedRow)) setManageId(null) } else await toggle(managedRow); setConfirmation(null) }}>Confirm {confirmation === 'reset' ? 'reset' : 'disable'}</button>
+              <button type="button" disabled={!!busyId} className="min-h-11 px-3 text-sm text-brand-primary" onClick={() => setConfirmation(null)}>Cancel</button>
+            </div>
+          </div>}
+        </div>
+      </ActionSheet>}
     </div>
   )
 }

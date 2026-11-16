@@ -1,3 +1,13 @@
+## 16 November — mobile staff cleanup, source candidate only
+
+CA expanded PR #993 to simplify phone staff/admin use. Same isolated worktree:
+searchable all-workspace More menu (same role gates), compact client cards,
+native action sheets, direct login copy, explicit reset/disable confirmations,
+staff input zoom prevention and 44px phone buttons. Tasks/calendar/provider and
+other agent lanes untouched. [Scope and verification](MOBILE-STAFF-CLEANUP-2026-11-16.md).
+175 relevant tests/build/lint/diff pass; rendered browser acceptance pending.
+NOT LIVE; no production writes or Vercel usage. #679 gate remains.
+
 ## 16 November — client login message copy, source candidate only
 
 CA requested one forwardable link/username/password message directly on the Clients
