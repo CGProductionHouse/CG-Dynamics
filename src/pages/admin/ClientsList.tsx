@@ -20,6 +20,10 @@ import {
   type PackageSettings,
 } from '../../lib/db/clients'
 import { ClientLogo } from '../../components/ClientLogo'
+import { CopyClientLoginButton } from '../../components/clients/CopyClientLoginButton'
+import { ActionSheet } from '../../components/ui/ActionSheet'
+import { PageContainer } from '../../components/layout/PageShell'
+import { mobilePackageSummary } from '../../lib/mobilePackageSummary'
 import { PACKAGE_NUMBER_FIELDS, type PackageVerificationReceipt } from '../../lib/packageAuthority'
 import { loadActiveClientPackageEvidenceMatrix, type ActiveClientPackageEvidence } from '../../lib/packageEvidence'
 import { PackageEvidenceReviewModal } from '../../components/clients/PackageEvidenceReviewModal'
@@ -245,12 +249,12 @@ export default function ClientsList() {
   }
 
   return (
-    <div className="w-full max-w-7xl p-4 sm:p-6 lg:p-8">
+    <PageContainer gap={false}>
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-display text-3xl font-bold tracking-tight text-white">Clients</h1>
+          <h1 className="text-xl font-bold tracking-tight text-white sm:text-2xl">Clients</h1>
           <p className="mt-1 text-xs text-brand-primary">
-            Active package queue · {packageQueue.confirmed} confirmed · {packageQueue.unverified} unverified · {packageQueue.total} active
+            {packageQueue.total} active clients{packageQueue.unverified > 0 ? ` · ${packageQueue.unverified} packages need review` : ''}
           </p>
         </div>
         {isAdmin && (
@@ -322,6 +326,7 @@ export default function ClientsList() {
             <input id="client-list-search" type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Find a client" className="min-h-10 w-full rounded-lg border border-white/10 bg-brand-bg px-3 text-sm text-white placeholder:text-white/40 outline-none focus:border-brand-accent/50 sm:ml-auto sm:w-64" />
             <span className="text-xs text-brand-primary/60">Showing {displayClients.length} of {clients.length}</span>
           </div>
+          {isAdmin && <p className="mb-3 text-xs text-brand-primary/60">Copy login message includes the link and issued starter password. Custom passwords cannot be retrieved.</p>}
 
           <div className="space-y-3 md:hidden">
             {displayClients.length === 0 ? (
@@ -334,25 +339,18 @@ export default function ClientsList() {
             ) : (
               displayClients.map(c => (
                 <PremiumCard key={c.id} padding="sm">
-                  <div className="flex items-start gap-3">
-                    <ClientLogo client={c} />
+                  <div className="flex items-center gap-3">
+                    <ClientLogo client={c} boxClassName="h-10 w-10 rounded-lg" />
                     <div className="min-w-0 flex-1">
                       <h2 className="text-base font-semibold text-white break-words">{c.name}</h2>
-                      <div className="mt-2 flex flex-wrap items-center gap-2">
-                        <Pill tone={c.tier === 'premium' ? 'accent' : 'neutral'}>{c.tier}</Pill>
-                        <StatusBadge
-                          label={c.active ? 'Active' : 'Archived'}
-                          variant={c.active ? 'published' : 'internal-draft'}
-                        />
-                      </div>
-                      <div className="mt-2">
-                        <PackageChips client={c} />
-                      </div>
+                      <p className="mt-1 text-xs leading-5 text-brand-primary/70">{mobilePackageSummary(readPackageAuthority(c.package_settings))}</p>
+                      {!c.active && <span className="text-xs text-amber-200">Archived</span>}
                     </div>
+                    {c.active && <ClientMoreActions client={c} isAdmin={isAdmin} onEdit={() => setModal({ open: true, client: c })} onArchive={() => setConfirmAction({ type: 'archive', client: c })} />}
                   </div>
 
                   {c.active ? (
-                    <ClientQuickActions client={c} isAdmin={isAdmin} onEdit={() => setModal({ open: true, client: c })} onArchive={() => setConfirmAction({ type: 'archive', client: c })} />
+                    <ClientQuickActions client={c} isAdmin={isAdmin} />
                   ) : (
                     isAdmin && (
                       <div className="mt-4 flex flex-wrap gap-2">
@@ -420,6 +418,7 @@ export default function ClientsList() {
                           <td className="px-4 py-3">
                             <div className="flex flex-wrap gap-1.5">
                                <ClientActionLink to={`/admin/client-dashboard?client=${c.id}`} label="Client Dashboard" teal />
+                              {isAdmin && <CopyClientLoginButton clientId={c.id} compact />}
                               {!isAdmin && <ClientActionLink to={`/admin/published?client=${c.id}&view=setup`} label="Setup preview" />}
                             </div>
                           </td>
@@ -493,7 +492,7 @@ export default function ClientsList() {
           onClose={() => setReviewClientId(null)}
         />
       )}
-    </div>
+    </PageContainer>
   )
 }
 
@@ -603,36 +602,38 @@ function PackageChips({ client }: { client: Client }) {
 function ClientQuickActions({
   client,
   isAdmin,
-  onEdit,
-  onArchive,
 }: {
   client: Client
   isAdmin: boolean
-  onEdit: () => void
-  onArchive: () => void
 }) {
   return (
-    <div className="mt-4 flex flex-wrap items-start gap-2 border-t border-white/10 pt-3">
+    <div className="mt-3 grid grid-cols-2 gap-2 border-t border-white/10 pt-3">
       <ClientActionLink to={`/admin/client-dashboard?client=${client.id}`} label="Client Dashboard" teal />
-      <ClientActionLink to={`/admin/client-schedule?view=calendar&client=${client.id}`} label="Client Schedule" />
-      <ClientActionLink to={`/admin/package-master?client=${client.id}`} label="Package" />
-      <ClientMoreActions client={client} isAdmin={isAdmin} onEdit={onEdit} onArchive={onArchive} />
+      {isAdmin && <CopyClientLoginButton clientId={client.id} compact />}
+      {!isAdmin && <ClientActionLink to={`/admin/client-schedule?view=calendar&client=${client.id}`} label="Client Schedule" />}
     </div>
   )
 }
 
 function ClientMoreActions({ client, isAdmin, onEdit, onArchive }: { client: Client; isAdmin: boolean; onEdit: () => void; onArchive: () => void }) {
+  const [open, setOpen] = useState(false)
   return (
-    <details className="inline-block rounded-md border border-white/10 bg-white/[0.025] px-2.5 py-1 text-left text-xs text-brand-primary">
-      <summary className="flex min-h-9 cursor-pointer items-center font-bold hover:text-white">More actions</summary>
-      <div className="mt-2 flex min-w-32 flex-col items-start gap-2 border-t border-white/10 pt-2">
+    <>
+      <button type="button" aria-label={`Actions for ${client.name}`} aria-haspopup="dialog" onClick={() => setOpen(true)} className="min-h-11 min-w-11 shrink-0 rounded-lg px-2 text-sm font-bold text-brand-primary hover:bg-white/5">•••</button>
+      {open && <ActionSheet title={client.name} onClose={() => setOpen(false)}>
+      <div className="mb-4"><PackageChips client={client} /></div>
+      <div className="client-action-list grid gap-1" onClick={event => { if ((event.target as HTMLElement).closest('a')) setOpen(false) }}>
+        <ClientActionLink to={`/admin/client-schedule?view=calendar&client=${client.id}`} label="Client Schedule" />
+        <ClientActionLink to={`/admin/package-master?client=${client.id}`} label="Package" />
         <ClientActionLink to={`/admin/published?client=${client.id}&view=setup`} label="Setup preview" />
+        {isAdmin && <ClientActionLink to={`/admin/users?tab=client-access&client=${client.id}`} label="Client login settings" />}
         {isAdmin && <ClientActionLink to={`/admin/clients/brand-hub?client=${client.id}`} label="Manage Brand Hub" />}
         {isAdmin && <ClientActionLink to={`/admin/integrations/meta?client=${client.id}`} label="Meta / Sync" />}
-        {isAdmin && <button type="button" onClick={onEdit} className="min-h-11 px-2 text-xs font-bold hover:text-white">Edit client</button>}
-        {isAdmin && <button type="button" onClick={onArchive} className="min-h-11 px-2 text-xs font-bold text-amber-200 hover:text-white">Archive client</button>}
+        {isAdmin && <button type="button" onClick={() => { setOpen(false); onEdit() }} className="min-h-11 px-3 text-left text-sm font-semibold hover:text-white">Edit client</button>}
+        {isAdmin && <button type="button" onClick={() => { setOpen(false); onArchive() }} className="mt-2 min-h-11 border-t border-white/10 px-3 text-left text-sm font-semibold text-amber-200 hover:text-white">Archive client</button>}
       </div>
-    </details>
+      </ActionSheet>}
+    </>
   )
 }
 

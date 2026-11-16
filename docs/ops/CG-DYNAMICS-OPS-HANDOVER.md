@@ -1,3 +1,163 @@
+## 16 November — All Around PVC current report/Plan LIVE; ranking fix release-held
+
+CA chose next client after Madison. Exact active All Around PVCfd16ebae,
+real issued login200/own client, October report5598a192 published16:25:36UTC
+with independently reviewed normal-author findings/other fields preserved.
+14fresh source posts,14current facts(11available/3NULL), no duplicates/Pacific
+period drift. No Ads/TikTok mapping invented or website/provider/package change.
+Manual canonical Novemberv6 approve/publish16:34:46UTC after source/content/
+version/package/guide/notes fencing; actual client reads10gold fields/1video/
+3photos/3posters/no staff metadata. Decv3/Janv1 genuine unpublished drafts.
+
+Original December Strategy Rollout chat reached maximum length. Existing
+CG Client & Industry Research task continuation6afb1ddf-480c-83e9-b29f-6afe02521136
+is directly verified active/useful (EmoyaJan save42/62lightweight coverage), then
+authored all three PVC saves/readbacks. Same task/model; no duplicate writer or
+configuration change. Existing supervisor-owned media/scope/source holds remain.
+
+Actual production client browser390px/scale1/no overflow and API/foreign403/404,
+published logo177488bytes accepted. Live Best platform still incorrectly names
+Instagram when Facebook reach unavailable. Small source correction requires
+complete observed reach across at least two reporting platforms;92tests/build/
+lint/diff plus actual local1280/390render pass. NO Vercel/frontend deployment;
+presentation release remains held by #679, not claimed fixed live. No migration/
+Edge/config/permissions/Microsoft/shared-worker/other-agent change. Exact receipt:
+[All Around PVC readiness](ALL-AROUND-PVC-CLIENT-READINESS-2026-11-16.md).
+Historical contact conflict/media/date/future-review gates remain explicit.
+
+## 16 November — Madison current portal accepted; narrow guide fix LIVE
+
+CA prioritised Madison Wear7b47afb0-fa55-4916-85f6-09c57e5905b9. Real issued login
+200/exact client, October report published15:51:30UTC and manually reviewed current
+November strategyv5 published15:56:51UTC. Actual client reads report/22facts across
+FB/IG/TikTok, Plan ten fields/2videos8photos8posters, protected logo PNG200;
+foreign real Novus posts/facts/Ads/calendar denied403, asset404, no draft leakage.
+No credentials in repo/issues, reset, provider permission/mapping, package,
+website, schema/migration, Vercel or other-agent change.
+
+33Meta posts refreshed;35historical rows retained/two not-returned Facebook posts
+guardedly excluded from current comparisons pending confirmation, NOT deleted.
+Staff report hash unchanged. TikTok1video refreshed, native semantics preserved;
+missing unique viewers stays null. No Ads mapping is not zero or entitlement.
+Decemberv3/Januaryv1 real drafts; actual assets/dates not invented.
+
+Parser omitted approved guide's Content directions heading, producing false
+EXACT_STRATEGY_EVIDENCE_UNAVAILABLE. One-word alias, no trust-gate/data change;
+two failing-before regressions now pass,138focused/245broader strategy tests,
+build/lint/full hosted Deno/diff green. Existing MCPv84 exact41-file readback,
+other40/auth unchanged; actual brief admits same approved guide. No frontend or
+worker release implied. [Exact receipt/limits](MADISON-CLIENT-READINESS-2026-11-16.md).
+Same normal author/hourly task continues. Tracker target unavailable, no guessed write.
+
+## 16 November — Novus actual client login/current plan accepted; fleet continued
+
+CA requested Novus client-ready and exact forwardable credentials, then other
+active clients. Real issued login200/exact client profile; report/post/fact/Ads
+reads200, actual foreign Cape report denied403. Existing Brand Hub logo opens
+through protected Edge200. No reset, credential disclosure in repo, permissions
+or provider/website change. October report remains published; reviewed November
+canonical strategy v5 deliberately approved/published via guarded existing RPC
+at15:23:09UTC, actual CLIENT reads ten gold fields/1video/4photos/4posters.
+Decemberv4/Januaryv2 are cleaned real drafts, not published/scheduled media.
+[Exact acceptance and remaining limits](NOVUS-CLIENT-READINESS-2026-11-16.md).
+
+Same hourly normal author now has real Novus and Forklift January save/readbacks;
+earlier zero-save wording below is historical. Do not confuse separate failing
+OpenCode GitHub jobs with this successful normal-Chat task or replace its model.
+Destination metadata discrepancy remains read-only investigation, no new task.
+62-client inventory frozen with explicit snapshot boundary;46enabled mappings
+are not46tested logins. All Around PVC October refreshed14posts/no duplicates/
+staffhash unchanged, remains draft. AV Event Life Facebook exact provider code10
+permission hold; Instagram fresh. No global blocker, guessed scope/dates or consent.
+No code/migration/Vercel or other agent changes. Google Control Centre exact target
+unavailable; no guessed tracker write.
+
+## 16 November — Novus published; existing strategy author through January
+
+CA explicitly approved Novus October publication: exact report940f3153 is now
+published16Nov14:33UTC; independent client-role reads verify12posts/13ready facts
+and no foreign reports. GoogleAds historical/paused campaign and no-campaign-data
+truth retained; Wix disconnected. No package/provider/credential changes.
+CA also confirms Cape Lumber now opens correctly on the actual phone; this is
+owner device acceptance of #994, superseding the unverified wording below.
+
+Existing normal Chat **December Strategy Rollout** / task6ae868361b6c81918b6b333508a47a50
+now **CG Client & Industry Research** is independently UI-verified Active, hourly,
+RepeatON/endNever. Same author updated/read back January-preparation instructions;
+no new writer/model/task. New recovery performed0canonical saves; source triage
+is not substantive completion. #731 latest author receipt6919535126.
+Small three-file connector release admits current+nextTWO months (Nov→Jan)
+without changing automatic worker cadence/schema/staff/source/publication guards.
+136tests/build/lint/diff/full hosted Deno check pass. Existing MCPv83 ACTIVE:
+all41 deployed files match candidate, other38/auth unchanged; actual NovusJan
+brief ready, February refused, client-context authoring denied. Same author
+notified to continue January; no saved January row claimed at release acceptance.
+[Exact evidence, coverage and release boundary](STRATEGY-JANUARY-PLANNING-2026-11-16.md).
+Other agent work untouched; no Vercel. Google Control Centre target unavailable;
+no guessed tracker write.
+
+## 16 November — client opening crop corrective release LIVE
+
+CA's new screenshot confirms #993 reached the phone but the opening view still
+crops. The old HTTP/test receipt is not physical-device acceptance. Isolated
+`fix/client-portal-opening-viewport` adds a bounded iOS entry-only retained-zoom
+repair and pre-auth blur.93tests plus actual local Chromium/WebKit five-width
+opening/login/long-name checks pass; native Chromium16/14magnification reproduces
+the old crop and returns to1 with correction, later zoom preserved. No production
+data/account changes or other agent files. [Evidence and release boundary](CLIENT-OPENING-VIEWPORT-2026-11-16.md).
+Runtime89b20830 now LIVE atdpl_GwQE8n9fRXGdr13L4Gbjj8VV2iM5 (PR #994):
+one local prebuild/stage then same-stage promotion; protected/live HTML/JS/CSS
+match exact local bytes, routes200/invalid capability404. No cloud app build or
+DB/provider/account change. Prior dpl_B8eMyLViZqYRNxae4cR9HXqLhwhB retained.
+Physical iPhone acceptance remains unverified; do not claim HTTP checks prove it.
+Exact Google Control Centre target remains unavailable; no guessed tracker write.
+
+## 16 November — approved mobile staff/client viewport release LIVE
+
+CA approved PR #993 release. Exact runtime ccbb6ec7 is LIVE at
+dpl_B8eMyLViZqYRNxae4cR9HXqLhwhB: one local production-target prebuild, protected
+stage SHA256 verification, same-deployment promotion; zero cloud application
+compilation. Apex/www and login/client/plan/performance serve exact candidate
+HTML; changed JS/CSS chunks match. 205 affected tests/build/lint/diff pass.
+No DB/provider/auth-account/config/spend-limit change; git deploy remains OFF.
+Rollback dpl_DZ5RJ8F6gbRsSSvFtsHHhVXS3744 retained. Billing window preflight recovered
+and conservative included-budget headroom verified; lag/physical-phone/browser
+limits remain explicit. [Current release receipt](MOBILE-STAFF-CLEANUP-2026-11-16.md).
+Older source-only notes immediately below are historical and superseded.
+
+### Historical pre-approval state
+
+Latest client screenshot: live HTML/assets independently confirm old 14px login
+and absent candidate CSS; current deployment/source/rollback recorded in the
+mobile cleanup receipt. Added bounded portal header/Overview shrink/wrap fixes
+and portal form sizing; 41 focused fixture-env tests/build/lint/diff pass. No
+deployment/cloud build or production mutation. #679/no-Vercel release hold and
+unverified current budget remain; do not tell CA the live phone view changed.
+
+Client-login follow-up in the same PR: auth inputs now inherit explicit 16px
+phone sizing, preventing Safari focus zoom from carrying into the portal; normal
+pinch zoom and the device-width initial viewport remain. Actual rendered-component
+and compiled-CSS regressions plus 19 focused tests/build/lint/diff pass. Source
+only, physical-iPhone acceptance unverified; no cloud or production action.
+
+CA expanded PR #993 to simplify phone staff/admin use. Same isolated worktree:
+searchable all-workspace More menu (same role gates), compact client cards,
+native action sheets, direct login copy, explicit reset/disable confirmations,
+staff input zoom prevention and 44px phone buttons. Tasks/calendar/provider and
+other agent lanes untouched. [Scope and verification](MOBILE-STAFF-CLEANUP-2026-11-16.md).
+175 relevant tests/build/lint/diff pass; rendered browser acceptance pending.
+NOT LIVE; no production writes or Vercel usage. #679 gate remains.
+
+## 16 November — client login message copy, source candidate only
+
+CA requested one forwardable link/username/password message directly on the Clients
+card. Bounded #399 correction on `fix/client-login-message-copy` adds admin-only
+copy on desktop/mobile cards and enabled Client Access rows, with fresh exact-ID
+mapping checks and iPhone user-gesture clipboard handling. No account reset or
+production mutation. [Evidence and limitations](CLIENT-LOGIN-MESSAGE-COPY-2026-11-16.md).
+Local tests/build/lint/diff green; browser acceptance unverified. NOT LIVE; #679
+hosting gate and other agent lanes remain unchanged.
+
 ## 11 November — video editing system of record + brand rules panel
 
 CA set one system for every editor/agent: CG Dynamics is the video tracker
@@ -9,6 +169,9 @@ and handovers live in company Google Drive `m.productions.cg@gmail.com` →
 the client portal OneDrive, linked in Dynamics. Read
 `docs/ops/VIDEO-EDITING-SYSTEM-OF-RECORD.md`. Nolan lanes unchanged; their trackers
 migrate into this layout. PR #984 app code is unmerged/undeployed (#679 gate).
+16 Nov (CA-approved): rules updated in production — retired `1fefef98`, added six
+CG rules and two house rules; full handover in PR #999
+(`docs/ops/CLAUDE-NOLAN-HANDOVER-2026-11-16.md`).
 
 ## 11 November — existing-film registration repair, local candidate only
 

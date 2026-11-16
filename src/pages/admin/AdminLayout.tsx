@@ -3,6 +3,8 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { MyDayContextStoreProvider } from '../../contexts/MyDayContextStore'
 import BrandMark from '../../components/BrandMark'
+import { ActionSheet } from '../../components/ui/ActionSheet'
+import { mobileNavigationGroups } from '../../lib/mobileStaffNavigation'
 import { roleLabel } from '../../lib/roles'
 import { primaryNavItems, performanceNavItems, adminNavItems, canShowNavItem, isNavItemActive, isSharedNavZonePath, resolveNavZone, type NavItem, type NavZone } from './adminNavigation'
 import { dismissAssistantNotification, listMyNotifications, markAllNotificationsRead, markNotificationRead, refreshAssistantDayNotifications, safeNotificationLink, snoozeAssistantNotification, unreadNotificationCount, type AppNotification } from '../../lib/notifications'
@@ -113,6 +115,7 @@ export default function AdminLayout() {
   const location = useLocation()
   const navigate = useNavigate()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [menuSearch, setMenuSearch] = useState('')
   const [desktopCollapsed, setDesktopCollapsed] = useState(false)
   const [notificationOpen, setNotificationOpen] = useState(false)
   const [notifications, setNotifications] = useState<AppNotification[]>([])
@@ -147,7 +150,8 @@ export default function AdminLayout() {
     ? zoneItems.slice(0, 4)
     : primaryItems.filter(item => MOBILE_PRIMARY_PATHS.includes(item.to))
   const assistantVisible = location.pathname !== '/admin/assistant'
-  const closeMobile = () => setMobileMenuOpen(false)
+  const closeMobile = () => { setMobileMenuOpen(false); setMenuSearch('') }
+  const mobileGroups = mobileNavigationGroups(currentRole, menuSearch)
 
   useEffect(() => {
     window.localStorage.setItem(ZONE_STORAGE_KEY, zone)
@@ -241,14 +245,14 @@ export default function AdminLayout() {
     return (
       <button
         type="button"
-        onClick={() => setNotificationOpen(open => !open)}
+        onClick={() => { closeMobile(); setNotificationOpen(open => !open) }}
         className={`relative flex min-h-11 min-w-11 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-lg text-brand-primary transition-colors hover:text-white ${className}`}
         aria-label={label}
         aria-expanded={notificationOpen}
         aria-controls="staff-notification-center"
         title={label}
       >
-        <span aria-hidden="true">&#128276;</span>
+        <svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" /></svg>
         {text && <span className="text-sm font-bold">{text}</span>}
         {unreadCount > 0 && (
           <span className="absolute -right-1 -top-1 flex min-h-5 min-w-5 items-center justify-center rounded-full bg-brand-teal px-1 text-[10px] font-black text-black">
@@ -285,34 +289,35 @@ export default function AdminLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-brand-bg md:flex md:h-screen md:overflow-hidden">
+    <div data-staff-shell className="min-h-screen bg-brand-bg md:flex md:h-screen md:overflow-hidden">
       <div className="pointer-events-none fixed inset-x-0 top-0 z-50 h-px bg-gradient-to-r from-transparent via-brand-teal/70 to-transparent" />
 
       <header className="sticky top-0 z-40 border-b border-white/10 bg-black/90 backdrop-blur md:hidden">
         <div className="flex items-center gap-2 px-3 py-2.5">
-          <BrandMark subtitle={displayRole} compact />
+          <BrandMark subtitle={zone === 'performance' ? 'Clients & reporting' : 'Daily work'} compact />
           <ZoneSwitcher zone={zone} onChange={changeZone} className="ml-auto hidden max-w-[12.5rem] shrink min-[560px]:flex" />
           <div className="ml-auto min-[560px]:ml-0">{notificationButton()}</div>
-          <button type="button" onClick={() => setMobileMenuOpen(true)} className="min-h-11 shrink-0 rounded-md border border-white/12 bg-white/[0.04] px-3 text-sm font-bold text-white" aria-expanded={mobileMenuOpen} aria-controls="staff-mobile-navigation">
-            Menu
-          </button>
         </div>
       </header>
 
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          <button type="button" aria-label="Close menu" className="absolute inset-0 bg-black/70" onClick={closeMobile} />
-          <aside id="staff-mobile-navigation" className="absolute right-0 top-0 flex h-full w-[min(21rem,88vw)] max-w-full flex-col border-l border-white/10 bg-brand-surface shadow-2xl" aria-label="Staff navigation">
-            <div className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-4">
-              <BrandMark subtitle={displayRole} compact />
-              <button type="button" onClick={closeMobile} className="min-h-11 rounded-md border border-white/10 px-3 text-sm font-semibold text-brand-primary hover:text-white">Close</button>
-            </div>
-            <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain p-3">{renderNav(false, closeMobile)}</nav>
-            <div className="border-t border-white/10 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+        <ActionSheet title="Go to" onClose={closeMobile}>
+          <div id="staff-mobile-navigation" aria-label="Staff navigation">
+            <label className="sr-only" htmlFor="staff-menu-search">Find a page</label>
+            <input id="staff-menu-search" type="search" placeholder="Find a page…" value={menuSearch} onChange={event => setMenuSearch(event.target.value)} className="input mb-3" />
+            <nav className="space-y-3" aria-label="All staff pages">
+              {mobileGroups.map(group => <div key={group.label}>
+                <NavSection label={group.label} />
+                {group.items.map(item => <NavigationLink key={item.to} item={item} active={item.to.includes('?') ? `${location.pathname}${location.search}` === item.to : isNavItemActive(location.pathname, item)} onClick={closeMobile} />)}
+              </div>)}
+              {mobileGroups.length === 0 && <p className="px-3 py-4 text-sm text-brand-primary">No matching pages. Try another name.</p>}
+              {!menuSearch.trim() && <ExternalHoursLink onClick={closeMobile} />}
+            </nav>
+            <div className="mt-4 border-t border-white/10 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
               <UserBlock name={profile?.full_name ?? 'Staff user'} role={displayRole} onSignOut={signOut} onNavigate={closeMobile} />
             </div>
-          </aside>
-        </div>
+          </div>
+        </ActionSheet>
       )}
 
       <aside className={`${desktopCollapsed ? 'w-20' : 'w-60'} hidden shrink-0 border-r border-white/10 bg-black/72 transition-[width] md:flex md:h-screen md:flex-col`} aria-label="Staff navigation">
@@ -349,7 +354,7 @@ export default function AdminLayout() {
               {mobilePrimaryItems.map(item => <MobileNavItem key={item.to} item={item} active={isNavItemActive(location.pathname, item)} />)}
               <button
                 type="button"
-                onClick={() => setMobileMenuOpen(true)}
+                onClick={() => { setNotificationOpen(false); setMobileMenuOpen(true) }}
                 className="min-h-11 min-w-11 rounded-md px-1 text-center text-[11px] font-bold text-brand-primary transition-colors hover:text-white"
                 aria-expanded={mobileMenuOpen}
                 aria-controls="staff-mobile-navigation"

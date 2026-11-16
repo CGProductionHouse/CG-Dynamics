@@ -7,10 +7,12 @@ const layout = readFileSync(new URL('../src/pages/admin/AdminLayout.tsx', import
 test('staff mobile navigation uses visible destinations plus a complete More menu', () => {
   assert.match(layout, /const MOBILE_PRIMARY_PATHS = \[/)
   assert.match(layout, /MOBILE_PRIMARY_PATHS\.includes\(item\.to\)/)
-  assert.match(layout, /onClick=\{\(\) => setMobileMenuOpen\(true\)\}/)
+  assert.match(layout, /setNotificationOpen\(false\); setMobileMenuOpen\(true\)/)
   assert.match(layout, /aria-controls="staff-mobile-navigation"/)
   assert.match(layout, />\s*More\s*<\/button>/)
-  assert.match(layout, /renderNav\(false, closeMobile\)/)
+  assert.match(layout, /<ActionSheet title="Go to" onClose=\{closeMobile\}/)
+  assert.match(layout, /mobileNavigationGroups\(currentRole, menuSearch\)/)
+  assert.match(layout, /aria-label="All staff pages"/)
   assert.doesNotMatch(layout, /overflow-x-auto overscroll-x-contain/)
 })
 

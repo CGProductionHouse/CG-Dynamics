@@ -121,7 +121,7 @@ export default function ClientPortalHome() {
             <div aria-hidden className="absolute right-6 top-2 hidden text-[10rem] font-black leading-none tracking-[-0.12em] text-white/[0.035] lg:block">CG</div>
             <div aria-hidden className="absolute left-0 top-0 h-1 w-full bg-gradient-to-r from-[#2dd4bf] via-[#14b8a6] to-[#f97316]" />
 
-            <div className="relative grid gap-6 p-5 sm:gap-8 sm:p-9 lg:grid-cols-[1.2fr_0.8fr] lg:items-end lg:p-12">
+            <div className="relative grid min-w-0 grid-cols-1 gap-6 p-5 sm:gap-8 sm:p-9 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] lg:items-end lg:p-12">
               <div className="min-w-0">
                 <div className="flex items-center gap-4 sm:gap-5">
                   {client && (
@@ -141,7 +141,7 @@ export default function ClientPortalHome() {
                   </div>
                 </div>
 
-                <h1 className="mt-6 max-w-4xl text-4xl font-black leading-[0.98] tracking-[-0.055em] text-white sm:mt-8 sm:text-7xl lg:text-[5.5rem]">
+                <h1 className="mt-6 max-w-4xl break-words text-4xl font-black leading-[0.98] tracking-[-0.055em] text-white sm:mt-8 sm:text-7xl lg:text-[5.5rem]">
                   {client?.name ?? 'Your portal'}
                 </h1>
                 {reportMonth && <p className="mt-4 max-w-2xl text-sm leading-relaxed text-slate-300 sm:mt-6 sm:text-lg">
@@ -158,7 +158,7 @@ export default function ClientPortalHome() {
                 </div>
               </div>
 
-              {(hasPerformanceSummary || hasScheduleHighlight) && <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-1">
+              {(hasPerformanceSummary || hasScheduleHighlight) && <div className="grid min-w-0 grid-cols-1 gap-2 min-[400px]:grid-cols-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-1">
                 {activeOrganic.length > 0 && !data.factsUnavailable && <HeroSignal label="Performance" value={performanceStatus} tone="teal" />}
                 {reportMonth && <HeroSignal label="Latest report" value={monthDisplayLabel(reportMonth)} tone="warm" />}
                 {hasScheduleHighlight && <HeroSignal label="Coming up" value={contentStatus} tone="teal" />}
@@ -320,9 +320,9 @@ export default function ClientPortalHome() {
 
 function HeroSignal({ label, value, tone }: { label: string; value: string; tone: 'teal' | 'warm' }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.045] p-4 backdrop-blur">
-      <div className="flex items-center gap-2">
-        <span className={`h-2 w-2 rounded-full ${tone === 'warm' ? 'bg-[#f97316]' : 'bg-[#2dd4bf]'}`} />
+    <div className="min-w-0 break-words rounded-2xl border border-white/10 bg-white/[0.045] p-4 backdrop-blur">
+      <div className="flex min-w-0 items-center gap-2">
+        <span className={`h-2 w-2 shrink-0 rounded-full ${tone === 'warm' ? 'bg-[#f97316]' : 'bg-[#2dd4bf]'}`} />
         <p className="text-[0.65rem] font-bold uppercase tracking-[0.22em] text-slate-500">{label}</p>
       </div>
       <p className="mt-2 text-base font-black text-white">{value}</p>
