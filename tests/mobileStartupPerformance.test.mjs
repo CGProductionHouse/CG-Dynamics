@@ -15,11 +15,9 @@ test('non-current route pages are split out of the mobile startup bundle', () =>
   assert.match(layout, /<Suspense fallback=[\s\S]*<Outlet \/>/)
 })
 
-test('Assistant and notification work wait until after the critical shell render', () => {
-  assert.match(layout, /const GlobalAssistantComposer = lazy/)
+test('Notification work waits until after the critical shell render; composer is retired', () => {
+  assert.doesNotMatch(layout, /GlobalAssistantComposer/)
   assert.match(layout, /scheduleWhenIdle/)
   assert.match(layout, /requestIdleCallback/)
-  assert.match(layout, /setBackgroundReady\(true\)/)
-  assert.match(layout, /backgroundReady && <Suspense fallback=\{null\}>/)
   assert.doesNotMatch(layout, /setTimeout\(pollNotifications, 0\)/)
 })

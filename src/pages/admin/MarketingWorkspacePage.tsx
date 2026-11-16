@@ -669,8 +669,8 @@ function ClientGuidesSection() {
 function AiSection() {
   return (
     <div className="space-y-3">
-      <p className="text-sm leading-relaxed text-white/70">Marketing AI runs specialist workflows grounded only in <span className="font-bold text-white">approved</span> knowledge — evidence cards are attached to every version, and a run stops with an insufficient-evidence message rather than inventing Library truth. AI output is saved as a draft for human review, never auto-approved.</p>
-      <Link to="/admin/marketing-ai" className="inline-flex items-center gap-1.5 rounded-lg border border-brand-teal/25 bg-brand-teal/[0.08] px-3 py-1.5 text-sm font-bold text-brand-teal hover:border-brand-teal/50">Open Marketing AI workspace →</Link>
+      <p className="text-sm leading-relaxed text-white/70">Use the CG Dynamics connector in ChatGPT or Nolan for marketing work grounded in approved knowledge. Built-in AI generation has been retired. Saved drafts and human review history remain available; drafts are never auto-approved.</p>
+      <Link to="/admin/marketing-ai" className="text-sm font-bold text-brand-teal underline">View saved marketing artifacts and reviews</Link>
     </div>
   )
 }
@@ -685,7 +685,7 @@ export default function MarketingWorkspacePage() {
 
   const tabs = useMemo(() => {
     const list: Array<{ key: Section; label: string }> = [{ key: 'library', label: 'Library' }, { key: 'client-guides', label: 'Client Guides' }]
-    if (isManager) list.push({ key: 'ai', label: 'AI' })
+    if (isManager) list.push({ key: 'ai', label: 'Saved artifacts' })
     if (isAdmin) list.push({ key: 'review', label: 'Review' }, { key: 'sources', label: 'Sources' }, { key: 'registration', label: 'Registration' })
     return list
   }, [isAdmin, isManager])

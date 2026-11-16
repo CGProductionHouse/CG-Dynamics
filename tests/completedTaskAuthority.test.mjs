@@ -36,9 +36,6 @@ const commandCentrePage = read('../src/pages/admin/CommandCentrePage.tsx')
 const plannerPage = read('../src/pages/admin/PlannerPage.tsx')
 const taskCard = read('../src/components/operations/TaskCard.tsx')
 const dailyAssistant = read('../src/lib/dailyAssistant.ts')
-const dailyAssistantCapture = read('../src/components/assistant/DailyAssistantCapture.tsx')
-const globalAssistantComposer = read('../src/components/assistant/GlobalAssistantComposer.tsx')
-const assistantPage = read('../src/pages/admin/AssistantPage.tsx')
 const assistantMigration = read('../supabase/migrations/20260806090001_assistant_linked_completed_authority.sql')
 const originalAssistantMigration = read('../supabase/migrations/20260803163045_personal_daily_assistant.sql')
 const originalPushMigration = read('../supabase/migrations/20260804070651_iphone_web_push_notifications.sql')
@@ -268,16 +265,6 @@ test('unlinked open Assistant items remain active', () => {
   assert.equal(isActiveAssistantDayItem(assistantItem('open')), true)
   assert.equal(isActiveAssistantDayItem(assistantItem('completed')), false)
   assert.equal(isActiveAssistantDayItem(assistantItem('dismissed')), false)
-})
-
-test('Assistant frontend exposes one derived helper backed by taskLifecycle', () => {
-  assert.match(dailyAssistant, /import \{ isActiveAssistantDayItem \} from '\.\/taskLifecycle'/)
-  assert.match(dailyAssistant, /export \{ isActiveAssistantDayItem \} from '\.\/taskLifecycle'/)
-  assert.doesNotMatch(dailyAssistant, /\['done',\s*'completed'\]|new Set\(\['done',\s*'completed'\]\)/)
-  assert.match(dailyAssistant, /items\.filter\(isActiveAssistantDayItem\)/)
-  assert.match(dailyAssistantCapture, /items\.filter\(isActiveAssistantDayItem\)/)
-  assert.match(globalAssistantComposer, /dailyAssistantContextLine\(captureResult\.data \?\? \[\], itemResult\.data \?\? \[\]\)/)
-  assert.match(assistantPage, /dailyAssistantContextLine\(captureResult\.data \?\? \[\], itemResult\.data \?\? \[\]\)/)
 })
 
 test('both Assistant notification functions guard every assistant_day_items path', () => {

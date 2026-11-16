@@ -1,3 +1,71 @@
+## 16 November — PR #995 final local compatibility receipt, NOT LIVE
+
+Tested code412fa43c: 456 tests, build, native Deno and nine real-Auth groups pass;
+combined workbook49136f9c tree: 503 tests/build pass. Lint zero errors/17 warnings.
+Main206f4df9 integrated after testing: only removes hourly dispatch; app source unchanged.
+Main Madison handover preserved verbatim. No workbook guard source absorbed.
+[Exact refs and limits](STAFF-AI-COMBINED-VERIFICATION-2026-11-16.json);
+[staged release gates](STAFF-AI-RELEASE-PACKET-2026-11-16.md). Hosted/installed/browser
+acceptance remains pending. No deployment, production migration, spend or PR-body retry.
+
+## 16 November — PR #995 integrated-main / workbook compatibility checkpoint
+
+Main34c4552 integrated in092f929d, preserving Madison and all prior handovers; no PR
+merged to main. Workbook49136f9c remains separately owned. Its five unchanged guards,
+including debrief, run only in disposable DB with all five new MCP tools and retirement
+endpoints. No guard source copied into this PR. Native Deno’s explicit compatibility
+conditions and remaining hosted/installed/browser gates remain in the
+[release packet](STAFF-AI-RELEASE-PACKET-2026-11-16.md). No paid services, deployment,
+production migrations, credential changes or blocked PR-description retry.
+
+## Earlier readiness snapshot
+
+## 16 November — PR #995 release-readiness packet, NOT LIVE
+
+Native Deno compatibility check and disposable real GoTrue/PostgREST/native-handler
+acceptance prepared in the same lane. No production connection or credentials used;
+workbook832c0cc guard drafts tested unchanged only in isolated DB. Runtime merge preview
+has only handover-doc conflict. Original remote esm.sh check blocked by environment403;
+explicit npm map/sloppy-import/frontend-type conditions are recorded, not hidden.
+[Staged packet, exact order, approval owners and remaining gates](STAFF-AI-RELEASE-PACKET-2026-11-16.md).
+No PR-body retry, merge, deployment or production migration. Git deployments stay off.
+
+## 16 November — PR #995 remaining governed parity, NOT LIVE
+
+Same branch adds admin-only source/rights browsing (verified permitted public-domain
+chunks), authenticated canonical human-triggered activation, exact-client internal
+Project artifact writes and creation-only canonical campaign binding. Reassignment and
+unsafe raw-text export intentionally unavailable. 64 MCP tools; all prior skills and
+Library/My Assistant surfaces preserved. Three migrations remain unapplied; workbook
+owned RPCs/shared helpers untouched. PR-description publication blocked and not retried.
+Current authority: [coverage, receipts and release gates](STAFF-AI-RETIREMENT-2026-11-16.md).
+
+## Historical continuation snapshots
+
+<!-- PR #995 continuation: narrowly guards assistant_ownership_review_summary with exact active auth.uid(); #990 retains shared RLS/helper ownership. Two new migrations remain UNAPPLIED. Isolated regression reproduces original bypass and verifies active/denied accounts and unchanged history. -->
+## 16 November — PR #995 model-free connector continuation, NOT LIVE
+
+Same retirement lane now exposes reviewed generic/specialist skills and current
+platform evidence, exact-client legacy Marketing history, and externally authored
+immutable drafts/human decisions through three new MCP tools (62total). Fifth plugin
+skill added; original four preserved. Atomic service-only actor/client/version/evidence/
+receipt migration is UNAPPLIED. No provider calls, production changes, profile helper
+or #990 RLS edits; #996/main1c1bd36 integrated without changing its strategy-date logic.
+[Coverage, limits and expanded release gates](STAFF-AI-RETIREMENT-2026-11-16.md).
+My Assistant and all Library governance surfaces remain. Not a live/full-parity claim.
+
+## Historical first candidate — built-in staff AI retirement, NOT LIVE
+
+Owner requested removal of the broken in-app model. Isolated branch
+`codex/retire-staff-ai-20261116` removes chat/composer/capture UI and marketing
+model controls, preserves artifact review, redirects old assistant links to the
+existing external-assistant workspace, and retires chat/marketing generation with
+an authenticated410. Shared router/skills/MCP/providers/data/permissions unchanged.
+Read [scope, parity limits and release gates](STAFF-AI-RETIREMENT-2026-11-16.md).
+#990 workbook and all other active lanes preserved. No merge/deploy/SQL/data or
+staff-desktop operation; #679 remains mandatory. Live external acceptance and raw
+legacy marketing artifact/skill-search parity are explicitly not claimed.
+
 ## 16 November — Madison current portal accepted; narrow guide fix LIVE
 
 CA prioritised Madison Wear7b47afb0-fa55-4916-85f6-09c57e5905b9. Real issued login

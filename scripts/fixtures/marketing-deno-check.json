@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {"types": ["./marketing-deno-browser-env.d.ts"]},
+  "imports": {
+    "https://esm.sh/@supabase/supabase-js@2": "npm:@supabase/supabase-js@2.106.2",
+    "https://esm.sh/@supabase/supabase-js@2.49.8": "npm:@supabase/supabase-js@2.49.8",
+    "@supabase/supabase-js": "npm:@supabase/supabase-js@2.106.2"
+  }
+}

@@ -8,8 +8,6 @@ const migration = read('../supabase/migrations/20260803163045_personal_daily_ass
 const replayMigration = read('../supabase/migrations/20260803194000_allow_daily_assistant_ai_replay.sql')
 const edge = read('../supabase/functions/daily-assistant-capture/index.ts')
 const client = read('../src/lib/dailyAssistant.ts')
-const panel = read('../src/components/assistant/DailyAssistantCapture.tsx')
-const composer = read('../src/components/assistant/GlobalAssistantComposer.tsx')
 const chat = read('../supabase/functions/cg-assistant-chat/index.ts')
 
 const clients = [
@@ -77,16 +75,6 @@ test('confirmation is transactional, canonical, role-gated, audited and notifies
   assert.match(apply, /'cg_assistant_daily'/)
 })
 
-test('repeat notes link recent same-client canonical tasks instead of duplicating', () => {
-  const apply = migration.slice(migration.indexOf('function public.apply_assistant_day_capture'))
-  assert.match(apply, /assistant_normalise_task_title\(task\.title\) = public\.assistant_normalise_task_title\(v_title\)/)
-  assert.match(apply, /task\.client_id is not distinct from v_client_id/)
-  assert.match(apply, /task\.created_at >= now\(\) - interval '45 days'/)
-  assert.match(apply, /existing_tasks_linked/)
-  assert.match(edge, /findDuplicate/)
-  assert.match(panel, /This may already be covered by/)
-})
-
 test('audio is transcribed server-side and never persisted as bytes or a storage object', () => {
   assert.match(edge, /transcribeAudio/)
   assert.match(edge, /audioFingerprint/)
@@ -116,41 +104,12 @@ test('manager interpretation context stays bounded for free-provider fallback', 
   assert.match(edge, /maxOutputTokens: 1000/)
 })
 
-test('nothing applies before the explicit mobile confirmation', () => {
-  assert.match(client, /applyDailyAssistantCapture/)
-  assert.match(panel, /Confirm selected/)
-  assert.match(panel, /Nothing writes until you review and confirm/)
-  const analysisPath = edge.slice(edge.indexOf("action !== 'analyse_audio'"))
-  assert.doesNotMatch(analysisPath.slice(0, analysisPath.indexOf("if (action === 'apply')")), /planner_tasks/)
-  assert.match(edge, /action === 'apply'[\s\S]*rpc\('apply_assistant_day_capture'/)
-})
-
-test('mobile capture protects drafts and safely stops recording on background/interruption', () => {
-  assert.match(panel, /localStorage\.setItem\(draftKey/)
-  assert.match(panel, /document\.visibilityState === 'hidden'/)
-  assert.match(panel, /recorder\.start\(1000\)/)
-  assert.match(panel, /MAX_VOICE_SECONDS/)
-  assert.match(panel, /Uploading securely/)
-  assert.match(panel, /Try again/)
-  assert.match(panel, /min-h-20/)
-  assert.match(panel, /safe-area-inset-bottom/)
-})
-
 test('daily reminders are quiet-hour bounded, deduplicated, snoozable and dismissible', () => {
   assert.match(migration, /if v_hour < 7 or v_hour >= 19 then return 0/)
   for (const slot of ['morning', 'midday', 'end-of-day']) assert.match(migration, new RegExp(`'${slot}'`))
   assert.match(migration, /on conflict \(user_id, dedupe_key\).*do nothing/s)
   assert.match(migration, /snooze_my_assistant_notification/)
   assert.match(migration, /dismiss_my_assistant_notification/)
-})
-
-test('both assistant surfaces receive own timeline context and day questions route locally in EN/AF', () => {
-  assert.match(composer, /DailyAssistantCapture/)
-  assert.match(composer, /dailyAssistantContextLine/)
-  assert.match(chat, /personalDaySummary/)
-  assert.ok(chat.includes('what (have i done|did i promise|am i forgetting'))
-  assert.match(chat.toLowerCase(), /wat het ek vandag gedoen/)
-  assert.match(chat.toLowerCase(), /wat moet ek nog doen/)
 })
 
 test('launch acceptance fixture set covers required English, Afrikaans, mixed and multi-action notes', () => {

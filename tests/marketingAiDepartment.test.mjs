@@ -256,10 +256,10 @@ test('UI exposes evidence, confidence, provider, specialist, creator and timesta
   assert.match(page, /SPECIALIST_LABELS\[currentVersion\.specialist\]/)
 })
 
-test('UI offers routing choice, regenerate, compare, and all four decisions', () => {
-  assert.match(page, /CG Assistant routes automatically/)
-  assert.match(page, /Preview routing/)
-  assert.match(page, /Regenerate current step/)
+test('Retired generation UI retains compare and all four human decisions', () => {
+  assert.doesNotMatch(page, /CG Assistant routes automatically/)
+  assert.doesNotMatch(page, /Preview routing/)
+  assert.doesNotMatch(page, /Regenerate current step/)
   assert.match(page, /Compare with/)
   for (const d of ['approved', 'rejected', 'changes_requested', 'returned']) {
     assert.match(page, new RegExp(`decide\\('${d}'`))
