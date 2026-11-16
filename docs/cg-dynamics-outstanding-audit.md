@@ -15,6 +15,12 @@ When user feedback changes direction:
 
 ## Phone staff/admin cleanup — 16 November 2026
 
+CURRENT: CA-approved release is LIVE, source ccbb6ec7 / deployment
+dpl_B8eMyLViZqYRNxae4cR9HXqLhwhB. 205 affected tests/build/lint/diff and exact
+staging/production HTTP asset readbacks pass. Phone rendered acceptance remains
+unverified; no all-app claim. See current mobile release receipt. Earlier
+candidate wording below is retained as history.
+
 PR #993 is the source candidate for CA's phone usability complaint: searchable
 cross-workspace navigation, short client cards/action sheets, direct login-copy,
 deliberate account settings and safer shared touch/input sizing. 175 relevant

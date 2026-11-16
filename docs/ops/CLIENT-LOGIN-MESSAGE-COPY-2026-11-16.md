@@ -1,5 +1,10 @@
 # Client login message copy — 16 November 2026
 
+CURRENT: included in CA-approved LIVE release of PR #993, runtime ccbb6ec7,
+deployment dpl_B8eMyLViZqYRNxae4cR9HXqLhwhB. See
+[the mobile release receipt](MOBILE-STAFF-CLEANUP-2026-11-16.md). Source-only language
+below records the earlier preparation state; it is not the current live status.
+
 CA's phone screenshot showed no login-sharing action on the Clients card.
 Current main also required a provision/reset action before displaying individual
 credential-copy controls. This is a bounded #399 usability correction.

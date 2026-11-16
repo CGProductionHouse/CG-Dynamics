@@ -1,5 +1,60 @@
 # Mobile staff interface cleanup — 16 November 2026
 
+## CURRENT: approved release LIVE
+
+CA explicitly approved releasing PR #993 after the previous screenshot exposed
+that source-only changes had not reached production. Runtime source is
+`ccbb6ec7fa203d7cef83ab496a81bb66e5d33f40`. One production-target prebuilt stage
+`dpl_B8eMyLViZqYRNxae4cR9HXqLhwhB` was verified then the SAME deployment promoted
+to www.cgdynamics.co.za (apex redirects there). No cloud app compilation, second
+deployment, preview rebuild, DB/schema/provider/auth-account or spending-limit
+change. Git deployment remains OFF. Older source-only statements below describe
+the pre-approval state and are superseded by this receipt.
+
+Rollback: `dpl_DZ5RJ8F6gbRsSSvFtsHHhVXS3744` remains retained. No rollback needed.
+Project/team IDs and the former runtime SHA remain documented below.
+
+Verification: 205 affected mobile/navigation/auth/portal/preview/isolation tests
+pass serially with loopback fixture env. Production-target local TypeScript/Vite
+build, emitted JS, scoped lint/diff and self-contained function packaging pass.
+Protected staging GETs for login/client/main JS/CSS match local SHA256 bytes;
+invalid guideline capability returns404. Production GETs with iPhone User-Agent
+for apex/www login/client/plan/performance are200 and match prebuilt HTML; main
+JS/CSS and changed login/Users/Clients/Overview chunks match exact local hashes.
+These are HTTP/artifact checks, not an authenticated rendered-device claim.
+
+Live assets: `index-ECbp0huM.js` and `index-ZXZ0FuvD.css`. Live CSS includes the
+auth/client16px phone rules, preserves pinch zoom, and the shell/Overview contain
+the new shrink/wrap/stack constraints. The previous screenshot's old assets are
+no longer served for a fresh normal request. Existing tabs may retain prior
+browser zoom; reopening the normal login link starts a fresh viewport.
+
+The initial local Vercel environment pull contained redacted placeholders, caught
+before upload. Rebuilt using ONLY the exact existing public Supabase URL and
+publishable browser key from the verified live bundle. No private secret read,
+transfer, repository persistence or hosted env change. Final prebuilt239files /
+77,285,951bytes includes unchanged large client logos in static/function output;
+platform content reuse avoids treating them as new client assets. Never upload
+the initial placeholder build. Private manifests/readbacks are in %TEMP% under
+`cg-mobile-release-*`, `cg-mobile-stage-*`, `cg-mobile-production-*`.
+
+Budget preflight recovered the previous API size-limit failure through30 adjacent
+one-day windows, all successful. Observed billed-cost sum16.209721369951USD through
+16November08:00UTC conservatively includes the preceding period's final day.
+Current team is active Pro with20USD included allocation; cycle ends18November
+08:00UTC. Conservative included headroom~3.79USD; retained3USD serving/storage
+reserve with recent two-day run-rate~0.64USD and incremental prebuilt-release
+allowance at most0.10USD. No extra on-demand spend/cap increase authorized or
+performed. Daily charges are delayed estimates, not a real-time invoice/cap
+guarantee. No cloud application build CPU was used for this release.
+
+Physical-iPhone and authenticated rendered client acceptance remain unverified
+because the current Computer Use session has the documented Chrome URL-safety
+limitation. No all-app launch or every-device completion claim. The final browser
+attempt/outcome must be recorded separately if available; never bypass protection.
+
+## Historical source-only preparation
+
 CA requested a practical cleanup of the phone admin/staff experience after the
 Clients screen made even sharing a login difficult. Continue the same isolated
 PR #993/worktree; do not create competing Clients changes. Source only.

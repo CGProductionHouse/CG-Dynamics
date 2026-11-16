@@ -1,4 +1,17 @@
-## 16 November — mobile staff cleanup, source candidate only
+## 16 November — approved mobile staff/client viewport release LIVE
+
+CA approved PR #993 release. Exact runtime ccbb6ec7 is LIVE at
+dpl_B8eMyLViZqYRNxae4cR9HXqLhwhB: one local production-target prebuild, protected
+stage SHA256 verification, same-deployment promotion; zero cloud application
+compilation. Apex/www and login/client/plan/performance serve exact candidate
+HTML; changed JS/CSS chunks match. 205 affected tests/build/lint/diff pass.
+No DB/provider/auth-account/config/spend-limit change; git deploy remains OFF.
+Rollback dpl_DZ5RJ8F6gbRsSSvFtsHHhVXS3744 retained. Billing window preflight recovered
+and conservative included-budget headroom verified; lag/physical-phone/browser
+limits remain explicit. [Current release receipt](MOBILE-STAFF-CLEANUP-2026-11-16.md).
+Older source-only notes immediately below are historical and superseded.
+
+### Historical pre-approval state
 
 Latest client screenshot: live HTML/assets independently confirm old 14px login
 and absent candidate CSS; current deployment/source/rollback recorded in the
