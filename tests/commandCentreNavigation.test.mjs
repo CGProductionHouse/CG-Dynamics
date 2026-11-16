@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { readFileSync, existsSync } from 'node:fs'
+import { build } from 'esbuild'
 import test from 'node:test'
 
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8')
@@ -54,15 +55,29 @@ test('Team Work and Morning List Import never render for staff/team roles', () =
 
 // ── 5 + 6. Desktop and mobile navigation both expose the workflow ───────────
 
-test('desktop sidebar and mobile drawer both render the full hub list including the workflow', () => {
-  // Desktop and mobile reuse the same renderNav over zoneItems, so entries in
-  // primaryNavItems surface in both. The desktop sidebar also renders on mobile
-  // through the slide-out drawer.
+async function mobileDestinations(role) {
+  const modern = existsSync(new URL('../src/lib/mobileStaffNavigation.ts', import.meta.url))
+  const entry = new URL(modern ? '../src/lib/mobileStaffNavigation.ts' : '../src/pages/admin/adminNavigation.ts', import.meta.url)
+  const result = await build({ entryPoints: [entry.pathname], bundle: true, write: false, format: 'esm', platform: 'node' })
+  const policy = await import('data:text/javascript;base64,' + Buffer.from(result.outputFiles[0].text).toString('base64'))
+  if (modern) {
+    assert.match(layout, /mobileNavigationGroups\(currentRole, menuSearch\)/)
+    assert.match(layout, /mobileGroups\.map/)
+    assert.match(layout, /group\.items\.map\(item => <NavigationLink/)
+    return policy.mobileNavigationGroups(role).flatMap(group => group.items).map(item => item.to)
+  }
+  assert.match(layout, /renderNav\(false, closeMobile\)/)
+  return policy.primaryNavItems.filter(item => policy.canShowNavItem(item, role)).map(item => item.to)
+}
+
+test('desktop and mobile retain Work and role-gated Team Work across shell versions', async () => {
   assert.match(layout, /zoneItems\.map\(item => <NavigationLink/)
   assert.match(layout, /renderNav\(desktopCollapsed\)/)
-  assert.match(layout, /renderNav\(false, closeMobile\)/)
-  assert.match(adminNav, /label: 'Team Work'/)
-  assert.match(adminNav, /label: 'Morning List Import'/)
+  for (const role of ['admin', 'manager', 'team']) {
+    const destinations = await mobileDestinations(role)
+    assert(destinations.includes('/admin/work'), `Work remains reachable for ${role}`)
+    assert.equal(destinations.includes('/admin/command-centre'), role !== 'team')
+  }
 })
 
 test('mobile quick-nav is role-stable and never displaces Content or Calendar', () => {
@@ -74,13 +89,11 @@ test('mobile quick-nav is role-stable and never displaces Content or Calendar', 
   assert.doesNotMatch(layout, /MOBILE_PRIMARY_PATHS = \[[^\]]*morning-import[^\]]*\]/)
 })
 
-test('Team Work and Morning List Import reach managers via the More drawer, not the bottom bar', () => {
-  // The drawer renders every role-visible zone item, so managers see the work
-  // entries there (More -> entry = two taps). The bottom bar stays untouched.
-  assert.match(layout, /zoneItems\.map\(item => <NavigationLink/)
-  assert.match(layout, /renderNav\(false, closeMobile\)/)
-  assert.match(adminNav, /label: 'Team Work'/)
-  assert.match(adminNav, /label: 'Morning List Import'/)
+test('managers reach Morning List Import through Work even when mobile menu removes the duplicate shortcut', async () => {
+  for (const role of ['admin', 'manager']) assert((await mobileDestinations(role)).includes('/admin/work'))
+  assert.match(work, /canViewWorkload && \(/)
+  assert.match(work, /\/admin\/command-centre#morning-import/)
+  assert.match(work, /Morning List Import/)
   assert.match(adminNav, /to: '\/admin\/command-centre', label: 'Team Work'[\s\S]{0,120}access: 'manager'/)
 })
 

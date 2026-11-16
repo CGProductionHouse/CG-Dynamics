@@ -1,3 +1,88 @@
+## 16 November — client opening crop corrective release LIVE
+
+CA's new screenshot confirms #993 reached the phone but the opening view still
+crops. The old HTTP/test receipt is not physical-device acceptance. Isolated
+`fix/client-portal-opening-viewport` adds a bounded iOS entry-only retained-zoom
+repair and pre-auth blur.93tests plus actual local Chromium/WebKit five-width
+opening/login/long-name checks pass; native Chromium16/14magnification reproduces
+the old crop and returns to1 with correction, later zoom preserved. No production
+data/account changes or other agent files. [Evidence and release boundary](CLIENT-OPENING-VIEWPORT-2026-11-16.md).
+Runtime89b20830 now LIVE atdpl_GwQE8n9fRXGdr13L4Gbjj8VV2iM5 (PR #994):
+one local prebuild/stage then same-stage promotion; protected/live HTML/JS/CSS
+match exact local bytes, routes200/invalid capability404. No cloud app build or
+DB/provider/account change. Prior dpl_B8eMyLViZqYRNxae4cR9HXqLhwhB retained.
+Physical iPhone acceptance remains unverified; do not claim HTTP checks prove it.
+Exact Google Control Centre target remains unavailable; no guessed tracker write.
+
+## 16 November — approved mobile staff/client viewport release LIVE
+
+CA approved PR #993 release. Exact runtime ccbb6ec7 is LIVE at
+dpl_B8eMyLViZqYRNxae4cR9HXqLhwhB: one local production-target prebuild, protected
+stage SHA256 verification, same-deployment promotion; zero cloud application
+compilation. Apex/www and login/client/plan/performance serve exact candidate
+HTML; changed JS/CSS chunks match. 205 affected tests/build/lint/diff pass.
+No DB/provider/auth-account/config/spend-limit change; git deploy remains OFF.
+Rollback dpl_DZ5RJ8F6gbRsSSvFtsHHhVXS3744 retained. Billing window preflight recovered
+and conservative included-budget headroom verified; lag/physical-phone/browser
+limits remain explicit. [Current release receipt](MOBILE-STAFF-CLEANUP-2026-11-16.md).
+Older source-only notes immediately below are historical and superseded.
+
+### Historical pre-approval state
+
+Latest client screenshot: live HTML/assets independently confirm old 14px login
+and absent candidate CSS; current deployment/source/rollback recorded in the
+mobile cleanup receipt. Added bounded portal header/Overview shrink/wrap fixes
+and portal form sizing; 41 focused fixture-env tests/build/lint/diff pass. No
+deployment/cloud build or production mutation. #679/no-Vercel release hold and
+unverified current budget remain; do not tell CA the live phone view changed.
+
+Client-login follow-up in the same PR: auth inputs now inherit explicit 16px
+phone sizing, preventing Safari focus zoom from carrying into the portal; normal
+pinch zoom and the device-width initial viewport remain. Actual rendered-component
+and compiled-CSS regressions plus 19 focused tests/build/lint/diff pass. Source
+only, physical-iPhone acceptance unverified; no cloud or production action.
+
+CA expanded PR #993 to simplify phone staff/admin use. Same isolated worktree:
+searchable all-workspace More menu (same role gates), compact client cards,
+native action sheets, direct login copy, explicit reset/disable confirmations,
+staff input zoom prevention and 44px phone buttons. Tasks/calendar/provider and
+other agent lanes untouched. [Scope and verification](MOBILE-STAFF-CLEANUP-2026-11-16.md).
+175 relevant tests/build/lint/diff pass; rendered browser acceptance pending.
+NOT LIVE; no production writes or Vercel usage. #679 gate remains.
+
+## 16 November — client login message copy, source candidate only
+
+CA requested one forwardable link/username/password message directly on the Clients
+card. Bounded #399 correction on `fix/client-login-message-copy` adds admin-only
+copy on desktop/mobile cards and enabled Client Access rows, with fresh exact-ID
+mapping checks and iPhone user-gesture clipboard handling. No account reset or
+production mutation. [Evidence and limitations](CLIENT-LOGIN-MESSAGE-COPY-2026-11-16.md).
+Local tests/build/lint/diff green; browser acceptance unverified. NOT LIVE; #679
+hosting gate and other agent lanes remain unchanged.
+
+## 11 November — existing-film registration repair, local candidate only
+
+CA asked MSI to finish all possible video tracking reconciliation. Sixteen
+exact-client histories were saved/read back in Dynamics and indexed in existing
+task `7f413d31-17cd-4761-b2e9-a031c1343444`; several actual films remain absent from
+the live Pipeline. A bounded frontend repair on `codex/nolan-video-registration`
+adds explicit historical-film registration in the existing table without fake
+runs/slots, duplicate/retry readback protection and name-only editor preservation.
+[Workflow, evidence and release limits](EXISTING-VIDEO-REGISTRATION.md).
+No production DB/schema/deployment, approval promotion or staff assignment was
+performed. #900 owns tracking; #981 exact handoffs and #984 brand panel remain
+separate/additive. Shared editorial library remains PR910. Hosting #679 release
+gate remains; this candidate is not a claim of completed live-board backfill.
+
+## 16 November — Nolan offline review artifact and integration rehearsal
+
+Draft #990 now has a self-contained HTML review using actual Nolan components
+and CSS with explicit sample-only adapters, saved to Library. Production auth
+and decision activation remain unchanged. Browser/device acceptance is still
+open. The local integration rehearsal preserves both this lane and current main;
+no integration commit, deployment or production action was performed. Exact
+artifact, test results and compared trees: [review receipt](NOLAN-REVIEW-PREVIEW-2026-11-16.md).
+
 ## 16 November — Nolan real sign-in/JWT backend acceptance
 
 Existing draft #990 now passes genuine GoTrue password sign-in and PostgREST JWT
@@ -44,20 +129,6 @@ external pinned board stays in place. See
 [Nolan candidate and verification](NOLAN-NATIVE-OVERVIEW-2026-11-15.md).
 Authenticated role/browser/visual acceptance and actual-posted reconciliation
 remain open. #679 ZERO unapproved deployment gate and all other owners remain.
-
-## 11 November — existing-film registration repair, local candidate only
-
-CA asked MSI to finish all possible video tracking reconciliation. Sixteen
-exact-client histories were saved/read back in Dynamics and indexed in existing
-task `7f413d31-17cd-4761-b2e9-a031c1343444`; several actual films remain absent from
-the live Pipeline. A bounded frontend repair on `codex/nolan-video-registration`
-adds explicit historical-film registration in the existing table without fake
-runs/slots, duplicate/retry readback protection and name-only editor preservation.
-[Workflow, evidence and release limits](EXISTING-VIDEO-REGISTRATION.md).
-No production DB/schema/deployment, approval promotion or staff assignment was
-performed. #900 owns tracking; #981 exact handoffs and #984 brand panel remain
-separate/additive. Shared editorial library remains PR910. Hosting #679 release
-gate remains; this candidate is not a claim of completed live-board backfill.
 
 ## 9 November — combined guideline release LIVE, acceptance complete
 
