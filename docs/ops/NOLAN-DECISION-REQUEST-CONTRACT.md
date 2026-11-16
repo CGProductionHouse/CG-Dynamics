@@ -310,3 +310,34 @@ VITE_SUPABASE_URL=http://127.0.0.1:1 VITE_SUPABASE_PUBLISHABLE_KEY=synthetic-tes
 npx eslint tests/nolanDecisionDatabase.test.mjs tests/helpers/nolanCanonicalSchema.mjs
 git diff --check
 ```
+
+
+## 16 November genuine Auth/API acceptance continuation
+
+The missing local Auth/API capability is now resolved for backend tests. Official
+pinned GoTrue v2.197.0 and PostgREST v14.18 run with PostgreSQL in one isolated
+network namespace, no external network or host ports. GoTrue owns its real auth
+schema/functions; five synthetic accounts sign up and password-sign-in normally.
+PostgREST verifies the actual issued JWTs before canonical RLS/RPC checks.
+Ten Auth/API tests pass; the combined real-DB/Auth selection passes 42 tests.
+This includes existing-token deactivation/role revocation, signature/password
+rejection, source revision, recipient isolation and refresh-session logout.
+Already-issued access tokens remain valid until expiry; no instant logout-token
+revocation is claimed. Application activation remains false.
+
+All eleven replay gaps are now classified by dependency impact. The date/text
+and duplicate-source conflicts reproduce in real PostgreSQL after dependencies
+exist; the latter also fails under either insertion order. They do not block the
+narrow decision/profile/task path, but remain unrelated fresh-install gaps.
+No real client/contacts were fabricated/imported to make backfills pass.
+
+Read [runtime, exact tests, gap classification and remaining gates](NOLAN-AUTH-API-ACCEPTANCE-2026-11-16.md).
+The old missing-Auth/PostgREST blocker is superseded by this backend receipt;
+working sandboxed-browser, same-origin UI and physical-device acceptance remain
+open. Chromium was not retried and the prior PR-description denial was respected.
+
+Final aggregate for the Auth/API continuation: 4,444 tests, 4,414 passed, 30
+optional skips, zero failures/cancellations, exit 0 in 247.76 seconds with both
+RUN_NOLAN_DECISION_DB_TESTS=1 and RUN_NOLAN_AUTH_API_TESTS=1. Separate affected
+selection: 42/42 pass. Build/emitted application bundle, scoped lint and diff
+checks pass. All generated containers cleaned up; source and activation unchanged.

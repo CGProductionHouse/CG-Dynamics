@@ -98,6 +98,29 @@ for(const canonical of [false,true])test(`decision persistence and role isolatio
   const newRequest=()=>as(admin,create(freshRevision(),'Concurrent question',recipient,randomUUID()))
 
   if(canonical){
+
+   await t.test('legacy publication date/text failure persists after all dependencies exist',()=>{
+    assert.equal(sql("select data_type from information_schema.columns where table_schema='public' and table_name='content_guide_ideas' and column_name='month'"),'date')
+    assert.throws(()=>sql('begin;'+readFileSync('supabase/phase-22a-content-guide-publication-gate.sql','utf8')+'rollback;'),/operator does not exist: date = text/)
+   })
+   await t.test('legacy source seed conflicts with canonical title uniqueness in either order',()=>{
+    const source=readFileSync('supabase/phase-28a-marketing-library-repo-source-registration.sql','utf8')
+    assert.throws(()=>sql('begin;'+source+'rollback;'),/marketing_library_sources_title_year_edition_uidx/)
+    // Existing official seed and later generated cited source are different IDs
+    // for the same normalized title/year/edition. Reordering cannot satisfy both.
+    const original=JSON.parse(sql("select row_to_json(s) from (select source_identifier,canonical_url from marketing_library_sources where lower(btrim(title))='tiktok creative center') s"))
+    assert.equal(original.canonical_url,'https://ads.tiktok.com/business/creativecenter')
+    const later=source.split('\n').find(line=>line.includes("'TikTok Creative Center', 'TikTok For Business"))
+    assert.ok(later?.includes("'repo:docs/ai-workforce/"))
+    // Exercise the actual expression index on a temporary isolated table, both
+    // seed orders, without touching canonical source rows or weakening its index.
+    for(const [first,second] of [['official','generated'],['generated','official']]){
+     assert.throws(()=>sql(`begin;create temporary table title_order_probe (title text,publication_year int,edition text,source_identifier text);
+      create unique index title_order_probe_unique on title_order_probe(lower(btrim(title)),coalesce(publication_year,-1),lower(btrim(coalesce(edition,''))));
+      insert into title_order_probe values ('TikTok Creative Center',null,null,'${first}');
+      insert into title_order_probe values ('TikTok Creative Center',null,null,'${second}');rollback;`),/title_order_probe_unique/)
+    }
+   })
    await t.test('canonical task RLS and profile policies retain role/source isolation',()=>{
     const operational=randomUUID(),client=randomUUID()
     sql(`insert into auth.users(id,email) values ('${client}','${client}@example.invalid');

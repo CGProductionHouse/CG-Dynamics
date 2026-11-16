@@ -1,3 +1,15 @@
+## 16 November — Nolan real sign-in/JWT backend acceptance
+
+Existing draft #990 now passes genuine GoTrue password sign-in and PostgREST JWT
+role/revocation/RPC checks with synthetic accounts, in isolated containers with
+no external network or host ports. Combined DB/Auth selection: 42 passing tests.
+All eleven replay gaps are classified; canonical native decision/profile/task
+paths apply, while full platform/data parity remains open. Read
+[Auth/API receipt](NOLAN-AUTH-API-ACCEPTANCE-2026-11-16.md).
+Browser/same-origin/device acceptance remains open; no Chromium sandbox bypass,
+production change, activation, migration, deployment or PR-description retry.
+MSI/social ownership remains untouched.
+
 ## 16 November — Nolan canonical policy replay, release still gated
 
 Existing draft #990 now exercises real repository profiles/native-task policies

@@ -4,8 +4,8 @@ import { createHash } from 'node:crypto'
 
 // Platform scaffolding only: NOT GoTrue authentication or hosted Supabase proof.
 // Public tables, triggers, functions and policies come from unmodified repo SQL.
-export function replayNolanCanonicalSchema(sql, reportPath) {
- sql(`create role anon; create role authenticated; create role service_role bypassrls;
+export function replayNolanCanonicalSchema(sql, reportPath, {bootstrap=true}={}) {
+ if(bootstrap)sql(`create role anon; create role authenticated; create role service_role bypassrls;
  create schema auth; create schema extensions;
  create extension pgcrypto with schema extensions;
  create table auth.users(id uuid primary key, email text, invited_at timestamptz, raw_user_meta_data jsonb default '{}'::jsonb);
@@ -39,7 +39,7 @@ export function replayNolanCanonicalSchema(sql, reportPath) {
  }
  const policies=JSON.parse(sql("select coalesce(json_agg(p order by tablename,policyname),'[]') from (select tablename,policyname,cmd,roles,qual,with_check from pg_policies where schemaname='public' and tablename in ('profiles','command_centre_tasks')) p"))
  const extensions=JSON.parse(sql("select json_agg(e order by extname) from (select extname,extversion from pg_extension) e"))
- writeFileSync(reportPath,JSON.stringify({policies,extensions,platform:'PostgreSQL 17; synthetic auth.users/auth.uid/auth.role and API default grants; no GoTrue/storage/vault/cron/net',report},null,2)+'\n')
+ writeFileSync(reportPath,JSON.stringify({policies,extensions,platform:bootstrap?'PostgreSQL 17; synthetic auth.users/auth.uid/auth.role and API default grants; no GoTrue/storage/vault/cron/net':'PostgreSQL 17; real GoTrue-managed auth schema and auth.uid/auth.role; verified PostgREST JWT claims; local API default grants; no storage/vault/cron/net',report},null,2)+'\n')
  // Known gaps are explicit and bounded. New failures cannot silently pass as
  // "expected on an empty database", even when the narrow Nolan tests pass.
  const gaps={
