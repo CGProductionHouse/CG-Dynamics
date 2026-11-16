@@ -1,3 +1,4 @@
+import { marketingSourceReview } from './marketingGovernance.ts'
 import { getMarketingKnowledge, readMarketingArtifacts, writeMarketingArtifact } from './marketingKnowledge.ts'
 // cg-dynamics-mcp — Private authenticated MCP connector for ChatGPT ↔ CG Dynamics.
 //
@@ -3578,6 +3579,7 @@ const handleRevokeContentGuidelineShare: ToolHandler = (staff, input) => manageG
 
 const WRITE_TOOLS = new Set([
   'write_marketing_artifact',
+  'activate_marketing_knowledge',
   'submit_monthly_strategy_draft',
   'amend_monthly_strategy_draft',
   'create_task',
@@ -3618,10 +3620,22 @@ const CANONICAL_RECEIPT_REPLAY_TOOLS = new Set([
   'correct_my_entry',
 ])
 
+async function handleMarketingSourceReview(staff: AuthenticatedStaff, input: Record<string, unknown>, activate = false) {
+  const url = Deno.env.get('SUPABASE_URL'), anonKey = Deno.env.get('SUPABASE_ANON_KEY')
+  if (!url || !anonKey) return {error:'Authenticated source review configuration unavailable.'}
+  const authenticated = createClient(url, anonKey, {
+    global: {headers: {Authorization: `Bearer ${staff.connection.accessToken}`}},
+    auth: {persistSession:false,autoRefreshToken:false},
+  })
+  return marketingSourceReview(staff,input,authenticated,activate)
+}
+
 const toolHandlers: Record<string, ToolHandler> = {
   get_marketing_knowledge: getMarketingKnowledge,
   read_marketing_artifacts: readMarketingArtifacts,
   write_marketing_artifact: writeMarketingArtifact,
+  read_marketing_source: handleMarketingSourceReview,
+  activate_marketing_knowledge: (staff,input) => handleMarketingSourceReview(staff,input,true),
   publish_content_guideline: handlePublishContentGuideline,
   get_content_guideline_share: handleGetContentGuidelineShare,
   revoke_content_guideline_share: handleRevokeContentGuidelineShare,

@@ -63,19 +63,24 @@ and connection handoff only.
 ## Model-free operations after built-in retirement (PR #995 candidate)
 
 The existing four skills and Project-context contract remain. The additional
-`marketing-knowledge-and-artifacts` skill uses three new tools:
+`marketing-knowledge-and-artifacts` skill uses five new tools (64 total connector tools):
 
 - `get_marketing_knowledge`: approved/current shared and exact-client Skill Cards,
   practical guidance and all ten specialist briefs; optional current platform/surface
   evidence. Paged, scoped, redacted and model-free.
 - `read_marketing_artifacts`: exact-client legacy draft/version/decision/handoff reads.
 - `write_marketing_artifact`: externally authored draft/version saves or explicit
-  current-version human decisions, with an atomic actor-scoped retry receipt.
+  current-version human decisions, with an atomic actor-scoped retry receipt. Internal
+  Client Projects remain pinned; optional campaign binding is creation-only.
+- `read_marketing_source`: active-admin-only exact-card/source rights and readiness,
+  plus bounded verified public-domain chunks when permissions allow.
+- `activate_marketing_knowledge`: explicit human-triggered activation through the
+  existing authenticated canonical review/revision/trust gate; no new approval power.
 
 These are source candidates, not installed/live capabilities until the reviewed
-migration and MCP release execute. Missing tools or database seam means unavailable.
-No in-app model, Content Director generation, provider spend, raw full-text document,
-knowledge activation or client publication is added. Canonical ChatGPT-authored
+three migrations and MCP release execute. Missing tools or database seam means unavailable.
+No in-app model, Content Director generation, provider spend, copyrighted/unverified
+raw-text export, campaign reassignment, autonomous approval or client publication is added. Canonical ChatGPT-authored
 Content Guidelines retain their existing add/edit/read/share tools.
 
 Use the current `get_my_assistant_bootstrap` coexistence policy; older fallback-only

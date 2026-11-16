@@ -1,3 +1,15 @@
+## 16 November — PR #995 remaining governed parity, NOT LIVE
+
+Same branch adds admin-only source/rights browsing (verified permitted public-domain
+chunks), authenticated canonical human-triggered activation, exact-client internal
+Project artifact writes and creation-only canonical campaign binding. Reassignment and
+unsafe raw-text export intentionally unavailable. 64 MCP tools; all prior skills and
+Library/My Assistant surfaces preserved. Three migrations remain unapplied; workbook
+owned RPCs/shared helpers untouched. PR-description publication blocked and not retried.
+Current authority: [coverage, receipts and release gates](STAFF-AI-RETIREMENT-2026-11-16.md).
+
+## Historical continuation snapshots
+
 <!-- PR #995 continuation: narrowly guards assistant_ownership_review_summary with exact active auth.uid(); #990 retains shared RLS/helper ownership. Two new migrations remain UNAPPLIED. Isolated regression reproduces original bypass and verifies active/denied accounts and unchanged history. -->
 ## 16 November — PR #995 model-free connector continuation, NOT LIVE
 

@@ -39,7 +39,7 @@ test('artifact read resolves exact parent before reading history and projects/re
  const r=await readMarketingArtifacts(good.staff,{client_id:client,artifact_id:artifact,offset:50})
  assert.ok(!JSON.stringify(r).includes('PRIVATE'));assert.ok(good.calls.some(x=>x.op==='range'&&x.args[0]===0&&x.args[1]===0))
 })
-test('staff cannot approve; client Projects cannot write; explicit human confirmation is required',async()=>{
+test('staff cannot approve; client Projects require an exact pin; explicit human confirmation is required',async()=>{
  for(const input of [{action:'decision',decision:'approved',confirm_human_decision:true},{action:'decision',decision:'returned'}]){
  const {staff,calls}=fixture();const r=await writeMarketingArtifact(staff,{client_id:client,artifact_id:artifact,version_id:key,idempotency_key:key,...input});assert.ok(r.error);assert.ok(!calls.some(x=>x.name))}
  const {staff}=fixture({}, {contextKind:'client',effectiveClientId:client});assert.ok((await writeMarketingArtifact(staff,{client_id:client})).error)
@@ -84,4 +84,29 @@ test('actual MCP dispatcher routes canonical marketing retries through the atomi
  const result=await call(input,'write_marketing_artifact')
  assert.equal(result.result.isError,false);assert.match(keySeen,/^[0-9a-f-]{36}$/)
  assert.ok(calls.some(x=>x.table==='clients'))
+})
+
+
+test('structured Skill Card guidance stays usable and redacted',async()=>{
+ const {staff}=fixture({skill_cards:[{...card,how_to_apply:['Use a specific hook','password=private'],mistakes_to_avoid:['Generic phrasing'],agent_instructions:['Apply the evidence']}]})
+ const r=await getMarketingKnowledge(staff,{})
+ assert.deepEqual(r.cards[0].how_to_apply,['Use a specific hook','[redacted-credential]'])
+ assert.deepEqual(r.cards[0].mistakes_to_avoid,['Generic phrasing'])
+})
+test('client Project writes bind authenticated actor and server-resolved client, reject foreign client before RPC',async()=>{
+ const {staff,calls}=fixture({}, {contextKind:'client',effectiveClientId:client})
+ const input={client_id:client,action:'draft',specialist:'copywriting_agent',request:'Draft',content:{drafts:['Specific copy']},idempotency_key:key}
+ assert.ok((await writeMarketingArtifact(staff,{...input,client_id:other})).error)
+ assert.ok(!calls.some(c=>c.name))
+ assert.equal((await writeMarketingArtifact(staff,input)).receipt.actor,actor)
+ assert.equal(calls.find(c=>c.name).args.p_project_client,client)
+})
+
+test('campaign observations remain exact-client and never fabricate provider freshness',async()=>{
+ const {staff,calls}=fixture({google_ads_campaign_daily_metrics:[{client_id:client,campaign_id:'stored',campaign_name:'Observed',metric_date:'2026-11-16'},{client_id:client,campaign_id:'stored',campaign_name:'Old name',metric_date:'2026-11-15'}]})
+ const result=await readMarketingArtifacts(staff,{client_id:client,include_campaign_options:true})
+ assert.equal(result.campaign_observations[0].campaign_id,'stored');assert.equal(result.campaign_observations[0].campaign_name,'Observed')
+ assert.ok(calls.some(c=>c.op==='eq' && c.args[0]==='client_id' && c.args[1]===client))
+ const foreign=fixture({google_ads_campaign_daily_metrics:[{client_id:other,campaign_id:'foreign'}]})
+ assert.ok((await readMarketingArtifacts(foreign.staff,{client_id:client,include_campaign_options:true})).error)
 })

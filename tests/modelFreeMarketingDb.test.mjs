@@ -23,7 +23,7 @@ test('model-free Marketing SQL: atomic drafts, exact actor/client, review gates,
  set fixture.role='service_role';`)
  await db.exec(readFileSync('supabase/migrations/20260802130000_marketing_ai_department.sql','utf8'))
  await db.exec(readFileSync('supabase/migrations/20261116160000_model_free_marketing_connector.sql','utf8'))
- const call=async(input,k=key(),actor=staff,connection=admin,context='staff')=>(await db.query('select mcp_write_marketing_artifact($1,$2,$3,$4,$5) as result',[actor,connection,context,k,input])).rows[0].result
+ const call=async(input,k=key(),actor=staff,connection=admin,context='staff',project=null)=>(await db.query('select mcp_write_marketing_artifact($1,$2,$3,$4,$5,$6) as result',[actor,connection,context,k,input,project])).rows[0].result
  const draft={client_id:client,action:'draft',specialist:'copywriting_agent',request:'External authored copy',content:{drafts:['A real specific draft']},expected_version:0,evidence_card_ids:[card]}
  const receiptKey=key();const first=await call(draft,receiptKey)
  assert.equal(first.status,'draft');assert.equal(first.version,1);assert.equal(first.model_used,false)
@@ -64,6 +64,25 @@ test('model-free Marketing SQL: atomic drafts, exact actor/client, review gates,
  await assert.rejects(db.query('select * from mcp_marketing_write_receipts'),/permission denied/)
  await assert.rejects(call(draft),/permission denied/)
  await db.exec('reset role')
+ await db.exec('begin')
+ const denied=async(p,pattern)=>{await assert.rejects(p,pattern);await db.exec('rollback to savepoint denied');await db.exec('release savepoint denied')}
+ const attempt=async(...args)=>{await db.exec('savepoint denied');return call(...args)}
+ await db.exec("set fixture.role='service_role'")
+ await db.exec(`insert into google_ads_campaign_daily_metrics values('${client}','campaign-1','Canonical campaign','2026-11-16'),('${other}','foreign','Foreign','2026-11-16')`)
+ await denied(attempt({...draft,campaign_id:'foreign'}),/Campaign unavailable/)
+ const bound=await call({...draft,campaign_id:'campaign-1'},key(),staff,staff,'client',client)
+ assert.equal((await db.query('select campaign_name from ai_marketing_artifacts where id=$1',[bound.artifact_id])).rows[0].campaign_name,'Canonical campaign')
+ await denied(attempt({...draft,artifact_id:bound.artifact_id,expected_version:1,campaign_id:'campaign-1'}),/creation-only/)
+ await denied(attempt({...decision,artifact_id:bound.artifact_id,campaign_id:null}),/creation-only/)
+ await denied(attempt(draft,key(),staff,staff,'client',other),/Exact Project client/)
+ await denied(attempt(draft,key(),staff,admin,'client',client),/Active actor/)
+ await db.exec(`update profiles set is_active=false where id='${admin}'`)
+ await denied(attempt(draft,key(),staff,admin,'staff'),/Active actor/)
+ await db.exec(`update profiles set is_active=true where id='${admin}';update profiles set role='client' where id='${staff}'`)
+ await denied(attempt(draft,key(),staff,staff,'client',client),/Active actor/)
+ await db.exec(`update profiles set role='staff',is_active=false where id='${staff}'`)
+ await denied(attempt(draft,key(),staff,staff,'client',client),/Active actor/)
+ await db.exec('rollback')
  assert.equal((await db.query('select count(*)::int n from ai_marketing_artifact_versions')).rows[0].n,2)
  assert.equal((await db.query('select count(*)::int n from ai_marketing_artifact_approvals')).rows[0].n,1)
  assert.equal((await db.query('select count(*)::int n from mcp_marketing_write_receipts')).rows[0].n,3)

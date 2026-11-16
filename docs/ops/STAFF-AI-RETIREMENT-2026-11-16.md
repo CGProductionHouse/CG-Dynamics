@@ -1,6 +1,82 @@
 # Built-in staff AI retirement — 16 November 2026
 
-## Continuation: usable model-free connector parity, still NOT LIVE
+## Current gap closure — same PR #995, not live
+
+Five added tools now bring the connector to 64 tools (32 read / 32 write); the fifth
+plugin skill covers these workflows and the original four remain. Current decisions:
+
+| Capability | Candidate implementation / intentional boundary |
+| --- | --- |
+| Raw source browsing | `read_marketing_source`: active authenticated admin in explicit company_admin context; exact card/client/branch, canonical blockers and source rights metadata. Bounded verified public-domain chunks only when BOTH source and document permit full-text access. No storage paths, unverified chunks, copyrighted/research-only/excerpt-only/unknown-rights raw export. Those exports are intentionally unavailable; no rights inference or new ingestion. |
+| Knowledge activation | `activate_marketing_knowledge` delegates to existing `skill_card_activate` with the real authenticated token, current material hash, explicit human confirmation and canonical review/source gates. No service-role impersonation or new review/approval authority. Manager/staff/client contexts denied. |
+| Campaign binding | Optional exact-client stored campaign on NEW externally authored artifacts, canonical latest name resolved in the transaction. Bounded stored campaign observations discover IDs. Reassignment intentionally unavailable: the retired provider workflow only set binding on creation; no canonical reassignment semantics exist. Historical bindings remain intact. |
+| Client Project artifact writes | Implemented for internal staff-connected Projects pinned to the exact resolved client, with connection principal as actor. The service-only transaction independently checks active actor/connection, no impersonation, client pin, version, evidence, human decisions and receipt. No client-role or portal access expansion. |
+
+Structured Skill Card how-to/mistakes/agent guidance now preserves arrays (and legacy
+text) while redacting credentials. No null loss of actionable guidance.
+
+Three unapplied migrations form the final release packet:
+`20261116160000_model_free_marketing_connector.sql` (signature includes independently
+supplied Project client; this never-applied candidate was revised),
+`20261116170000_guard_assistant_ownership_summary.sql` (unchanged narrow guard), and
+`20261116180000_governed_marketing_source_activation.sql` (new authenticated admin
+adapter, preserving canonical functions and their grants/policies). The last requires
+existing phase-23a source/document/chunk rights schema, exact-client scope column and
+canonical revision-review migration to be installed; do NOT replay historical seeds.
+
+The new adapter has no anon/service-role execution grant. Authenticated admin authority
+and exact active auth.uid() are checked inside SQL as well as in the handler. It locks
+source then card using the existing review lock order. Activation is revision-fenced;
+repeating an already active revision adds no duplicate activation audit. Human content
+review records remain owned by the retained UI/canonical review RPC. Raw excerpts are
+untrusted data and redacted at the connector boundary. Full source retrieval is never
+used as production grounding unless its derived Skill Card passes existing approval.
+
+No #990-owned functions or shared active-account/profile helpers were edited. In
+particular assistant_update_video, apply_microsoft_sync_item and
+client_portal_published_content_guidelines remain outside this lane. No provider calls,
+production SQL, migrations, merge or deployment. PR-description publication remains
+blocked and was NOT retried during this continuation; this committed document is the
+current candidate receipt, not proof the PR description was refreshed.
+
+Additional release gates: native Deno checks; hosted authenticated-token delegation,
+source rights/RLS and inactive/exact-client denials; real installed ChatGPT AND Nolan
+read/activation/write acceptance under exact-record authority; legitimate browser/phone
+retirement checks; owner-approved #679 release packet. Deploy reviewed migrations before
+MCP routes, verify canonical activation identity and stored receipts, then retired Edge
+handlers before frontend. Keep git.deploymentEnabled=false. Do not delete history on
+rollback or restore generation without an owner decision.
+
+
+### Gap-closure verification receipt
+
+The expanded regression command covers `tests/modelFree*.test.mjs`,
+`assistantOwnershipActiveAccount`, all `mcp*.test.mjs`, `cgDynamicsMcpToolCatalog`,
+`marketingKnowledgeWorkspace`, `staffAiRetirement`, `skillCardReview` and
+`skillCardReviewRevision`: 366 passed / zero failed or skipped. The final focused
+model-free set additionally rechecked all 19 tests after the last pagination and
+campaign-observation adjustments. `CG_LOCAL_PGLITE_MODULE` points only to the disposable
+`/tmp/cg-marketing-db` installation; no production dependencies or real backend calls.
+
+`modelFreeGovernanceDb.test.mjs` executes the canonical foundation, historical review,
+rights schema and revision-binding SQL plus the new adapter. It verifies real human
+reviewer identity, canonical activation, duplicate audit avoidance, absent approval,
+stale hash, insufficient source trust, explicit confirmation, exact client/branch,
+foreign document, public-domain verified text, insufficient rights, private-path
+exclusion, staff/manager/client/inactive/anon/service-role denial. Role-only legacy
+`is_admin` in the fixture proves the adapter's own active-account guard. It does not
+claim hosted Supabase/JWT or concurrent-session acceptance.
+
+Artifact PostgreSQL tests now also verify exact Project pin, authenticated actor,
+connection inactivity, client-role denial, canonical campaign creation binding,
+foreign-campaign denial and refusal to reassign an existing artifact. The prior narrow
+ownership-summary regression remains included. Strict new-module/catalog TypeScript,
+application build, lint and clean diff are required before pushing this exact tree;
+final commit/check receipt is returned in the task handoff. No full-suite rerun is
+claimed; the earlier two independently reproduced navigation baseline failures remain
+historical, unrelated evidence.
+
+## Earlier continuation receipt (superseded by the current gap closure above)
 
 PR #995 now adds three tools (62 total:31read/31write) and a fifth plugin skill.
 `get_marketing_knowledge` pages reviewed/current generic or specialist-targeted
@@ -197,7 +273,7 @@ the existing lockfile with scripts disabled and a temporary cache; no dependency
    fresh billing/headroom/reserve, maximum incremental spend, prior rollback deployment,
    one local prebuilt artifact/stage/promotion and affected-domain uptime evidence.
    Keep `vercel.json` git.deploymentEnabled=false. Push is not deploy authorization.
-5. Separately approve the two additive migrations, changed MCP entry/catalog/module
+5. Separately approve the THREE additive migrations, changed MCP entry/catalog/module
    and the two retired Edge entry files with their shared dependency closures and
    unchanged JWT/auth settings. Apply reviewed migrations before exposing MCP writes;
    verify receipt permissions and active-account/exact-client/version denial, including

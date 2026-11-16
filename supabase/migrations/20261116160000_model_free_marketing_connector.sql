@@ -15,23 +15,25 @@ revoke all on public.mcp_marketing_write_receipts from public,anon,authenticated
 grant select,insert on public.mcp_marketing_write_receipts to service_role;
 
 create function public.mcp_write_marketing_artifact(
-  p_actor uuid,p_connection uuid,p_context text,p_key uuid,p_input jsonb
+  p_actor uuid,p_connection uuid,p_context text,p_key uuid,p_input jsonb,p_project_client uuid default null
 ) returns jsonb language plpgsql security definer set search_path=public,pg_temp as $$
 declare
   actor_role text; connection_role text; client uuid; artifact public.ai_marketing_artifacts%rowtype;
   version_row public.ai_marketing_artifact_versions%rowtype; previous public.mcp_marketing_write_receipts%rowtype;
   fingerprint text; result jsonb; action text; specialist text; artifact_type text; decision text;
-  expected integer; evidence uuid[]; note text; prior_specialist text;
+  expected integer; evidence uuid[]; note text; prior_specialist text; campaign_name text;
 begin
   if auth.role() is distinct from 'service_role' or auth.uid() is not null then raise exception 'Service-only marketing operation'; end if;
   select role into actor_role from public.profiles where id=p_actor and is_active=true and role in ('admin','manager','staff','team');
   select role into connection_role from public.profiles where id=p_connection and is_active=true and role in ('admin','manager','staff','team');
-  if actor_role is null or connection_role is null or p_context is null or p_context not in ('staff','company_admin')
+  if actor_role is null or connection_role is null or p_context is null or p_context not in ('staff','company_admin','client')
      or (p_actor<>p_connection and connection_role not in ('admin','manager'))
+     or (p_context='client' and (p_actor<>p_connection or p_project_client is null))
      or (p_context='company_admin' and (p_actor<>p_connection or connection_role not in ('admin','manager'))) then raise exception 'Active actor and authorised connection required'; end if;
   if p_key is null or jsonb_typeof(p_input) is distinct from 'object' or octet_length(p_input::text)>50000 then raise exception 'Invalid bounded input'; end if;
   client := (p_input->>'client_id')::uuid;
   if not exists(select 1 from public.clients where id=client and active=true) then raise exception 'Exact active client required'; end if;
+  if p_context='client' and client is distinct from p_project_client then raise exception 'Exact Project client required'; end if;
   action:=p_input->>'action';
   if action is null or action not in ('draft','decision') then raise exception 'Unsupported marketing action'; end if;
   fingerprint:=encode(sha256(convert_to(p_input::text,'UTF8')),'hex');
@@ -47,6 +49,7 @@ begin
     select * into artifact from public.ai_marketing_artifacts where id=(p_input->>'artifact_id')::uuid and client_id=client for update;
     if not found then raise exception 'Artifact unavailable for exact client'; end if;
   end if;
+  if p_input ? 'campaign_id' and (action<>'draft' or artifact.id is not null) then raise exception 'Campaign binding is creation-only'; end if;
   if action='draft' then
     specialist:=p_input->>'specialist';
     artifact_type:=case specialist when 'marketing_strategist' then 'strategy_brief' when 'copywriting_agent' then 'copy_deck' when 'creative_director' then 'creative_direction' when 'brand_guardian' then 'brand_review' when 'social_media_strategist' then 'social_strategy' when 'paid_ads_agent' then 'paid_ads_plan' when 'content_planner' then 'content_plan' end;
@@ -65,10 +68,16 @@ begin
       and ((c.client_specific=false and c.active_client_id is null) or
            (c.client_specific=true and c.active_client_id=client and c.client_scope_key is not distinct from nullif(p_input->>'scope_key','')))
     )) then raise exception 'Evidence is missing, stale, unreviewed or outside client scope'; end if;
+    if p_input->>'campaign_id' is not null then
+      select m.campaign_name into campaign_name from public.google_ads_campaign_daily_metrics m
+        where m.client_id=client and m.campaign_id=p_input->>'campaign_id'
+        order by m.metric_date desc,m.campaign_name limit 1;
+      if not found then raise exception 'Campaign unavailable for exact client'; end if;
+    end if;
     prior_specialist:=artifact.current_specialist;
     if artifact.id is null then
-      insert into public.ai_marketing_artifacts(client_id,originating_request,requested_specialist,current_specialist,artifact_type,created_by)
-      values(client,btrim(p_input->>'request'),specialist,specialist,artifact_type,p_actor) returning * into artifact;
+      insert into public.ai_marketing_artifacts(client_id,originating_request,requested_specialist,current_specialist,artifact_type,created_by,campaign_id,campaign_name)
+      values(client,btrim(p_input->>'request'),specialist,specialist,artifact_type,p_actor,p_input->>'campaign_id',campaign_name) returning * into artifact;
     end if;
     insert into public.ai_marketing_artifact_versions(artifact_id,version,specialist,content,evidence_card_ids,parent_version_id,created_by)
     values(artifact.id,expected+1,specialist,p_input->'content',evidence,
@@ -92,6 +101,6 @@ begin
   insert into public.mcp_marketing_write_receipts(actor_id,request_key,input_hash,result) values(p_actor,p_key,fingerprint,result);
   return result;
 end $$;
-revoke all on function public.mcp_write_marketing_artifact(uuid,uuid,text,uuid,jsonb) from public,anon,authenticated;
-grant execute on function public.mcp_write_marketing_artifact(uuid,uuid,text,uuid,jsonb) to service_role;
+revoke all on function public.mcp_write_marketing_artifact(uuid,uuid,text,uuid,jsonb,uuid) from public,anon,authenticated;
+grant execute on function public.mcp_write_marketing_artifact(uuid,uuid,text,uuid,jsonb,uuid) to service_role;
 commit;
