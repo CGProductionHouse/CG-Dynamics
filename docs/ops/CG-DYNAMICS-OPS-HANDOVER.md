@@ -1,3 +1,26 @@
+## 16 November — Novus actual client login/current plan accepted; fleet continued
+
+CA requested Novus client-ready and exact forwardable credentials, then other
+active clients. Real issued login200/exact client profile; report/post/fact/Ads
+reads200, actual foreign Cape report denied403. Existing Brand Hub logo opens
+through protected Edge200. No reset, credential disclosure in repo, permissions
+or provider/website change. October report remains published; reviewed November
+canonical strategy v5 deliberately approved/published via guarded existing RPC
+at15:23:09UTC, actual CLIENT reads ten gold fields/1video/4photos/4posters.
+Decemberv4/Januaryv2 are cleaned real drafts, not published/scheduled media.
+[Exact acceptance and remaining limits](NOVUS-CLIENT-READINESS-2026-11-16.md).
+
+Same hourly normal author now has real Novus and Forklift January save/readbacks;
+earlier zero-save wording below is historical. Do not confuse separate failing
+OpenCode GitHub jobs with this successful normal-Chat task or replace its model.
+Destination metadata discrepancy remains read-only investigation, no new task.
+62-client inventory frozen with explicit snapshot boundary;46enabled mappings
+are not46tested logins. All Around PVC October refreshed14posts/no duplicates/
+staffhash unchanged, remains draft. AV Event Life Facebook exact provider code10
+permission hold; Instagram fresh. No global blocker, guessed scope/dates or consent.
+No code/migration/Vercel or other agent changes. Google Control Centre exact target
+unavailable; no guessed tracker write.
+
 ## 16 November — Novus published; existing strategy author through January
 
 CA explicitly approved Novus October publication: exact report940f3153 is now
@@ -98,13 +121,30 @@ performed. #900 owns tracking; #981 exact handoffs and #984 brand panel remain
 separate/additive. Shared editorial library remains PR910. Hosting #679 release
 gate remains; this candidate is not a claim of completed live-board backfill.
 
+## 16 November — Nolan final bounded checkpoint and review release path
+
+PR990 functional checkpoint `dcf24f98098b5da0fc1c2ef217588989fd26a556`: 12 genuine
+Auth/API tests passed, local build/lint passed. Debrief atomicity, sync create/
+Calendar/idempotency and deterministic two-session revocation are exercised.
+New statements after committed revocation deny; older statement snapshots may
+finish. No cancellation or whole-system revocation claim. SQL remains unapplied.
+[Exact evidence](NOLAN-FINAL-MUTATION-ACCEPTANCE-2026-11-16.md).
+
+Handover reconciled against main `62f7a88ad961468697bd24aecd48132bc38d1450`, preserving
+its entries. PR995/plugin and other lanes remain separate. Four actual-component
+sample preview contracts passed; refreshed HTML/receipt identify their exact SHA.
+Root owns the authorized protected static-only sample deployment; this lane only
+transfers artifacts. Genuine same-origin browser/device acceptance is unexecuted.
+Read-only workbook uses existing schema; Needs You/security drafts remain deferred.
+[Release scope, owners and actionable gates](NOLAN-AUTHENTICATED-ACCEPTANCE.md).
+
 ## 16 November — Nolan inactive-source server-policy draft
 
 Next bounded mutation tranche reproduces and guards `assistant_update_video`
 and `apply_microsoft_sync_item` with retained real JWTs: 11 affected tests and
 build pass. Draft only; active behavior/grants preserved, no connector send or
-production application. `apply_content_run_debrief` and other inventory routes
-remain unexecuted. [Mutation evidence and limits](NOLAN-MUTATION-DEFINER-ACCEPTANCE-2026-11-16.md).
+production application. Debrief coverage is now superseded by the final tranche below;
+other unexecuted inventory entries remain open. [Mutation evidence and limits](NOLAN-MUTATION-DEFINER-ACCEPTANCE-2026-11-16.md).
 
 Follow-up adds six independently owned Content Guideline/identity definer guards
 after real inactive-JWT reproductions; existing active/client/service-role access

@@ -4,13 +4,14 @@ import {createRoot} from 'react-dom/client'
 import {MemoryRouter,useNavigate,useLocation} from 'react-router-dom'
 import NolanOverview from '../../../src/pages/admin/NolanOverview'
 import {ADMIN,REVIEWER,TASK,setActor,setMode,setLostReceipt,changeRevision} from './adapters'
+declare const __NOLAN_REVIEW_PROVENANCE__: string
 function Review(){
  const navigate=useNavigate(), location=useLocation()
  const [notice,setNotice]=useState('')
  const refresh=()=>window.dispatchEvent(new Event('focus'))
  return <><section className="review-banner">
  <strong>Interactive review preview · sample data · not connected to live Dynamics</strong>
- <p>PR #990 candidate df7699a · actual Nolan components and CSS. All records, identities, receipts and mutations here are fictional and held in memory. Production activation remains off. This is not signed-in, backend or device acceptance.</p>
+ <p>PR #990 candidate {__NOLAN_REVIEW_PROVENANCE__} · actual Nolan components and CSS. All records, identities, receipts and mutations here are fictional and held in memory. Production activation remains off. This is not signed-in, backend or device acceptance.</p>
  <div className="review-controls"><label>Sample account <select onChange={e=>{setActor(e.target.value);refresh()}}><option value={ADMIN}>Sample Administrator</option><option value={REVIEWER}>Sample Reviewer</option></select></label>
  <label>Sample source <select onChange={e=>{setMode(e.target.value);refresh()}}><option value="healthy">Available</option><option value="unavailable">Unavailable — retain last-known rows</option><option value="empty">Empty result</option></select></label>
  <button onClick={()=>navigate(-1)}>Back in preview</button><button onClick={()=>navigate(1)}>Forward</button>

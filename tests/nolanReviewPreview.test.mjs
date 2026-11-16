@@ -5,6 +5,7 @@ import {mkdtemp,readFile,rm,writeFile} from 'node:fs/promises'
 import {tmpdir} from 'node:os'
 import {join,resolve} from 'node:path'
 import vm from 'node:vm'
+import {execFileSync} from 'node:child_process'
 import {buildPreview,options} from '../scripts/build-nolan-review-preview.mjs'
 const temp=await mkdtemp(join(tmpdir(),'nolan-review-contract-'))
 const compiled=await build({entryPoints:['tests/fixtures/nolan-review/adapters.tsx'],bundle:true,write:false,format:'esm',platform:'node',jsx:'automatic',packages:'external'})
@@ -16,6 +17,11 @@ test.after(async()=>{await rm(temp,{recursive:true,force:true});await rm(moduleP
 test('single HTML bundles actual Nolan components and CSS with no production backend or external resources',async()=>{
  const {html,receipt}=await buildPreview(join(temp,'review.html'))
  assert.match(html,/Interactive review preview/)
+ assert.equal(receipt.candidate,execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim())
+ assert.equal(receipt.candidateTree,execFileSync('git',['rev-parse','HEAD^{tree}'],{encoding:'utf8'}).trim())
+ assert(html.includes(receipt.candidate.slice(0,12)))
+ assert.equal(typeof receipt.sourceDirty,'boolean')
+ assert(!html.includes('df7699a'))
  assert.match(html,/connect-src 'none'/)
  assert.doesNotMatch(html,/<script[^>]+src=|<link[^>]+href=|<iframe|<img[^>]+src="https?:/i)
  assert(!receipt.inputs.some(p=>/supabase|cgWebsiteFleet\.ts|AuthContext\.tsx/.test(p)))
