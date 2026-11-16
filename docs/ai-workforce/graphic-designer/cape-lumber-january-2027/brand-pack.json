@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "status": "internal-working-brand-pack",
+  "observedAt": "2026-11-16",
+  "clientId": "42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa",
+  "clientName": "Cape Lumber",
+  "publicName": "Cape Lumber Marketing",
+  "guide": {
+    "id": "9023fc27-f39b-4526-a1cf-6a1be676a306",
+    "version": 1,
+    "readiness": "ready"
+  },
+  "canva": {
+    "brandKit": "kAGaDGQTAW4",
+    "officialMaster": "DAGVuJURh6I",
+    "pageCount": 238,
+    "workingDesign": "DAHbFhGSrvg",
+    "workbenchOnly": true,
+    "workingPageIds": [
+      "PBGmrh5STrFYB4Yz",
+      "PBjlb1YNNlB3gSDf",
+      "PBJDvMKXj0mlK9PG",
+      "PBy5BC33jZT9gQM5"
+    ],
+    "officialDraftPages": [
+      { "poster": "DP04", "page": 27, "id": "PB65QD8ZhnwZcs9Y" },
+      { "poster": "DP03", "page": 28, "id": "PBGq4Z2X18Lw6qTF" },
+      { "poster": "DP02", "page": 29, "id": "PBPTK2pHzmMGmGPS" },
+      { "poster": "DP01", "page": 30, "id": "PBxD2jwDZwrKsRZ4" }
+    ],
+    "fontFamily": "Zing Rust Base Rough",
+    "fontEvidence": "Exact standalone Brand Kit; retained native Canva typography; no local licensed font file claimed",
+    "palette": [
+      "#58AC0D",
+      "#336501",
+      "#172F00",
+      "#202020",
+      "#FFFFFF"
+    ]
+  },
+  "mediaAuthority": "OneDrive Clients/Cape Lumber/Photos and Brand Identity/Logo",
+  "package": {
+    "designPosters": 4,
+    "photoPosts": 3,
+    "videos": 0,
+    "januaryDatedRows": 0
+  },
+  "captionFooter": {
+    "source": "Fresh exact-client task_type=caption packet",
+    "requiredOrder": [
+      "phone",
+      "email"
+    ],
+    "phone": "+27 71 353 4261",
+    "email": "info@capelumbermarketing.co.za",
+    "savedNotesNeedSync": true
+  },
+  "restrictions": [
+    "Supplier, not contractor or installer",
+    "Office address is not a collection yard",
+    "No unverified prices, stock, grades, treatment availability or delivery promises",
+    "No H4/H5 claim from stale Canva guide",
+    "No generative client-photo/logo reconstruction",
+    "No global unused-photo certificate",
+    "No invented January posting dates",
+    "No approval-group send until actual relevant social/approval history cleared"
+  ],
+  "cost": {
+    "incrementalZAR": 0,
+    "newSubscriptions": false,
+    "newAPICredits": false,
+    "newHosting": false
+  },
+  "deliverableState": {
+    "DP01": "Saved R4 native; current genuine HD export pending",
+    "DP02": "Saved R3; genuine 2160x2700 HD checked",
+    "DP03": "Saved R3; genuine 2160x2700 HD checked",
+    "DP04": "Saved R3; genuine 2160x2700 HD checked",
+    "humanCreativeApproval": false,
+    "masterInserted": true,
+    "messagesSent": 0
+  }
+}

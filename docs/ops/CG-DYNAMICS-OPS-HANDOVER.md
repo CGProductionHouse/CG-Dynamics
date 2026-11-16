@@ -1,3 +1,44 @@
+## 16November — Cape Lumber January four drafts saved and inserted
+
+Owner starts four fresh January2027 posters, photo posts later. Current Dynamics
+package4DP/3photo/0video; January dated rows empty. Same #948/draft#956 branch,
+no new agent/lane. Wiseman's16November four HD sends/tag are complete; do not replay.
+
+Exact Cape kit kAGaDGQTAW4 verified: Zing Rust Base Rough, three greens/charcoal/
+white, exact source mark. Four source-faithful layered Canva drafts saved in
+DAHbFhGSrvg; existing approved design mechanisms retained, all old photos/copy
+replaced.15live text/fourlogo64px checks pass. Six selected OneDrive JPEGs and
+two logos only; no bulk hydration.234history previews audited; a detected prior
+ceiling-board image excluded. Same-shoot and actual live-social/approval-history
+coverage remain explicit unresolved send gates. No global unused-photo claim.
+
+Owner approved exact four-page insertion after official In Progress26, executed
+once. Official DAGVuJURh6I now238pages; all234original IDs/order exact. Actual new
+order is27DP04 PB65QD8ZhnwZcs9Y,28DP03 PBGq4Z2X18Lw6qTF,29DP02
+PBPTK2pHzmMGmGPS,30DP01 PBxD2jwDZwrKsRZ4. To Be Approved31, Drafts40,
+Posted/Scheduled41, human New Year32 remain protected. Do not replay consumed
+approval or assume source order. Bounded copy-back DAHbFqQnWtY verifies all15
+live text/26media records, geometry/notes and four actual480x600 renders exactly
+against saved sources. It is labelled TEMP QA ONLY, not another official file.
+Large-master native-edit preflight rejected234pages; no universal size limit inferred.
+
+Four genuine2160x2700 PNG High2x exports were downloaded/inspected. That HD pass
+found a small DP01 roof remnant; source/official DP01 is now corrected R4, with all
+non-target native records and target geometry exact. Current genuine R4 HD export
+still pending browser command timeouts; old R3 DP01 is superseded/unselected.
+Three other current HDs verified; clean review derivatives retain decoded pixels
+exactly. Raw Canva exports lack ICC and carry EXIFColourSpace65535; no guessed
+profile assigned. No four-current-HD or exported-colour-certification claim.
+
+Fresh caption packet requires phone then email, overriding older guide prose.
+Four local unsigned R4 captions pass transport/exact-footer guards; Canva source/
+master notes still need synchronisation from their earlier email-first order.
+No WhatsApp/send, scheduling, client publication or portal-final promotion.
+Private evidence under Pictures/CG-Graphic-Designer-private/cape-lumber-january-2027.
+See that lane README for exact next work. R0; no runtime/dependency/deployment,
+production SQL/data, schedule/task, hosting, account-access or other-agent changes.
+
+
 ## 16November — Wiseman four amended posters delivered; browser restored
 
 Fresh supported inventory now exposes company Chrome `cgproductionhouse.com`.

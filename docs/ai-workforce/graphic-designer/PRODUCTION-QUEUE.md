@@ -1,9 +1,24 @@
 # Graphic designer production queue
 
-Owner steering14November2026; same #948 / draft#956 lane, no new agent or branch.
+Owner steering16November2026; same #948 / draft#956 lane, no new agent or branch.
+
+Current16November: **Cape Lumber January2027 four posters** are the active owner
+request. Saved source DAHbFhGSrvg and exact-approved official DAGVuJURh6I insertion
+complete (master238pages, all234prior IDs/order preserved). New actual27–30 order
+is DP04/DP03/DP02/DP01; no posting dates assigned. Current source DP01R4, othersR3.
+Three current HD files checked; corrected DP01R4 HD export and caption-note sync
+pending browser recovery. Actual live-social/approval-history reuse gate and human
+creative approval remain outstanding. No sends. See
+[cape-lumber-january-2027/README.md](cape-lumber-january-2027/README.md).
+
+Wiseman four revised HD poster-plus-caption messages and separate Amonique mention
+were Delivered16November15:40–15:45; do not resend. Earlier blocked snapshots below
+are historical. No Nolan/Picasso production change or parallel lane.
+
+## Historical14–15November queue snapshots
 
 Current15November override: Wiseman four poster concepts retained, automotive R4
-source drafts saved and exact owner-approved official40�43 replacements complete.
+source drafts saved and exact owner-approved official40–43 replacements complete.
 All98other IDs/order, four photo posts and protected sections preserved. Owner
 accepted native previews and requested only these four in HD with clean captions,
 then an Amonique tag. No sends/tag: Computer Use stopped at browser observation
