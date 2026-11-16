@@ -1,0 +1,137 @@
+From edb0f97aa7d7b74c1803190742a3bac05894b2fe Mon Sep 17 00:00:00 2001
+From: Christie-Ann Groenewald <info@cgproductionhouse.com>
+Date: Mon, 16 Nov 2026 16:36:47 +0000
+Subject: [PATCH] Separately retire authenticated staff model execution paths
+
+---
+ docs/ops/CG-DYNAMICS-OPS-HANDOVER.md          |  2 +
+ .../STAFF-AI-PHASED-CONTAINMENT-2026-11-16.md |  8 +++
+ supabase/functions/cg-assistant-chat/index.ts |  4 ++
+ .../functions/marketing-workflow/index.ts     |  4 ++
+ tests/staffAiHandlerContainment.test.mjs      | 55 +++++++++++++++++++
+ 5 files changed, 73 insertions(+)
+ create mode 100644 tests/staffAiHandlerContainment.test.mjs
+
+diff --git a/docs/ops/CG-DYNAMICS-OPS-HANDOVER.md b/docs/ops/CG-DYNAMICS-OPS-HANDOVER.md
+index 5c130c12..9f1de5cb 100644
+--- a/docs/ops/CG-DYNAMICS-OPS-HANDOVER.md
++++ b/docs/ops/CG-DYNAMICS-OPS-HANDOVER.md
+@@ -4,6 +4,8 @@ Existing #995 task prepared an isolated frontend-only extraction against main206
+ No new tools, migrations or backend changes in phase A; optional separate two-handler
+ 410 phase B also needs no migration. PR995 full-parity source remains unchanged.
+ [Scope, cached-client risk and narrow release gates](STAFF-AI-PHASED-CONTAINMENT-2026-11-16.md).
++Phase A is local066b1a15. Separate phase B adds only two authenticated 410 guards;
++12 handler tests/native Deno pass, no schema/plugin changes. Both are review artifacts.
+ No deployment, main merge, settings changes or spending authorized/performed.
+ 
+ ## 16 November — Madison current portal accepted; narrow guide fix LIVE
+diff --git a/docs/ops/STAFF-AI-PHASED-CONTAINMENT-2026-11-16.md b/docs/ops/STAFF-AI-PHASED-CONTAINMENT-2026-11-16.md
+index 404aba1f..2d995579 100644
+--- a/docs/ops/STAFF-AI-PHASED-CONTAINMENT-2026-11-16.md
++++ b/docs/ops/STAFF-AI-PHASED-CONTAINMENT-2026-11-16.md
+@@ -101,3 +101,11 @@ cached PGlite passed all 18 tests with zero skips. Production tsc/Vite build pas
+ Byte comparison confirms the entire supabase tree, chatgpt-plugin, src/lib,
+ package files and vercel.json are unchanged from the exact base. The original
+ parity worktree remains untouched. These are local results, not browser acceptance.
++
++Phase B separated verification: 12 handler tests passed (chat/default/unknown and
++Marketing run across five staff roles; client/inactive/unauthenticated/method gates),
++zero failures/skips. Scoped ESLint and native Deno check of both complete entry graphs
++passed using #995's explicit validation-only npm map/sloppy imports/browser env types.
++As-authored hosted esm.sh resolution remains unverified. Frontend build is reused
++from byte-identical phase A. Exact eight-line backend delta matches the previously
++real-Auth-tested #995 handlers; no new real-Auth run is claimed for this local split.
+diff --git a/supabase/functions/cg-assistant-chat/index.ts b/supabase/functions/cg-assistant-chat/index.ts
+index 8485d6cf..9303b0bd 100644
+--- a/supabase/functions/cg-assistant-chat/index.ts
++++ b/supabase/functions/cg-assistant-chat/index.ts
+@@ -2104,6 +2104,10 @@ Deno.serve(async (req) => {
+   }
+ 
+   const action = normalizeAction(body.action)
++  if (['chat'].includes(action)) {
++    return jsonResponse({ ok: false, code: 'STAFF_AI_RETIRED', error: 'The built-in CG Assistant has been retired. Use the CG Dynamics connector in ChatGPT or Nolan.' }, 410)
++  }
++
+   const idempotencyKey = requestId(body.requestId)
+ 
+   if (action === 'specialist_status') {
+diff --git a/supabase/functions/marketing-workflow/index.ts b/supabase/functions/marketing-workflow/index.ts
+index 9e1df6c3..cfe88184 100644
+--- a/supabase/functions/marketing-workflow/index.ts
++++ b/supabase/functions/marketing-workflow/index.ts
+@@ -136,6 +136,10 @@ Deno.serve(async request => {
+   }
+   const action = typeof body.action === 'string' ? body.action : ''
+ 
++  if (action === 'run') {
++    return jsonResponse({ ok: false, code: 'STAFF_AI_RETIRED', error: 'Built-in marketing generation has been retired. Use the CG Dynamics connector in ChatGPT or Nolan. Saved artifacts remain available.' }, 410)
++  }
++
+   // ── route: explain who would act, without running anything ────────────────
+   if (action === 'route') {
+     const req = typeof body.request === 'string' ? body.request.trim() : ''
+diff --git a/tests/staffAiHandlerContainment.test.mjs b/tests/staffAiHandlerContainment.test.mjs
+new file mode 100644
+index 00000000..55043124
+--- /dev/null
++++ b/tests/staffAiHandlerContainment.test.mjs
+@@ -0,0 +1,55 @@
++import assert from 'node:assert/strict'
++import { readFileSync } from 'node:fs'
++import test from 'node:test'
++import ts from 'typescript'
++
++const read = p => readFileSync(p, 'utf8')
++// Execute the real HTTP handler with fail-fast synthetic dependencies. Any provider,
++// credential inventory, client-data read, write or audit after authentication fails.
++function handler(path, role = 'staff', active = true, authenticated = true) {
++  const source = read(path)
++  const start = source.indexOf('Deno.serve(')
++  let captured
++  const profile = { role, is_active: active }
++  const db = {
++    auth: { getUser: async () => ({ data: { user: authenticated ? { id: 'fixture' } : null }, error: null }) },
++    from(table) {
++      assert.equal(table, 'profiles')
++      return { select: () => ({ eq: () => ({ single: async () => ({ data: profile }), maybeSingle: async () => ({ data: profile }) }) }) }
++    },
++  }
++  const deny = () => { throw Error('Retired handler reached provider or mutation') }
++  const deps = {
++    Deno: { env: { get: () => 'synthetic' }, serve: fn => { captured = fn } },
++    env: () => 'synthetic', createClient: () => db, corsHeaders: {},
++    STAFF_ROLES: ['admin', 'manager', 'staff', 'team', 'owner'],
++    jsonResponse: (data, status = 200) => Response.json(data, { status }),
++    normalizeAction: v => ['diagnostics', 'test_provider', 'specialist_status'].includes(v) ? v : 'chat',
++    requestId: deny, routeAiChat: deny, getMarketingAiState: deny,
++  }
++  const js = ts.transpileModule(source.slice(start).replace(/^import .*$/gm, ''), { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext } }).outputText
++  new Function(...Object.keys(deps), js)(...Object.values(deps))
++  return (action, method = 'POST') => captured(new Request('https://fixture.invalid', { method, ...(method === 'POST' ? { body: JSON.stringify({ action, message: 'hello', clientId: 'fixture' }) } : {}) }))
++}
++for (const role of ['staff','team','manager','admin','owner']) {
++  test(`retired chat/default returns 410 without model/data access: ${role}`, async () => {
++    const call = handler('supabase/functions/cg-assistant-chat/index.ts', role)
++    for (const action of ['chat', undefined, 'unknown']) {
++      const response = await call(action)
++      assert.equal(response.status, 410)
++      assert.equal((await response.json()).code, 'STAFF_AI_RETIRED')
++    }
++  })
++  test(`retired marketing execution returns 410 without artifact/provider access: ${role}`, async () => {
++    assert.equal((await handler('supabase/functions/marketing-workflow/index.ts', role)('run')).status, 410)
++  })
++}
++for (const path of ['supabase/functions/cg-assistant-chat/index.ts', 'supabase/functions/marketing-workflow/index.ts']) {
++  test(`auth and method gates remain ahead of retirement: ${path}`, async () => {
++    assert.equal((await handler(path, 'client')('run')).status, 403)
++    assert.equal((await handler(path, 'staff', false)('run')).status, 403)
++    assert.equal((await handler(path, 'staff', true, false)('run')).status, 401)
++    assert.equal((await handler(path)('run', 'GET')).status, 405)
++    assert.equal((await handler(path)('run', 'OPTIONS')).status, 200)
++  })
++}
+-- 
+2.52.0
+

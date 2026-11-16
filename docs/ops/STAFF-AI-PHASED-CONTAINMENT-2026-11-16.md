@@ -109,3 +109,33 @@ passed using #995's explicit validation-only npm map/sloppy imports/browser env 
 As-authored hosted esm.sh resolution remains unverified. Frontend build is reused
 from byte-identical phase A. Exact eight-line backend delta matches the previously
 real-Auth-tested #995 handlers; no new real-Auth run is claimed for this local split.
+
+## Durable review branch and authorization boundary
+
+The owner explicitly authorized this removal implementation and preservation push.
+Ordinary isolated edits, tests, commits and this review-branch push need no repeated
+permission. The same request explicitly prohibits deployment and spending; moreover
+#679 requires an exact approved release window/packet. These are the actual remaining
+authorization boundaries, not a universal rule that every deployment needs a fresh
+confirmation. Once a suitable release packet is approved, execute its covered steps
+without asking again unless scope/conditions change or a stop gate is reached.
+
+Before this preservation push: vercel.json retains git.deploymentEnabled=false; all
+repository workflow triggers were inspected and none executes on push. No workflow
+contains an automatic release path for this branch. No PR/comment/dispatch is created.
+Thus this push has no configured deployment trigger and does not authorize a manual
+CLI/dashboard deployment. No GitHub PR description publication is retried.
+
+Phase A commit066b1a159eb1b4f6fbaf753006ca753e7a35134e and phase B
+edb0f97aa7d7b74c1803190742a3bac05894b2fe remain unchanged ancestors of the
+codex/draft-staff-ai-containment-20261116 branch. The final evidence-only commit
+does not change tested runtime code. Patches/receipts are under
+[staff-ai-containment-artifacts](staff-ai-containment-artifacts/receipt.json).
+
+Handler review: both gates occur after method/config checks, real auth.getUser, exact
+user profile active/role checks and JSON parsing. Chat normalizes unknown/default
+actions to chat before 410 and stops before requestId/provider/audit work. Marketing
+run stops before route execution/artifact/provider work. Existing specialist_status,
+diagnostics and test_provider code remains unchanged with its original permissions;
+provider diagnostic testing can still invoke providers and is NOT part of acceptance.
+This is retirement of staff chat/Marketing-run paths, not a global provider kill switch.

@@ -1,0 +1,46 @@
+
+> cg-dynamics@0.0.0 lint
+> eslint .
+
+
+/workspace/dynamics-containment/src/components/ClientLogo.tsx
+  27:66  warning  React Hook useMemo has a missing dependency: 'client'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/workspace/dynamics-containment/src/components/operations/TaskDetailDrawer.tsx
+   94:7  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/set-state-in-effect')
+   96:7  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/set-state-in-effect')
+   98:7  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/set-state-in-effect')
+  101:6  warning  React Hook useEffect has a missing dependency: 'task'. Either include it or remove the dependency array. If 'setDraft' needs the current value of 'task', you can also switch to useReducer instead of useState and read 'task' in the reducer  react-hooks/exhaustive-deps
+  226:6  warning  React Hook useEffect has a missing dependency: 'handleCloseRequest'. Either include it or remove the dependency array                                                                                                                           react-hooks/exhaustive-deps
+
+/workspace/dynamics-containment/src/lib/marketing-library/citedSources.generated.ts
+  12:1  warning  Unused eslint-disable directive (no problems were reported)
+
+/workspace/dynamics-containment/src/pages/admin/ImportMetaCsv.tsx
+  363:6  warning  React Hook useEffect has a missing dependency: 'getImportDraft'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/workspace/dynamics-containment/src/pages/admin/MarketingAiDepartmentPage.tsx
+  118:7  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/set-state-in-effect')
+  120:7  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/set-state-in-effect')
+  122:7  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/set-state-in-effect')
+
+/workspace/dynamics-containment/src/pages/admin/NewReport.tsx
+  179:6  warning  React Hook useEffect has missing dependencies: 'getReportDraft', 'reportId', and 'searchParams'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+/workspace/dynamics-containment/src/pages/admin/PackageMasterPage.tsx
+  170:7  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/set-state-in-effect')
+  172:7  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/set-state-in-effect')
+  174:7  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/set-state-in-effect')
+  193:7  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/set-state-in-effect')
+
+/workspace/dynamics-containment/src/pages/admin/ReportsManagement.tsx
+  204:6  warning  React Hook useEffect has a missing dependency: 'load'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+✖ 17 problems (0 errors, 17 warnings)
+  0 errors and 11 warnings potentially fixable with the `--fix` option.
+
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice

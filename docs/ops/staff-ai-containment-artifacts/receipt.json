@@ -1,0 +1,19 @@
+{
+  "base": "206f4df9cc845a1b818f96fa4ab43ef1922b7772",
+  "phase_a": "066b1a159eb1b4f6fbaf753006ca753e7a35134e",
+  "phase_b_on_a": "edb0f97aa7d7b74c1803190742a3bac05894b2fe",
+  "unchanged_parity_pr995": "d5a02c0ce69c97e3c454c6500538f3abe1daf242",
+  "workbook_observed": "41bda9a96c2e73616f2a469ba9038a7b11c01af8",
+  "publication": "Preserved as unchanged ancestors on codex/draft-staff-ai-containment-20261116; final evidence commit adds docs only; no PR or deployment",
+  "hashes": {
+    "containment-tests.log": "396ec7837de5ec0aafa73a7b0de934f7c2cbcaa94d457a23eb72958912a550b0",
+    "containment-handler-tests.log": "ea9279b5290a36b8c9203dffc96224c947b28ce4dd0ac0bdc6c829d0bd1efb52",
+    "phase-b-handlers.patch": "ffc35094818b949c75238399a07a5b93e54571bbbd3c9006824ee0d20e12a4cb",
+    "containment-lint.log": "b86e2e5aa191d1548fe76eb1e931c767423efea6b38f09096e7281b210188608",
+    "containment-receipts.log": "dd2a01b7ced09ee55b035e6011a8f65b981cd0b83adedaa891db0fab6d752ad2",
+    "containment-build.log": "b6cb1db2cd340fe77c058ba2566d7716bd8071efa40427514c669e31df17e948",
+    "containment-handler-lint.log": "509db3e3576a5ddeede99380db64011156c8602eb204903675e7cb44eae64ef7",
+    "containment-handler-deno.log": "771d5b69da2ccd98ff86d797505b40ac2d1d92c094341269787f343fb8cd463c",
+    "phase-a-ui-only.patch": "9b7d43c863b7321262ca1c7eb3b1853d2ad0c0cfeb4bbc1c77c78b95b90e2411"
+  }
+}

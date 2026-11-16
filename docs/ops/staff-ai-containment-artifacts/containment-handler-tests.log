@@ -1,0 +1,20 @@
+✔ retired chat/default returns 410 without model/data access: staff (179.820741ms)
+✔ retired marketing execution returns 410 without artifact/provider access: staff (78.249166ms)
+✔ retired chat/default returns 410 without model/data access: team (25.385055ms)
+✔ retired marketing execution returns 410 without artifact/provider access: team (58.300596ms)
+✔ retired chat/default returns 410 without model/data access: manager (51.178926ms)
+✔ retired marketing execution returns 410 without artifact/provider access: manager (49.088375ms)
+✔ retired chat/default returns 410 without model/data access: admin (27.881887ms)
+✔ retired marketing execution returns 410 without artifact/provider access: admin (24.793069ms)
+✔ retired chat/default returns 410 without model/data access: owner (30.492794ms)
+✔ retired marketing execution returns 410 without artifact/provider access: owner (16.369284ms)
+✔ auth and method gates remain ahead of retirement: supabase/functions/cg-assistant-chat/index.ts (131.662965ms)
+✔ auth and method gates remain ahead of retirement: supabase/functions/marketing-workflow/index.ts (224.926128ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1646.640007

@@ -1,3 +1,10 @@
+## 16 November — containment artifacts preserved for review
+
+Same task preserves original phase A066b1a15/B edb0f97a on the explicit draft
+branch codex/draft-staff-ai-containment-20261116 with patches and local evidence.
+No new PR, deployment or description retry. Parity PR995 remains unchanged.
+[Packet and authorization boundaries](STAFF-AI-PHASED-CONTAINMENT-2026-11-16.md).
+
 ## 16 November — minimal staff-AI containment alternative, NOT LIVE
 
 Existing #995 task prepared an isolated frontend-only extraction against main206f4df9.

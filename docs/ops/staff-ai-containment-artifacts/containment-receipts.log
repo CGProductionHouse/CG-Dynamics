@@ -1,0 +1,28 @@
+✔ actual PostgREST table-array receipts are read; unknown/error/empty/repeated rows fail closed (6.203345ms)
+✔ create adapter keeps both server identities and fails without durable receipt, never falls back (0.666285ms)
+✔ operational date inputs never rely on database-relative timezone parsing or invented calendar dates (1.443192ms)
+✔ actual dispatcher preserves existing canonical replay and nullable-success semantics outside the operational lane (109.992061ms)
+▶ actual atomic create SQL commits canonical entity/assignments and original receipt together
+  ✔ real task creator, real multi-assignment helper, audit and receipt; lost response retry returns same ID (66.731367ms)
+  ✔ changed payload conflicts and staff principals cannot borrow another actor (16.200839ms)
+  ✔ actual comment/status/assignment RPCs replay once; staff cannot reassign or act on another owner (57.978141ms)
+  ✔ real recurring creator returns the original template rather than a second instance-generating template (12.236955ms)
+  ✔ explicit monthly ordinal rules persist and re-read verbatim through the same atomic creator (31.654228ms)
+  ✔ SQL itself refuses historical and Microsoft-linked edits even if HTTP preflight was stale (21.442719ms)
+  ✔ native calendar create repeats same ID without source identity or publication; bad client/time/fields refuse (19.898461ms)
+  ✔ calendar update/cancel receipts preserve notes and original state; drift/history/source identity are checked under lock (18.932134ms)
+  ✔ linked calendar outcome, active client identity and visibility remain separate from receipt success (10.312905ms)
+  ✔ receipt insertion failure rolls back the actual task, assignment, notification and audit; same key then recovers (25.300989ms)
+  ✔ receipt failure also rolls back calendar insert and comment append, not just task creation (14.378601ms)
+  ✔ actual MCP dispatcher + creator + table-array RPC replay the original SQL record and never double-log (127.188483ms)
+  ✔ legacy receipt without original record refuses, and real grants deny anon/authenticated execution (4.863292ms)
+✔ actual atomic create SQL commits canonical entity/assignments and original receipt together (5600.64468ms)
+ℹ Actual SQL/creator/assignment helper in ephemeral PostgreSQL, least-privilege service role. Not a hosted schema, production trigger or simultaneous multi-connection acceptance claim.
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6718.860278
