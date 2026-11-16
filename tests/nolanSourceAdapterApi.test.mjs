@@ -7,7 +7,8 @@ import {randomUUID} from 'node:crypto'
 import {startAcceptance} from '../scripts/nolan-same-origin-acceptance.mjs'
 
 test('actual Nolan source modules execute through genuine same-origin SDK roles', {skip:process.env.RUN_NOLAN_SOURCE_API_TESTS!=='1',timeout:240000},async t=>{
- const app=await startAcceptance(),path=resolve('node_modules/.cache/nolan-source-'+randomUUID()+'.mjs')
+ const sourcePolicyDraft=process.env.RUN_NOLAN_SOURCE_POLICY_TESTS==='1'
+ const app=await startAcceptance({sourcePolicyDraft}),path=resolve('node_modules/.cache/nolan-source-'+randomUUID()+'.mjs')
  let api
  try{
   const result=await build({stdin:{contents:`export {supabase} from './src/lib/supabase';export {getProfile} from './src/lib/db/profiles';export {withNolanVerifiedViewer} from './src/lib/nolanVerifiedViewer';export {listTasks,listActiveClients} from './src/lib/commandCentre';export {listStaffProfiles,listPipelineVideos} from './src/lib/contentWorkflow';export {listMonthlyDeliverablesByMonth} from './src/lib/planner';export * from './src/lib/nolanDecisionApi';export * from './src/lib/nolanReadContinuity';export {nolanTaskOwnerLabel} from './src/lib/nolanOwnership';`,resolveDir:process.cwd(),loader:'ts'},bundle:true,format:'esm',platform:'node',packages:'external',write:false,define:{'import.meta.env.VITE_SUPABASE_URL':JSON.stringify(app.origin),'import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY':'"isolated-synthetic-publishable-key"'}})
@@ -61,6 +62,12 @@ test('actual Nolan source modules execute through genuine same-origin SDK roles'
    await scenario('revoke-manager');await assert.rejects(api.listMyNativeDecisions())
    const current=await api.getProfile(app.manifest.accounts.manager.id);assert.equal(current.data.is_active,false)
    const revokedReads=await reads();t.diagnostic('Inactive existing-session actual readers: '+JSON.stringify(revokedReads.map((r,i)=>({source:names[i],count:r.data?.length,error:r.error}))))
+   if(sourcePolicyDraft){
+    for(const [i,result] of revokedReads.entries()){
+     assert.equal(result.error,null)
+     assert.equal(result.data.length,i===1?1:0,'Draft direct source policy '+names[i])
+    }
+   }
    await assert.rejects(guardedReads(),/Current account authorization/)
    await scenario('restore-manager');assert((await api.listMyNativeDecisions()).some(r=>r.id===id));assert((await guardedReads())[0].data.length>0)
   })

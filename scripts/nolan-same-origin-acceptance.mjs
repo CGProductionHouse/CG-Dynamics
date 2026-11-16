@@ -10,7 +10,7 @@ import react from '@vitejs/plugin-react'
 import {createClient} from '@supabase/supabase-js'
 import {startNolanIsolatedAcceptance} from './helpers/nolanIsolatedAcceptance.mjs'
 
-export async function startAcceptance({decisions=false,signal}={}){
+export async function startAcceptance({decisions=false,sourcePolicyDraft=false,signal}={}){
  signal?.throwIfAborted()
  const directory=await mkdtemp(join(tmpdir(),'nolan-same-origin-')),dist=join(directory,'app')
  let runtime,origin,ready=false,restAvailable=true,tasksAvailable=true
@@ -64,6 +64,7 @@ export async function startAcceptance({decisions=false,signal}={}){
  const stop=async()=>{ready=false;server.closeAllConnections();await new Promise(r=>server.close(r));runtime?.stop();await rm(directory,{recursive:true,force:true})}
  try{
   runtime=await startNolanIsolatedAcceptance(origin,join(directory,'canonical-replay.json'),{signal})
+  if(sourcePolicyDraft)runtime.policyAcceptance.applyDraft()
   let gateTransforms=0
   const isolatedGate={name:'explicit-isolated-nolan-gate',enforce:'pre',transform(code,id){if(decisions&&id.replaceAll('\\','/').endsWith('/src/lib/nolanDecisionApi.ts')){assert(code.includes('NOLAN_DECISIONS_ACCEPTED = false'));gateTransforms++;return code.replace('NOLAN_DECISIONS_ACCEPTED = false','NOLAN_DECISIONS_ACCEPTED = true')}}}
   await build({configFile:false,envDir:false,plugins:[isolatedGate,react()],logLevel:'error',define:{'import.meta.env.VITE_SUPABASE_URL':JSON.stringify(origin),'import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY':'"isolated-synthetic-publishable-key"'},build:{outDir:dist,emptyOutDir:true}})

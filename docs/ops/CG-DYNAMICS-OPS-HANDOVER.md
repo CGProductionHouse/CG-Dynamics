@@ -74,6 +74,18 @@ performed. #900 owns tracking; #981 exact handoffs and #984 brand panel remain
 separate/additive. Shared editorial library remains PR910. Hosting #679 release
 gate remains; this candidate is not a claim of completed live-board backfill.
 
+## 16 November — Nolan inactive-source server-policy draft
+
+PR #990 adds an unapplied restrictive-policy draft for ten existing source tables
+and profiles, preserving self-read and existing active-role/client visibility.
+Real old GoTrue JWTs reproduced inactive reads, legacy task RPC access, direct
+task insertion and admin self-reactivation; the bounded draft denies these paths.
+Two returning Command Centre RPCs receive active-caller checks. No global role
+helper, UI/AI file, live database, activation or deployment change. The adjacent
+AI ownership-summary definer remains a separately identified revocation gap;
+do not claim system-wide account isolation or authenticated UI acceptance.
+[Exact scope, evidence and rollout boundary](NOLAN-SOURCE-POLICY-ACCEPTANCE-2026-11-16.md).
+
 ## 16 November — Nolan actual-reader audit and profile freshness repair
 
 Draft #990 now tests actual SDK-backed task/staff/client/pipeline/schedule readers
