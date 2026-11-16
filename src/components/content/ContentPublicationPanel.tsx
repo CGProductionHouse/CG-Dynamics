@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 import clockIcon from '../../assets/lucide/clock.svg'
 import externalLinkIcon from '../../assets/lucide/external-link.svg'
-import { getStaffPublicationStatus, withdrawStaffPublication, PUBLICATION_STATE_LABELS, PUBLICATION_CONFIRMATION_VISIBLE, type StaffPublication, type StaffPublicationStatus } from '../../lib/socialPublishing'
+import { getStaffPublicationStatus, withdrawStaffPublication, canPrepareFacebookPhotoReview, PUBLICATION_STATE_LABELS, PUBLICATION_CONFIRMATION_VISIBLE, type PublicationReview, type StaffPublication, type StaffPublicationStatus } from '../../lib/socialPublishing'
 import { ContentPublicationConfirmation } from './ContentPublicationConfirmation'
 
-export function ContentPublicationPanel({ reviewId }: { reviewId: string }) {
-  return <PublicationPanelBody key={reviewId} reviewId={reviewId} />
+export function ContentPublicationPanel({ review }: { review: PublicationReview }) {
+  return <PublicationPanelBody key={review.id} review={review} />
 }
 
-function PublicationPanelBody({ reviewId }: { reviewId: string }) {
+function PublicationPanelBody({ review }: { review: PublicationReview }) {
+  const reviewId = review.id
   const [open, setOpen] = useState(false)
   const [data, setData] = useState<StaffPublicationStatus | null>(null)
   const [busy, setBusy] = useState(false)
@@ -53,7 +54,7 @@ function PublicationPanelBody({ reviewId }: { reviewId: string }) {
       {busy && <p role="status" className="text-sm text-white/70">Checking publication records…</p>}
       {error && <p role="alert" className="text-sm text-amber-200">{error}</p>}
       {notice && <p role="status" className="text-sm text-brand-teal">{notice}</p>}
-      {PUBLICATION_CONFIRMATION_VISIBLE && <ContentPublicationConfirmation key={reviewId} reviewId={reviewId} onConfirmed={() => void load()} />}
+      {PUBLICATION_CONFIRMATION_VISIBLE && canPrepareFacebookPhotoReview(review) && <ContentPublicationConfirmation key={reviewId} review={review} onConfirmed={() => void load()} />}
       {!busy && data?.items.length === 0 && <p className="text-sm text-white/70">No Dynamics publication jobs for this review. This does not check native platform schedules.</p>}
       {data?.items.map(item => {
         const needsReview = ['failed', 'blocked', 'unknown_outcome'].includes(item.state)

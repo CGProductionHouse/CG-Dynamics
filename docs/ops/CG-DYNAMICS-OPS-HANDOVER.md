@@ -1,3 +1,54 @@
+## Latest 16 November — approved JPEG source adoption and honest publishing controls
+
+Same DRAFT PR991/#220. CA approved exact pinned `jpeg-js@0.4.4` and private
+adapter; adoption is no longer pending. Minimal manifest/lock addition only,
+existing entries/shared node_modules untouched, packaged license/decoder notices
+retained. Actual imported codec now composes privately with existing Instagram
+runtime, never worker/Edge/MCP registration or an activation flag. Five real
+Node decode cases pass with corrupt entropy rejection/original bytes retained;
+strict helper typing uses actual package declarations. Native Deno/Edge import
+and CPU qualification remain unverified; approval is NOT rollout authority.
+
+Reproduced/fixed Facebook-creation controls being offered on superseded or
+other-platform/non-PNG reviews. Existing manager visibility/history/withdrawal
+retained; new creation requires approved FB PNG plus default-off candidate flag
+and backend authorization.27 focused checks and36 actual isolated Chrome cases
+at375/390/430/1440 pass, including role exclusions/cancel/late-preview discard.
+Real components and library, synthetic I/O, external network blocked; no company
+browser/session change or physical-phone/native-provider claim. Build/emitted
+app/lint/helper typing pass. Corrected full run4690 total /4658 pass /1 Vite
+module-load timeout /31 skips. Unchanged Teams audit file passes9/9 isolated
+after that timeout, without a code change; original full run is NOT all-green.
+First invocation's16 Bash/OpenSSL environment failures cleared with the existing
+Git tools in process PATH. Self-review passes for bounded source adoption only;
+full-suite Vite stability/native/provider acceptance remain distinct concerns.
+Automatic approval review blocked restarting the owned network-none PostgreSQL
+QA container (“blocked by policy” only). It stays stopped; no bypass or fresh
+database-test claim. Prior frozen2bbaa2b5's29 PostgreSQL passes remain separate
+evidence. Queue/preparation/authority/migrations unchanged in this increment;
+unrelated generated artifacts restored.
+
+Mainf89fefea/PR994 integrated with owner files and LIVE record below unchanged;
+no deployment by this lane. FOUR migrations unapplied; Teams/sync hold/Nolan
+preserved. No production/provider/OAuth/SQL/Edge/Microsoft/Vercel action.
+[Existing evidence](SOCIAL-PUBLISHING-220-2026-11-15.md). Tracker unknown; no guess.
+
+## 16 November — client opening crop corrective release LIVE
+
+CA's new screenshot confirms #993 reached the phone but the opening view still
+crops. The old HTTP/test receipt is not physical-device acceptance. Isolated
+`fix/client-portal-opening-viewport` adds a bounded iOS entry-only retained-zoom
+repair and pre-auth blur.93tests plus actual local Chromium/WebKit five-width
+opening/login/long-name checks pass; native Chromium16/14magnification reproduces
+the old crop and returns to1 with correction, later zoom preserved. No production
+data/account changes or other agent files. [Evidence and release boundary](CLIENT-OPENING-VIEWPORT-2026-11-16.md).
+Runtime89b20830 now LIVE atdpl_GwQE8n9fRXGdr13L4Gbjj8VV2iM5 (PR #994):
+one local prebuild/stage then same-stage promotion; protected/live HTML/JS/CSS
+match exact local bytes, routes200/invalid capability404. No cloud app build or
+DB/provider/account change. Prior dpl_B8eMyLViZqYRNxae4cR9HXqLhwhB retained.
+Physical iPhone acceptance remains unverified; do not claim HTTP checks prove it.
+Exact Google Control Centre target remains unavailable; no guessed tracker write.
+
 ## Latest 16 November — LinkedIn private GET-only receipt core
 
 Same draft PR991/#220. Added private fixed-host/versioned GET transport and exact

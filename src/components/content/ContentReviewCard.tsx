@@ -66,7 +66,7 @@ function ContentReviewCardBody({ review, canDecide, onChanged, staffView = false
     <p className="whitespace-pre-wrap break-words text-sm text-white/80">{review.caption}</p>
     <p className="text-xs text-white/60">{review.channels.join(' · ')} · {new Date(review.scheduled_at).toLocaleString('en-ZA', { timeZone: 'Africa/Johannesburg' })} SAST</p>
     {review.state === 'approved' && <p className="text-xs text-white/60">{staffView ? 'Approval is recorded. Check publishing status and the native platform before scheduling manually.' : 'Your approval is recorded. Publication is managed by CG.'}</p>}
-    {staffView && canManagePublishing && ['approved', 'superseded'].includes(review.state) && <ContentPublicationPanel reviewId={review.id} />}
+    {staffView && canManagePublishing && ['approved', 'superseded'].includes(review.state) && <ContentPublicationPanel review={review} />}
     {canDecide && <div className="space-y-2">
       <label className="block text-sm text-white/70">Comment<textarea className="mt-1 min-h-20 w-full rounded-lg border border-white/10 bg-black/30 p-2" value={note} onChange={event => setNote(event.target.value)} maxLength={2000} /></label>
       <div className="flex flex-wrap gap-2"><button type="button" disabled={busy || !url} onClick={() => void decide(true)} className="min-h-11 rounded-lg bg-brand-teal px-4 font-bold text-black disabled:opacity-40">Approve</button>

@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import type { ContentReview } from './contentReviews'
 export const PUBLICATION_CONFIRMATION_VISIBLE = import.meta.env.VITE_SOCIAL_PUBLISHING_PREVIEW === 'true'
 
 export const PUBLICATION_STATE_LABELS = {
@@ -19,6 +20,17 @@ export interface StaffPublicationPreview {
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const record = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v)
 const text = (v: unknown): v is string => typeof v === 'string' && !!v.trim() && v.length <= 512
+
+export type PublicationReview = Pick<ContentReview, 'id' | 'state' | 'channels' | 'media_type'>
+
+/** UI affordance only: the current candidate supports approved Facebook PNGs.
+ * Other-platform history/withdrawal remains visible. This does not prove access
+ * or override the backend's exact-account/source/authorization release gates.
+ */
+export function canPrepareFacebookPhotoReview(review: PublicationReview | null | undefined): boolean {
+  return !!review && UUID.test(review.id) && review.state === 'approved' && review.media_type === 'image/png'
+    && Array.isArray(review.channels) && review.channels.includes('facebook')
+}
 
 /** No default empty/healthy result when the backend is absent or unreadable. */
 export function projectPublicationStatus(value: unknown, reviewId: string): StaffPublicationStatus | null {

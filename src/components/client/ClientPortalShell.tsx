@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, NavLink, useLocation, useNavigationType } from 'react-router-dom'
 import { portalPreviewPath } from '../../lib/clientPortalPreviewPolicy'
 import { ClientLogo } from '../ClientLogo'
@@ -6,6 +6,7 @@ import BrandMark from '../BrandMark'
 import { useAuth } from '../../contexts/AuthContext'
 import type { Client } from '../../lib/db/clients'
 import { hasClientLeadsDestination } from '../../lib/clientLeadsNavigation'
+import { restoreClientOpeningViewport } from '../../lib/clientOpeningViewport'
 
 const NAV_ITEMS = [
   { to: '/client', label: 'Overview', end: true },
@@ -46,6 +47,9 @@ export function ClientPortalShell({
   const location = useLocation()
   const navigationType = useNavigationType()
   const isPreview = previewClientId !== undefined
+  useLayoutEffect(() => {
+    if (!isPreview) return restoreClientOpeningViewport()
+  }, [isPreview])
   const exactClientId = client?.id ?? null
   const activePath = isPreview ? `/client/${new URLSearchParams(location.search).get('area') === 'overview' ? '' : new URLSearchParams(location.search).get('area') ?? ''}`.replace(/\/$/, '') : location.pathname
   const sectionScope = `${exactClientId ?? ''}:${activePath}`

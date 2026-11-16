@@ -197,7 +197,7 @@ test('actual Edge entrypoint validates active profile, preserves CORS/no-store a
 
 // Execute the REAL component's callbacks with a small lifecycle harness. This
 // tests async ownership/confirmation behavior; it is not browser/visual QA.
-function componentHarness(io, reviewId, confirmation = false) {
+function componentHarness(io, reviewId, confirmation = false, reviewChanges = {}) {
   const slots = [], cleanups = [], lateWrites = []; let cursor = 0, mounted = true
   const react = { useState(initial) {
     const slot = cursor++
@@ -212,20 +212,53 @@ function componentHarness(io, reviewId, confirmation = false) {
     if (name === 'react') return react
     if (name === 'react/jsx-runtime') return runtime
     if (name.endsWith('.svg')) return { default: '/fixture-imported-icon.svg' }
-    if (name.endsWith('/socialPublishing')) return { PUBLICATION_STATE_LABELS: frontend.PUBLICATION_STATE_LABELS, ...io }
+    if (name.endsWith('/socialPublishing')) return { PUBLICATION_STATE_LABELS: frontend.PUBLICATION_STATE_LABELS, canPrepareFacebookPhotoReview: frontend.canPrepareFacebookPhotoReview, ...io }
     if (name.endsWith('/ContentPublicationConfirmation')) return { ContentPublicationConfirmation: () => null }
     throw new Error(`Unexpected component import ${name}`)
   }, Date, Intl })
-  const root = confirmation ? { type: exports.ContentPublicationConfirmation, props: { reviewId, onConfirmed: io.onConfirmed ?? (() => {}) } } : exports.ContentPublicationPanel({ reviewId })
+  const review = { id: reviewId, state: 'approved', channels: ['facebook'], media_type: 'image/png', ...reviewChanges }
+  const root = confirmation ? { type: exports.ContentPublicationConfirmation, props: { reviewId, review, onConfirmed: io.onConfirmed ?? (() => {}) } } : exports.ContentPublicationPanel({ reviewId, review })
   const render = () => { cursor = 0; return root.type(root.props) }
   const nodes = value => !value ? [] : Array.isArray(value) ? value.flatMap(nodes) : typeof value === 'object' ? [value, ...nodes(value.props?.children)] : []
   const text = value => value == null || typeof value === 'boolean' ? '' : Array.isArray(value) ? value.map(text).join('') : typeof value === 'object' ? text(value.props?.children) : String(value)
-  return { render, text: () => text(render()), click(label) {
+  return { render, text: () => text(render()), confirmationCount: () => nodes(render()).filter(n => typeof n.type === 'function' && n.type.name === 'ContentPublicationConfirmation').length, click(label) {
     const node = nodes(render()).find(n => n.type === 'button' && text(n.props.children) === label)
     assert.ok(node, `Missing button ${label}`); assert.notEqual(node.props.disabled, true); node.props.onClick()
   }, unmount() { cleanups.forEach(fn => fn?.()); mounted = false }, lateWrites }
 }
 const settle = async () => { for (let n = 0; n < 8; n++) await Promise.resolve() }
+
+test('actual Facebook confirmation is absent for unapproved, other-platform or unsupported-format reviews', () => {
+  for (const change of [{ state: 'rejected' }, { state: 'superseded' }, { state: 'pending' }, { channels: ['instagram'] }, { channels: ['tiktok'] },
+    { channels: ['linkedin'] }, { channels: ['manual'] }, { channels: [] }, { channels: null }, { media_type: 'video/mp4' }, { media_type: 'image/jpeg' }]) {
+    let reads = 0
+    const c = componentHarness({ prepareStaffPublication: async () => { reads++; return confirmationPreview } }, ids.review, true, change)
+    assert.equal(c.text().includes('Prepare Facebook schedule'), false, JSON.stringify(change))
+    assert.equal(reads, 0)
+  }
+})
+
+test('supported approved Facebook PNG metadata permits the candidate without implying provider access', () => {
+  const review = { id: ids.review, state: 'approved', media_type: 'image/png', channels: ['instagram', 'facebook'] }
+  assert.equal(frontend.canPrepareFacebookPhotoReview(review), true)
+  for (const value of [null, undefined, { ...review, id: 'not-a-review' }, { ...review, channels: null }]) assert.equal(frontend.canPrepareFacebookPhotoReview(value), false)
+  const c = componentHarness({ prepareStaffPublication: async () => confirmationPreview }, ids.review, true, review)
+  assert.match(c.text(), /Prepare Facebook schedule/)
+})
+
+test('panel hides new authority for unsupported reviews but preserves status and exact withdrawal', async () => {
+  for (const change of [{ state: 'superseded' }, { channels: ['instagram'] }, { channels: ['tiktok'] }, { media_type: 'image/jpeg' }]) {
+    const f = await fixture(), status = await readStatus(f); let writes = 0
+    const panel = componentHarness({ PUBLICATION_CONFIRMATION_VISIBLE: true, getStaffPublicationStatus: async () => status,
+      withdrawStaffPublication: async () => { writes++; return { state: 'cancelled', providerMayHaveStarted: false } } }, ids.review, false, change)
+    panel.click('Publishing status'); await settle()
+    assert.equal(panel.confirmationCount(), 0, JSON.stringify(change)); assert.match(panel.text(), /Queued in Dynamics/)
+    panel.click('Stop queued publishing'); assert.equal(writes, 0)
+    panel.click('Confirm withdrawal'); await settle(); assert.equal(writes, 1)
+  }
+  const eligible = componentHarness({ PUBLICATION_CONFIRMATION_VISIBLE: true, getStaffPublicationStatus: async () => ({ reviewId: ids.review, clientId: ids.client, canAuthorize: false, items: [] }) }, ids.review)
+  eligible.click('Publishing status'); await settle(); assert.equal(eligible.confirmationCount(), 1)
+})
 
 test('actual panel requires a second confirmation and invalidates old data after uncertain withdrawal', async () => {
   const f = await fixture(), status = await readStatus(f); let writes = 0, reads = 0

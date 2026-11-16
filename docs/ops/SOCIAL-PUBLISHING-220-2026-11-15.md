@@ -1,6 +1,79 @@
 # Social publishing — 15 November 2026
 
-## Latest 16 November — LinkedIn read-only photo receipt verification, SOURCE ONLY
+## Latest 16 November — approved JPEG adapter and accurate scheduling controls, SOURCE ONLY
+
+CA explicitly approved the exact `jpeg-js@0.4.4` dependency and private adapter.
+That approval is now consumed for source adoption; it is **not pending** and does
+not authorize activation, deployment, account changes or actual publication.
+Same draft PR #991 / #220; no second queue, schedule or operating lane.
+
+Manifests pin exactly0.4.4: one root dependency plus one lock package, with no
+existing package/version/settings changes or transitive dependencies. Registry
+integrity matches the qualified official archive. The shared `node_modules`
+junction was NOT installed into or modified. The unvendored npm package retains
+its BSD-3-Clause LICENSE and decoder's Apache-2.0 copyright/license notice.
+Private `instagramPublicationCodec.ts` supplies the real decoder to the existing
+Instagram runtime and its original exact-account/immutable-source/durable
+authorization barriers. No entry/worker/MCP registration or activation parser.
+[Supabase dependency instructions](https://supabase.com/docs/guides/functions/dependencies)
+support versioned npm imports; source support is not native runtime acceptance.
+
+`scripts/qa/publication-jpeg-codec.mjs` executes the actual adapter with the
+integrity-checked real CommonJS package and existing runtime. Five real decode
+cases pass, including corrupt entropy rejection and1440x1800 solid/high-detail
+originals; fixture bytes unchanged, composition performs zero database/provider
+calls. Node maximum-profile measured141ms solid/372ms detail in this run, not an
+Edge CPU-budget claim. Initial Vite inline CommonJS attempts failed; the local
+QA now transpiles the actual adapter and explicitly loads the real package.
+Native Deno npm resolution and hosted Edge CPU/import acceptance remain gates.
+No decoder mock or passing media flag substitutes for actual pixel decoding.
+
+Reproduced the current candidate UI offering new Facebook scheduling for a
+superseded review and other-channel/non-PNG work. The existing staff-manager
+visibility and job-history/withdrawal controls remain. Creation now requires an
+approved Facebook PNG review plus the default-off preview flag; backend scope,
+source and release checks remain authoritative. Same review metadata reaches
+both the panel and confirmation action. Unmount invalidates pending previews;
+new authority is never inferred from old job history. No design/layout/icon
+change. The earlier manual management-only fixture now passes the new props
+and keeps creation disabled.
+
+Focused management regressions27/27 and an actual isolated local Chrome run
+pass:36 cases across375/390/430/1440, client/ordinary-staff exclusion, exact
+manager controls, unsupported/superseded history, second-action confirmation,
+cancel-without-write and late-preview discard. Real components/library/CSS with
+synthetic I/O and all external requests blocked; no company profile/session
+attachment, remote-debugging port, provider/database write or physical phone
+claim. Screenshots/log in task TEMP `cg-publication-review-browser`.
+Build/emitted app, scoped lint and strict imported-helper typing against the
+actual package declarations pass; codec is absent from the browser bundle.
+Corrected full-app run: **4,690 total / 4,658 passed / 1 failed / 31 skipped**.
+The one failure was a60-second Vite module-load timeout in the unchanged
+`teamsReadinessAudit.test.mjs`; the entire affected file then passed **9/9**
+in isolation with no source change. Do not label the original full run green.
+An earlier invocation's16 environment failures (Windows Bash/OpenSSL selection)
+were cleared by the corrected process PATH. No system setting was changed.
+Logs: task TEMP `cg-approved-jpeg-full-corrected.log` and
+`cg-approved-jpeg-teams-isolated.log`. Self-review finds no blocker to this
+bounded source-only change; full-suite Vite stability remains a harness concern,
+not permission to change the staff/Teams runtime or claim native acceptance.
+
+Automatic approval review rejected restarting the owned, network-none local
+PostgreSQL QA container with only “blocked by policy” as the stated reason.
+It remains stopped; no attempt to bypass the rejection was made. The31 skips
+include the opt-in PostgreSQL group. The previous frozen2bbaa2b5 receipt's29
+actual PostgreSQL checks are separate prior evidence, not rerun in this turn.
+Queue, authority, preparation and all four migration sources are unchanged in
+this increment. Unrelated generated client-access artifacts were restored.
+
+Integrated mainf89fefea/PR994; preserved its opening-viewport runtime and LIVE
+receipt unchanged. This lane did not deploy or independently recertify their
+physical-device result. FOUR existing migration candidates remain unapplied;
+Teams stays current, Microsoft hold/Nolan/staff lanes untouched. No production
+SQL/data/Edge/config/secrets/OAuth/mapping/permission/provider/Vercel/cost action.
+Google Control Centre target still unidentified; no guessed tracker write.
+
+## Earlier 16 November — LinkedIn read-only photo receipt verification, SOURCE ONLY
 
 Same draft PR #991 / #220. Added private LinkedIn photo status core and a real
 GET-only versioned HTTP transport with REQUIRED server credential resolver. No

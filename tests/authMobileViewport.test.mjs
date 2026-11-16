@@ -55,7 +55,7 @@ test('compiled stylesheet overrides 14px auth fields at phone widths including p
   assert.ok(css.css.indexOf('.text-sm') < css.css.indexOf('[data-auth-shell] input'), 'auth override follows utility sizing')
 })
 
-test('initial phone viewport fits device width without suppressing user zoom or scripting scale resets', () => {
+test('document starts at device width and login does not install a persistent zoom restriction', () => {
   const html = read('index.html')
   assert.match(html, /name="viewport" content="width=device-width, initial-scale=1\.0"/)
   assert.doesNotMatch(html + read('src/pages/Login.tsx'), /user-scalable=no|maximum-scale=1|minimum-scale=1|visualViewport.*scale|document\.querySelector\(['"]meta\[name=/)
