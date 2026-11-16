@@ -1,4 +1,50 @@
-### 11 November — registration LIVE, seven missing films reconciled; MSI paused
+### 16 November — exact Nolan Codex MSI claims and portal linkage
+
+CA resumed this lane and explicitly requested all MSI video ownership/progress,
+correct client OneDrive files and Dynamics links, plus a standard that runs while
+editing. Nine exact existing film records now say **Nolan Codex MSI**, legacy
+alias Nolan MSI. No PC/Claude/staff work was claimed. Guarded exact-ID/client/
+version metadata updates and an independent full readback preserved all lifecycle,
+approval, schedule, editor-user-id and source/delivery evidence. This was an
+owner-requested bounded production data correction, not a schema/RLS/auth change
+or a new grant for routine SQL. New claims use the supported form; later ordinary
+edits retain the saved editor.
+
+Eight existing portal MP4s were reverified by exact folder/name/size/SHA256;
+no duplicate client media uploads. Piek's missing final link and Watch Christmas's
+missing canonical name were repaired. Three already-published assets (Piek R16,
+PSG crop REVISION07 and TBS Brokers equipmentV11) lacked their same-client film
+link; those nullable links are now saved/read back. Active flags and original
+publication times remain unchanged. Current client-library eligibility is3, not8:
+OneDrive filing/final URL does not itself publish a client library asset.
+
+Remaining owner decisions are pending in this chat: exact approved Action Sports
+attachment (whether MSI R16), disabled Daisy library/R05 client review, and whether
+the four internally pending WiseRide/EHP/TBS transit/Watch Christmas cuts may be
+shared for client review. No disabled library was enabled and no pending cut was
+inserted as a supposedly client-ready asset. Approval/public posting was not
+inferred. Sixteen older client-history receipts retain uncertain/rejected/source-
+only work rather than reviving it as current editing.
+
+Issue900's exact existing Google Video Work Queue was reached on company account,
+rows14:22 updated and independently read back: nine MSI film rows, including stale
+DaisyR04 replaced by R05. It mirrors Dynamics, not a new tracker. Global Google
+Control Centre has not been separately identified. Existing maintenance task
+7f413d31-17cd-4761-b2e9-a031c1343444 contains the detailed current receipt and stays
+ongoing. Company Chrome profile info@cgproductionhouse.com and Dynamics Admin
+were verified; UI reload shows all9 with the exact new editor label.
+
+The canonical story skill, approved closeout and NOLAN-START-HERE now require
+claim/revision/export/delivery/approval/portal updates and readback. New reusable
+reference: video-tracker-and-portal-standard.md. MSI installed hash CURRENT,
+prior skill backed up outside its catalog. Same standard uploaded/read back in
+the existing OneDrive Video Editing System; Office installation not witnessed.
+Local TypeScript/Vite build and diff check pass. No new dependency, app deployment,
+hosting/DNS/budget/security change or client/public message. PR910 stays draft;
+PR875 remains MSI production evidence. Private proof folder is
+Videos/CG-AI-Editing/Nolan-Studio-Private/Dynamics-Reconciliation-20261116.
+
+### Historical 11 November — registration LIVE and safe MSI pause
 
 CA requested safe pause for laptop shutdown. Resume tomorrow from this receipt,
 not from the superseded sign-in gate below. #985/main4af41304 is LIVE on the SAME

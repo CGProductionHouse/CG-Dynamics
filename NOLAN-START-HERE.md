@@ -1,6 +1,13 @@
 # Nolan Studio — current start here
 
-Maintained entry point for MSI, Office PC/BC and any new laptop. Updated 11 November 2026.
+Maintained entry point for MSI, Office PC/BC and any new laptop. Updated 16 November 2026.
+
+**16 November live custody:** this Codex laptop claims actual films as
+**Nolan Codex MSI** (legacy alias Nolan MSI). Follow the [tracker/portal standard](.agents/skills/cg-video-story-editor/references/video-tracker-and-portal-standard.md)
+while editing: saved ownership/progress, exact revision/hash, verified client
+portal files/direct Dynamics links, and readback at each handoff. Preserve other
+agents' ownership and approval distinctions. PR985 registration is live. Never
+fill an unknown approved-file identity with a guessed final.
 
 **11 November morning consolidation:** Read the [ChatGPT findings and overnight reconciliation](docs/ops/NOLAN-CHATGPT-FINDINGS-RECONCILIATION-2026-11-11.md) alongside the existing cross-device handover. It registers the isolated native-JavaScript study in [draft PR982](https://github.com/CGProductionHouse/CG-Dynamics/pull/982), durable OneDrive HTML/MP4/skill/test artifacts, exact reference-access limits and its fit with the overnight Nolan milestones. Continue the existing `NOLAN-DEVELOPMENT-QUEUE.json` at its live cursor; the observed cursor was M07, with M05/M06 blocked. Do not reset the queue, create a parallel renderer/registry, merge or force-install the draft, or treat a silent code proof as a client-ready advert. Desktop/Katana/MSI ownership and prior feedback remain separate.
 
