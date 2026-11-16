@@ -31,6 +31,15 @@ separate, unmerged lanes. Their relevant changes were reviewed for overlap.
   source. Existing Control Centre investigation owns that contract; source read
   time and arbitrary notes are not execution evidence or invented assignments.
 
+Latest integration: main `b524a9f91d61a5727db355194db2a988594b8af1`, PR995
+`d5a02c0ce69c97e3c454c6500538f3abe1daf242` remains separate. The combined
+candidate passed 55 focused workbook/brand/pipeline/report checks and local build.
+Main's brand/report changes are preserved; no new workbook runtime fix warranted.
+Remaining gates are the existing approved same-host browser/backend run, explicit
+release controls and authoritative accessible Control Centre evidence for any
+future agent/device claims. Current Master coverage remains account-visible only.
+No charged hosting upload is authorized or assumed free; no new deployment made.
+
 ### Shortest review/release path
 
 The owner authorized root to deploy only the standalone actual-component sample
