@@ -1,8 +1,8 @@
 import type { NolanTaskLane } from './nolanSourceLanes'
 
-export type NolanLane = NolanTaskLane | 'master' | 'videos' | 'packages' | 'systems'
+export type NolanLane = NolanTaskLane | 'decisions' | 'master' | 'videos' | 'packages' | 'systems'
 export type NolanViewState = { lane: NolanLane; query: string; status: string; month: string }
-const lanes: NolanLane[] = ['master', 'work', 'needs', 'ownership', 'special', 'done', 'videos', 'packages', 'systems', 'editor', 'apps']
+const lanes: NolanLane[] = ['decisions', 'master', 'work', 'needs', 'ownership', 'special', 'done', 'videos', 'packages', 'systems', 'editor', 'apps']
 const validMonth = (value: string) => /^\d{4}-(0[1-9]|1[0-2])$/.test(value) && value.slice(0, 4) !== '0000'
 
 // View state only: URLs never grant permissions or mutate canonical records.

@@ -13,9 +13,7 @@ Invalid receipts, duplicate request IDs or missing current revisions are unavail
 not a successful zero-work answer. Changed revisions do not show old questions as
 current. No source task status is rewritten. No browser cache is authority.
 
-This module is deliberately NOT imported by NolanOverview or a write screen.
-Client-side validation and TypeScript types cannot establish permission. There is
-no persistence RPC/table yet. No pending requests have been invented or created.
+The pure generic proposal module is not a permission boundary. A separate narrow native-task RPC adapter and gated Needs You component are now implemented in this draft (see next-slice receipt below). No migration has been executed and no pending requests have been invented or created.
 
 ## Architecture evidence and rejected shortcuts
 
@@ -73,3 +71,58 @@ Synthetic proposal/selection tests are not database or role acceptance. Require:
 Current blocker is missing server-enforced canonical recipient/source authority
 contract and disposable DB acceptance capability. Parent/owner may authorize
 further draft migration implementation, but live rollout remains separately gated.
+
+
+## Next-slice implementation receipt: explicit native-task workflow
+
+Draft implementation now includes SQL at
+docs/ops/sql/nolan_explicit_decision_requests.draft.sql (deliberately outside
+automatic migration discovery), a native-task adapter and
+NolanNeedsYou UI. The distinct lane does not replace Assigned to you.
+
+Scope is deliberately limited to native command_centre_tasks. Existing
+phase-security-admin-isolation.sql grants manager/admin source visibility; schema.sql
+reserves profile updates to administrators. No external, Planner, video or monthly
+deliverable record is guessed into this producer. Active administrators explicitly
+choose an active manager/admin recipient; that makes a question addressed to the
+person, not authority for them to approve publishing, money or production changes.
+
+Persistence uses RLS plus no direct authenticated/anonymous table grants. Fixed
+pg_catalog search_path SECURITY DEFINER RPCs derive auth.uid(), check active roles,
+lock profiles and source rows on mutation, compare full-row JSON revision hashes,
+and serialize actor-scoped idempotency keys. Key replay with changed material
+payload rejects. Same valid retry returns the original receipt. Questions retain
+server actor/time; closure records responder/time, response and incremented CAS
+version. Repeated or concurrent closure must fail the stale-version/state check;
+integer overflow rolls back rather than reusing a revision. Responses never mutate
+the source task. Only requester may withdraw; only named recipient may answer a
+still-current source question.
+
+Reads return only own pending incoming/outgoing questions. More than 500 produces
+an explicit coverage error rather than a truncated complete result. Source changes
+and inactive recipients are disclosed; they cannot be resolved as current.
+Closed requests remain persisted but this first UI shows pending only, not a full
+history browser. A failed queue read is unavailable, not empty. Source deletion
+is restricted while a decision record references it; retention behavior requires
+review before rollout.
+
+The UI gate NOLAN_DECISIONS_ACCEPTED is hardcoded false. Its disabled state is
+rollout control, NOT backend security. Account/month-key remounting preserves
+scope isolation. Admin draft form reads exact source/revision and eligible profiles,
+requires explicit recipient/question and freezes edits after a create attempt so
+an uncertain response is retried using the same idempotency key. Source links and
+response actions are distinct; no task action is implicitly applied.
+
+Validation: five source/synthetic tests passed using in-memory source, including
+receipt validation and role/revision/idempotency code contracts. These are NOT
+proof of SQL syntax, authorization or concurrency behavior. An opt-in disposable
+PostgreSQL test is supplied with minimal synthetic canonical dependency tables;
+it uses --pull=never, --network none, tmpfs, no host ports, no production credentials
+and cleans only its exact generated container. It has NOT been executed because
+no permitted working disposable DB is available. The real-schema full role matrix,
+concurrent transactions and authenticated browser acceptance remain mandatory.
+Do not activate the UI gate or apply migration until those checks are verified.
+
+Independent review correction: draft SQL is stored outside supabase/migrations so ordinary deployment tooling cannot apply it merely because it exists in the PR. Promoting it to an executable migration requires reviewed acceptance and separate release authorization. Native command-centre links use the existing daily-tasks workspace, with the exact UUID shown separately; the Planner board-ID route is not reused or claimed as an exact task deep link.
+
+Further source-review corrections: every RPC fixes timezone UTC for consistent JSON timestamp revision serialization; known SQL rejection codes release the draft for correction, while network/timeout/missing receipt errors retain the retry key and locked fields. These behaviors still require rendered and real-DB acceptance.
