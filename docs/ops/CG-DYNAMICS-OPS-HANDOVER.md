@@ -9,7 +9,7 @@ or #990 RLS edits; #996 strategy-date logic retained for integration review.
 [Coverage, limits and expanded release gates](STAFF-AI-RETIREMENT-2026-11-16.md).
 My Assistant and all Library governance surfaces remain. Not a live/full-parity claim.
 
-## 16 November — built-in staff AI retirement candidate, NOT LIVE
+## Historical first candidate — built-in staff AI retirement, NOT LIVE
 
 Owner requested removal of the broken in-app model. Isolated branch
 `codex/retire-staff-ai-20261116` removes chat/composer/capture UI and marketing
@@ -20,6 +20,30 @@ Read [scope, parity limits and release gates](STAFF-AI-RETIREMENT-2026-11-16.md)
 #990 workbook and all other active lanes preserved. No merge/deploy/SQL/data or
 staff-desktop operation; #679 remains mandatory. Live external acceptance and raw
 legacy marketing artifact/skill-search parity are explicitly not claimed.
+
+## 16 November — Novus published; existing strategy author through January
+
+CA explicitly approved Novus October publication: exact report940f3153 is now
+published16Nov14:33UTC; independent client-role reads verify12posts/13ready facts
+and no foreign reports. GoogleAds historical/paused campaign and no-campaign-data
+truth retained; Wix disconnected. No package/provider/credential changes.
+CA also confirms Cape Lumber now opens correctly on the actual phone; this is
+owner device acceptance of #994, superseding the unverified wording below.
+
+Existing normal Chat **December Strategy Rollout** / task6ae868361b6c81918b6b333508a47a50
+now **CG Client & Industry Research** is independently UI-verified Active, hourly,
+RepeatON/endNever. Same author updated/read back January-preparation instructions;
+no new writer/model/task. New recovery performed0canonical saves; source triage
+is not substantive completion. #731 latest author receipt6919535126.
+Small three-file connector release admits current+nextTWO months (Nov→Jan)
+without changing automatic worker cadence/schema/staff/source/publication guards.
+136tests/build/lint/diff/full hosted Deno check pass. Existing MCPv83 ACTIVE:
+all41 deployed files match candidate, other38/auth unchanged; actual NovusJan
+brief ready, February refused, client-context authoring denied. Same author
+notified to continue January; no saved January row claimed at release acceptance.
+[Exact evidence, coverage and release boundary](STRATEGY-JANUARY-PLANNING-2026-11-16.md).
+Other agent work untouched; no Vercel. Google Control Centre target unavailable;
+no guessed tracker write.
 
 ## 16 November — client opening crop corrective release LIVE
 
