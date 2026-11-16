@@ -95,12 +95,11 @@ export function preparePublishingIntent(context: PublishingContext): { intent: P
 }
 
 /** Every claim must re-read current source, mapping, consent and token health. */
-export function publishingDispatchDecision(intent: PublishingIntent, context: PublishingContext, now: string, maxLateMs = 15 * 60_000) {
+function currentPublishingDecision(intent: PublishingIntent, context: PublishingContext, now: string, maxLateMs: number) {
   const prepared = preparePublishingIntent(context)
   if (!prepared.intent || prepared.intent.key !== intent.key
     || JSON.stringify([prepared.intent.assetSha256, prepared.intent.assetPath, prepared.intent.caption, prepared.intent.scheduledAt, prepared.intent.platform, prepared.intent.mediaType, prepared.intent.route, prepared.intent.connectionId, prepared.intent.authorizationId])
       !== JSON.stringify([intent.assetSha256, intent.assetPath, intent.caption, intent.scheduledAt, intent.platform, intent.mediaType, intent.route, intent.connectionId, intent.authorizationId])) return 'blocked_source_changed'
-  if (!['queued', 'retry_wait'].includes(intent.state)) return 'do_not_submit'
   const time = instant(now), due = instant(intent.scheduledAt), expiry = instant(context.binding.tokenValidUntil)
   if (time === null || due === null || expiry === null || expiry <= time) return 'blocked_token_or_time'
   if (due < time - maxLateMs) return 'blocked_overdue_review'
@@ -108,7 +107,23 @@ export function publishingDispatchDecision(intent: PublishingIntent, context: Pu
   return 'submit'
 }
 
-export interface PublishingObservation { state: 'processing' | 'provider_scheduled' | 'posted' | 'failed' | 'unknown_outcome'; operationId?: string; postId?: string; errorCode?: string }
+export function publishingDispatchDecision(intent: PublishingIntent, context: PublishingContext, now: string, maxLateMs = 15 * 60_000) {
+  const decision = currentPublishingDecision(intent, context, now, maxLateMs)
+  if (decision === 'blocked_source_changed') return decision
+  if (!['queued', 'retry_wait'].includes(intent.state)) return 'do_not_submit'
+  return decision
+}
+
+/** Continuing one existing container is not permission to recreate it. */
+export function instagramPublishingContinuationDecision(intent: PublishingIntent, context: PublishingContext, now: string) {
+  if (intent.platform !== 'instagram' || intent.state !== 'processing' || !['instagram_login', 'instagram_facebook_login'].includes(intent.route)
+    || !/^\d+$/.test(intent.providerOperationId ?? '') || intent.providerPostId) return 'do_not_submit'
+  return currentPublishingDecision(intent, context, now, 15 * 60_000)
+}
+
+export type InstagramPublicationPhase = 'container_creating' | 'container_processing' | 'container_ready' | 'publishing' | 'verifying'
+export interface InstagramPublicationProtocol { phase: InstagramPublicationPhase; publishAttempted: boolean; statusReads: number; startedAt: string | null }
+export interface PublishingObservation { state: 'processing' | 'provider_scheduled' | 'posted' | 'failed' | 'unknown_outcome'; operationId?: string; postId?: string; errorCode?: string; instagramPhase?: InstagramPublicationPhase }
 /** Provider IDs alone are not evidence that a post is live. Unknown states fail closed. */
 export function normalizePublishingObservation(platform: PublishingPlatform, payload: Record<string, unknown>): PublishingObservation {
   const status = payload.status

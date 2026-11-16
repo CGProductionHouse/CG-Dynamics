@@ -1,5 +1,83 @@
 # Social publishing — 15 November 2026
 
+## Latest 16 November — durable Instagram photo protocol, SOURCE ONLY
+
+Same draft PR #991 / #220 / #236; no competing scheduler or Nolan lane. Reproduced the
+ready-container gap before the change: FINISHED could only remain processing;
+there was no durable, separate authority for media_publish. New protocol now
+supports four persisted claims over the SAME background_jobs row: create one
+container, record readiness, atomically begin one publish attempt, verify the
+distinct media ID and owner with GET-only reads. No create+publish double POST
+inside one claim, and no container ID/FINISHED status is advertised as posted.
+
+New CLI-generated, **UNAPPLIED** fourth migration:
+`20261116102019_instagram_publication_steps.sql`. It preserves existing generic
+claimer/receipt implementations behind service-only wrappers and adds
+`begin_instagram_publication_publish`. Durable phase/read budget/attempt markers
+live in the existing private job JSON. Second begin rechecks lease/fence, source,
+original authorization/fingerprint, active actor, revocation, schedule and older
+attempt barriers. It consumes the attempt BEFORE the second provider mutation;
+restart/timeout cannot replay it. Receipt/container identities are immutable;
+late receipts remain evidence without phase promotion. Five-minute execution
+bound and conservative five status/receipt-check budget, with one-minute spacing,
+prevent indefinite polling. No client grants, RLS weakening, new table or cron.
+
+Private single-photo protocol and bounded transport support Instagram Login and
+Facebook Login as distinct host/scope families. Exact account/connection/client,
+credential expiry, current private verifier receipt, request paths/fields,
+approved caption and qualified delivery URL are pinned. Facebook-login HMAC proof
+is route-specific. No redirect, arbitrary URL/path/header, POST retry, credential
+DTO or native-console token reuse. Quota uses the CURRENT returned config; Meta's
+overview and reference give different numerical examples, so no 50/100 default.
+Owner-verified public media is required for a posted receipt. HTTP/Graph/timeout
+errors are scrubbed. Initial dispatch keeps its earlier no-resubmit decisions;
+the shared-check refactor regression was reproduced and fixed in review.
+
+**Instagram is NOT registered/activated in the production worker/configuration.**
+Its concrete login-specific app/permission/role/mapping verifier and actual JPEG
+qualification remain mandatory private adapter gates. The existing reporting
+credential helper's analytics fallback is NOT sufficient publication evidence.
+No new OAuth scope, token, account mapping, media conversion, provider setting,
+consent, file upload, schedule, post or deployment was performed. JPEG/metadata,
+caption/tag/disclosure and other provider media constraints must be qualified
+before any exact pilot release. Reels/carousels/stories are intentionally not
+accepted by this single-JPEG adapter. No runtime dependency was added. A read-only
+registry/source review identified `jpeg-js@0.4.4` as a candidate decoder; its official
+tarball was downloaded to a task-only TEMP directory for inspection, not installed
+or executed in the app. New production dependencies require separate approval.
+
+Official sources checked 16 November:
+[publishing flow](https://developers.facebook.com/documentation/instagram-platform/content-publishing),
+[container states](https://developers.facebook.com/documentation/instagram-platform/instagram-graph-api/reference/ig-container),
+[quota response](https://developers.facebook.com/documentation/instagram-platform/instagram-graph-api/reference/ig-user/content_publishing_limit),
+[media/owner verification](https://developers.facebook.com/docs/instagram-platform/reference/instagram-media/v21.0/),
+[image/container requirements](https://developers.facebook.com/documentation/instagram-platform/instagram-graph-api/reference/ig-user/media).
+The provider, not a guessed shared publishing API, defines each stage.
+
+Local evidence: 43 Instagram regressions + existing policy checks pass; real
+PostgreSQL group passes all 27 tests, including four new Instagram integration,
+concurrent/crash/late-response, revocation/source/age/lease and service-role-only
+cases. Uses actual candidate SQL with synthetic Graph/media transports, not live
+provider acceptance. Final full run: 4,542 total / 4,512 passed / 30 skipped / 0 failures;
+includes the actual candidate SQL and preserves existing Facebook/TikTok tests.
+Build/emitted app, scoped lint and helper/entry typing bridge pass. Generated
+unrelated access-matrix artifacts were restored and the task-owned network-none
+PostgreSQL container stopped after acceptance.
+No new UI changes or physical phone/browser verification are claimed. Current main
+is `4af41304`; open Nolan PR #990 has no overlapping publishing files. All FOUR candidate
+migrations need a future exact release review; none was applied by this lane.
+
+Further TikTok official research confirms media URLs require an owned verified
+URL property; do not assume a Supabase signed storage URL qualifies. The exact
+current property inventory/Business publish payload and receipt contract still
+need primary-provider verification. The portal reference remains inaccessible
+through the documentation tool; no secondary sample was implemented as fact and
+no live DNS/provider property/upload change occurred. Existing TikTok OAuth gates
+and other platform/real-provider/phone acceptance work remain in this same record.
+
+Earlier increments below are historical; this latest section supersedes their
+three-migration and missing-Instagram-phase SOURCE status.
+
 ## 16 November continuation — concrete Facebook photo path, SOURCE ONLY
 
 This supersedes earlier statements that preparation/provider bindings are

@@ -10,7 +10,7 @@ const container = process.env.CG_SOCIAL_QA_CONTAINER
 const enabled = container === 'cg-dynamics-social-220-qa'
 const database = `qa_${randomUUID().replaceAll('-', '')}`
 const actor = randomUUID()
-let server, queue, authorization, authorizationStore
+let server, queue, authorization, authorizationStore, instagram
 const q = value => `'${String(value).replaceAll("'", "''")}'`
 function sql(text, role) {
   return execFileSync('docker', ['exec', '-i', container, 'psql', '-X', '-U', 'postgres', '-d', database, '-v', 'ON_ERROR_STOP=1', '-Atq'], {
@@ -60,10 +60,12 @@ before(async () => {
   sql(readFileSync('supabase/migrations/20261115104948_social_publishing_queue.sql', 'utf8'))
   sql(readFileSync('supabase/migrations/20261115104950_tiktok_business_oauth.sql', 'utf8'))
   sql(readFileSync('supabase/migrations/20261116085815_social_publication_preparation_evidence.sql', 'utf8'))
+  sql(readFileSync('supabase/migrations/20261116102019_instagram_publication_steps.sql', 'utf8'))
   server = await createServer({ configFile: false, server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true }, logLevel: 'error' })
   queue = await server.ssrLoadModule('/supabase/functions/_shared/socialPublishingQueue.ts')
   authorization = await server.ssrLoadModule('/supabase/functions/_shared/socialPublicationAuthorization.ts')
   authorizationStore = await server.ssrLoadModule('/supabase/functions/_shared/socialPublicationAuthorizationStore.ts')
+  instagram = await server.ssrLoadModule('/supabase/functions/_shared/instagramPublishing.ts')
 })
 after(async () => server?.close())
 
@@ -104,6 +106,7 @@ function rpcClient() {
   return { async rpc(name, a) {
     const args = name === 'claim_social_publication' ? [a.p_id, a.p_worker]
       : name === 'begin_social_publication' ? [a.p_id, a.p_worker, a.p_fence]
+      : name === 'begin_instagram_publication_publish' ? [a.p_id, a.p_worker, a.p_fence, a.p_container_id]
       : name === 'save_social_publication' ? [a.p_id, a.p_worker, a.p_fence, JSON.stringify(a.p_observation)] : null
     if (name === 'authorize_social_publication') return { data: jsonSql(`select authorize_social_publication(${q(JSON.stringify(a.p_intent))},${q(a.p_actor)},${q(a.p_fingerprint)},${q(JSON.stringify(a.p_evidence))})`), error: null }
     if (name === 'revoke_social_publication') return { data: jsonSql(`select revoke_social_publication(${q(a.p_id)},${q(a.p_client)},${q(a.p_actor)})`), error: null }
@@ -134,7 +137,111 @@ function capturedScheduleFixture() {
   return { ...f, sourceJob: job, source, run, plan, bucket, task, record, coverage, read }
 }
 
+function instagramFixture() {
+  const f = fixture()
+  Object.assign(f.intent, { platform: 'instagram', route: 'instagram_login', key: `social-publish:v1:${JSON.stringify([f.client, f.deliverable, f.review, 'instagram', '12345'])}` })
+  sql(`update content_review_versions set channels=array['instagram'] where id=${q(f.review)};
+   update background_jobs set idempotency_key=${q(f.intent.key)},payload=jsonb_set(payload,'{intent}',${q(JSON.stringify(f.intent))}::jsonb),
+    publication=jsonb_set(publication,'{authorization,fingerprint}',to_jsonb(social_publication_fingerprint(${q(JSON.stringify(f.intent))}))) where id=${q(f.job)};`)
+  const current = context(f)
+  current.review.channels = ['instagram']; current.binding.route = 'instagram_login'
+  current.binding.grantedScopes = ['instagram_business_basic', 'instagram_business_content_publish']; current.authorization.route = 'instagram_login'
+  return { ...f, current }
+}
+function readyInstagramFixture() {
+  const f = instagramFixture(), worker = `ig-ready-${randomUUID()}`, receipt = claim(f, worker)
+  assert.equal(jsonSql(`select to_jsonb(begin_social_publication(${q(f.job)},${q(worker)},${q(receipt.fence)}))`), true)
+  for (const phase of ['container_processing', 'container_ready']) {
+    const lease = phase === 'container_processing' ? receipt : (sql(`update background_jobs set run_after=now() where id=${q(f.job)}`), claim(f, worker))
+    assert.equal(jsonSql(`select to_jsonb(save_social_publication(${q(f.job)},${q(worker)},${q(lease.fence)},${q(JSON.stringify({ state: 'processing', operationId: '456', instagramPhase: phase }))}))`), true)
+  }
+  sql(`update background_jobs set run_after=now() where id=${q(f.job)}`)
+  return { ...f, worker, receipt: claim(f, worker) }
+}
+
 test('real PostgreSQL: queue, source/role fences, crash recovery, receipts and OAuth transactions', { skip: !enabled }, async t => {
+  await t.test('Instagram uses four persisted claims, two distinct mutations and an owner-verified final receipt', async () => {
+    const f = instagramFixture(), worker = `ig-flow-${randomUUID()}`, calls = []; let published = false
+    const transport = { approvedMediaUrl: async () => 'https://fixture.invalid/approved.jpg', async request(method, path) {
+      calls.push([method, path])
+      if (path.endsWith('/content_publishing_limit')) return { data: [{ quota_usage: 0, config: { quota_total: 50, quota_duration: 86400 } }] }
+      if (method === 'POST' && path === '/12345/media') return { id: '456' }
+      if (path === '/456') return { id: '456', status_code: published ? 'PUBLISHED' : 'FINISHED' }
+      if (method === 'POST' && path === '/12345/media_publish') { published = true; return { id: '789' } }
+      if (path === '/789') return { id: '789', owner: { id: '12345' }, media_type: 'IMAGE' }
+      throw new Error('Unexpected Instagram fixture request')
+    } }
+    const bindings = { readCurrent: async () => f.current, submit: i => instagram.createInstagramPhotoContainer(i, transport),
+      reconcile: (i, p) => instagram.readInstagramPhotoStatus(i, transport, p), publishReadyContainer: i => instagram.publishInstagramPhotoContainer(i, transport) }
+    const run = async () => {
+      sql(`update background_jobs set run_after=now() where id=${q(f.job)}; select id from claim_next_background_job(${q(worker)})`)
+      return queue.runClaimedSocialPublication({ sb: rpcClient(), jobId: f.job, key: f.intent.key, worker, now: new Date().toISOString(), enabled: true, bindings })
+    }
+    assert.equal((await run()).publication.instagramPhase, 'container_processing')
+    assert.equal(calls.filter(c => c[0] === 'POST').length, 1)
+    assert.equal((await run()).publication.instagramPhase, 'container_ready')
+    assert.equal(calls.filter(c => c[0] === 'POST').length, 1) // Ready saved before publish.
+    assert.equal((await run()).publication.instagramPhase, 'verifying')
+    assert.equal(calls.filter(c => c[0] === 'POST').length, 2)
+    assert.equal((await run()).publication.state, 'posted')
+    assert.equal(calls.filter(c => c[0] === 'POST').length, 2)
+    const job = jsonSql(`select row_to_json(j) from background_jobs j where id=${q(f.job)}`)
+    assert.equal(job.status, 'succeeded'); assert.equal(job.publication.instagram.publishAttempted, true)
+    assert.equal(job.publication.observation.operationId, '456'); assert.equal(job.publication.observation.postId, '789')
+    assert.equal(job.publication.authorization.id, f.intent.authorizationId)
+  })
+
+  await t.test('Instagram publish barrier is one-way under concurrency and lost-response recovery', async () => {
+    const f = readyInstagramFixture(), args = `${q(f.job)},${q(f.worker)},${q(f.receipt.fence)},'456'`
+    const results = await Promise.all([parallelSql(`select begin_instagram_publication_publish(${args})`), parallelSql(`select begin_instagram_publication_publish(${args})`)])
+    assert.deepEqual(results.sort(), ['f', 't'])
+    sql(`update background_jobs set locked_at=now()-interval '6 minutes' where id=${q(f.job)}`)
+    const recovered = claim(f, 'ig-recovery')
+    assert.equal(recovered.instagram.publishAttempted, true); assert.equal(recovered.instagram.phase, 'publishing')
+    assert.equal(jsonSql(`select to_jsonb(begin_instagram_publication_publish(${q(f.job)},'ig-recovery',${q(recovered.fence)},'456'))`), false)
+    // A late response is evidence, not authority to replay the second POST.
+    assert.equal(jsonSql(`select to_jsonb(save_social_publication(${q(f.job)},${q(f.worker)},${q(f.receipt.fence)},${q(JSON.stringify({ state: 'processing', operationId: '456', postId: '789', instagramPhase: 'verifying' }))}))`), false)
+    const row = jsonSql(`select publication from background_jobs where id=${q(f.job)}`)
+    assert.equal(row.instagram.publishAttempted, true); assert.equal(row.late_observation.postId, '789')
+    sql(`update background_jobs set status='cancelled' where id=${q(f.job)}`)
+  })
+
+  await t.test('Instagram second step rechecks scope, source, active actor, revocation, lease, age and read budget', () => {
+    for (const change of [
+      f => `update profiles set is_active=false where id=${q(actor)}`,
+      f => `update background_jobs set publication=jsonb_set(publication,'{authorization,revokedAt}',to_jsonb(now())) where id=${q(f.job)}`,
+      f => `update content_review_versions set caption='changed' where id=${q(f.review)}`,
+      f => `update monthly_deliverables set production_status='scheduled' where id=${q(f.deliverable)}`,
+      f => `update background_jobs set publication=jsonb_set(publication,'{started_at}',to_jsonb(now()-interval '6 minutes')) where id=${q(f.job)}`,
+      f => `update background_jobs set publication=jsonb_set(publication,'{instagram,statusReads}','5') where id=${q(f.job)}`,
+      f => `update background_jobs set locked_at=now()-interval '6 minutes' where id=${q(f.job)}`,
+    ]) {
+      const f = readyInstagramFixture(); sql(change(f))
+      try { assert.equal(jsonSql(`select to_jsonb(begin_instagram_publication_publish(${q(f.job)},${q(f.worker)},${q(f.receipt.fence)},'456'))`), false) }
+      catch (error) { if (!/Current exact approved publication source required/.test(String(error))) throw error }
+      assert.equal(jsonSql(`select publication->'instagram'->'publishAttempted' from background_jobs where id=${q(f.job)}`), false)
+      sql(`update profiles set is_active=true where id=${q(actor)}; update background_jobs set status='cancelled' where id=${q(f.job)}`)
+    }
+  })
+
+  await t.test('Instagram phase/receipt identities cannot skip the barrier, change container or expose service RPCs to users', () => {
+    const f = readyInstagramFixture()
+    for (const observation of [
+      { state: 'posted', operationId: '456', postId: '789' }, { state: 'processing', operationId: '999', instagramPhase: 'container_ready' },
+      { state: 'processing', operationId: '456', postId: '789', instagramPhase: 'verifying' },
+    ]) assert.throws(() => sql(`select save_social_publication(${q(f.job)},${q(f.worker)},${q(f.receipt.fence)},${q(JSON.stringify(observation))})`))
+    assert.equal(jsonSql(`select to_jsonb(begin_instagram_publication_publish(${q(f.job)},${q(f.worker)},${q(f.receipt.fence)},'999'))`), false)
+    for (const role of ['anon', 'authenticated']) for (const name of ['claim_social_publication', 'claim_social_publication_lease_v1']) {
+      assert.throws(() => sql(`select ${name}(${q(f.job)},${q(f.worker)})`, role), /permission denied/)
+    }
+    for (const role of ['anon', 'authenticated']) assert.throws(() => sql(`select begin_instagram_publication_publish(${q(f.job)},${q(f.worker)},${q(f.receipt.fence)},'456')`, role), /permission denied/)
+    for (const signature of ['claim_social_publication(uuid,text)', 'claim_social_publication_lease_v1(uuid,text)',
+      'save_social_publication(uuid,text,text,jsonb)', 'save_social_publication_receipt_v1(uuid,text,text,jsonb)', 'begin_instagram_publication_publish(uuid,text,text,text)']) {
+      for (const role of ['anon', 'authenticated']) assert.equal(sql(`select has_function_privilege(${q(role)},${q(signature)},'execute')`), 'f')
+      assert.equal(sql(`select prosecdef from pg_proc where oid=${q(signature)}::regprocedure`), 'f')
+    }
+    sql(`update background_jobs set status='cancelled' where id=${q(f.job)}`)
+  })
   await t.test('captured-source preflight reads one exact fresh task proof without exposing text or writing capture/schedule state', () => {
     const f = capturedScheduleFixture(), before = sql(`select row_to_json(s) from microsoft_sync_job_sources s where id=${q(f.source)}`)
     const proof = f.read()

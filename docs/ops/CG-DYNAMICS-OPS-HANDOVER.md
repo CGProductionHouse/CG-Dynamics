@@ -1,4 +1,32 @@
-## 16 November — Facebook photo flow wired, local only
+## Latest 16 November — Instagram durable phases, local only
+
+Same draft PR #991 / #220 / #236. Added source-only single-JPEG container/readiness/
+one-way publish/owner-verification stages over existing background_jobs. New
+UNAPPLIED `20261116102019_instagram_publication_steps.sql` makes FOUR pending
+migrations. No second queue/table/cron, public grants or Microsoft writes.
+Concurrent/crashed/expired/revoked/changed attempts cannot repeat media_publish;
+late IDs stay reconciliation evidence. Exact route/account, bounded private
+transport, current returned quota, immutable container/media identities and
+five-minute/minute-spaced bounded checks are enforced. Preserve generic worker
+leases and Facebook behavior. Initial-dispatch refactor regression fixed/tested.
+
+Instagram remains UNREGISTERED for live dispatch pending concrete login-specific
+app/role/mapping credential verification and qualified JPEG/media/caption profile.
+Reporting-token fallback does not meet that requirement. No actual provider
+media/permission/phone acceptance and no added production dependency. `jpeg-js@0.4.4`
+was only researched/downloaded to task TEMP for inspection; production adoption
+requires explicit approval. Existing Facebook/TikTok source flags remain off.
+No production SQL/data/Edge/config/secret/OAuth/provider/Microsoft/Vercel action.
+
+Local PostgreSQL: 27/27 (including four new Instagram groups); 43 Instagram regressions,
+build/app bundle, scoped lint and helper/entry typing bridge pass. Final full-run
+4,542 total / 4,512 passed / 30 skipped / 0 failures. Owned network-none QA container
+stopped and generated unrelated artifacts restored. New code has no UI changes. Main
+4af41304; no overlapping publishing files in Nolan PR990. Current receipt remains
+[social publishing](SOCIAL-PUBLISHING-220-2026-11-15.md); Google Control Centre
+target still unidentified, no guessed tracker writes. Teams/sync hold unchanged.
+
+## Earlier 16 November — Facebook photo flow wired, local only
 
 Same draft PR991/#220. Supersedes earlier "unregistered" SOURCE status below:
 the concrete private Facebook runtime now joins canonical review/schedule reads,
