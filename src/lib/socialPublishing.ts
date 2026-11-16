@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+export const PUBLICATION_CONFIRMATION_VISIBLE = import.meta.env.VITE_SOCIAL_PUBLISHING_PREVIEW === 'true'
 
 export const PUBLICATION_STATE_LABELS = {
   queued: 'Queued in Dynamics', submitting: 'Submission started', processing: 'Processing at provider',
@@ -11,6 +12,10 @@ export interface StaffPublication {
   authorizationState: 'recorded' | 'revoked' | 'unconfirmed'; providerMayHaveStarted: boolean; postUrl: string | null; errorCode: string | null
 }
 export interface StaffPublicationStatus { reviewId: string; clientId: string; items: StaffPublication[]; canAuthorize: false }
+export interface StaffPublicationPreview {
+  reviewId: string; clientId: string; accountId: string; platform: 'facebook'; caption: string; mediaType: 'image/png'
+  assetSha256: string; scheduledAt: string; fingerprint: string
+}
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const record = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v)
 const text = (v: unknown): v is string => typeof v === 'string' && !!v.trim() && v.length <= 512
@@ -58,5 +63,36 @@ export async function withdrawStaffPublication(reviewId: string, jobId: string):
     if (error || data?.ok !== true || !record(p) || p.jobId !== jobId || p.authorizationRevoked !== true
       || typeof p.providerMayHaveStarted !== 'boolean' || typeof p.state !== 'string' || !Object.hasOwn(PUBLICATION_STATE_LABELS, p.state)) return null
     return { state: p.state as StaffPublication['state'], providerMayHaveStarted: p.providerMayHaveStarted }
+  } catch { return null }
+}
+
+/** No client/account/URL/proof booleans are supplied by the browser. */
+export async function prepareStaffPublication(reviewId: string): Promise<StaffPublicationPreview | null> {
+  if (!UUID.test(reviewId)) return null
+  try {
+    const { data, error } = await supabase.functions.invoke('social-publication-authorization', { body: { action: 'preview', reviewId } })
+    const p = data?.preview, t = p?.target
+    if (error || data?.ok !== true || !record(p) || !record(t) || t.reviewVersionId !== reviewId || t.route !== 'facebook_page'
+      || typeof t.clientId !== 'string' || !UUID.test(t.clientId) || typeof t.accountId !== 'string' || !/^\d+$/.test(t.accountId)
+      || p.platform !== 'facebook' || p.mediaType !== 'image/png' || typeof p.caption !== 'string' || !p.caption.trim() || p.caption.length > 63_206
+      || typeof p.assetSha256 !== 'string' || !/^[a-f0-9]{64}$/.test(p.assetSha256)
+      || typeof p.fingerprint !== 'string' || !/^[a-f0-9]{64}$/.test(p.fingerprint)
+      || typeof p.scheduledAt !== 'string' || !Number.isFinite(Date.parse(p.scheduledAt))) return null
+    return { reviewId, clientId: t.clientId, accountId: t.accountId, platform: 'facebook', caption: p.caption,
+      mediaType: 'image/png', assetSha256: p.assetSha256, fingerprint: p.fingerprint, scheduledAt: p.scheduledAt }
+  } catch { return null }
+}
+
+export async function confirmStaffPublication(preview: StaffPublicationPreview): Promise<{ jobId: string } | null> {
+  if (!UUID.test(preview.reviewId) || !/^[a-f0-9]{64}$/.test(preview.fingerprint)) return null
+  try {
+    const { data, error } = await supabase.functions.invoke('social-publication-authorization', { body: { action: 'confirm', reviewId: preview.reviewId,
+      expectedFingerprint: preview.fingerprint, confirmPublication: true } })
+    const p = data?.publication
+    if (error || data?.ok !== true || !record(p) || typeof p.jobId !== 'string' || !UUID.test(p.jobId)
+      || typeof p.authorizationId !== 'string' || !UUID.test(p.authorizationId) || p.fingerprint !== preview.fingerprint
+      || !['queued', 'running', 'succeeded', 'failed', 'cancelled'].includes(String(p.status))
+      || typeof p.state !== 'string' || !Object.hasOwn(PUBLICATION_STATE_LABELS, p.state)) return null
+    return { jobId: p.jobId }
   } catch { return null }
 }

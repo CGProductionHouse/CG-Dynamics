@@ -197,7 +197,7 @@ test('actual Edge entrypoint validates active profile, preserves CORS/no-store a
 
 // Execute the REAL component's callbacks with a small lifecycle harness. This
 // tests async ownership/confirmation behavior; it is not browser/visual QA.
-function componentHarness(io, reviewId) {
+function componentHarness(io, reviewId, confirmation = false) {
   const slots = [], cleanups = [], lateWrites = []; let cursor = 0, mounted = true
   const react = { useState(initial) {
     const slot = cursor++
@@ -207,15 +207,16 @@ function componentHarness(io, reviewId) {
   useEffect(effect) { const slot = cursor++; if (!(slot in slots)) { slots[slot] = true; cleanups.push(effect()) } } }
   const runtime = { jsx: (type, props) => ({ type, props }), jsxs: (type, props) => ({ type, props }) }
   const exports = {}
-  const source = ts.transpileModule(readFileSync('src/components/content/ContentPublicationPanel.tsx', 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX } }).outputText
+  const source = ts.transpileModule(readFileSync(`src/components/content/${confirmation ? 'ContentPublicationConfirmation' : 'ContentPublicationPanel'}.tsx`, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX } }).outputText
   vm.runInNewContext(source, { exports, require: name => {
     if (name === 'react') return react
     if (name === 'react/jsx-runtime') return runtime
     if (name.endsWith('.svg')) return { default: '/fixture-imported-icon.svg' }
     if (name.endsWith('/socialPublishing')) return { PUBLICATION_STATE_LABELS: frontend.PUBLICATION_STATE_LABELS, ...io }
+    if (name.endsWith('/ContentPublicationConfirmation')) return { ContentPublicationConfirmation: () => null }
     throw new Error(`Unexpected component import ${name}`)
   }, Date, Intl })
-  const root = exports.ContentPublicationPanel({ reviewId })
+  const root = confirmation ? { type: exports.ContentPublicationConfirmation, props: { reviewId, onConfirmed: io.onConfirmed ?? (() => {}) } } : exports.ContentPublicationPanel({ reviewId })
   const render = () => { cursor = 0; return root.type(root.props) }
   const nodes = value => !value ? [] : Array.isArray(value) ? value.flatMap(nodes) : typeof value === 'object' ? [value, ...nodes(value.props?.children)] : []
   const text = value => value == null || typeof value === 'boolean' ? '' : Array.isArray(value) ? value.map(text).join('') : typeof value === 'object' ? text(value.props?.children) : String(value)
@@ -259,4 +260,61 @@ test('actual panel preserves in-flight truth after withdrawal and never makes pr
   panel.click('Publishing status'); await settle(); panel.click('Withdraw publishing authority'); panel.click('Confirm withdrawal'); await settle()
   assert.match(panel.text(), /Submission started/); assert.match(panel.text(), /nothing was deleted/)
   assert.equal(panel.text().includes('Stopped in Dynamics'), false)
+})
+
+const confirmationPreview = { reviewId: ids.review, clientId: ids.client, accountId: '12345', platform: 'facebook', caption: 'Approved caption', mediaType: 'image/png',
+  assetSha256: 'a'.repeat(64), fingerprint: 'b'.repeat(64), scheduledAt: '2026-11-17T08:00:00Z' }
+const previewResponse = () => ({ ok: true, preview: { ...confirmationPreview, target: { reviewVersionId: ids.review, clientId: ids.client, accountId: '12345', route: 'facebook_page' } } })
+
+test('browser preview is default-hidden, requests only review ID and refuses foreign or malformed evidence', async () => {
+  assert.equal(frontend.PUBLICATION_CONFIRMATION_VISIBLE, false)
+  const calls = []
+  supabase.functions.invoke = async (name, options) => { calls.push([name, options]); return { data: previewResponse(), error: null } }
+  assert.deepEqual(await frontend.prepareStaffPublication(ids.review), confirmationPreview)
+  assert.deepEqual(calls, [['social-publication-authorization', { body: { action: 'preview', reviewId: ids.review } }]])
+  for (const change of [p => { p.target.reviewVersionId = randomUUID() }, p => { p.target.route = 'instagram_login' }, p => { p.mediaType = 'image/jpeg' },
+    p => { p.fingerprint = 'private' }, p => { p.scheduledAt = 'tomorrow' }, p => { p.target.accountId = 'invalid/page' }]) {
+    const data = previewResponse(); change(data.preview); supabase.functions.invoke = async () => ({ data, error: null })
+    assert.equal(await frontend.prepareStaffPublication(ids.review), null)
+  }
+})
+
+test('browser confirmation supplies no account/media/proof overrides and uncertain receipts never become success', async () => {
+  let captured
+  const good = { ok: true, publication: { jobId: ids.job, authorizationId: ids.authorization, fingerprint: confirmationPreview.fingerprint, status: 'queued', state: 'queued' } }
+  supabase.functions.invoke = async (name, options) => { captured = [name, options]; return { data: good, error: null } }
+  assert.deepEqual(await frontend.confirmStaffPublication(confirmationPreview), { jobId: ids.job })
+  assert.deepEqual(captured, ['social-publication-authorization', { body: { action: 'confirm', reviewId: ids.review, expectedFingerprint: confirmationPreview.fingerprint, confirmPublication: true } }])
+  for (const data of [undefined, { ...good, publication: { ...good.publication, fingerprint: 'c'.repeat(64) } }, { ...good, publication: { ...good.publication, state: 'healthy' } }]) {
+    supabase.functions.invoke = async () => ({ data, error: null }); assert.equal(await frontend.confirmStaffPublication(confirmationPreview), null)
+  }
+  supabase.functions.invoke = async () => { throw new Error('PRIVATE lost response') }
+  assert.equal(await frontend.confirmStaffPublication(confirmationPreview), null)
+})
+
+test('actual confirmation UI requires a second action and clears uncertain confirmation before refreshing receipts', async () => {
+  let writes = 0, refreshes = 0
+  const c = componentHarness({ prepareStaffPublication: async () => confirmationPreview,
+    confirmStaffPublication: async selected => { writes++; assert.equal(selected, confirmationPreview); return null }, onConfirmed: () => refreshes++ }, ids.review, true)
+  c.click('Prepare Facebook schedule'); await settle(); assert.equal(writes, 0)
+  assert.match(c.text(), /Approved caption/); assert.match(c.text(), /Facebook Page · 12345/); assert.match(c.text(), /not already scheduled/)
+  c.click('Confirm this Facebook schedule'); await settle()
+  assert.equal(writes, 1); assert.equal(refreshes, 1); assert.match(c.text(), /job may already exist/)
+  assert.equal(c.text().includes('Confirm this Facebook schedule'), false)
+})
+
+test('actual confirmation UI cancellation is zero-write and success does not claim a live post', async () => {
+  let writes = 0
+  const c = componentHarness({ prepareStaffPublication: async () => confirmationPreview, confirmStaffPublication: async () => { writes++; return { jobId: ids.job } } }, ids.review, true)
+  c.click('Prepare Facebook schedule'); await settle(); c.click('Cancel'); assert.equal(writes, 0)
+  c.click('Prepare Facebook schedule'); await settle(); c.click('Confirm this Facebook schedule'); await settle()
+  assert.equal(writes, 1); assert.match(c.text(), /not a verified live post yet/)
+})
+
+test('late confirmation preview cannot update an unmounted previous client review', async () => {
+  let resolve
+  const pending = new Promise(r => { resolve = r })
+  const c = componentHarness({ prepareStaffPublication: async () => pending }, ids.review, true)
+  c.click('Prepare Facebook schedule'); c.unmount(); resolve(confirmationPreview); await settle()
+  assert.equal(c.lateWrites.length, 0)
 })

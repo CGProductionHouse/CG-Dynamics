@@ -7,6 +7,7 @@
 import { createClient, type SupabaseClient } from 'jsr:@supabase/supabase-js@2'
 import webpush from 'npm:web-push@3.6.7'
 import { SOCIAL_PUBLICATION_JOB, runClaimedSocialPublication } from '../_shared/socialPublishingQueue.ts'
+import { facebookPublicationRuntime, readFacebookPublicationConfiguration } from '../_shared/facebookPublicationRuntime.ts'
 import { dispatchMetaWorker } from '../_shared/metaWorkerDispatch.ts'
 import { currentMetaMonth, previousMetaMonth, currentMonthHasIncrementalWindow } from '../_shared/metaPeriod.ts'
 import { fetchAllRows } from '../_shared/paginatedRows.ts'
@@ -801,12 +802,13 @@ async function runJob(
 
   switch (job.job_type) {
     case SOCIAL_PUBLICATION_JOB: {
-      // No provider binding is activated by this candidate. Even if someone
-      // enables the flag prematurely, the durable job holds with an explicit
-      // blocker. Reviewed private transport/preflight registration is separate.
+      // Source-only candidate. Global flag alone cannot activate publishing:
+      // dedicated photo gate + exact-account server packet are also mandatory.
+      const configuration = readFacebookPublicationConfiguration(name => Deno.env.get(name))
       return await runClaimedSocialPublication({ sb: supabase, jobId: job.id,
         key: job.idempotency_key ?? '', worker, now: new Date().toISOString(),
-        enabled: Deno.env.get('SOCIAL_PUBLISHING_ENABLED') === 'true' })
+        enabled: configuration !== null,
+        bindings: configuration ? facebookPublicationRuntime(supabase, configuration).workerBindings(job.id) : undefined })
     }
     case GOOGLE_ADS_REFRESH_JOB_TYPE: {
       return await runGoogleAdsRefreshJob({

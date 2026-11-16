@@ -2,6 +2,7 @@ import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { inspectPublicationSnapshot, type PrivatePublicationSnapshot } from './socialPublishingMedia.ts'
 import { preparePublishingIntent, type PublishingBinding, type PublishingContext } from './socialPublishing.ts'
 import { socialPublicationFingerprint, type PublicationAuthorizationPorts, type PublicationTarget } from './socialPublicationAuthorization.ts'
+import { FACEBOOK_PHOTO_MAX_BYTES } from './facebookPhotoMedia.ts'
 
 export class PublicationPreparationError extends Error {
   constructor(readonly code: string) { super(code); this.name = 'PublicationPreparationError' }
@@ -53,7 +54,7 @@ export function publicationCandidateReader(sb: SupabaseClient, checks: PrivatePu
       || typeof schedule.revision !== 'string' || !/^[a-f0-9]{64}$/.test(schedule.revision) || schedule.scheduledDate !== d.scheduled_date
       || !fresh(schedule.capturedAt, now) || !fresh(schedule.checkedAt, now)) stop('FRESH_TEAMS_EVIDENCE_REQUIRED')
     const snapshot = await inspectPublicationSnapshot(sb, { clientId: target.clientId, deliverableId: d.id, reviewVersionId: r.id,
-      platform: 'facebook', assetPath: r.asset_path, mediaType: r.media_type, caption: r.caption, scheduledAt: r.scheduled_at })
+      platform: 'facebook', assetPath: r.asset_path, mediaType: r.media_type, caption: r.caption, scheduledAt: r.scheduled_at }, FACEBOOK_PHOTO_MAX_BYTES)
     let provider: Awaited<ReturnType<PrivatePublicationPreparationChecks['verifyProvider']>>
     let media: Awaited<ReturnType<PrivatePublicationPreparationChecks['verifyMedia']>>
     try {

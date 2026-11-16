@@ -12,10 +12,11 @@ export interface PrivatePublicationSnapshot { bytes: Uint8Array<ArrayBuffer>; as
 /** Read exact approved bytes for server preflight WITHOUT signing, uploading,
  * exposing a URL or transforming the file. A hash is derived, never caller proof.
  */
-export async function inspectPublicationSnapshot(sb: SupabaseClient, source: Readonly<PublicationSnapshotSource>): Promise<PrivatePublicationSnapshot> {
+export async function inspectPublicationSnapshot(sb: SupabaseClient, source: Readonly<PublicationSnapshotSource>, maxBytes = SNAPSHOT_MAX_BYTES): Promise<PrivatePublicationSnapshot> {
   function fail(): never { throw new Error('Approved publication snapshot unavailable.') }
   const parts = source.assetPath.split('/')
-  if (parts.length < 2 || parts[0] !== source.deliverableId || parts.some(p => !p || p === '.' || p === '..' || /[%\\?#]/.test(p) || [...p].some(c => c.charCodeAt(0) < 32))
+  if (!Number.isSafeInteger(maxBytes) || maxBytes < 1 || maxBytes > SNAPSHOT_MAX_BYTES
+    || parts.length < 2 || parts[0] !== source.deliverableId || parts.some(p => !p || p === '.' || p === '..' || /[%\\?#]/.test(p) || [...p].some(c => c.charCodeAt(0) < 32))
     || (source.assetSha256 !== undefined && !/^[a-f0-9]{64}$/.test(source.assetSha256)) || !['image/jpeg', 'image/png'].includes(source.mediaType)) fail()
   try {
     const { data: review, error } = await sb.from('content_review_versions')
@@ -25,7 +26,7 @@ export async function inspectPublicationSnapshot(sb: SupabaseClient, source: Rea
       || review.caption !== source.caption || Date.parse(review.scheduled_at) !== Date.parse(source.scheduledAt)
       || !Array.isArray(review.channels) || !review.channels.includes(source.platform)) fail()
     const { data: blob, error: downloadError } = await sb.storage.from(BUCKET).download(source.assetPath)
-    if (downloadError || !blob || blob.size === 0 || blob.size > SNAPSHOT_MAX_BYTES || blob.type !== source.mediaType) fail()
+    if (downloadError || !blob || blob.size === 0 || blob.size > maxBytes || blob.type !== source.mediaType) fail()
     const bytes = new Uint8Array(await blob.arrayBuffer())
     const signature = source.mediaType === 'image/png'
       ? bytes.length >= 8 && [137, 80, 78, 71, 13, 10, 26, 10].every((b, i) => bytes[i] === b)

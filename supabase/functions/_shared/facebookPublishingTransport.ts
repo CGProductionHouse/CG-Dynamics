@@ -22,12 +22,13 @@ async function proof(token: string, secret: string): Promise<string> {
  * decrypt through metaTokenStorage; analytics user-token fallback is forbidden.
  * Call only behind server preflight and the durable begin-attempt barrier.
  */
-export async function facebookPhotoTransport(input: {
-  intent: Readonly<PublishingIntent>; graphVersion: string; appSecret: string
+interface FacebookPageAccessInput {
+  intent: Readonly<Pick<PublishingIntent, 'platform' | 'route' | 'accountId'>>; graphVersion: string; appSecret: string
   resolveUserToken: () => Promise<string>
-  approvedMediaUrl: (intent: Readonly<PublishingIntent>) => Promise<string>
   fetch?: typeof fetch; now?: () => number
-}): Promise<FacebookPublishingTransport> {
+}
+
+async function resolveFacebookPageAccess(input: FacebookPageAccessInput) {
   // Copy caller data so later mutation cannot change the credential's target.
   const intent = Object.freeze({ ...input.intent })
   if (intent.platform !== 'facebook' || intent.route !== 'facebook_page' || !/^\d+$/.test(intent.accountId)
@@ -91,6 +92,34 @@ export async function facebookPhotoTransport(input: {
   if (!pageToken) failure('FACEBOOK_EXACT_PAGE_REQUIRED')
   const pageIdentity = await graph(pageToken, 'GET', '/me', { fields: 'id' })
   if (pageIdentity.id !== intent.accountId) failure('FACEBOOK_PAGE_TOKEN_MISMATCH')
+  const checkedAt = now()
+  if (!Number.isFinite(checkedAt) || checkedAt < resolvedAt || checkedAt - resolvedAt >= 120_000) failure('FACEBOOK_CREDENTIAL_RECHECK_REQUIRED')
+  // Tokens remain captured by this PRIVATE server closure. Only the timestamp
+  // is used in preparation receipts; neither the closure nor tokens are a DTO.
+  function assertFresh() {
+    const current = now()
+    if (!Number.isFinite(current) || current < resolvedAt || current - resolvedAt >= 120_000) failure('FACEBOOK_CREDENTIAL_RECHECK_REQUIRED')
+  }
+  return { checkedAt: new Date(checkedAt).toISOString(), assertFresh, async request(method: 'GET' | 'POST', path: string, fields: Record<string, string | boolean>) {
+    assertFresh()
+    return await graph(pageToken, method, path, fields)
+  } }
+}
+
+/** Read-only Page preflight. It cannot sign media or expose a mutation port. */
+export async function verifyFacebookPageAccess(input: FacebookPageAccessInput): Promise<{ checkedAt: string }> {
+  const access = await resolveFacebookPageAccess(input)
+  return { checkedAt: access.checkedAt }
+}
+
+export async function facebookPhotoTransport(input: {
+  intent: Readonly<PublishingIntent>; graphVersion: string; appSecret: string
+  resolveUserToken: () => Promise<string>
+  approvedMediaUrl: (intent: Readonly<PublishingIntent>) => Promise<string>
+  fetch?: typeof fetch; now?: () => number
+}): Promise<FacebookPublishingTransport> {
+  const intent = Object.freeze({ ...input.intent }), now = input.now ?? Date.now
+  const access = await resolveFacebookPageAccess({ ...input, intent })
   let delivery: { url: string; expires: number } | null = null
   let mutationStarted = false
   return {
@@ -102,8 +131,7 @@ export async function facebookPhotoTransport(input: {
       return url
     },
     async request(method, path, fields = {}) {
-      const current = now()
-      if (!Number.isFinite(current) || current < resolvedAt || current - resolvedAt >= 120_000) failure('FACEBOOK_CREDENTIAL_RECHECK_REQUIRED')
+      access.assertFresh()
       if (method !== 'GET' && method !== 'POST') failure('FACEBOOK_REQUEST_METHOD_INVALID')
       if (method === 'POST') {
         if (mutationStarted || path !== `/${intent.accountId}/photos` || !delivery || now() >= delivery.expires
@@ -112,7 +140,7 @@ export async function facebookPhotoTransport(input: {
         mutationStarted = true // Even an ambiguous timeout cannot retry this transport.
       } else if (!new RegExp(`^/${intent.accountId}_\\d+$`).test(path) || fields.fields !== 'id,is_published,scheduled_publish_time'
         || Object.keys(fields).length !== 1) failure('FACEBOOK_STATUS_CONTRACT_INVALID')
-      return await graph(pageToken, method, path, fields)
+      return await access.request(method, path, fields)
     },
   }
 }

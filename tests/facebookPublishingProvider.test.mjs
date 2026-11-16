@@ -219,6 +219,13 @@ test('credential loader reuses encrypted Meta store and exact active mapping wit
   assert.equal(sb.events.length, 4)
 })
 
+test('narrow provider byte limit rejects a large snapshot before reading its body into memory', async () => {
+  const i = intent(); let read = false
+  const sb = store({ content_review_versions: [review(i)] }, { blob: { size: 10_000_000, type: 'image/jpeg', async arrayBuffer() { read = true; throw new Error('must not read') } } })
+  await assert.rejects(media.inspectPublicationSnapshot(sb, i, 9_999_999)); assert.equal(read, false)
+  await assert.rejects(media.inspectPublicationSnapshot(sb, i, 52_428_801))
+})
+
 for (const [name, mutate] of [
   ['foreign client mapping', r => { r.meta_client_assets[0].client_id = 'client-b' }],
   ['foreign connection mapping', r => { r.meta_client_assets[0].connection_id = 'other' }],
@@ -241,6 +248,37 @@ test('credential loader refuses wrong-app/unknown/expired/near-expiry or analyti
     await assert.rejects(credentials.facebookPublishingUserToken(store(await credentialStore(i)), i, config,
       { now: () => NOW, inspect: async () => ({ ...diagnostics(), ...change }) }), /^Error: Exact Facebook publishing credential unavailable\.$/)
   }
+})
+
+test('concrete provider preflight reads exact app and Page rights without returning credentials or mutation handles', async () => {
+  const i = intent(), sb = store(await credentialStore(i)), g = graphFixture()
+  const result = await credentials.verifyFacebookPublishingTarget(sb, i, config, { now: () => NOW, fetch: g.fetch,
+    inspect: async () => ({ ...diagnostics(), dataAccessExpiresAt: new Date(NOW + 600_000).toISOString() }) })
+  assert.equal(result.checkedAt, new Date(NOW).toISOString())
+  assert.equal(result.binding.tokenValidUntil, new Date(NOW + 600_000).toISOString())
+  assert.equal(result.binding.accountPublishingVerified, true)
+  assert.equal(result.binding.mediaContractVerified, false)
+  assert.equal(g.calls.length, 3); assert.equal(g.calls.some(c => c.method !== 'GET'), false)
+  assert.equal(JSON.stringify(result).includes('fixture-'), false)
+  assert.equal(Object.values(result).some(v => typeof v === 'function'), false)
+})
+
+test('provider preflight refuses foreign mapping and current revoked Page access without mutation', async () => {
+  const i = intent(), rows = await credentialStore(i), g = graphFixture({ handle: async url => url.pathname.endsWith('/me/permissions')
+    ? Response.json({ data: [] }) : null })
+  await assert.rejects(credentials.verifyFacebookPublishingTarget(store(rows), i, config, { now: () => NOW, fetch: g.fetch, inspect: async () => diagnostics() }))
+  assert.equal(g.calls.length, 1)
+  rows.meta_client_assets[0].client_id = 'foreign'
+  await assert.rejects(credentials.verifyFacebookPublishingTarget(store(rows), i, config, { now: () => NOW, fetch: g.fetch, inspect: async () => diagnostics() }))
+  assert.equal(g.calls.length, 1)
+})
+
+test('slow Page proof cannot revive expired token or stale credential resolution', async () => {
+  let clock = NOW
+  const i = intent(), g = graphFixture({ handle: async url => { if (url.pathname.endsWith('/me')) clock += 121_000 } })
+  await assert.rejects(credentials.verifyFacebookPublishingTarget(store(await credentialStore(i)), i, config,
+    { now: () => clock, fetch: g.fetch, inspect: async () => diagnostics() }), /CREDENTIAL_RECHECK_REQUIRED/)
+  assert.equal(g.calls.some(c => c.method !== 'GET'), false)
 })
 
 test('durable executor integration retains a lost response barrier with the real private transport', async () => {

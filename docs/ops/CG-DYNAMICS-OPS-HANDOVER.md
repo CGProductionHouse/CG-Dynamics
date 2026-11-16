@@ -1,4 +1,32 @@
-## 16 November — publishing preparation evidence, local only
+## 16 November — Facebook photo flow wired, local only
+
+Same draft PR991/#220. Supersedes earlier "unregistered" SOURCE status below:
+the concrete private Facebook runtime now joins canonical review/schedule reads,
+encrypted app/token + live exact-Page rights, bounded original PNG validation,
+staff preview/confirmation and the existing worker/queue. New UNDEPLOYED
+social-publication-authorization derives account/client from a server packet;
+no browser proofs, new schedule store, provider POST during preview/confirmation
+or Microsoft change. Lost responses cannot authorize another submission.
+
+Default-off: existing global flag PLUS dedicated SOCIAL_FACEBOOK_PHOTO_ENABLED
+and exact client/connection/Page server release packet required. UI independently
+needs VITE_SOCIAL_PUBLISHING_PREVIEW. These are source gates, not authority to
+enable anything. Static 8-bit non-interlaced PNG only in this conservative pilot;
+JPEG/video/other platform adapters and actual provider/native schedule/phone
+acceptance remain open. Existing Meta scopes may need later approved consent.
+THREE prior migrations remain unapplied; no new migration/dependency in this step.
+No production data/SQL/Edge/config/secret/OAuth/provider/Microsoft/Vercel action.
+
+Full local4494 total /4464 pass /30 skipped /0 failures incl isolated PostgreSQL;
+103 affected checks pass (one added Edge-entry test after full run; same runtime).
+Build/emitted app, scoped lint, helper/new-entry TypeScript bridge and diff pass.
+Browser inventory has no available browsers; no fresh visual/phone acceptance or
+UI/session changes. Owned network-none QA container stopped; generated unrelated
+test artifacts restored. Main4af41304; Nolan PR990 untouched. Current receipt:
+[social publishing](SOCIAL-PUBLISHING-220-2026-11-15.md). Google Control Centre
+target remains unidentified, so no guessed tracker write.
+
+## Earlier 16 November — publishing preparation evidence, local only
 
 Same draft PR991 / #220. Private canonical candidate reader derives the approved
 snapshot hash WITHOUT signing/sharing, binds exact manager/client/review/account

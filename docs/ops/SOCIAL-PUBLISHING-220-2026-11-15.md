@@ -1,5 +1,83 @@
 # Social publishing — 15 November 2026
 
+## 16 November continuation — concrete Facebook photo path, SOURCE ONLY
+
+This supersedes earlier statements that preparation/provider bindings are
+unregistered in source. Same PR991/#220, same existing background_jobs and
+monthly_deliverables authorities. Nothing in this continuation is deployed.
+
+The new private runtime composes the canonical candidate reader, encrypted Meta
+token diagnostics, live exact-Page permissions/tasks/token identity, original PNG
+qualification, durable staff authorization and existing worker. A separate
+UNDEPLOYED `social-publication-authorization` entry accepts only a review ID for
+preview, then its exact fingerprint + explicit confirmation. It derives the
+client/deliverable/account on the server; caller-supplied account/media/permission
+proofs are rejected. Preview cannot sign files, enqueue jobs or publish. Confirm
+atomically records one existing-queue job, without making a provider request.
+The worker recovers the ORIGINAL authorization and rechecks the same canonical
+and private evidence before its durable begin barrier. Provider receipt reading
+remains separate from submission. Lost responses never license another POST.
+
+Staff confirmation UI is implemented behind default-off
+`VITE_SOCIAL_PUBLISHING_PREVIEW`. Existing client/ordinary-staff visibility gates
+remain intact. It requires prepare then exact confirmation, supports zero-write
+cancel, clears stale/uncertain previews, refreshes job status and never calls a
+queued job a live post. The status API's `canAuthorize:false` remains its scoped
+status/withdrawal contract; new authority uses the separate gated entry.
+
+Server activation needs BOTH `SOCIAL_PUBLISHING_ENABLED=true` and
+`SOCIAL_FACEBOOK_PHOTO_ENABLED=true`, plus `SOCIAL_FACEBOOK_PHOTO_RELEASE` with
+exactly clientId/connectionId/accountId for ONE later approved account packet.
+No packet/client/default Graph version is inferred. Existing META_GRAPH_VERSION,
+META_APP_ID, META_APP_SECRET, encrypted-token settings and SUPABASE_URL are reused;
+none was read from production or changed. Global flag alone still cannot publish.
+The new entry and changed worker must be reviewed/deployed together in a later
+exact release packet; none of these flags is authorization to enable them now.
+
+First qualified media profile: original static, non-interlaced, 8-bit PNG;
+greyscale/RGB with optional alpha, <10,000,000 bytes, maximum 4096 per dimension
+and 16,777,216 pixels. Those dimensions/format subset are OUR conservative pilot
+bounds, not Facebook's universal limits. PNG CRCs, chunk order, static profile,
+actual bounded zlib stream, scanline lengths/filters and SHA256 are checked.
+Byte bounds apply before body materialization/copy; no new runtime dependency,
+conversion, metadata stripping, public upload or external verifier. JPEG/video,
+palette/interlaced/APNG and unreviewed metadata extensions are held. Qualification
+does not infer licensing/content suitability; staff's exact confirmation carries
+that editorial decision. Media is revalidated before its short-lived delivery URL.
+
+Official sources checked 16 November:
+[Meta Photo reference](https://developers.facebook.com/docs/graph-api/reference/photo/)
+states static photos under 10MB; [W3C PNG Third Edition](https://www.w3.org/TR/png-3/)
+defines CRC, chunks, zlib datastream and scanline rules. Detailed Page-photo
+reference availability had been limited; no undocumented universal pixel limits
+or successful live provider qualification is asserted.
+
+Validation: 103 affected tests pass, including the fully composed runtime with
+fixture storage/Graph (prepare -> confirm -> one queue -> submit -> separate
+published receipt), loss/duplicate/foreign-account/revocation guards, valid PNGs
+and corrupt/oversized/animated/decompression-bomb rejection, plus actual TSX
+callback lifecycle/confirmation tests. Build/app bundle, scoped lint, helper and
+new-entry typing bridge pass. Full PostgreSQL-inclusive run: 4494 total /4464
+passed /30 skipped /0 failures. One additional actual-authorization-Edge-entry
+regression was added afterward and passes in the 103-test affected rerun; runtime
+source is unchanged from the full run. This is local fixture acceptance, not live
+provider or native Deno acceptance. Browser inventory again returned no browser
+access; no UI input/profile/session changes or new visual/phone acceptance.
+
+Still open in this SAME lane: deployed schema/entries and exact-account/provider
+approval; publishing-scope OAuth consent where absent; real provider/media/native
+schedule cross-check and phone acceptance; qualified JPEG/video; Instagram's
+durably separated container/publish phases, TikTok Business media/status adapters,
+LinkedIn media/role flow, and future-only explicitly-private YouTube upload flow.
+TikTok OAuth grant remains unverified live. All THREE existing candidate migrations
+(queue/authorization, TikTok OAuth, captured schedule evidence) remain unapplied.
+No provider settings/consent/post/schedule, production
+data/SQL/Edge/config/secret, Microsoft or Vercel action occurred. Teams remains
+the team's scheduling surface and the Microsoft sync hold stays intact.
+
+The remainder below records earlier increments and evidence; the current source
+composition above supersedes their historical "not registered" statements.
+
 Candidate: [draft PR991](https://github.com/CGProductionHouse/CG-Dynamics/pull/991),
 branch `codex/social-publishing-220`. Owners: #220 shared production/publishing, #236 Meta, #269 TikTok Business,
 #493 LinkedIn. This extends their existing lane; it is not a new calendar or
