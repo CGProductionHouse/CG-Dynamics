@@ -1,3 +1,12 @@
+## 16November — DP03 soft-join source ready; one-page transfer pending
+
+Owner rejects only the bakkie poster's hard background line. Corrected source
+`DAHa6dj_8iU` is saved/read back; smooth upper-background join, original source
+RGB/ICC and lower RGBA retained. Vehicle/roof overlap, all text/logo/caption and
+other posters unchanged. See [bounded R7 proof](BAKKIE-SOFT-JOIN-2026-11-16.md).
+Master is still R6 while the exact two-call replacement of owned page42 awaits
+owner approval. Do not replay earlier consumed plans or imply R7 is transferred.
+
 ## 16November — R6 restores colour and clarifies DP02
 
 Owner correction supersedes the near-monochrome R5 interpretation. All four R6

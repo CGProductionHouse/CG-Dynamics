@@ -201,5 +201,16 @@
       "officialMasterTransferCompleted": true,
       "deliveryState": "Official current pages replaced; actual copied native records/render verified. New HD/export, human approval and delivery held."
     }
-  ]
+  ],
+  "pendingSinglePosterAmendment": {
+    "slot": "DP03",
+    "revision": "soft-background-join-r7",
+    "sourceSavedAndReadBack": true,
+    "officialTransferCompleted": false,
+    "currentOfficialPageId": "PBQVQGkmNhkLjGgb",
+    "observedPage": 42,
+    "scope": "Replace hard horizontal join with upper-background feather. Retain original source RGB/ICC and lower RGBA, vehicle/roof overlap, all text/logo/caption; other101pages protected.",
+    "actualPreviewInspected": true,
+    "newHdVerified": false
+  }
 }

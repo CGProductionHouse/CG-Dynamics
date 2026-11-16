@@ -151,7 +151,7 @@
       "nextAction": "Use the verified Group website to find the appropriate business.",
       "januaryRelevance": "Returning to ordinary driving after a longer summer journey. This is a proposed creative window, not a schedule.",
       "headlineCandidates": [
-        "THE HOLIDAYÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢S OVER. THE KILOMETRES STAY."
+        "THE HOLIDAYÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢S OVER. THE KILOMETRES STAY."
       ],
       "mechanism": "actual Group vehicle with registered roof/type overlap, large tightly stacked centred live headline, top-right logo and right-aligned footer",
       "sourceRequirement": "Retain the original owned candidate photograph; historical vehicle-wrap marks are documentary, not current Hi-Q promotion.",
@@ -287,5 +287,11 @@
     "creativeReview": "Generic New Year launch differs from specific wheel-balancing enquiry; retain it in the whole-month concept check and do not count it as one of the new batch automatically.",
     "reviewFlag": "Apparent Hi-Q mark in its footer; owner excludes Hi-Q from this campaign. Existing page left untouched for staff review, not included in this new batch."
   },
-  "ownerDirectionUpdateId": "183f24ca-43c2-41de-aafb-ccabfa93c4ba"
+  "ownerDirectionUpdateId": "183f24ca-43c2-41de-aafb-ccabfa93c4ba",
+  "pendingSinglePosterAmendment": {
+    "slot": "DP03",
+    "revision": "soft-background-join-r7",
+    "state": "source-saved-master-replacement-approval-pending",
+    "otherPostersChanged": false
+  }
 }

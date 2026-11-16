@@ -1,3 +1,23 @@
+## 16November — DP03 R7 source seam fix ready, master approval pending
+
+Owner rejects the bakkie poster's hard horizontal background join. Saved source
+`DAHa6dj_8iU` now feathers only upper-background alpha across the independent photo/
+light-shaping pair. Original source RGB/ICC and RGBA below row330 retained; actual
+preview shows the hard line removed. Six text/one logo64px checks pass; all native
+type/logo/roof-cap records and caption unchanged. First internal ICC omission was
+caught/corrected, excluded from current selection. Actual photo-region preview
+differs from R6 (MAE1.03/max71); no full rendered-RGB identity or cause asserted.
+
+R7 is saved/read back in the source only. Official R6 page42 remains
+`PBQVQGkmNhkLjGgb` until the pending exact two-call approval: delete only42, insert
+sourcepage1 after41, retain all101otherIDs/order. Private plan prepared/not executed;
+earlier R5/R6 plans consumed. Current selector and local Claude packet hold delivery
+against the old seam; other three R6 sources/artwork unchanged.17-entry11,629,167-byte
+SOURCE WORKING recovery ZIP backed up to existing internal OneDrive, local CRC/SHA
+and remote name/size verified, remoteSHA not claimed, sharing unchanged. No new HD,
+send, tag, client publication, schedule, runtime/dependency/deployment or spend.
+Same #948/draft#956 lane. See BAKKIE-SOFT-JOIN-2026-11-16.md for actual limits.
+
 ## 16November — Wiseman R6 colour/clarity supersedes R5
 
 Owner says R5 removed too much colour and DP02's errand metaphor is unclear.

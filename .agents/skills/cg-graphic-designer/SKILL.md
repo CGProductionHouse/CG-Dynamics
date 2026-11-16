@@ -302,6 +302,18 @@ When the owner authorises stock, record the exact asset, creator and licence inc
 
 Match each quoted review to the exact poster and stable page ID; keep a private amendment matrix. Read all feedback before concluding that only the example needs attention. Apply general alignment, source-quality and spacing lessons across the current set while preserving liked concepts. A request to read and amend is not permission to reply or resend. Keep historical delivery receipts distinct from the newly revised artwork.
 
+Inspect the photo/background join itself. An opaque black light-shaping layer can
+leave a straight horizontal cut over a softer charcoal graphic even when text,
+vehicle and mask registration pass. The Wiseman DP03 R7 proof uses a coordinated
+upper-background alpha fade across the source-photo/light-shaping pair, retaining
+their separate layers and source RGB. Naïvely fading each layer independently can
+create a bright band; verify the composed result. Preserve the original embedded
+ICC explicitly when rebuilding RGBA assets: RGB equality alone misses a dropped
+profile. Confine changes above the actual subject, preserve its original overlap
+cap and compare the native render. Re-imported Canva photos can differ in rendered
+pixels despite exact source RGB/ICC and geometry; report measured differences and
+never invent full exported-RGB identity or an unverified cause.
+
 WhatsApp review history is virtualised: save the relevant successive viewports and verify every matrix quote against the combined capture, including the opening and latest-review boundaries. A single DOM snapshot can silently omit earlier feedback. Before a resend, resolve both normal monthly items and separately stored extras against current stable page IDs; remove stale current-export/current-message fields while preserving historical receipts. Check caption Unicode, paragraph breaks and replacement-photo facts. Useful depth comes from registered source overlap, context, hierarchy and deliberate graphic treatment; neither extra layer count nor more decoration establishes quality. Inspect genuine final-resolution exports before delivery.
 
 For the Piek January pilot, the owner requires important text and logos safely inside the page. Use a **64px inset on the 1080×1350 canvas**, with an explicit inventory of every logo, including unnamed image elements and branding baked into a footer strip. Backgrounds and deliberate photo bleed remain edge-to-edge. A successful render is insufficient: re-read native text height after formatting/wrapping and run `node scripts/poster-studio/native-safe-area.mjs <native-state.json> <private-specification.json> --out <private-receipt.json>`. Its specification contains `pageIds`, reviewed `logoElementIds` and `insetPx`. It measures conservative frame bounds, not actual glyphs/alpha, logo discovery, overlap or creative quality. Inspect the previews for those separately. Moving a footer mark up can collide with its caption; reflow the caption instead of accepting a margin-only pass.
