@@ -74,6 +74,15 @@ performed. #900 owns tracking; #981 exact handoffs and #984 brand panel remain
 separate/additive. Shared editorial library remains PR910. Hosting #679 release
 gate remains; this candidate is not a claim of completed live-board backfill.
 
+## 16 November — Nolan Master canonical task evidence candidate
+
+Existing draft #990 now replaces static-only Master content with existing task
+ownership/status/source-age rows and lazy exact-task activity evidence. Agent,
+device and independently verified actions remain explicitly unknown where the
+schema has no structured evidence; source notes are not parsed into assignments.
+No DB, auth, activation, release or other-lane change. See
+[Master evidence sources and verification](NOLAN-MASTER-EVIDENCE-2026-11-16.md).
+
 ## 16 November — Nolan offline review artifact and integration rehearsal
 
 Draft #990 now has a self-contained HTML review using actual Nolan components

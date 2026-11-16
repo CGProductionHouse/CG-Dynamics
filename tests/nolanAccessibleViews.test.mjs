@@ -10,8 +10,8 @@ before(async () => {
   ;({MasterScope} = await server.ssrLoadModule('/src/pages/admin/NolanMasterScope.tsx'))
 })
 after(async () => { await server?.close() })
-test('master responsibility view renders real accessible headings and source anchors without status claims', async () => {
-  const html = renderToStaticMarkup(React.createElement(MemoryRouter, null, React.createElement(MasterScope)))
+test('master responsibility view renders real accessible headings and source anchors without fabricated status claims', async () => {
+  const html = renderToStaticMarkup(React.createElement(MemoryRouter, null, React.createElement(MasterScope, {role: 'manager'})))
   assert.equal((html.match(/<article/g) ?? []).length,12)
   assert.equal((html.match(/<h3>/g) ?? []).length,12)
   assert.equal((html.match(/<a /g) ?? []).length,12)

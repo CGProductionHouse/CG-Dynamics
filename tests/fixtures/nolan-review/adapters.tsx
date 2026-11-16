@@ -58,3 +58,5 @@ export async function createNativeDecision(p:{key:string;taskId:string;revision:
 export async function closeNativeDecision(id:string,version:number,action:string,response:string){const r=requests.find(r=>r.id===id);if(!r||r.state!=='pending'||r.version!==version)throw new Error('Sample request changed. Refresh.');if(action==='resolve'&&(r.recipientId!==actor||r.sourceRevision!==revision||!response.trim()))throw new Error('Sample response blocked: actor/source/response check.');if(action==='withdraw'&&r.requestedBy!==actor)throw new Error('Sample requester mismatch');r.state=action==='resolve'?'resolved':'withdrawn';r.version++}
 
 export function cgManagedWebsiteForClient(){return null}
+
+export async function listPlannerActivity(){throw new Error('Action history is outside the offline sample preview.')}

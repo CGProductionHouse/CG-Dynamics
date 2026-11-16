@@ -29,3 +29,11 @@
 /* Unbroken source labels/errors must wrap rather than disappear outside the host. */
 .nolan-board .list .card > *{min-width:0}
 .nolan-board .list .card h3,.nolan-board .list .badge,.nolan-board .native-owner,.nolan-board .native-details,.nolan-board .native-error,.nolan-board .coverage{overflow-wrap:anywhere}
+
+/* Master evidence uses full-width disclosures inside the existing workboard. */
+.nolan-board .list .nolan-master-task{grid-template-columns:minmax(0,1fr) auto}
+.nolan-board .list .nolan-master-task>p,.nolan-board .list .nolan-master-task>dl,.nolan-board .list .nolan-master-task>details{grid-column:1/-1;overflow-wrap:anywhere}
+.nolan-board .nolan-master-task dl{display:grid;grid-template-columns:minmax(120px,1fr) minmax(0,3fr);gap:6px 12px;font-size:12px}
+.nolan-board .nolan-master-task dt{font-weight:600}.nolan-board .nolan-master-task dd{margin:0;overflow-wrap:anywhere}
+.nolan-board .nolan-master .toolbar{flex-wrap:wrap}.nolan-board .nolan-master .toolbar input{min-width:0;max-width:100%;flex:1;padding:8px}
+@container(max-width:500px){.nolan-board .nolan-master-task dl{grid-template-columns:minmax(0,1fr)}.nolan-board .nolan-master .toolbar select{max-width:100%}}
