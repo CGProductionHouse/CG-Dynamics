@@ -74,6 +74,16 @@ performed. #900 owns tracking; #981 exact handoffs and #984 brand panel remain
 separate/additive. Shared editorial library remains PR910. Hosting #679 release
 gate remains; this candidate is not a claim of completed live-board backfill.
 
+## 16 November — Nolan executable same-origin acceptance entry point
+
+Draft #990 now serves the actual app and genuine isolated GoTrue/PostgREST through
+one private loopback origin. Four synthetic sign-ins/JWT roles and source reads
+passed; no browser launched. Normal-sandbox browser entry/runbook is prepared;
+current blocked browser paths were not retried. Structured agent/device evidence
+integration stops at the unresolved exact-task/source contract (Control Centre
+sheet not resolved), not a new store or guessed assignment. See
+[same-origin runbook and bounded source contract](NOLAN-SAME-ORIGIN-ACCEPTANCE-2026-11-16.md).
+
 ## 16 November — Nolan Master canonical task evidence candidate
 
 Existing draft #990 now replaces static-only Master content with existing task
