@@ -100,6 +100,12 @@ gate remains; this candidate is not a claim of completed live-board backfill.
 
 ## 16 November — Nolan inactive-source server-policy draft
 
+Next bounded mutation tranche reproduces and guards `assistant_update_video`
+and `apply_microsoft_sync_item` with retained real JWTs: 11 affected tests and
+build pass. Draft only; active behavior/grants preserved, no connector send or
+production application. `apply_content_run_debrief` and other inventory routes
+remain unexecuted. [Mutation evidence and limits](NOLAN-MUTATION-DEFINER-ACCEPTANCE-2026-11-16.md).
+
 Follow-up adds six independently owned Content Guideline/identity definer guards
 after real inactive-JWT reproductions; existing active/client/service-role access
 is preserved. PR995 exclusively owns the ownership-summary RPC. Broader inventory
