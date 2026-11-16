@@ -341,3 +341,19 @@ optional skips, zero failures/cancellations, exit 0 in 247.76 seconds with both
 RUN_NOLAN_DECISION_DB_TESTS=1 and RUN_NOLAN_AUTH_API_TESTS=1. Separate affected
 selection: 42/42 pass. Build/emitted application bundle, scoped lint and diff
 checks pass. All generated containers cleaned up; source and activation unchanged.
+
+## Browser runtime gate — precise investigation after a4a8212
+
+No new browser acceptance. The installed Chromium setuid helper is owned by
+65534:65534 while this shell has NoNewPrivs=1 and zero effective capabilities;
+this explains the prior setuid-helper initialization failure. Chromium was not
+retried and no sandbox/host settings changed. Official Playwright Firefox build
+1538 download to /tmp was attempted once, but its standard CDN endpoints returned
+403 `Domain forbidden`; no mirror, proxy workaround or manual retry followed.
+No native browser capability is exposed by this task.
+
+See [browser-runtime evidence and exact remaining requirement](NOLAN-AUTH-API-ACCEPTANCE-2026-11-16.md#browser-runtime-investigation-after-a4a8212).
+The next step requires an approved runtime with a preinstalled official browser
+and working normal sandbox, plus permitted local same-origin app/Auth/API routing.
+Backend acceptance remains valid; UI/device acceptance remains open. Production
+activation, deployment and prior denial boundaries are unchanged.

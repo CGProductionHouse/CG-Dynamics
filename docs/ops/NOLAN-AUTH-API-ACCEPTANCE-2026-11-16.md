@@ -146,3 +146,65 @@ emitted `MyWorkPage-Bqki3EFh.js` contains the actual disabled Needs You applicat
 copy, scoped ESLint and diff checks pass. All generated Nolan containers were
 absent after completion. Draft SQL, application code and both off guards are
 unchanged from e645878.
+
+## Browser-runtime investigation after a4a8212
+
+Remote and local head were verified as `a4a8212fcc72a1f039149cf5bc27d1e2c7a5de55`
+before this documentation-only continuation. No browser UI acceptance was obtained.
+
+Read-only Chromium diagnosis:
+
+- `/usr/lib/chromium/chrome-sandbox`: owner UID/GID **65534:65534**, mode **4755**,
+  not the root-owned setuid helper required for that sandbox route.
+- Current shell: effective capabilities **0**, `NoNewPrivs=1`, `Seccomp=2`.
+  The user namespace maps only inside UID 1000 to outside UID 0, one ID; root
+  ownership is not available inside this process namespace.
+- Earlier launch with `chromium_sandbox=True` reported crashpad database-path
+  errors and terminated at setuid-sandbox initialization. The ownership and
+  no-new-privileges evidence explains why the installed setuid-helper route
+  cannot work here. This does not prove every user-namespace browser route is
+  inherently impossible; none is demonstrated as supported in this runtime.
+- Chromium was NOT relaunched. No helper ownership/permissions, capabilities,
+  sysctls, firewall, sandbox flags or host settings were changed.
+
+Python Playwright **1.62.0** is installed, but its matching Chromium, Firefox and
+WebKit binaries are absent. There is no callable native browser/computer tool in
+this task's available tool catalogue. One official local-cache-only Firefox
+installation was attempted:
+
+```sh
+PLAYWRIGHT_BROWSERS_PATH=/tmp/nolan-playwright python3 -m playwright install firefox
+```
+
+The installer selected **Firefox 153.0 / Playwright build 1538** for Debian 13.
+Its official endpoints returned **HTTP 403 `Domain forbidden`**:
+
+- `https://cdn.playwright.dev/dbazure/download/playwright/builds/firefox/1538/firefox-debian-13.zip`
+- `https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/firefox/1538/firefox-debian-13.zip`
+- `https://cdn.playwright.dev/builds/firefox/1538/firefox-debian-13.zip`
+
+The installer performed its own fallback/retries within that one invocation,
+then exited 1. No manual retry, mirror, alternate transport, proxy change,
+privileged container, system-wide install or security bypass followed. Firefox
+was not installed or launched. Available user history provided no new evidence
+changing that network restriction. This was a download-network rejection, not
+an automatic approval-review rejection.
+
+**Smallest remaining supported-runtime requirement:** provision an approved
+browser-capable runtime with a preinstalled official browser matching its
+automation driver and a functioning normal sandbox, able to reach the isolated
+local app/Auth/PostgREST through approved loopback/same-origin routing. For this
+installed driver, Firefox build 1538 is the exact untested candidate. Provisioning
+should preserve the runtime's security policy rather than disabling its sandbox
+or changing this machine's host security settings.
+
+Until that runtime exists, signed-in rendered UI, account switching, create/retry/
+resolve interactions, interruption/refresh/back navigation, error/empty states,
+and desktop/narrow-width checks remain OPEN. Physical-device checks are separate.
+No acceptance-only feature build or app/API server was started, no session was
+injected, and no production gate was changed just to display the feature.
+
+Only this receipt and the decision contract changed. The unchanged application/
+test baseline remains the a4a8212 result: 42 affected real DB/Auth tests, full
+4,414 pass/30 skip/0 fail, build/bundle/lint pass. No redundant helper tests or full
+suite were rerun for this documentation-only blocker receipt; diff check passed.
