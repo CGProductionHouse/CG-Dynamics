@@ -10,6 +10,25 @@ and exact merge receipt are recorded in PR #984. Git deployment remains OFF.
 No Vercel operation, production data write, new tracker or #910-base resolution.
 Source merge does not mean staff production browser acceptance or deployment.
 
+## 16 November — Dulux logo LIVE; exact missing-logo continuation checkpoint
+
+CA explicitly authorized exact OneDrive logos for Dulux and other missing-logo
+active clients. Dulux original294093bytes copied/hash-verified, selected through
+existing admin workflow and library enabled. Real client list/access/download200,
+source SHA256 match/foreign404; live header and BrandHub verified. Header now uses
+the existing deployed Bloemfontein variant through a logo_url-only guarded update;
+package and every other client field preserved. No frontend release/Vercel.
+
+Bat Hill and Bohemia logos published/enabled; Bloem Marble logo published but
+library disabled; five other verified originals safely copied only. Browser
+control then stopped on Windows URL-verification failure. No uncertain write
+replayed or alternate automation bypass. Exact states, source holds and resume
+path: [Client logo continuation](CLIENT-LOGO-CONTINUATION-2026-11-16.md).
+Bat Hill next-client brief remains draft/blocked for missing fixed monthly scope;
+#516 already confirms recurring social and NULL quantities must remain NULL.
+Other agent tabs/worktrees, providers, package truth, #679/#1001 release holds
+unchanged. No new migrations, shares/permissions, runtime release or secrets.
+
 ## 16 November — Dulux current report/November Plan LIVE; BrandHub remains private
 
 CA chose exact ACTIVE Dulux Paint & Paper Bloemfontein2aed8a31 next. Actual issued
