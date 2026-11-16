@@ -7,7 +7,8 @@ or changes to role/security settings just to complete a test.
 ## Current release checkpoint — 16 November
 
 Functional checkpoint `dcf24f98098b5da0fc1c2ef217588989fd26a556`, PR990 draft;
-integration base `62f7a88ad961468697bd24aecd48132bc38d1450`. The artifact receipt
+initial integration base `62f7a88ad961468697bd24aecd48132bc38d1450`; follow-up
+reconciles main `34c4552ec5108d1bb0aab49140da7ee2807de08b` (PR998 now merged). The artifact receipt
 records its own exact final candidate/tree. PR995 owns ownership-summary and
 model-free plugin work (observed `97c9eca443259ddbc23eb1fb53afb98b31e9cec2`);
 PR998 strategy evidence, PR991 social publishing and PR956 designer remain
