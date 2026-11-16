@@ -1,3 +1,24 @@
+## 16 November — private Facebook photo delivery, local only
+
+Same draft PR991 / #220/#236, isolated `codex/social-publishing-220` worktree.
+Added private Facebook provider ports using the exact existing client/Page/
+connection mapping, encrypted Meta token reader and current app/token diagnostics.
+Live scope/task/Page-token identity checks, fixed-host cursor pagination,
+sanitized no-retry Graph transport and one-mutation guard precede receipt capture.
+Private approved snapshots are re-read, byte-hash verified and signed for five
+minutes; no OneDrive source URL or arbitrary caller URL is delivered. No new
+schema, dependency or setting. [Current receipt and remaining gates](SOCIAL-PUBLISHING-220-2026-11-15.md).
+
+Ports remain unregistered; worker publishing and public enqueue remain held.
+Trusted current-context/explicit authorization/Teams instruction and full media
+qualification gates still apply. No production API, OAuth, data/configuration,
+publishing, Microsoft or Vercel action occurred. No change to Nolan/staff lanes.
+Verification:37 new /63 affected checks pass; full4396 total /4366 pass /30 skipped /
+0 failures with isolated PostgreSQL. Build/app-bundle, scoped lint, strict helper
+typing and diff pass. Generated access artifacts restored; owned QA container
+stopped. No new UI/phone/live-provider acceptance claimed. Source push keeps the
+existing disabled Vercel Git-deployment guard; PR remains draft.
+
 ## 15 November — durable publishing queue + Business OAuth, local only
 
 CA requested continued Meta/TikTok/LinkedIn/YouTube publishing infrastructure.

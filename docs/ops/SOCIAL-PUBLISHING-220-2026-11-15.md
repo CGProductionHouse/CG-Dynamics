@@ -45,6 +45,68 @@ client was found or assumed; no LinkedIn publishing entitlement was verified.
 
 ## Implemented locally
 
+### 16 November continuation — private Facebook photo delivery
+
+Continued the same draft PR991 after confirming the isolated checkout was clean,
+main remained `4af41304`, and no competing social-publishing PR existed. Nolan's
+PR990 and other staff/workboard lanes were left alone. No live browser/provider
+session was needed or changed for this source-only increment.
+
+`facebookPublishingProvider.ts` now composes private photo submission/read-back
+ports over the existing Meta mapping, encrypted token store and snapshot bucket.
+It requires the exact active client/Page/**connection_id** mapping; nullable or
+ambiguous mappings are held, never inferred from the latest global connection.
+It reuses `readMetaStoredToken` and live `inspectMetaAccessToken` app/USER-token,
+scope and expiry diagnostics, rejects plaintext fallback, and never rewrites tokens.
+
+`facebookPublishingTransport.ts` rechecks live permission grants (including
+`pages_show_list` needed for discovery), the exact Page's `CREATE_CONTENT` task
+and Page-token identity. Page discovery uses bounded cursors on the fixed,
+explicitly versioned Graph host; provider-supplied pagination URLs are never
+followed. Authorization headers and HMAC app-secret proofs stay private.
+Photo submission accepts only the captured approved caption, Page and freshly
+resolved media URL, with one mutation per transport, no redirects/retries and a
+two-minute credential/preflight lifetime. HTTP/Graph/malformed/timeout errors
+return sanitized codes; they never authorize a repeated POST. Submission remains
+behind the durable attempt barrier, with publication read-back kept separate.
+
+`socialPublishingMedia.ts` reads the exact approved client/deliverable/revision
+from `content_review_versions`, downloads only its private INSERT-only
+`content-review-snapshots` object, and verifies MIME, signature and SHA-256 before
+signing the exact untransformed object for five minutes. It rejects foreign
+paths/hosts, traversal, changed captions/dates/channels/bytes and signing errors.
+No source OneDrive URL, arbitrary caller URL, public-bucket switch, upload or
+asset publication is introduced. The existing 50 MiB bucket bound is not a
+provider media-limit claim. Signatures are not a substitute for full provider
+dimensions/codec/rights qualification, which remains a separate preflight gate.
+
+These are **unregistered private ports**, not an enabled publishing path. The
+worker still has no provider bindings and no public enqueue producer. Current
+context/authorization persistence, Teams instruction verification and provider
+media/app-review acceptance must be completed before registration. Native Suite
+access and OAuth alone do not satisfy those gates. No migration or new setting
+was added in this increment; no live API, consent, publication or deployment ran.
+
+Verification: 37 new deterministic provider/storage/credential checks pass;
+63 affected policy/OAuth/provider checks pass. Full Node24.16.0 acceptance is
+4396 total / 4366 passed / 30 skipped / 0 failures, including the existing real
+isolated PostgreSQL fixtures. App build and emitted TikTok integration bundle,
+scoped ESLint, strict helper typing (including unused checks) and diff checks pass.
+The full suite's generated access-matrix files were restored and only this lane's
+label-verified, network-isolated QA container was started/stopped. Review found no
+blocking local issue; activation/current-context/media gates above remain open.
+No new UI was changed, so no additional mobile/browser or real provider acceptance
+is claimed. Logs: `%TEMP%/cg-social-facebook-full-acceptance.log`,
+`%TEMP%/cg-facebook-focused.log`, `%TEMP%/cg-social-facebook-build.log`.
+Vercel's existing `git.deploymentEnabled=false` guard and no PR checks were
+verified before the source-only push; neither was changed.
+
+Official guidance rechecked 16 November: [Meta Page photo publishing](https://developers.facebook.com/documentation/pages-api/posts)
+and [secure requests](https://developers.facebook.com/docs/graph-api/guides/secure-requests/),
+plus [Supabase private storage/signing](https://supabase.com/docs/guides/storage/serving/downloads).
+The Supabase changelog shows no relevant JS storage contract change; the installed
+CLI stays pinned and no upgrade/configuration was performed.
+
 * Shared typed preflight binds the canonical `monthly_deliverables` item to an
   immutable approved `content_review_versions` row, exact client/account/route,
   approved bytes/hash/caption, Johannesburg calendar date and explicit publishing
@@ -104,7 +166,7 @@ queue, calendar, production dependency or background schedule was introduced.
 
 | Provider | Submission/timing path | Required before activation |
 | --- | --- | --- |
-| Facebook Pages | Due-time Page photo submission implemented against an injected versioned Graph transport. Video/Reel uploads remain separate adapters. Native scheduling is not assumed. | Reuse encrypted Meta token resolver, exact Page mapping and CREATE_CONTENT task; verify `pages_manage_posts`, `pages_read_engagement`, app review/advanced access and any content-specific permission. Wire approved-media resolver and durable worker. |
+| Facebook Pages | Due-time Page photo submission now has private versioned Graph, encrypted exact-Page credential and approved-hash snapshot delivery ports. Video/Reel uploads remain separate adapters. Native scheduling is not assumed. | Complete trusted current-context/authorization producer, full media preflight, app review/advanced access and any content-specific permission; register in the durable worker only after review. Live Page discovery also requires `pages_show_list`; analytics OAuth is insufficient. |
 | Instagram professional accounts | Facebook Login: `instagram_basic`, `instagram_content_publish`, `pages_read_engagement`; Instagram Login uses the different `instagram_business_*` permissions. Create container, poll, publish, read media at due time. JPEG images; video/Reel checks separate. | Confirm actual login route/account, conditional Business Manager requirements, app review and publishing limit dynamically. No claim that analytics OAuth grants publishing. Container FINISHED is not publication. Transport adapter not implemented here. |
 | TikTok Business / Accounts API | Approved app exposes Business video/photo publication and publish-status endpoints. OAuth, encrypted storage and refresh are implemented/tested locally. Dynamics due-time submission/polling; no assumed native scheduling field. | Review/deploy the candidate OAuth schema/functions/form, configure dedicated server settings privately, obtain exact-account consent, then verify the actual granted permissions. Publishing transport/media eligibility remains a separate pilot gate; metadata eligibility defaults to not_approved. No consumer Direct Post fallback. |
 | LinkedIn organizations | Media initialize/upload/readiness, then versioned `/rest/posts` at due time, followed by read-back. | Community Management access/review, correct organization role and `w_organization_social` / `r_organization_social`. Use supported monthly `LinkedIn-Version` plus Rest.li header; do not ship retiring 202511. Member scope is not organization authority. Adapter remains to implement. |
@@ -136,8 +198,9 @@ No universal hard-coded media size, quota or native scheduling window is inferre
    `TIKTOK_BUSINESS_REDIRECT_URI`, `TIKTOK_BUSINESS_TOKEN_ENCRYPTION_KEY` and
    `TIKTOK_BUSINESS_TOKEN_KEY_VERSION`. No values belong in chat or handovers.
    Never reuse the consumer Login Kit secret or an existing Meta/Instagram key.
-3. Separately wire the first Facebook photo adapter to encrypted token/mapping source
-   and an approved-hash media resolver. Add provider status reconciliation jobs,
+3. The first Facebook photo adapter now has private encrypted token/mapping and
+   approved-hash snapshot delivery ports. Complete the trusted current-context,
+   media qualification and authorization producer before registering it. Add provider status reconciliation jobs,
    per-provider polling cadence and a staff-authorized publication producer using
    fresh server preflight. Register those private bindings only after review.
    `SOCIAL_PUBLISHING_ENABLED` remains false; OAuth enablement never enables it.
