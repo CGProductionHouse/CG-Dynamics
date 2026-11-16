@@ -1,4 +1,16 @@
-## 16November — PSG January three editable drafts; review holds
+## 16November — PSG owner rejected all R3 drafts; paused until tomorrow
+
+Owner rejected all three PSG posters as off brand and lacking depth/skill.
+**REJECTED / DO NOT SEND OR TRANSFER** applies to DAHbGaJ7U2o and all R3 exports;
+prior technical checks are not creative approval. Owner explicitly deferred work
+to tomorrow; no further design, send, insertion or production work this session.
+Same #948/draft#956 lane. On explicit resumption, study actual approved local PSG
+references, reconcile the font-direction discrepancy and prove one strong poster
+before scaling. Preserve rejected evidence, original media and all human work.
+Private export selector and Brand Pack invalidate delivery readiness. No other
+agent/session/service, schedule, account permission or production state changed.
+
+## Earlier16November — PSG January three editable drafts; review holds
 
 Owner moved to PSG next after Cape delivery; same #948/draft#956 isolated lane.
 Exact PSG Bloemfontein package3DP/1professional video; Nolan film ownership unchanged.

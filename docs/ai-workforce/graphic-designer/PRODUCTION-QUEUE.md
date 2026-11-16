@@ -2,7 +2,14 @@
 
 Owner steering16November2026; same #948 / draft#956 lane, no new agent or branch.
 
-Current16November: **PSG Bloemfontein January2027** is the active owner request.
+Current16November override: **PSG paused at the owner's request until tomorrow.**
+Owner rejected all three R3 drafts as off brand and lacking depth/skill.
+**DAHbGaJ7U2o and its R3 exports are REJECTED / DO NOT SEND OR TRANSFER.**
+Technical checks do not override rejection. Resume only when requested: recover
+actual approved local PSG visual language, reconcile fonts and prove one stronger
+poster before scaling. Preserve rejected history and every existing human page.
+
+Earlier16November: **PSG Bloemfontein January2027** working checkpoint:
 Three editable R3 poster drafts saved in DAHbGaJ7U2o; current confirmed package
 3DP/1professional video, with Nolan video excluded. Genuine2160x2700 Canva exports
 inspected,20live texts/10media/64px important-frame checks and a cancelled isolated

@@ -3,7 +3,22 @@
 Owner request16November: continue with PSG, with fresh January concepts.
 Same #948 / draft#956 lane and isolated worktree. No new agent or branch.
 
-## Current result
+## Owner rejection and pause — current authority
+
+Owner rejected **all three R3 posters** on16November: not on brand, insufficient
+creative skill, depth and execution. This overrides technical passes and all
+earlier review-readiness language. **REJECTED / DO NOT SEND OR TRANSFER.**
+The owner explicitly deferred further work until tomorrow. Stop substantive
+production; preserve the artwork and evidence as rejected history only.
+
+On explicit resumption, recover actual recently approved local PSG design language
+and resolve the Kit/guideline discrepancy before rebuilding. Study how the real
+references use typography, photo treatment, graphics and meaningful depth; do not
+add arbitrary decoration or repeat this visual system. Prove one strong poster
+against those actual references before scaling the set. No claim of approval,
+readiness, publication or completion. Existing human work stays untouched.
+
+## Earlier R3 result — rejected history
 
 Three independently editable1080x1350 Canva drafts are saved in **DAHbGaJ7U2o**,
 titled `PSG | JAN 2027 | DP01-DP03 | R3 INTERNAL REVIEW | 16 NOV 2026`.

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "status": "internal-working-brand-pack-release-held",
+  "status": "owner-rejected-r3-paused-do-not-send",
   "observedAt": "2026-11-16",
   "clientId": "29a28efd-c998-45e2-a57c-4a751e779e66",
   "clientName": "PSG Bloemfontein",
@@ -116,5 +116,16 @@
     "No private source media supplied to image generator",
     "No publication/scheduling/portal finals"
   ],
-  "incrementalSpendZar": 0
+  "incrementalSpendZar": 0,
+  "ownerFeedback": {
+    "observedAt": "2026-11-16",
+    "allThreeRejected": true,
+    "reasons": [
+      "Not on brand",
+      "No depth",
+      "Insufficient skill and execution"
+    ],
+    "pausedByOwner": true,
+    "resume": "On owner request; study actual approved local PSG work and prove one poster before scaling"
+  }
 }
