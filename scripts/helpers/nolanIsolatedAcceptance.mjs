@@ -81,6 +81,23 @@ export async function startNolanIsolatedAcceptance(origin, reportPath, {signal}=
    insert into planner_tasks(id,board_id,title,status,source,import_hash,notes) values ('${plannerTaskId}','${boardId}','Synthetic Master task','in_progress','manual','${plannerTaskId}','Synthetic source notes; not verified agent/device evidence');
    insert into planner_task_assignees(task_id,profile_id,position,assigned_by) values ('${plannerTaskId}','${accounts.admin.id}',0,'${accounts.admin.id}');
    insert into planner_activity_log(entity_type,entity_id,action,actor_user_id) values ('planner_task','${plannerTaskId}','synthetic_acceptance_seed','${accounts.admin.id}');`)
-  return {accounts,taskId,plannerTaskId,report,exchange,stop(){for(const a of agents.values())a.destroy();stop()}}
+  const clientId=randomUUID(),foreignClientId=randomUUID(),deliverableId=randomUUID(),foreignDeliverableId=randomUUID(),videoId=randomUUID(),foreignVideoId=randomUUID()
+  sql(`insert into clients(id,name) values ('${clientId}','Synthetic source client'),('${foreignClientId}','Synthetic foreign client');
+   update profiles set client_id='${clientId}' where id='${accounts.client.id}';
+   insert into monthly_deliverables(id,client_id,month,code,instance_number,title,deliverable_type) values
+    ('${deliverableId}','${clientId}','2026-11-01','V',1,'Synthetic schedule row','video'),
+    ('${foreignDeliverableId}','${foreignClientId}','2026-11-01','V',1,'Synthetic foreign schedule row','video');
+   insert into content_guide_ideas(id,client_id,client_name,month,title,deliverable_id,owner_user_id) values
+    ('${videoId}','${clientId}','Synthetic source client','2026-11-01','Synthetic pipeline row','${deliverableId}','${accounts.admin.id}'),
+    ('${foreignVideoId}','${foreignClientId}','Synthetic foreign client','2026-11-01','Synthetic foreign pipeline row','${foreignDeliverableId}','${accounts.admin.id}');`)
+  const sources={clientId,foreignClientId,deliverableId,foreignDeliverableId,videoId,foreignVideoId,month:'2026-11'}
+  // Only fixed mutations of this run's generated rows; no arbitrary SQL/IDs.
+  const scenario=action=>{
+   if(action==='advance-source')sql(`update command_centre_tasks set notes=notes||' changed' where id='${taskId}'`)
+   else if(action==='revoke-manager')sql(`update profiles set is_active=false where id='${accounts.manager.id}'`)
+   else if(action==='restore-manager')sql(`update profiles set is_active=true where id='${accounts.manager.id}'`)
+   else throw new Error('Unsupported isolated scenario')
+  }
+  return {accounts,taskId,plannerTaskId,sources,scenario,report,exchange,stop(){for(const a of agents.values())a.destroy();stop()}}
  }catch(error){for(const a of agents.values())a.destroy();stop();throw new Error('Isolated acceptance setup failed: '+(error?.name??'Error'))}
 }

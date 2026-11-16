@@ -29,7 +29,7 @@ test('scope requires exact identity and manager role; account/month/role boundar
 })
 test('render gating and request cleanup guard retained rows; directory never retained as authority',()=>{
  const page=readFileSync(new URL('../src/pages/admin/NolanOverview.tsx',import.meta.url),'utf8')
- for(const value of ['rawSnapshot?.scope === scope','previous?.scope === readScope','if (cancelled) return','return () => { cancelled = true }','[month, generation, scope]','profile?.is_active === false','if (!scope) return <div','NolanPackageEvidence key={scope}','NolanWebsiteConnections key={`${scope}:${generation}`}','Last-known record','includes last-known records','Open the authoritative record before acting.']) assert.ok(page.includes(value),value)
+ for(const value of ['rawSnapshot?.scope === scope','previous?.scope === readScope','if (cancelled) return','return () => { cancelled = true }','[month, generation, scope, user?.id, profile?.id, profile?.role]','profile?.is_active === false','if (!scope) return <div','NolanPackageEvidence key={scope}','NolanWebsiteConnections key={`${scope}:${generation}`}','Last-known record','includes last-known records','Open the authoritative record before acting.']) assert.ok(page.includes(value),value)
  assert.ok(page.includes('const staff = staffRead.result && !staffRead.result.error'))
  assert.ok(page.includes(': null'))
  assert.doesNotMatch(page,/staff:\s*previous/)

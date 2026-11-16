@@ -4,7 +4,7 @@ import {mkdir,writeFile,readFile} from 'node:fs/promises'
 import {createHash} from 'node:crypto'
 const root=process.cwd()
 const fixture=resolve(root,'tests/fixtures/nolan-review')
-const aliases=new Set(['src/contexts/AuthContext','src/lib/commandCentre','src/lib/contentWorkflow','src/lib/planner','src/lib/nolanPackageEvidence','src/lib/nolanDecisionApi','src/lib/db/clients','src/lib/cgWebsiteFleet','src/components/admin/WebsitePerformancePanel'].map(p=>resolve(root,p)))
+const aliases=new Set(['src/contexts/AuthContext','src/lib/commandCentre','src/lib/contentWorkflow','src/lib/planner','src/lib/nolanPackageEvidence','src/lib/nolanDecisionApi','src/lib/db/clients','src/lib/db/profiles','src/lib/cgWebsiteFleet','src/components/admin/WebsitePerformancePanel'].map(p=>resolve(root,p)))
 export const options={entryPoints:[resolve(fixture,'entry.tsx')],bundle:true,write:false,outdir:'preview',format:'iife',platform:'browser',jsx:'automatic',minify:true,metafile:true,define:{'process.env.NODE_ENV':'"production"'},plugins:[{name:'offline-review-adapters',setup(b){b.onResolve({filter:/./},args=>{if(aliases.has(resolve(args.resolveDir,args.path).replace(/\.(tsx?|jsx?)$/,'')))return {path:resolve(fixture,'adapters.tsx')}})}}]}
 export async function buildPreview(output='/workspace/scratch/nolan-review/nolan-workbook-review.html'){
  const result=await build(options)

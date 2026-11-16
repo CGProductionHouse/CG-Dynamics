@@ -74,6 +74,17 @@ performed. #900 owns tracking; #981 exact handoffs and #984 brand panel remain
 separate/additive. Shared editorial library remains PR910. Hosting #679 release
 gate remains; this candidate is not a claim of completed live-board backfill.
 
+## 16 November — Nolan actual-reader audit and profile freshness repair
+
+Draft #990 now tests actual SDK-backed task/staff/client/pipeline/schedule readers
+against the isolated same-origin services. All seeded paths pass; no replay gap
+blocks them. Reproduced inactive-session legacy source reads; workbook refresh now
+revalidates its own profile before/after reads and clears data on revocation.
+This does not repair legacy RLS: direct inactive-session source reads remain an
+explicit server-side release gate. 35 affected tests and build pass; browser
+stale/retry/revocation assertions are authored only. No production/guard change.
+[Exact evidence and boundaries](NOLAN-SOURCE-ADAPTER-ACCEPTANCE-2026-11-16.md).
+
 ## 16 November — Nolan executable same-origin acceptance entry point
 
 Draft #990 now serves the actual app and genuine isolated GoTrue/PostgREST through

@@ -4,6 +4,7 @@ import {mkdtemp,readFile,writeFile,rm,stat} from 'node:fs/promises'
 import {tmpdir} from 'node:os'
 import {join,resolve,extname} from 'node:path'
 import {fileURLToPath} from 'node:url'
+import {randomBytes} from 'node:crypto'
 import {build} from 'vite'
 import react from '@vitejs/plugin-react'
 import {createClient} from '@supabase/supabase-js'
@@ -12,7 +13,8 @@ import {startNolanIsolatedAcceptance} from './helpers/nolanIsolatedAcceptance.mj
 export async function startAcceptance({decisions=false,signal}={}){
  signal?.throwIfAborted()
  const directory=await mkdtemp(join(tmpdir(),'nolan-same-origin-')),dist=join(directory,'app')
- let runtime,origin,ready=false
+ let runtime,origin,ready=false,restAvailable=true,tasksAvailable=true
+ const fixtureControl=randomBytes(32).toString('hex')
  const server=createServer(async(req,res)=>{
   try{
    if(!ready){res.writeHead(503);res.end('Isolated acceptance starting');return}
@@ -20,8 +22,20 @@ export async function startAcceptance({decisions=false,signal}={}){
    res.setHeader('Cache-Control','no-store')
    res.setHeader('Content-Security-Policy',"default-src 'self'; connect-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self' data:; base-uri 'self'; form-action 'self'; frame-src 'none'")
    const url=new URL(req.url,origin)
+   if(url.pathname==='/__nolan_acceptance/scenario'){
+    if(req.method!=='POST'||req.headers['x-nolan-fixture-control']!==fixtureControl){res.writeHead(403);res.end();return}
+    let body='';for await(const chunk of req){body+=chunk;if(body.length>256){res.writeHead(413);res.end();return}}
+    const action=JSON.parse(body).action
+    if(action==='fail-rest')restAvailable=false
+    else if(action==='restore-rest')restAvailable=true
+    else if(action==='fail-tasks')tasksAvailable=false
+    else if(action==='restore-tasks')tasksAvailable=true
+    else runtime.scenario(action)
+    res.writeHead(204);res.end();return
+   }
    const port=url.pathname.startsWith('/auth/v1/')?9999:url.pathname.startsWith('/rest/v1/')?3000:null
    if(port){
+    if(port===3000&&(!restAvailable||(!tasksAvailable&&url.pathname==='/rest/v1/command_centre_tasks'))){res.writeHead(503);res.end('Deliberate isolated REST interruption');return}
     if(!['GET','POST','PATCH','DELETE'].includes(req.method)){res.writeHead(405);res.end();return}
     const chunks=[];let bytes=0
     for await(const chunk of req){bytes+=chunk.length;if(bytes>1024*1024){res.writeHead(413);res.end();return}chunks.push(chunk)}
@@ -57,7 +71,7 @@ export async function startAcceptance({decisions=false,signal}={}){
   assert.equal(gateTransforms,decisions?1:0)
   assert.match(await readFile('src/lib/nolanDecisionApi.ts','utf8'),/NOLAN_DECISIONS_ACCEPTED = false/)
   assert.equal(JSON.parse(await readFile('vercel.json','utf8')).git.deploymentEnabled,false)
-  const manifest={origin,decisions,accounts:runtime.accounts,taskId:runtime.taskId,plannerTaskId:runtime.plannerTaskId,scope:'Synthetic isolated accounts only. No signed-in browser acceptance yet.'}
+  const manifest={origin,decisions,accounts:runtime.accounts,taskId:runtime.taskId,plannerTaskId:runtime.plannerTaskId,sources:runtime.sources,fixtureControl,scope:'Synthetic isolated accounts only. No signed-in browser acceptance yet.'}
   const manifestPath=join(directory,'private-browser-manifest.json')
   await writeFile(manifestPath,JSON.stringify(manifest,null,2),{mode:0o600})
   assert.equal((await stat(manifestPath)).mode&0o777,0o600)

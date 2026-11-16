@@ -117,9 +117,11 @@ search, 390/1440 emulated widths, failed local REST read/stale retention and
 recovery, refresh/back navigation, Needs You off or explicit create/respond flow,
 real sign-out/account switch, and staff/client exclusion. Only a successful run
 can claim these browser checks passed. Width emulation is not physical-device QA.
-Stale-revision UI, uncertain-create retry UI, immediate profile-revocation UI and
-physical-device acceptance remain explicit follow-up matrix items, not covered
-by that authored runner. Their existing real API tests remain separate.
+The runner now also authors stale-revision, uncertain-create retry and profile-
+revocation/recovery checks using bounded capability-protected fixture controls.
+These browser assertions remain unexecuted. Physical-device acceptance remains
+separate. See NOLAN-SOURCE-ADAPTER-ACCEPTANCE-2026-11-16.md for the genuine reader
+results and the remaining legacy inactive-session RLS boundary.
 
 ## Verification performed here
 

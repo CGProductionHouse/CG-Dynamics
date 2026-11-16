@@ -71,10 +71,10 @@ def run(manifest_path):
                 page.set_viewport_size({'width': width, 'height': 1000})
                 assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Master viewport overflows'
             # A deliberate failed local API read is not a fabricated success response.
-            context.route(origin + '/rest/v1/**', lambda route: route.abort())
+            context.route(origin + '/rest/v1/command_centre_tasks*', lambda route: route.abort())
             page.get_by_role('button', name='Refresh status', exact=True).click()
             expect(task).to_contain_text('status is last-known')
-            context.unroute(origin + '/rest/v1/**')
+            context.unroute(origin + '/rest/v1/command_centre_tasks*')
             page.get_by_role('button', name='Refresh status', exact=True).click()
             expect(page.get_by_text('Task source read completed.', exact=False)).to_be_visible()
             page.reload()
@@ -84,12 +84,44 @@ def run(manifest_path):
             expect(page.get_by_role('heading', name='Master schedule', exact=True)).to_be_visible()
             page.get_by_role('navigation', name='Work views').get_by_role('button', name='Needs You', exact=True).click()
             if manifest['decisions']:
-                page.get_by_label('Native Dynamics task UUID', exact=True).fill(manifest['taskId'])
-                page.get_by_role('button', name='Read source and eligible recipients', exact=True).click()
-                page.get_by_label('Named recipient', exact=True).select_option(manifest['accounts']['manager']['id'])
-                page.get_by_label('Question', exact=True).fill('Synthetic same-origin browser question')
+                def scenario(action):
+                    # Private fixture administration, never app session/auth injection.
+                    response = context.request.post(origin + '/__nolan_acceptance/scenario',
+                                                    headers={'x-nolan-fixture-control': manifest['fixtureControl']},
+                                                    data={'action': action})
+                    assert response.status == 204, 'Isolated scenario failed'
+
+                def prepare_question(question):
+                    page.get_by_label('Native Dynamics task UUID', exact=True).fill(manifest['taskId'])
+                    page.get_by_role('button', name='Read source and eligible recipients', exact=True).click()
+                    page.get_by_label('Named recipient', exact=True).select_option(manifest['accounts']['manager']['id'])
+                    page.get_by_label('Question', exact=True).fill(question)
+
+                endpoint = origin + '/rest/v1/rpc/create_nolan_decision_request'
+                attempts = []
+                first_receipt = []
+
+                def lose_first_receipt(route):
+                    attempts.append(route.request.post_data_json['p_idempotency_key'])
+                    if len(attempts) == 1:
+                        # Real RPC commits; only delivery of its response is interrupted.
+                        response = route.fetch()
+                        assert response.status == 200, 'First genuine creation must commit'
+                        first_receipt.append(response.json())
+                        route.abort()
+                    else:
+                        route.continue_()
+
+                context.route(endpoint, lose_first_receipt)
+                prepare_question('Synthetic same-origin browser question')
                 page.get_by_role('button', name='Send internal decision request', exact=True).click()
-                expect(page.get_by_text('Request recorded:', exact=False)).to_be_visible()
+                expect(page.get_by_label('Native Dynamics task UUID', exact=True)).to_be_disabled()
+                expect(page.get_by_label('Question', exact=True)).to_be_disabled()
+                page.get_by_role('button', name='Send internal decision request', exact=True).click()
+                expect(page.get_by_text('Request recorded: ' + first_receipt[0], exact=True)).to_be_visible()
+                assert len(attempts) == 2 and attempts[0] == attempts[1], 'Uncertain retry must preserve its exact key'
+                expect(page.get_by_text('Synthetic same-origin browser question', exact=True)).to_have_count(1)
+                context.unroute(endpoint)
                 logout()
                 login('manager')
                 page.goto(origin + '/admin/work?tab=nolan&nolan_view=decisions')
@@ -97,6 +129,38 @@ def run(manifest_path):
                 page.get_by_label('Response', exact=True).fill('Synthetic response only')
                 page.get_by_role('button', name='Record response only', exact=True).click()
                 expect(page.get_by_text('Response recorded; no task change applied.', exact=True)).to_be_visible()
+                logout()
+                login('admin')
+                page.goto(origin + '/admin/work?tab=nolan&nolan_view=decisions')
+                prepare_question('Synthetic stale-create question')
+                scenario('advance-source')
+                page.get_by_role('button', name='Send internal decision request', exact=True).click()
+                decisions = page.locator('section[aria-label="Explicit decision requests"]')
+                expect(decisions.get_by_role('alert')).to_be_visible()
+                expect(page.get_by_text('Request recorded:', exact=False)).to_have_count(0)
+                prepare_question('Synthetic stale-response question')
+                page.get_by_role('button', name='Send internal decision request', exact=True).click()
+                expect(page.get_by_text('Request recorded:', exact=False)).to_be_visible()
+                scenario('advance-source')
+                logout()
+                login('manager')
+                page.goto(origin + '/admin/work?tab=nolan&nolan_view=decisions')
+                expect(page.get_by_text('Synthetic stale-response question', exact=True)).to_be_visible()
+                expect(page.get_by_text('Source changed or recipient unavailable.', exact=False)).to_be_visible()
+                expect(page.get_by_role('button', name='Record response only', exact=True)).to_have_count(0)
+                scenario('revoke-manager')
+                page.get_by_role('button', name='Refresh requests', exact=True).click()
+                expect(page.locator('section[aria-label="Explicit decision requests"]').get_by_role('alert')).to_be_visible()
+                expect(page.get_by_text('Synthetic stale-response question', exact=True)).to_have_count(0)
+                page.get_by_role('navigation', name='Work views').get_by_role('button', name='Master schedule', exact=True).click()
+                page.get_by_role('button', name='Refresh status', exact=True).click()
+                expect(page.locator('.native-error')).to_contain_text('Current account authorization changed')
+                expect(page.locator('.nolan-master-task')).to_have_count(0)
+                scenario('restore-manager')
+                page.get_by_role('button', name='Refresh status', exact=True).click()
+                expect(page.get_by_text('Task source read completed.', exact=False)).to_be_visible()
+                page.get_by_role('navigation', name='Work views').get_by_role('button', name='Needs You', exact=True).click()
+                expect(page.get_by_text('Synthetic stale-response question', exact=True)).to_be_visible()
             else:
                 expect(page.get_by_text('Needs You is not activated.', exact=False)).to_be_visible()
             logout()
@@ -113,7 +177,7 @@ def run(manifest_path):
             assert not external, 'Actual app attempted an external request; review CSP/scope before acceptance'
             print(json.dumps({'result': 'passed', 'scope': 'same-origin actual-app synthetic sign-in/Master/role/decision flows',
                               'widths': [390, 1440], 'physical_device': False,
-                              'remaining': ['stale source revision UI', 'uncertain-create retry UI', 'identity revocation UI', 'physical device']}))
+                              'remaining': ['physical device', 'production release acceptance']}))
         finally:
             browser.close()
 

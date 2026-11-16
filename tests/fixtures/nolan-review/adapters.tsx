@@ -60,3 +60,5 @@ export async function closeNativeDecision(id:string,version:number,action:string
 export function cgManagedWebsiteForClient(){return null}
 
 export async function listPlannerActivity(){throw new Error('Action history is outside the offline sample preview.')}
+
+export async function getProfile(id:string){return {data:id===actor?{id,is_active:true,role:id===ADMIN?'admin':'manager'}:null,error:null}}

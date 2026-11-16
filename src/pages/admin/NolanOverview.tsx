@@ -1,3 +1,4 @@
+import { withNolanVerifiedViewer } from '../../lib/nolanVerifiedViewer'
 import { NolanNeedsYou } from './NolanNeedsYou'
 import { retainNolanRows, nolanReadScope, type RetainedRows } from '../../lib/nolanReadContinuity'
 import { NolanVideoHandoffEvidence } from './NolanVideoHandoffEvidence'
@@ -47,10 +48,10 @@ export default function NolanOverview() {
       setLoading(true)
       setSnapshot(previous => previous?.scope === readScope ? previous : null)
       try {
-        const [taskRead, videoRead, scheduleRead, clientRead, staffRead] = await Promise.all([
+        const [taskRead, videoRead, scheduleRead, clientRead, staffRead] = await withNolanVerifiedViewer({ userId: user!.id, profileId: profile!.id, role: profile!.role }, () => Promise.all([
           captureNolanSource(() => listTasks()), captureNolanSource(() => listPipelineVideos()),
           captureNolanSource(() => listMonthlyDeliverablesByMonth(month)), captureNolanSource(() => listActiveClients()), captureNolanSource(() => listStaffProfiles()),
-        ])
+        ]))
         const tasks = taskRead.result ?? { data: [], error: { message: taskRead.error } }
         const videos = videoRead.result ?? { data: [], error: videoRead.error, migrationNeeded: false }
         const deliverables = scheduleRead.result ?? { data: [], error: { message: scheduleRead.error } }
@@ -81,7 +82,7 @@ export default function NolanOverview() {
     }
     void load()
     return () => { cancelled = true }
-  }, [month, generation, scope])
+  }, [month, generation, scope, user?.id, profile?.id, profile?.role])
   useEffect(() => {
     const refresh = () => setGeneration(n => n + 1)
     window.addEventListener('focus', refresh)
