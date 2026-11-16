@@ -434,3 +434,18 @@ Real authenticated candidate acceptance is therefore BLOCKED on an approved
 candidate hosting/release packet and legitimate same-origin test access, not a
 source-code or synthetic-browser failure. No cloud build, deploy, promotion,
 settings/budget/DNS change or credential forwarding occurred in this discovery.
+
+
+## 16 November source-failure workload continuity
+
+Owner explicitly requested continued active implementation after the prior freeze. This changes the existing draft only; no deployment, new branch, role/RLS change, schema change or scheduler.
+
+The overview now retains last-successful task/video/schedule rows only for the exact authenticated user/profile, manager role and selected month. Missing/mismatched identity or inactive profile yields no snapshot. Render-time scope gating hides another account/month immediately, and effect cleanup plus the functional-update cancellation guard suppress superseded reads. Successful empty reads clear previous rows. Each failed source preserves its original last-success timestamp through repeated failures, never a new successful receipt. Partial/error and migration-needed results do not become fresh rows. Staff directory evidence is always current or unavailable, never reused as verified ownership.
+
+Retained rows explicitly say Last-known record, source unavailable/refresh pending and last successful source read. Counts disclose last-known records. Lifecycle badges remain recorded canonical status, not inferred blocked/done/approved from source availability. Authoritative links remain navigation only; inspect the current source before acting. This is ephemeral display continuity, not a new task store or approval authority.
+
+Validation against an in-memory overlay of the exact existing application source (read-only execution filesystem): full-program TypeScript noEmit diagnostics 0; four new continuity tests pass; five existing overview source contracts pass; separate eleven helper assertions pass; TSX transform passes. No files written by the validation harness. The prior full-suite 4357pass/30skip receipt is historical, NOT a full regression of this new change. Delayed out-of-order rendered responses, real role/RLS/database and authenticated UI acceptance remain open; no current live acceptance claimed.
+
+Distinct Needs You remains a separate unresolved requirement. Assignment, manager privilege and historical reviewer IDs are not a pending recipient. The earlier eleven-case proposed receipt prototype is not connected or shipped. A canonical authorized pending-recipient/current-revision producer must be established before integrating that lane. Keep the pinned board until native acceptance is verified.
+
+Additional account isolation: no-auth render returns before source child panels mount; package evidence and website panels remount on exact scope change so their local caches do not survive an account/role/month switch. This does not replace backend RLS acceptance.
