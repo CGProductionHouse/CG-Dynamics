@@ -270,13 +270,12 @@ export function calculatePlatformBreakdowns(posts: ReportStatsPost[]): PlatformB
   })
 }
 
-// The existing reach ranking requires an observed reach; missing data cannot
-// win merely because a post/source exists. Equal reach uses stable platform order.
+// A winner requires a comparison: all reporting platforms must have observed
+// reach, and at least two must participate. Missing reach is not a losing score.
 export function bestPlatform(breakdowns: PlatformBreakdown[]): PlatformBreakdown | null {
-  const withData = breakdowns.filter(breakdown => breakdown.hasData
-    && typeof breakdown.stats.totalReach === 'number'
-    && Number.isFinite(breakdown.stats.totalReach))
-  if (withData.length === 0) return null
+  const withData = breakdowns.filter(breakdown => breakdown.hasData)
+  if (withData.length < 2 || withData.some(breakdown =>
+    typeof breakdown.stats.totalReach !== 'number' || !Number.isFinite(breakdown.stats.totalReach))) return null
 
   return [...withData].sort((a, b) => {
     const ar = a.stats.totalReach ?? -1
@@ -443,12 +442,13 @@ export function buildMasterReport(
 
   const withData = platforms.filter(view => view.source !== 'none')
 
-  const bestPlatform = withData.filter(view => typeof view.reach === 'number' && Number.isFinite(view.reach)).sort((a, b) => {
+  const completeReach = withData.length >= 2 && withData.every(view => typeof view.reach === 'number' && Number.isFinite(view.reach))
+  const bestPlatform = completeReach ? [...withData].sort((a, b) => {
     const ar = a.reach ?? -1
     const br = b.reach ?? -1
     if (br !== ar) return br - ar
     return a.platform.localeCompare(b.platform)
-  })[0] ?? null
+  })[0] ?? null : null
 
   // Views and reach are UNIQUE-audience style metrics with different per-platform
   // definitions. They must NEVER produce a cross-platform master total — not even

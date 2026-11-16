@@ -1,3 +1,30 @@
+## 16 November — All Around PVC current report/Plan LIVE; ranking fix release-held
+
+CA chose next client after Madison. Exact active All Around PVCfd16ebae,
+real issued login200/own client, October report5598a192 published16:25:36UTC
+with independently reviewed normal-author findings/other fields preserved.
+14fresh source posts,14current facts(11available/3NULL), no duplicates/Pacific
+period drift. No Ads/TikTok mapping invented or website/provider/package change.
+Manual canonical Novemberv6 approve/publish16:34:46UTC after source/content/
+version/package/guide/notes fencing; actual client reads10gold fields/1video/
+3photos/3posters/no staff metadata. Decv3/Janv1 genuine unpublished drafts.
+
+Original December Strategy Rollout chat reached maximum length. Existing
+CG Client & Industry Research task continuation6afb1ddf-480c-83e9-b29f-6afe02521136
+is directly verified active/useful (EmoyaJan save42/62lightweight coverage), then
+authored all three PVC saves/readbacks. Same task/model; no duplicate writer or
+configuration change. Existing supervisor-owned media/scope/source holds remain.
+
+Actual production client browser390px/scale1/no overflow and API/foreign403/404,
+published logo177488bytes accepted. Live Best platform still incorrectly names
+Instagram when Facebook reach unavailable. Small source correction requires
+complete observed reach across at least two reporting platforms;92tests/build/
+lint/diff plus actual local1280/390render pass. NO Vercel/frontend deployment;
+presentation release remains held by #679, not claimed fixed live. No migration/
+Edge/config/permissions/Microsoft/shared-worker/other-agent change. Exact receipt:
+[All Around PVC readiness](ALL-AROUND-PVC-CLIENT-READINESS-2026-11-16.md).
+Historical contact conflict/media/date/future-review gates remain explicit.
+
 ## 16 November — Madison current portal accepted; narrow guide fix LIVE
 
 CA prioritised Madison Wear7b47afb0-fa55-4916-85f6-09c57e5905b9. Real issued login
