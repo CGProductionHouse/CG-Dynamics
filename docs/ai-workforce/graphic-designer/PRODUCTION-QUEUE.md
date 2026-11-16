@@ -2,8 +2,18 @@
 
 Owner steering16November2026; same #948 / draft#956 lane, no new agent or branch.
 
-Current16November: **Cape Lumber January2027 four posters** are the active owner
-request. Saved source DAHbFhGSrvg and exact-approved official DAGVuJURh6I insertion
+Current16November: **PSG Bloemfontein January2027** is the active owner request.
+Three editable R3 poster drafts saved in DAHbGaJ7U2o; current confirmed package
+3DP/1professional video, with Nolan video excluded. Genuine2160x2700 Canva exports
+inspected,20live texts/10media/64px important-frame checks and a cancelled isolated
+amendment test verified. Three unsigned captions match saved notes. No January
+dates or strategy fabricated. Exact Kit Gabriel Sans/Montserrat conflicts with
+the2026 guideline's IBM Plex; R3 follows the latter as a proposed treatment, with
+brand-direction approval unresolved.199history previews checked; actual relevant
+social/approvals coverage incomplete, so **no PSG send or official insert**.
+See [psg-january-2027/README.md](psg-january-2027/README.md) and compact Brand Pack.
+
+Completed Cape Lumber January2027: saved source DAHbFhGSrvg and exact-approved official DAGVuJURh6I insertion
 complete (master238pages, all234prior IDs/order preserved). New actual27–30 order
 is DP04/DP03/DP02/DP01; no posting dates assigned. Current source DP01R4, othersR3.
 All four current genuine2160x2700 exports checked, corrected DP01R4 included;

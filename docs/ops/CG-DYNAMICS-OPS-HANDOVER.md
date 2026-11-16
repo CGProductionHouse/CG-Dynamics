@@ -1,3 +1,23 @@
+## 16November — PSG January three editable drafts; review holds
+
+Owner moved to PSG next after Cape delivery; same #948/draft#956 isolated lane.
+Exact PSG Bloemfontein package3DP/1professional video; Nolan film ownership unchanged.
+Three saved R3 working pages in DAHbGaJ7U2o, not another official master. Genuine
+Canva PNG High2x2160x2700 exports inspected;20live texts/10media,64px text/logo
+frame checks and one cancelled isolated text amendment verified. Source photo
+non-generatively finished/masked; only unbranded illustrative props generated.
+Actual Kit shows Gabriel Sans/Montserrat while2026 guideline specifies IBM Plex;
+R3 proposes guideline treatment, discrepancy remains a release hold.199master
+previews compared with bounded manual adjudication; actual relevant social and
+approval artwork coverage incomplete. **No PSG send, official insert, portal final,
+posting dates, client approval or deployment.** Original199pages/human New Year
+preserved. Caption notes match unsigned files; optional footer freshness unresolved.
+No global unused-photo, certified export ICC, PSD or everyday ChatGPT proof claimed.
+See graphic-designer/psg-january-2027 README/Brand Pack and production queue.
+R0 incremental spend; no production data/schedule/role/hosting/dependency, account
+access, restart or other-agent changes. Control Centre exact reference remains
+unavailable; no guessed write. Cape/Wiseman deliveries must not be replayed.
+
 ## 16November18:39 — Cape Lumber four HD drafts delivered
 
 Supersedes pending-export/notes/send statements in the earlier checkpoint below.

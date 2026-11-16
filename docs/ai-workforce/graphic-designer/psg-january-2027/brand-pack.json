@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "status": "internal-working-brand-pack-release-held",
+  "observedAt": "2026-11-16",
+  "clientId": "29a28efd-c998-45e2-a57c-4a751e779e66",
+  "clientName": "PSG Bloemfontein",
+  "aliases": [
+    "PSG Donald Murray",
+    "PSG"
+  ],
+  "guide": {
+    "id": "558399fe-251b-42f1-af71-cb9c02c27f9c",
+    "version": 1,
+    "readiness": "ready"
+  },
+  "canva": {
+    "brandKit": "kAGn0ETkyhE",
+    "officialMaster": "DAGHEr8Zu_o",
+    "officialPageCountObserved": 199,
+    "workingDesign": "DAHbGaJ7U2o",
+    "workbenchOnly": true,
+    "workingPageIds": [
+      "PBtBXTz6ft6Hgnrn",
+      "PB25NyYB8s2nnxrG",
+      "PBsZ583vGz7RbSHX"
+    ],
+    "guideline": "DAHIT-WgoXs",
+    "guidelinePages": 99,
+    "fontConflict": {
+      "kit": [
+        "Gabriel Sans",
+        "Montserrat"
+      ],
+      "guideline": [
+        "IBM Plex Serif",
+        "IBM Plex Sans"
+      ],
+      "workingChoice": "2026 guideline",
+      "resolved": false
+    },
+    "palette": [
+      "#00AEEF",
+      "#353E43",
+      "#FFFFFF"
+    ],
+    "secondaryPalette": [
+      "#0054FF",
+      "#FFDE21",
+      "#D4055C"
+    ],
+    "logo": "Modern PSG Insure white variant of exact supplied silhouette; no old gold icon",
+    "protectedObservedPages": {
+      "templates": 34,
+      "approvals": 35,
+      "drafts": 55,
+      "postedScheduled": 56,
+      "humanNewYear": 38
+    },
+    "officialInsertExecuted": false
+  },
+  "mediaAuthority": "OneDrive Clients/PSG",
+  "oneDrive": {
+    "driveId": "a2ac9fe4b255f52f",
+    "clientRoot": "A2AC9FE4B255F52F!33925",
+    "headshots": "A2AC9FE4B255F52F!s2e860cc939a244cfa361bc6c2ac008d8",
+    "selectedOriginal": "A2AC9FE4B255F52F!se81c1d1ab81549a7bd0849ddc6b4189d",
+    "selectedOriginalSha256": "6f2035a56f1c45517f9b17278a89fe35da9b62670fea4fb5a131ea5801c74e4a",
+    "modernLogo": "A2AC9FE4B255F52F!s347b2e6e51384c54bec16012e5b5d0f2"
+  },
+  "package": {
+    "designedPosters": 3,
+    "professionalVideos": 1,
+    "confirmationObserved": "2026-09-23",
+    "januaryDatedRows": 0,
+    "januaryStrategyVerified": false,
+    "videoWorkExcluded": true
+  },
+  "caption": {
+    "signatureAllowed": false,
+    "emojiAllowed": false,
+    "maxHashtags": 5,
+    "footerRequirement": "optional",
+    "packetObserved": "2026-11-16",
+    "mutableValuesLastVerified": "2026-09-10",
+    "freshnessVerifiedNow": false,
+    "notesMatchCanonical": true
+  },
+  "verification": {
+    "liveTexts": 20,
+    "editableMedia": 10,
+    "nativeImportantInsetPx": 64,
+    "safeAreaPassed": true,
+    "actualCanvaHdPixels": [
+      2160,
+      2700
+    ],
+    "actualExportInspected": true,
+    "isolatedAmendmentPassed": true,
+    "editTestCancelled": true,
+    "historyPreviewsCompared": 199,
+    "historyReadErrors": 0,
+    "suspectedFlags": 1,
+    "manualAdjudication": "Page188 different pose/frame; same-person/shoot coverage unresolved",
+    "globalUnusedCertified": false,
+    "actualSocialApprovalCoverageComplete": false,
+    "whatsappSent": false,
+    "humanCreativeApproval": false,
+    "psdVerified": false,
+    "normalCompanyChatgptInvocationVerified": false
+  },
+  "restrictions": [
+    "Personal/commercial insurance advice only from exact local current evidence",
+    "No guarantees, premiums, invented offers or coverage determinations",
+    "No brand-colour gradients or logo effects",
+    "No biometric identity database",
+    "No private source media supplied to image generator",
+    "No publication/scheduling/portal finals"
+  ],
+  "incrementalSpendZar": 0
+}

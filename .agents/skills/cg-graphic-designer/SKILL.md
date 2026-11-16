@@ -108,6 +108,14 @@ master before proposing a new month; an existing human January candidate is not
 available to duplicate or overwrite. Check anniversary/date-specific logo variants
 for the target month rather than copying the current page footer automatically.
 
+Selecting the correct Kit does not establish agreement with a separate brand
+guideline. PSG's actual Kit showed Gabriel Sans/Montserrat while its2026 guideline
+specified IBM Plex. Retain both observations and their source dates, label any
+proposed treatment, and resolve current local approval before release. Do not
+silently overwrite the Kit or call a guideline-led experiment brand-certified.
+An optional caption-footer packet must remain optional: check its actual values
+and freshness separately rather than forging a mandatory contract to pass a guard.
+
 Distinguish connector editing limits from Canva document capacity. Central Canvas's
 222-page master could be read and all previews retrieved, but its native editing
 transaction was rejected as unsupported. No transaction opened. Record that exact
