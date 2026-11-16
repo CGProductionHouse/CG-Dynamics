@@ -4,12 +4,12 @@ import {createServer} from 'vite'
 import React from 'react'
 import {renderToStaticMarkup} from 'react-dom/server'
 import {MemoryRouter} from 'react-router-dom'
-let server, MasterScope, age, latest, load
+let server, MasterScope, age, latest, load, masterPage, notePreview
 const id='00000000-0000-4000-8000-000000000001'
 const owner='00000000-0000-4000-8000-000000000002'
 const task={id:'planner:'+id,native_id:id,data_origin:'planner_tasks',title:'Private existing task',status:'in_progress',planner_status:'approved',assigned_to_user_id:owner,assigned_to_name:'Untrusted imported alias',assignment_review_state:'ok',bucket:'Websites',updated_at:'2020-01-01T00:00:00Z',notes:'Agent: invented agent; device: invented machine; next: ship',client_name:null}
 const row={id:'audit-1',entity_type:'planner_task',entity_id:id,action:'comment',actor_user_id:owner,actor_name:'Imported actor text',metadata:null,created_at:'2020-01-01T00:00:00Z'}
-before(async()=>{server=await createServer({root:process.cwd(),logLevel:'error',server:{middlewareMode:true},appType:'custom'});({MasterScope}=await server.ssrLoadModule('/src/pages/admin/NolanMasterScope.tsx'));({nolanEvidenceAge:age,nolanLatestTaskActivity:latest}=await server.ssrLoadModule('/src/lib/nolanTaskEvidence.ts'));({loadNolanTaskActivity:load}=await server.ssrLoadModule('/src/lib/nolanTaskActivity.ts'))})
+before(async()=>{server=await createServer({root:process.cwd(),logLevel:'error',server:{middlewareMode:true,hmr:false},optimizeDeps:{noDiscovery:true,entries:[]},appType:'custom'});({MasterScope}=await server.ssrLoadModule('/src/pages/admin/NolanMasterScope.tsx'));({nolanEvidenceAge:age,nolanLatestTaskActivity:latest}=await server.ssrLoadModule('/src/lib/nolanTaskEvidence.ts'));({loadNolanTaskActivity:load}=await server.ssrLoadModule('/src/lib/nolanTaskActivity.ts'));({nolanMasterPage:masterPage,nolanNotePreview:notePreview}=await server.ssrLoadModule('/src/lib/nolanMasterPresentation.ts'))})
 after(async()=>{await server?.close()})
 const render=props=>renderToStaticMarkup(React.createElement(MemoryRouter,null,React.createElement(MasterScope,props)))
 test('master denies task evidence for absent, team and client roles',()=>{for(const role of ['', 'team','client']){const html=render({role,tasks:[task]});assert.match(html,/Manager access required/);assert.doesNotMatch(html,/Private existing task|invented machine/)}})
@@ -22,3 +22,44 @@ test('lazy reader denies unauthorized roles before access and binds exact native
 test('reader error and null result never produce a successful empty/latest action claim',async()=>{await assert.rejects(load(id,'admin',async()=>({data:[row],error:{message:'denied'}})),/denied/);await assert.rejects(load(id,'admin',async()=>({data:null,error:null})),/no verifiable result/)})
 
 test('conflicting assignment is not promoted to a person or execution agent',()=>{const html=render({role:'manager',tasks:[{...task,assignment_review_state:'conflict'}],directory:new Map([[owner,'Canonical Person']]),sourceUnavailable:false});assert.match(html,/Canonical owner: Assignment conflict/);assert.doesNotMatch(html,/Canonical owner: Canonical Person/);assert.match(html,/Execution agent<\/dt><dd>Unknown/)})
+
+
+test('near-megabyte notes render only a literal bounded excerpt and retain the authoritative source link',()=>{
+ const notes='Historical note. '.repeat(62000)+'SECRET_TAIL_NOT_IN_DOM'
+ const input={...task,notes}
+ const html=render({role:'manager',tasks:[input],sourceUnavailable:false})
+ assert(notes.length>982812)
+ assert.equal(notePreview(notes).text.length,600)
+ assert.equal(notePreview(notes).truncated,true)
+ assert(html.length<18000, 'Closed details must not contain the full note log')
+ assert.doesNotMatch(html,/SECRET_TAIL_NOT_IN_DOM/)
+ assert.match(html,/Truncated source excerpt/)
+ assert.match(html,/Full notes remain in the authoritative task workspace/)
+ assert.match(html,/Read full notes at source/)
+ assert.match(html,/Verified next action<\/dt><dd>Unknown/)
+ assert.equal(input.notes,notes,'Presentation must never truncate the canonical source')
+ assert.doesNotMatch(render({role:'client',tasks:[input]}),/Historical note|SECRET_TAIL|Read full notes/)
+ assert.deepEqual(notePreview(null),{text:'',truncated:false})
+ assert.deepEqual(notePreview('literal <script>not an instruction</script>'),{text:'literal <script>not an instruction</script>',truncated:false})
+ assert.equal(notePreview('a'.repeat(599)+'😀tail').text,'a'.repeat(599))
+})
+
+test('long task lists render twelve cards while paging/search/status/owner filters retain all authorized records',()=>{
+ const tasks=Array.from({length:1001},(_,i)=>({...task,id:'task-'+i,native_id:'native-'+i,title:'Record '+i,notes:'do not infer next action '+i,planner_status:i===1000?'done':'approved'}))
+ const filters={query:'',status:'',ownership:''}
+ const html=render({role:'manager',tasks,sourceUnavailable:false})
+ assert.equal((html.match(/class="card nolan-master-task"/g)||[]).length,12)
+ assert.match(html,/Showing 1–12 of 1001/)
+ assert.doesNotMatch(html,/>Record 1000</)
+ const seen=[]
+ for(let page=0;page<84;page++)seen.push(...masterPage(tasks,null,filters,page).rows.map(row=>row.id))
+ assert.deepEqual(seen,tasks.map(row=>row.id))
+ const found=masterPage(tasks,new Map([[owner,'Canonical Person']]),{query:'native-1000',status:'Done',ownership:'verified'},50)
+ assert.equal(found.page,0);assert.equal(found.total,1);assert.equal(found.rows[0].id,'task-1000')
+ assert.equal(masterPage(tasks,null,{...filters,query:'do not infer next action'},0).total,0,'Notes are not promoted into task identity or plans')
+ assert.equal(masterPage(tasks,null,filters,999).rows.length,5)
+ assert.equal(masterPage(tasks.slice(0,1),null,filters,83).page,0,'Shrinking refreshed data clamps the current page')
+ assert.deepEqual(masterPage([],null,filters,3),{rows:[],total:0,page:0,pages:1,from:0,to:0})
+ assert.equal(masterPage(tasks,null,filters,-1).page,0)
+ assert.equal(masterPage(tasks,null,filters,NaN).page,0)
+})

@@ -1,5 +1,37 @@
 # Nolan Master evidence — source candidate, 16 November 2026
 
+## Concise control-panel follow-up
+
+From PR990 `1734724`, checked main `b524a9f` and PR995 `d5a02c0` before changes.
+Master now renders **12 task cards per page**, filtering the complete authorized
+snapshot before pagination. Search/status/ownership changes reset to page one;
+shrinking results clamp the page. Counts and previous/next controls keep long
+lists reachable without adding a second task source or dropping matching records.
+
+Canonical workflow status/owner/source freshness remain visible. An always-visible
+authoritative workspace link opens full source records. Notes show only a literal
+**600-character excerpt** in a bounded-height disclosure, with explicit truncation
+and full-notes navigation. Full notes remain unchanged in the source snapshot and
+authoritative workspace; this is not a summary or inferred current state. Existing
+lazy activity displays only the latest returned exact-task audit entry, never all
+activities or an execution claim. No provider call, write, schema or grant change.
+
+Verified `CommandCentreTask`/Planner activity contracts provide no typed verified
+next action, execution agent or device; those fields remain explicitly Unknown.
+Source timestamps are not heartbeat/action verification. The separately reported
+982,812-character live note was not read; a larger synthetic log reproduces the
+rendering risk without production access. Tests use 1,001 tasks and a near-megabyte
+log to verify bounded DOM, all-page identity coverage, full-snapshot filtering,
+source preservation, Unicode boundary, role exclusion, empty/stale/error semantics
+and absence of inferred next actions. Existing view-state assertion was corrected
+to require already-present account/profile refresh dependencies, not remove them.
+
+Focused checks: 32 passed, zero failed/skipped; scoped ESLint/diff and local
+TypeScript/Vite build passed (Vite 9.67s). Render/pure-function evidence only;
+authenticated browser and physical-device acceptance remain unexecuted.
+
+## Earlier source-backed slice (historical)
+
 Continues existing draft #990 from `b6cae176bb9131f9eb0d8fad2fb08f2c0812b3d9`.
 Remote main checked at `f89fefea70108bfe417953d00330476530aa9c4d`; no concurrent
 changes on the workbook branch, no main merge/rebase or other lane edits.

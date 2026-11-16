@@ -38,7 +38,7 @@ test('native route is source of truth; text input replaces history and source re
  assert.ok(page.includes('changeView({ query: e.target.value }, true)'))
  assert.ok(page.includes("changeView({ lane: id, status: 'All statuses' })"))
  assert.ok(page.includes('Clear filters'))
- assert.ok(page.includes('}, [month, generation, scope])'))
+ assert.ok(page.includes('}, [month, generation, scope, user?.id, profile?.id, profile?.role])'))
  assert.ok(page.includes('rawSnapshot?.scope === scope'))
  assert.doesNotMatch(page, /localStorage|sessionStorage/)
 })

@@ -226,6 +226,16 @@ gate remains; this candidate is not a claim of completed live-board backfill.
 
 ## 16 November — Nolan final bounded checkpoint and review release path
 
+### Concise Master control-panel follow-up
+
+Master now pages 12 canonical task cards and bounds literal source-note previews
+to 600 characters, with explicit truncation and an always-visible source link.
+Search/filter covers the full authorized snapshot; full notes remain at source.
+Current workflow status, canonical owner and freshness remain visible; execution
+agent/device/verified next action stay Unknown, not inferred from cumulative logs.
+32 focused checks and local build/lint/diff pass; actual browser remains unexecuted.
+[Presentation behavior, synthetic large-log evidence and limits](NOLAN-MASTER-EVIDENCE-2026-11-16.md).
+
 ### Latest integration checkpoint — 16 November
 
 PR990 reconciled with exact main `b524a9f91d61a5727db355194db2a988594b8af1`.

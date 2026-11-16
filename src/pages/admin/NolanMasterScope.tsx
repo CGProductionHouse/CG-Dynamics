@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom'
 import { useState } from 'react'
 import { taskStatusDisplayLabel, type CommandCentreTask } from '../../lib/commandCentre'
-import { nolanTaskOwnerLabel, nolanTaskOwnership } from '../../lib/nolanOwnership'
+import { nolanTaskOwnerLabel } from '../../lib/nolanOwnership'
 import { nolanEvidenceAge } from '../../lib/nolanTaskEvidence'
+import { nolanMasterPage, nolanNotePreview } from '../../lib/nolanMasterPresentation'
 import { NolanTaskOwnership } from './NolanTaskOwnership'
 import { NolanTaskActivity } from './NolanTaskActivity'
 
@@ -15,13 +16,9 @@ export function MasterScope({ tasks = [], directory = null, role = '', sourceUna
   const [query, setQuery] = useState('')
   const [status, setStatus] = useState('')
   const [ownership, setOwnership] = useState('')
+  const [page, setPage] = useState(0)
   if (!['admin', 'manager'].includes(role)) return <p role="alert">Manager access required. No task evidence displayed.</p>
-  const rows = tasks.filter(task => {
-    const owner = nolanTaskOwnerLabel(task, directory)
-    const state = nolanTaskOwnership(task, directory)?.state ?? 'unknown'
-    return [task.title, task.id, task.native_id, task.client_name, task.bucket, owner].join(' ').toLowerCase().includes(query.trim().toLowerCase())
-      && (!status || taskStatusDisplayLabel(task) === status) && (!ownership || state === ownership)
-  })
+  const result = nolanMasterPage(tasks, directory, { query, status, ownership }, page)
   const sections = [
     ['Websites & discovery', '/admin/work?tab=board&id=7f413d31-17cd-4761-b2e9-a031c1343444', 'Four reviewed reporting mappings; full Builder registry pending.'],
     ['Apps: CG Hours, CG Pay, Dynamics, Web Editor', '/admin/work?tab=board', 'Exact linked Dynamics work; full external milestone inventory pending.'],
@@ -40,13 +37,21 @@ export function MasterScope({ tasks = [], directory = null, role = '', sourceUna
     <p>Existing work records visible to this account. Task ownership is not an agent execution assignment. Status is recorded workflow state, not a live worker heartbeat.</p>
     <p role="status">{loading ? 'Refreshing — last-known records only.' : sourceUnavailable ? 'Task source unavailable — retained records are stale.' : 'Task source read completed.'} Last successful read: {checkedAt ?? 'Unknown'}.</p>
     <div className="toolbar">
-      <input aria-label="Search master tasks" placeholder="Find task, owner, client or ID…" value={query} onChange={e => setQuery(e.target.value)} />
-      <select aria-label="Master task status" value={status} onChange={e => setStatus(e.target.value)}><option value="">All statuses</option>{[...new Set(tasks.map(taskStatusDisplayLabel))].sort().map(value => <option key={value}>{value}</option>)}</select>
-      <select aria-label="Master ownership state" value={ownership} onChange={e => setOwnership(e.target.value)}><option value="">All ownership states</option>{['verified', 'unassigned', 'unresolved', 'conflict', 'unknown'].map(value => <option key={value}>{value}</option>)}</select>
-      <button className="refresh-data" onClick={() => { setQuery(''); setStatus(''); setOwnership('') }}>Clear master filters</button>
+      <input aria-label="Search master tasks" placeholder="Find task, owner, client or ID…" value={query} onChange={e => { setQuery(e.target.value); setPage(0) }} />
+      <select aria-label="Master task status" value={status} onChange={e => { setStatus(e.target.value); setPage(0) }}><option value="">All statuses</option>{[...new Set(tasks.map(taskStatusDisplayLabel))].sort().map(value => <option key={value}>{value}</option>)}</select>
+      <select aria-label="Master ownership state" value={ownership} onChange={e => { setOwnership(e.target.value); setPage(0) }}><option value="">All ownership states</option>{['verified', 'unassigned', 'unresolved', 'conflict', 'unknown'].map(value => <option key={value}>{value}</option>)}</select>
+      <button className="refresh-data" onClick={() => { setQuery(''); setStatus(''); setOwnership(''); setPage(0) }}>Clear master filters</button>
     </div>
-    <p>{rows.length} matching task records · includes completed history; not company-wide or agent-fleet coverage.</p>
-    <div className="grid list">{rows.map(task => <article className="card nolan-master-task" key={task.id}>
+    <p>{result.total} matching task records · includes completed history; not company-wide or agent-fleet coverage.</p>
+    <nav className="toolbar" aria-label="Master task pages">
+      <button className="refresh-data" disabled={result.page === 0} onClick={() => setPage(result.page - 1)}>Previous tasks</button>
+      <span role="status">Showing {result.from}–{result.to} of {result.total} · Page {result.page + 1} of {result.pages}</span>
+      <button className="refresh-data" disabled={result.page + 1 >= result.pages} onClick={() => setPage(result.page + 1)}>Next tasks</button>
+    </nav>
+    <div className="grid list">{result.rows.map(task => {
+      const notes = nolanNotePreview(task.notes)
+      const sourceHref = task.data_origin === 'planner_tasks' ? `/admin/work?tab=board&id=${encodeURIComponent(task.native_id ?? task.id)}` : '/admin/work?tab=daily-tasks'
+      return <article className="card nolan-master-task" key={task.id}>
       <h3>{task.title}</h3><span className="badge">{taskStatusDisplayLabel(task)}</span>
       <p className="native-owner">Canonical owner: {nolanTaskOwnerLabel(task, directory)}</p>
       <p>{task.client_name ?? 'Client not recorded'} · {task.bucket}</p>
@@ -55,15 +60,17 @@ export function MasterScope({ tasks = [], directory = null, role = '', sourceUna
       <dl><dt>Execution agent</dt><dd>Unknown — no canonical task-level agent evidence available.</dd>
         <dt>Execution device</dt><dd>Unknown — no canonical task-level device evidence available.</dd>
         <dt>Verified next action</dt><dd>Unknown — source notes are not a verified action plan.</dd></dl>
+      <Link to={sourceHref}>Open authoritative task workspace →</Link>
       <details className="native-details"><summary>Task ownership, notes &amp; source</summary>
         <NolanTaskOwnership task={task} directory={directory} />
         <p>Source: {task.data_origin ?? 'command_centre'} · record {task.native_id ?? task.id}</p>
-        <h4>Recorded source notes — unverified instructions</h4><p style={{ whiteSpace: 'pre-wrap' }}>{task.notes || 'No source notes recorded.'}</p>
-        <Link to={task.data_origin === 'planner_tasks' ? `/admin/work?tab=board&id=${encodeURIComponent(task.native_id ?? task.id)}` : '/admin/work?tab=daily-tasks'}>Open authoritative task workspace →</Link>
+        <h4>Recorded source notes — unverified instructions</h4><p className="nolan-note-preview">{notes.text || 'No source notes recorded.'}</p>
+        {notes.truncated && <p>Truncated source excerpt (up to 600 characters), not a current-state summary. Full notes remain in the authoritative task workspace.</p>}
+        <Link to={sourceHref}>Read full notes at source →</Link>
       </details>
       <NolanTaskActivity key={`${task.id}:${refreshGeneration}`} taskId={task.data_origin === 'planner_tasks' ? task.native_id ?? task.id : null} directory={directory} role={role} sourceUnavailable={sourceUnavailable || loading} />
-    </article>)}</div>
-    {!rows.length && <p>No matching task evidence. Check source availability and filters before concluding there is no work.</p>}
+    </article>})}</div>
+    {!result.total && <p>No matching task evidence. Check source availability and filters before concluding there is no work.</p>}
     <details className="coverage-details"><summary>Responsibility coverage &amp; source navigation</summary>
     <p>These twelve links describe coverage only. No task-to-responsibility assignment is inferred from titles or notes.</p>
     <div className="grid list">{sections.map(([title, href, note]) => <article className="card" key={title}><h3>{title}</h3><span className="badge">Open source</span><p className="next">{note}</p><Link className="native-owner" to={href}>View ↗</Link></article>)}</div></details></section>

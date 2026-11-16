@@ -37,3 +37,6 @@
 .nolan-board .nolan-master-task dt{font-weight:600}.nolan-board .nolan-master-task dd{margin:0;overflow-wrap:anywhere}
 .nolan-board .nolan-master .toolbar{flex-wrap:wrap}.nolan-board .nolan-master .toolbar input{min-width:0;max-width:100%;flex:1;padding:8px}
 @container(max-width:500px){.nolan-board .nolan-master-task dl{grid-template-columns:minmax(0,1fr)}.nolan-board .nolan-master .toolbar select{max-width:100%}}
+
+.nolan-board .nolan-master-task>a{grid-column:1/-1;overflow-wrap:anywhere}
+.nolan-board .nolan-note-preview{white-space:pre-wrap;max-height:12rem;overflow:auto;overflow-wrap:anywhere}
