@@ -1,3 +1,15 @@
+## 16 November — PR #995 integrated-main / workbook compatibility checkpoint
+
+Main34c4552 integrated in092f929d, preserving Madison and all prior handovers; no PR
+merged to main. Workbook49136f9c remains separately owned. Its five unchanged guards,
+including debrief, run only in disposable DB with all five new MCP tools and retirement
+endpoints. No guard source copied into this PR. Native Deno’s explicit compatibility
+conditions and remaining hosted/installed/browser gates remain in the
+[release packet](STAFF-AI-RELEASE-PACKET-2026-11-16.md). No paid services, deployment,
+production migrations, credential changes or blocked PR-description retry.
+
+## Earlier readiness snapshot
+
 ## 16 November — PR #995 release-readiness packet, NOT LIVE
 
 Native Deno compatibility check and disposable real GoTrue/PostgREST/native-handler

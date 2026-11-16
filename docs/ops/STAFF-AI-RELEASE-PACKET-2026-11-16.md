@@ -1,18 +1,18 @@
 # PR #995 staged release packet — 16 November 2026
 
 Status: PREPARED, NOT RELEASE AUTHORITY. No production connection, hosted acceptance,
-merge, migration application or deployment was used for this readiness pass. The final
+PR merge to main, production migration application or deployment was used for this readiness pass. Current main was integrated into this candidate only. The final
 preparation commit is identified in the task handoff; freeze its exact SHA before any
-release. Runtime candidate entering this pass: `97c9eca443259ddbc23eb1fb53afb98b31e9cec2`.
+release. Recovered candidate: `0b1a7b895bdb9597450a289cd23993ef35aff510`. Main integration commit: `092f929d66f11a64d275f09be12d47cb8573b551`. The final tested code and receipt SHAs are recorded in the combined receipt below.
 
 ## Scope and compatibility freeze
 
-- Main inspected: `62f7a88ad961468697bd24aecd48132bc38d1450` (#997 documents).
-- Independent workbook candidate inspected: `832c0ccc297f0c0ee3e31f9bb5d36e46af51986c`.
+- Main inspected: `34c4552ec5108d1bb0aab49140da7ee2807de08b` (#998 Content-directions evidence fix), integrated with its exact tests and Madison handover preserved.
+- Independent workbook candidate inspected: `49136f9c693f83565605d2fcdc7dc1b5807e697c`.
   A `git merge-tree --write-tree` preview found only the ops handover conflict; runtime
   and test files merge without textual conflicts. This is not an actual merge or proof
   of whole-app behavioral compatibility. Preserve both handovers when combining.
-- Workbook source, policies and shared active-account helpers remain unedited. Its four
+- Workbook source, policies and shared active-account helpers remain unedited. Its five
   guard drafts were read verbatim from that pinned commit and applied ONLY inside the
   disposable database for compatibility checks. Its `assistant_update_video`,
   `apply_microsoft_sync_item` and `client_portal_published_content_guidelines` ownership
@@ -56,7 +56,7 @@ record resolved versions. Do not advertise this local map as hosted compilation 
 PostgREST JWT validation, the repository's canonical SQL and native Deno HTTP handlers.
 It has no mocked auth, fake user bearer or production env. Local service-role tokens and
 passwords are generated only for the disposable stack and never printed. Source helper
-and optional workbook guard drafts are byte-checked against workbook `832c0cc`; no copy
+and optional workbook guard drafts are byte-checked against workbook `49136f9c`; no copy
 of its security logic is maintained here. The shared replay helper records eleven known
 historical empty-database/storage/backfill gaps, not a falsely clean whole-schema replay.
 The observed replay applied 205 files with those eleven known gaps. Local role/schema
@@ -83,12 +83,12 @@ retry; direct private-RPC denial; immediate profile-inactivity denial with an al
 issued JWT; active/inactive manager ownership-summary behavior; retired endpoint 410
 for active staff/manager/admin and 403/401 for inappropriate identities; unchanged model
 usage/artifact counts during retired calls. Workbook draft guards apply unchanged and
-the tested source/draft operations still pass afterward. This is real LOCAL integration,
+all five MCP tools, retries, foreign-client/role/inactive denials and retired endpoints pass afterward. The new debrief guard admits active-admin missing-record validation and denies the same JWT immediately after deactivation. This is a guard compatibility check, not a duplicate of the workbook owner’s full debrief mutation suite. This is real LOCAL integration,
 not hosted Supabase, installed ChatGPT/Nolan, browser, physical-phone or whole-workbook
 acceptance. Final command/count receipts are in the task handoff and local JSON report.
 
 To reproduce, fetch the pinned workbook object read-only, extract its
-`tests/helpers/nolanCanonicalSchema.mjs` and four `docs/ops/sql/nolan_*_active*.draft.sql`
+`tests/helpers/nolanCanonicalSchema.mjs` and five `docs/ops/sql/nolan_*_active*.draft.sql`
 files to an isolated temporary directory, and cache the exact images above. Set:
 
 ```sh
@@ -100,9 +100,9 @@ DENO_DIR=/tmp/cg-retire-deno-cache \
 node scripts/marketing-isolated-auth-acceptance.mjs
 ```
 
-The four exact draft basenames are `nolan_source_active_reads`,
-`nolan_identity_definer_active`, `nolan_content_definer_active`, and
-`nolan_mutation_definer_active`. Do not substitute altered files or apply them outside
+The five exact draft basenames are `nolan_source_active_reads`,
+`nolan_identity_definer_active`, `nolan_content_definer_active`,
+`nolan_mutation_definer_active`, and `nolan_debrief_active`. Do not substitute altered files or apply them outside
 this isolated test without their owner's review and separate release authority.
 
 ## Ordered staged release and approval owners

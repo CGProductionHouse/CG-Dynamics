@@ -11,9 +11,9 @@ import {join,resolve} from 'node:path'
 import {pathToFileURL} from 'node:url'
 const replayPath=process.env.CG_CANONICAL_REPLAY_MODULE, deno=process.env.CG_DENO_BINARY, config=process.env.CG_DENO_CHECK_CONFIG
 assert.ok(replayPath&&deno&&config,'Explicit isolated replay helper, Deno binary and validation config required')
-const workbookHead='832c0ccc297f0c0ee3e31f9bb5d36e46af51986c'
+const workbookHead='49136f9c693f83565605d2fcdc7dc1b5807e697c'
 assert.equal(readFileSync(replayPath,'utf8'),execFileSync('git',['show',workbookHead+':tests/helpers/nolanCanonicalSchema.mjs'],{encoding:'utf8'}),'Replay helper must match the reviewed workbook commit')
-if(process.env.CG_WORKBOOK_DRAFT_DIR) for(const name of ['nolan_source_active_reads','nolan_identity_definer_active','nolan_content_definer_active','nolan_mutation_definer_active']) {
+if(process.env.CG_WORKBOOK_DRAFT_DIR) for(const name of ['nolan_source_active_reads','nolan_identity_definer_active','nolan_content_definer_active','nolan_mutation_definer_active','nolan_debrief_active']) {
  assert.equal(readFileSync(join(process.env.CG_WORKBOOK_DRAFT_DIR,name+'.draft.sql'),'utf8'),execFileSync('git',['show',workbookHead+':docs/ops/sql/'+name+'.draft.sql'],{encoding:'utf8'}),'Workbook draft must remain unchanged')
 }
 const {replayNolanCanonicalSchema}=await import(pathToFileURL(replayPath).href)
@@ -154,10 +154,38 @@ try {
  assert.ok((await rest('admin','mcp_marketing_source_review',{p_card:card})).status>=400)
  assert.ok((await mcp('admin','read_marketing_source',{context,card_id:card})).status>=400)
  sql(`update profiles set is_active=true where id='${accounts.admin.id}'`)
- if(process.env.CG_WORKBOOK_DRAFT_DIR){for(const name of ['nolan_source_active_reads','nolan_identity_definer_active','nolan_content_definer_active','nolan_mutation_definer_active'])sql(readFileSync(join(process.env.CG_WORKBOOK_DRAFT_DIR,name+'.draft.sql'),'utf8'))
-  const again=await mcp('admin','read_marketing_source',{context,card_id:card});assert.equal(again.data.result?.isError,false)
-  const after=await mcp('admin','write_marketing_artifact',{...draft,idempotency_key:randomUUID()});assert.equal(after.data.result?.isError,false)
-  checks.push('unchanged workbook-owned draft guards apply in isolated DB; MCP source/draft operations remain compatible')
+ if(process.env.CG_WORKBOOK_DRAFT_DIR){for(const name of ['nolan_source_active_reads','nolan_identity_definer_active','nolan_content_definer_active','nolan_mutation_definer_active','nolan_debrief_active'])sql(readFileSync(join(process.env.CG_WORKBOOK_DRAFT_DIR,name+'.draft.sql'),'utf8'))
+  stage='all five tools and retirement after latest workbook guards'
+  const again=await mcp('admin','read_marketing_source',{context,card_id:card,document_id:document});assert.equal(again.data.result?.isError,false)
+  const skills=await mcp('admin','get_marketing_knowledge',{context,client_id:client});assert.equal(skills.data.result?.isError,false);assert.ok(JSON.parse(skills.data.result.content[0].text).cards.some(c=>c.id===card))
+  const active=await mcp('admin','activate_marketing_knowledge',{context,card_id:card,expected_content_hash:hash,confirm_human_activation:true,idempotency_key:randomUUID()});assert.equal(active.data.result?.isError,false)
+  const nextDraft={...draft,idempotency_key:randomUUID()}
+  const after=await mcp('admin','write_marketing_artifact',nextDraft);assert.equal(after.data.result?.isError,false)
+  const nextId=JSON.parse(after.data.result.content[0].text).artifact_id
+  const reread=await mcp('admin','read_marketing_artifacts',{context:scope,client_id:client,artifact_id:nextId});assert.equal(reread.data.result?.isError,false);assert.equal(JSON.parse(reread.data.result.content[0].text).versions.length,1)
+  const replayed=await mcp('admin','write_marketing_artifact',nextDraft);assert.equal(JSON.parse(replayed.data.result.content[0].text).artifact_id,nextId)
+  const wrong=await mcp('admin','write_marketing_artifact',{...nextDraft,client_id:other});assert.ok(wrong.data.error||wrong.data.result?.isError)
+  const foreignRead=await mcp('admin','read_marketing_artifacts',{context:scope,client_id:other,artifact_id:nextId});assert.ok(foreignRead.data.error||foreignRead.data.result?.isError)
+  assert.ok((await rest('manager','mcp_marketing_source_review',{p_card:card})).status>=400)
+  const beforeRetirement=modelState()
+  for(const role of ['admin','manager'])for(const [path,action] of [['/retired-chat','chat'],['/retired-chat','unknown'],['/retired-marketing','run']])assert.equal((await retired(role,path,action)).status,410)
+  for(const path of ['/retired-chat','/retired-marketing']){
+   assert.equal((await retired('client',path,'run')).status,403)
+   assert.equal((await retired('staff',path,'run')).status,403) // still inactive
+   assert.equal((await retired(null,path,'run')).status,401)
+  }
+  assert.equal(modelState(),beforeRetirement)
+  // Exercise the new guard with a real existing JWT, without duplicating the owner's mutation suite.
+  const debriefProbe={p_debrief_id:randomUUID(),p_actions:[]}
+  const missing=await rest('admin','apply_content_run_debrief',debriefProbe)
+  assert.equal(missing.status,400);assert.match(missing.body.toString(),/Debrief not found/)
+  sql(`update profiles set is_active=false where id='${accounts.admin.id}'`)
+  assert.equal((await rest('admin','apply_content_run_debrief',debriefProbe)).status,403)
+  assert.ok((await rest('admin','mcp_marketing_source_review',{p_card:card})).status>=400)
+  assert.ok((await mcp('admin','get_marketing_knowledge',{context,client_id:client})).status>=400)
+  sql(`update profiles set is_active=true where id='${accounts.admin.id}'`)
+  checks.push('latest five workbook guards unchanged: all five MCP tools, retries, foreign-client/role/inactive denial and retired handlers pass together')
+  checks.push('new debrief guard: active admin reaches canonical missing-record validation; same JWT after deactivation is denied before record access')
  }
  checks.push('already-issued real JWT denied after profile deactivation; restored only in synthetic fixture')
  writeFileSync(report,JSON.stringify({head:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),images,workbookHead,checks,replay:{applied:replay.filter(x=>x.result==='applied').length,knownFailures:replay.filter(x=>x.result!=='applied').map(x=>({file:x.file,error:x.error}))},limits:['local synthetic accounts only','no hosted/installed connector/browser acceptance','Deno npm import map and explicit frontend type compatibility config','no email delivery'],completed:true},null,2)+'\n')
