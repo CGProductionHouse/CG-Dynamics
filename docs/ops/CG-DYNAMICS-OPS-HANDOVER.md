@@ -1,3 +1,16 @@
+## 16 November — Nolan canonical policy replay, release still gated
+
+Existing draft #990 now exercises real repository profiles/native-task policies
+and triggers in isolated PostgreSQL, in addition to the minimal fixture. The
+30-test database selection passes; 202/213 repository SQL files fully apply and
+11 exact non-Nolan/platform/data-dependent failures remain disclosed. This is
+not full Supabase or authenticated-browser parity. Read
+[Nolan decision contract](NOLAN-DECISION-REQUEST-CONTRACT.md#16-november-canonical-policy-replay-continuation)
+and its manifest before relying on the evidence. No draft SQL/application change;
+Needs You and Git deployment stay false. Sandboxed Chromium startup and missing
+local Auth/PostgREST prevent signed-in browser acceptance. No sandbox bypass,
+production operation, PR-description retry or MSI/social-owner change.
+
 ## 16 November — Nolan isolated database acceptance, still draft
 
 Existing #990 now has real PostgreSQL 17.12 acceptance in the fresh saved cloud

@@ -3,8 +3,9 @@ import {execFileSync, spawn} from 'node:child_process'
 import {readFileSync} from 'node:fs'
 import {randomUUID} from 'node:crypto'
 import test from 'node:test'
+import {replayNolanCanonicalSchema} from './helpers/nolanCanonicalSchema.mjs'
 // Opt-in disposable DB only; never reads .env, publishes ports, or pulls images.
-test('decision persistence and role isolation on disposable PostgreSQL', {skip:process.env.RUN_NOLAN_DECISION_DB_TESTS!=='1',timeout:120000},async(t)=>{
+for(const canonical of [false,true])test(`decision persistence and role isolation on ${canonical?'repository replay':'minimal'} disposable PostgreSQL`, {skip:process.env.RUN_NOLAN_DECISION_DB_TESTS!=='1',timeout:180000},async(t)=>{
  const name='cg-nolan-decisions-'+randomUUID()
  const docker=args=>execFileSync('docker',args,{encoding:'utf8',timeout:60000,stdio:['pipe','pipe','pipe']})
  const sql=input=>execFileSync('docker',['exec','-i',name,'psql','-U','postgres','-v','ON_ERROR_STOP=1','-Atq'],{input,encoding:'utf8',timeout:10000,stdio:['pipe','pipe','pipe']}).trim()
@@ -52,8 +53,16 @@ test('decision persistence and role isolation on disposable PostgreSQL', {skip:p
   // to become postgres before connecting so entrypoint restart cannot race setup.
   let ready=false;for(let i=0;i<40;i++){try{if(docker(['exec',name,'cat','/proc/1/comm']).trim()!=='postgres')throw new Error('entrypoint still initializing');docker(['exec',name,'pg_isready','-U','postgres']);ready=true;break}catch{}await new Promise(r=>setTimeout(r,250))}
   assert.ok(ready)
-  // Minimal synthetic canonical dependencies; not the full production schema.
-  sql(`create role anon;create role authenticated;create schema auth;
+  // Compare minimal dependencies with unmodified repository public schema/policies.
+  // Both modes use synthetic identities; neither proves real authentication.
+  if(canonical){
+   const report=replayNolanCanonicalSchema(sql,'/tmp/nolan-canonical-replay.json')
+   t.diagnostic(`Repository replay: ${report.filter(r=>r.result==='applied').length}/${report.length} files fully applied; exact failures in /tmp/nolan-canonical-replay.json`)
+   for(const [id,role] of [[admin,'admin'],[recipient,'manager'],[other,'manager'],[staff,'staff']]){
+    sql(`insert into auth.users(id,email,raw_user_meta_data) values ('${id}','${id}@example.invalid','{"full_name":"Synthetic fixture"}');update profiles set role='${role}' where id='${id}';`)
+   }
+   sql(`insert into command_centre_tasks(id,title,status) values ('${task}','Synthetic task','in_progress')`)
+  }else sql(`create role anon;create role authenticated;create schema auth;
    create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
    create table public.profiles(id uuid primary key,full_name text,role text,is_active boolean);
    create table public.command_centre_tasks(id uuid primary key,title text,status text);
@@ -87,6 +96,61 @@ test('decision persistence and role isolation on disposable PostgreSQL', {skip:p
   const actorQuery=(actor,query)=>`set role authenticated;set request.jwt.claim.sub='${actor}';${query}`
   const freshRevision=()=>JSON.parse(as(admin,`select preview_nolan_decision_task('${task}');`)).revision
   const newRequest=()=>as(admin,create(freshRevision(),'Concurrent question',recipient,randomUUID()))
+
+  if(canonical){
+   await t.test('canonical task RLS and profile policies retain role/source isolation',()=>{
+    const operational=randomUUID(),client=randomUUID()
+    sql(`insert into auth.users(id,email) values ('${client}','${client}@example.invalid');
+     insert into command_centre_tasks(id,title,bucket) values ('${operational}','Synthetic operational','Graphic Design')`)
+    for(const actor of [admin,recipient,other])assert.equal(as(actor,`select count(*) from command_centre_tasks where id in ('${task}','${operational}')`),'2')
+    assert.equal(as(staff,`select count(*) from command_centre_tasks where id='${task}'`),'0')
+    assert.equal(as(staff,`select count(*) from command_centre_tasks where id='${operational}'`),'1')
+    assert.equal(as(client,`select count(*) from command_centre_tasks where id in ('${task}','${operational}')`),'0')
+    assert.equal(as(recipient,'select count(*) from profiles'),'1')
+    assert.equal(as(staff,'select count(*) from profiles'),'1')
+    as(staff,`update profiles set role='admin' where id='${staff}'`)
+    as(recipient,`update profiles set is_active=false where id='${admin}'`)
+    assert.equal(sql(`select role from profiles where id='${staff}'`),'staff')
+    assert.equal(sql(`select is_active from profiles where id='${admin}'`),'t')
+    assert.throws(()=>as(client,`select preview_nolan_decision_task('${operational}')`),/manager access/)
+    assert.throws(()=>as(staff,`select preview_nolan_decision_task('${operational}')`),/manager access/)
+    assert.throws(()=>as(recipient,create(freshRevision(),'Visible source is not producer authority',other,randomUUID())),/administrator/)
+   })
+   await t.test('canonical timestamp trigger and full-row hash invalidate non-title source changes',()=>{
+    const before=JSON.parse(as(admin,`select preview_nolan_decision_task('${task}')`))
+    assert.equal(JSON.parse(as(admin,`set timezone='Pacific/Auckland';select preview_nolan_decision_task('${task}')`)).revision,before.revision)
+    const timestamp=sql(`select updated_at from command_centre_tasks where id='${task}'`)
+    as(admin,`update command_centre_tasks set notes='Material source change',helper_names=array['Synthetic helper'] where id='${task}'`)
+    assert.notEqual(sql(`select updated_at from command_centre_tasks where id='${task}'`),timestamp)
+    assert.notEqual(freshRevision(),before.revision)
+    assert.throws(()=>as(admin,create(before.revision,'Stale notes',recipient,randomUUID())),/revision/)
+   })
+   await t.test('canonical requester profile revocation wins concurrent create',async()=>{
+    const revision=freshRevision(),k=randomUUID()
+    const result=await race(actorQuery(admin,`update profiles set is_active=false where id='${admin}';`),actorQuery(admin,create(revision,'Revoked requester',recipient,k)))
+    assert.notEqual(result.code,0);assert.match(result.errors,/administrator/)
+    assert.equal(sql(`select count(*) from nolan_decision_requests where idempotency_key='${k}'`),'0')
+    sql(`update profiles set is_active=true where id='${admin}'`)
+   })
+   await t.test('canonical recipient role revocation wins concurrent create',async()=>{
+    const revision=freshRevision(),k=randomUUID()
+    const result=await race(actorQuery(admin,`update profiles set role='staff' where id='${recipient}';`),actorQuery(admin,create(revision,'Revoked recipient',recipient,k)))
+    assert.notEqual(result.code,0);assert.match(result.errors,/recipient/)
+    assert.equal(sql(`select count(*) from nolan_decision_requests where idempotency_key='${k}'`),'0')
+    assert.throws(()=>as(recipient,'select list_my_nolan_decision_requests()'),/manager access/)
+    as(admin,`update profiles set role='manager' where id='${recipient}'`)
+   })
+   await t.test('canonical authenticated source edit wins concurrent response',async()=>{
+    const request=newRequest()
+    const result=await race(actorQuery(admin,`update command_centre_tasks set notes='Concurrent canonical edit' where id='${task}';`),actorQuery(recipient,`select close_nolan_decision_request('${request}',1,'resolve','Stale canonical answer');`))
+    assert.notEqual(result.code,0);assert.match(result.errors,/Source revision changed/)
+    assert.equal(sql(`select state||':'||version from nolan_decision_requests where id='${request}'`),'pending:1')
+   })
+   await t.test('canonical source/profile deletion cannot orphan retained decision history',()=>{
+    assert.throws(()=>as(admin,`delete from command_centre_tasks where id='${task}'`),/foreign key/)
+    assert.throws(()=>sql(`delete from auth.users where id='${recipient}'`),/foreign key/)
+   })
+  }
   await t.test('simultaneous identical retries return one persisted receipt',async()=>{
    const k=randomUUID(),query=actorQuery(admin,create(freshRevision(),'Concurrent retry',recipient,k))
    const result=await race(query,query)
@@ -131,7 +195,7 @@ test('decision persistence and role isolation on disposable PostgreSQL', {skip:p
    const request=newRequest()
    const queries=[`select preview_nolan_decision_task('${task}');`,create(freshRevision(),'Denied',recipient,randomUUID()),'select list_my_nolan_decision_requests();',`select close_nolan_decision_request('${request}',1,'resolve','Denied');`]
    for(const role of ['client','team','staff']){
-    const actor=randomUUID();sql(`insert into profiles values ('${actor}','Denied role','${role}',true)`)
+    const actor=randomUUID();if(canonical)sql(`insert into auth.users(id,email) values ('${actor}','${actor}@example.invalid');update profiles set role='${role}' where id='${actor}'`);else sql(`insert into profiles values ('${actor}','Denied role','${role}',true)`)
     for(const query of queries)assert.throws(()=>as(actor,query),/access required|administrator/)
    }
    for(const query of queries){

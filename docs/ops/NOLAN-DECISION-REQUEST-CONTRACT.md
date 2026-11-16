@@ -236,3 +236,77 @@ Final full suite: **4,414 tests, 4,384 pass, 30 optional skips, zero failures or
 cancellations**, exit 0 in 222.99 seconds, including all 12 real PostgreSQL checks.
 Command: `VITE_SUPABASE_URL=http://127.0.0.1:1 VITE_SUPABASE_PUBLISHABLE_KEY=synthetic-test-key RUN_NOLAN_DECISION_DB_TESTS=1 npm test`.
 All generated Nolan database containers were absent after completion.
+
+## 16 November canonical policy replay continuation
+
+Continued from verified remote head `2d2fc2a66d01aeadac38489d0a4ccfdb9b1d72b9`.
+The same opt-in database test now runs both the original minimal fixture and a
+repository-wide replay fixture. The latter applies unmodified repository SQL,
+including the real profiles/native-task tables, triggers and policies. The
+helper `tests/helpers/nolanCanonicalSchema.mjs` records every attempted file,
+SHA256, result and error plus the resulting policy catalogue and installed
+extensions. Unknown replay failures fail acceptance; eleven explicit non-Nolan
+replay gaps are documented, never silently treated as successful application.
+
+The natural legacy phase order must put bare foundation phases before lettered
+additions: `phase-6-cg-planner-core.sql` before `phase-6e-teams-planner-import.sql`.
+The older generic replay script's `sort -V` does the opposite. The new harness
+corrects that order and explicitly defers four legacy additions until their
+metric-registry/content-guideline foundations exist. No historical migration or
+shared replay script was rewritten, and no production migration was run.
+
+Real PostgreSQL checks now cover canonical admin/manager/staff/client source
+visibility, own-profile reads, denied staff role escalation/manager profile
+mutation, named-recipient versus source-reader authority, timestamp-trigger and
+full-row non-title revision invalidation, timezone-invariant previews, concurrent
+requester deactivation, recipient role revocation and authenticated source
+mutation, plus source/auth-user deletion restriction. Original role, idempotency,
+CAS, response/withdrawal races and overflow/coverage cases run against both schemas.
+The affected database selection passes 30 tests (12 minimal, 18 repository replay).
+No defect in the draft decision SQL was demonstrated; activation remains false.
+
+Scope is deliberately precise: 202 of 213 repository SQL files fully apply.
+Eleven remaining failures include two missing Storage-schema dependencies, seven
+real-client-dependent backfills/seeds, a legacy date/text SQL mismatch and a
+legacy duplicate source seed. Failed nontransactional files may have applied
+preceding statements. This is NOT complete whole-database/Supabase parity.
+The exact manifest and current policy catalogue are recorded in
+`NOLAN-CANONICAL-REPLAY-2026-11-16.md`.
+
+Platform boundary: PostgreSQL 17.12 with pgcrypto, synthetic auth.users columns
+and auth.uid()/auth.role() plus explicitly emulated Supabase API default grants.
+No public application policy is mocked. The auth scaffold is NOT GoTrue sign-in,
+JWT verification, PostgREST or hosted Supabase proof. Storage, vault, cron and net
+services/schemas are not approximated. The repository-referenced Supabase image
+`public.ecr.aws/supabase/postgres:17.6.1.159` could not be fetched: the registry
+returned `Forbidden`; the existing official PostgreSQL image remained the runtime.
+
+Browser feasibility: Chromium and Python Playwright are installed, but no local
+GoTrue/PostgREST/Supabase CLI backend is installed. A clean headless Chromium
+launch with `chromium_sandbox=True` terminated during startup with crashpad and
+setuid-sandbox initialization errors. No retry disabling the sandbox, copied
+production session, injected authenticated state, server/port exposure or mock
+login was used. No signed-in, responsive visual or physical-device acceptance is
+claimed. The smallest next environment requirement is a working sandbox-enabled
+browser and a genuine isolated local Auth/PostgREST stack with synthetic accounts
+and same-origin routing. Full replay additionally requires real Supabase platform
+schemas and reviewed handling of the explicit legacy/data-dependent failures.
+
+The prior PR-description publication denial remains in force: no retry, rewrite
+through another tool, comment, merge or release. Source/test evidence stays on
+existing draft #990; the MSI/social lane and production resources remain untouched.
+
+
+Final continuation verification: **4,432 tests, 4,402 passed, 30 optional skips,
+zero failures/cancellations**, exit 0 in 227.81 seconds. Includes all 30 real
+PostgreSQL tests. Local TypeScript/Vite build passed (10.29s Vite phase); emitted
+`MyWorkPage-Bqki3EFh.js` retains actual application code and disabled Needs You
+copy. Scoped ESLint and diff checks pass. No generated database container remains.
+
+```sh
+RUN_NOLAN_DECISION_DB_TESTS=1 node --test tests/nolanDecisionDatabase.test.mjs
+VITE_SUPABASE_URL=http://127.0.0.1:1 VITE_SUPABASE_PUBLISHABLE_KEY=synthetic-test-key RUN_NOLAN_DECISION_DB_TESTS=1 npm test
+VITE_SUPABASE_URL=http://127.0.0.1:1 VITE_SUPABASE_PUBLISHABLE_KEY=synthetic-test-key npm run build
+npx eslint tests/nolanDecisionDatabase.test.mjs tests/helpers/nolanCanonicalSchema.mjs
+git diff --check
+```
