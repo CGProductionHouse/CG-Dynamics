@@ -89,4 +89,3 @@ until normal author receipts and independent canonical readback prove them.
 
 Rollback: redeploy captured exactv82 closure only if no intervening owner release;
 preserve verify_jwt/body authentication and re-read files/version before acting.
-
