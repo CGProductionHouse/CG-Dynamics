@@ -1,3 +1,4 @@
+<!-- PR #995 continuation: narrowly guards assistant_ownership_review_summary with exact active auth.uid(); #990 retains shared RLS/helper ownership. Two new migrations remain UNAPPLIED. Isolated regression reproduces original bypass and verifies active/denied accounts and unchanged history. -->
 ## 16 November — PR #995 model-free connector continuation, NOT LIVE
 
 Same retirement lane now exposes reviewed generic/specialist skills and current

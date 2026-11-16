@@ -37,7 +37,7 @@ bindings/history survive. Human review and source governance stay in their curre
 UI/role authority. Content Guidelines remain canonical ChatGPT-authored operations,
 without a new Content Director/provider dependency.
 
-Release packet now includes ONE new migration plus the changed MCP index/catalog,
+Release packet now includes TWO new migrations plus the changed MCP index/catalog,
 new marketingKnowledge module and its unchanged shared skill dependencies, in addition
 to the two retired Edge handlers/frontend. Verify deployed migration/receipt permissions
 and active actor/client/version denial before exposing write tools. Keep migration,
@@ -46,6 +46,23 @@ schema change adds no new authenticated/anon grants. Do not roll it back by dele
 history or receipts. Preserve My Assistant/staff_assistant_profiles and all Library
 management surfaces. #679 hosting gates and legitimate browser/ChatGPT/Nolan acceptance
 remain mandatory.
+
+### Narrow ownership-summary guard (coordinated with #990)
+
+The retired composer was the only caller of `loadOwnershipReviewSummary`; the RPC
+remains callable, so removing the UI alone did not close inactive-session access.
+None of the new MCP tools calls this RPC. PR #995 owns additive migration
+`20261116170000_guard_assistant_ownership_summary.sql`; #990 owns shared policy/helper
+work and confirmed it will not edit this function. The guard preserves `is_manager()`
+and additionally requires the exact `auth.uid()` profile to be active. No shared
+helper/policy, grants, result shape or historical rows change. Migration is UNAPPLIED.
+
+`assistantOwnershipActiveAccount.test.mjs` executes the original and replacement RPC
+in isolated PostgreSQL: original inactive manager access reproduced; patched inactive
+manager/admin, staff/team, missing/null identity and anonymous access denied; active
+manager/admin output unchanged and historical conflict retained. The helper fixture
+intentionally remains role-only to prove this function protects itself independently
+of #990. Hosted JWT/RLS integration remains a release gate.
 
 ### Continuation verification
 
