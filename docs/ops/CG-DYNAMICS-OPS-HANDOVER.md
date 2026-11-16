@@ -1,3 +1,15 @@
+## 16 November — authorised brand panel merge reconciliation (#984)
+
+Owner requested #984 into main before #999 into the existing PR910 branch.
+Reconciled current main 4449131 without replacing parallel work; removed 31
+accidentally tracked Python bytecode cache files and ignored future caches.
+Brand-panel source is unchanged. Brand migration is ALREADY applied under ledger
+20261111064719 per the Claude handover: do not re-apply or seed production.
+Local brandRules/videoPipeline checks pass 31/31; production build verification
+and exact merge receipt are recorded in PR #984. Git deployment remains OFF.
+No Vercel operation, production data write, new tracker or #910-base resolution.
+Source merge does not mean staff production browser acceptance or deployment.
+
 ## 16 November — Dulux current report/November Plan LIVE; BrandHub remains private
 
 CA chose exact ACTIVE Dulux Paint & Paper Bloemfontein2aed8a31 next. Actual issued
@@ -182,6 +194,21 @@ mapping checks and iPhone user-gesture clipboard handling. No account reset or
 production mutation. [Evidence and limitations](CLIENT-LOGIN-MESSAGE-COPY-2026-11-16.md).
 Local tests/build/lint/diff green; browser acceptance unverified. NOT LIVE; #679
 hosting gate and other agent lanes remain unchanged.
+
+## 11 November — video editing system of record + brand rules panel
+
+CA set one system for every editor/agent: CG Dynamics is the video tracker
+(Video Pipeline status, assignment, review) and holds client brand rules
+(PR #984; tables applied with CA approval, ledger 20261111064719; CG Production
+House profile + 4 CG rules + 6 house rules seeded). Working files, feedback rounds
+and handovers live in company Google Drive `m.productions.cg@gmail.com` →
+**CG Video Editing System** (read its 00_START_HERE). Approved finals only go to
+the client portal OneDrive, linked in Dynamics. Read
+`docs/ops/VIDEO-EDITING-SYSTEM-OF-RECORD.md`. Nolan lanes unchanged; their trackers
+migrate into this layout. PR #984 app code is unmerged/undeployed (#679 gate).
+16 Nov (CA-approved): rules updated in production — retired `1fefef98`, added six
+CG rules and two house rules; full handover in PR #999
+(`docs/ops/CLAUDE-NOLAN-HANDOVER-2026-11-16.md`).
 
 ## 11 November — existing-film registration repair, local candidate only
 

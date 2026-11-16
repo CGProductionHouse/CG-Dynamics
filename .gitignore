@@ -148,3 +148,7 @@ scripts/generated/
 .vercel
 .worktrees/
 artifacts/
+
+# Generated Python interpreter caches
+__pycache__/
+*.py[cod]

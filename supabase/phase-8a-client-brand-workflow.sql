@@ -1,4 +1,6 @@
 -- Phase 8a: Client Brand Profile + Update Log
+-- SUPERSEDED, DO NOT RUN. Replaced by supabase/migrations/20261111064719_client_brand_profiles_and_rules.sql
+-- (this version let any signed-in user, including clients, read brand notes).
 -- Apply in Supabase SQL Editor when ready.
 -- App degrades gracefully (42P01 errors handled) until this migration is applied.
 
