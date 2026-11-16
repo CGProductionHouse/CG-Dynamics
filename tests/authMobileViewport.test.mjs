@@ -60,3 +60,17 @@ test('initial phone viewport fits device width without suppressing user zoom or 
   assert.match(html, /name="viewport" content="width=device-width, initial-scale=1\.0"/)
   assert.doesNotMatch(html + read('src/pages/Login.tsx'), /user-scalable=no|maximum-scale=1|minimum-scale=1|visualViewport.*scale|document\.querySelector\(['"]meta\[name=/)
 })
+
+test('portal header and overview shrink at native phone width instead of clipping a wide layout', () => {
+  const shell = read('src/components/client/ClientPortalShell.tsx')
+  const home = read('src/pages/client/ClientPortalHome.tsx')
+  assert.match(shell, /data-client-portal className="relative min-h-screen w-full min-w-0/)
+  assert.doesNotMatch(shell, /overflow-x-hidden/)
+  assert.match(shell, /flex min-w-0 flex-1 items-center/)
+  assert.match(shell, /id="client-portal-content" className="[^"]*w-full min-w-0/)
+  assert.match(home, /grid min-w-0 grid-cols-1 gap-6/)
+  assert.match(home, /lg:grid-cols-\[minmax\(0,1\.2fr\)_minmax\(0,0\.8fr\)\]/)
+  assert.match(home, /grid-cols-1 gap-2 min-\[400px\]:grid-cols-2/)
+  assert.match(home, /min-w-0 break-words rounded-2xl/)
+  assert.match(read('src/index.css'), /\[data-client-portal\] input:not\(\[type='checkbox'\]\):not\(\[type='radio'\]\)/)
+})

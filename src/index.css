@@ -75,6 +75,9 @@ textarea {
   [data-auth-shell] input:not([type='checkbox']):not([type='radio']),
   [data-auth-shell] select,
   [data-auth-shell] textarea,
+  [data-client-portal] input:not([type='checkbox']):not([type='radio']),
+  [data-client-portal] select,
+  [data-client-portal] textarea,
   [data-staff-shell] input:not([type='checkbox']):not([type='radio']),
   [data-staff-shell] select,
   [data-staff-shell] textarea {

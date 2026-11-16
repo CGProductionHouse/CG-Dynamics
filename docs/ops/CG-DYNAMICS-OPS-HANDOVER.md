@@ -1,5 +1,12 @@
 ## 16 November — mobile staff cleanup, source candidate only
 
+Latest client screenshot: live HTML/assets independently confirm old 14px login
+and absent candidate CSS; current deployment/source/rollback recorded in the
+mobile cleanup receipt. Added bounded portal header/Overview shrink/wrap fixes
+and portal form sizing; 41 focused fixture-env tests/build/lint/diff pass. No
+deployment/cloud build or production mutation. #679/no-Vercel release hold and
+unverified current budget remain; do not tell CA the live phone view changed.
+
 Client-login follow-up in the same PR: auth inputs now inherit explicit 16px
 phone sizing, preventing Safari focus zoom from carrying into the portal; normal
 pinch zoom and the device-width initial viewport remain. Actual rendered-component
