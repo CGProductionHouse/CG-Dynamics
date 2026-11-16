@@ -1,3 +1,15 @@
+## 16 November — client opening crop follow-up
+
+CA's new screenshot confirms #993 reached the phone but the opening view still
+crops. The old HTTP/test receipt is not physical-device acceptance. Isolated
+`fix/client-portal-opening-viewport` adds a bounded iOS entry-only retained-zoom
+repair and pre-auth blur.93tests plus actual local Chromium/WebKit five-width
+opening/login/long-name checks pass; native Chromium16/14magnification reproduces
+the old crop and returns to1 with correction, later zoom preserved. No production
+data/account changes or other agent files. [Evidence and release boundary](CLIENT-OPENING-VIEWPORT-2026-11-16.md).
+Physical iPhone acceptance remains unverified; do not send CA through a fresh-tab
+loop or claim source/HTTP checks prove it. Corrective release receipt follows when live.
+
 ## 16 November — approved mobile staff/client viewport release LIVE
 
 CA approved PR #993 release. Exact runtime ccbb6ec7 is LIVE at
