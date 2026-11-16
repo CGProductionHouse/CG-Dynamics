@@ -1,4 +1,18 @@
-## Latest 16 November — Instagram private prerequisites verified locally
+## Latest 16 November — LinkedIn native status gap fixed locally
+
+Same draft PR #991 / #220. Official LinkedIn schema review reproduced native
+PUBLISH_REQUESTED becoming unknown in the shared normalizer. Fixed native
+lifecycleState/legacy status handling, conflict rejection and share/ugcPost URN
+validation; media AVAILABLE/draft/unknown never counts as published.214 affected
+regressions, build/emitted app, scoped lint, helper typing and diff pass AFTER
+this correction. The full4597/4567/30 run below predates this small isolated
+LinkedIn change. No LinkedIn runtime/credential/mapping/worker registration or
+live mutation. Organization entitlement/role, versioned transport, durable media
+upload/barriers and exact-author/media readback still required; see existing
+[receipt](SOCIAL-PUBLISHING-220-2026-11-15.md). JPEG dependency approval pending;
+manifest/lock/shared node_modules unchanged. No deployment or production change.
+
+## Earlier 16 November — Instagram private prerequisites verified locally
 
 Same draft PR #991 / #220. Concrete private exact-account encrypted credential
 checks now distinguish Instagram Login from Facebook Login, without reporting or

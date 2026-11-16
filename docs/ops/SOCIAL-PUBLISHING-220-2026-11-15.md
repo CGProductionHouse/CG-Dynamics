@@ -1,5 +1,34 @@
 # Social publishing — 15 November 2026
 
+## Latest 16 November — LinkedIn lifecycle correction, SOURCE ONLY
+
+While the exact JPEG dependency approval is pending, official LinkedIn review
+exposed a concrete normalization gap: native `lifecycleState=PUBLISH_REQUESTED`
+was treated as unknown. Regression reproduced before fixing. The existing shared
+normalizer now accepts native lifecycleState and the legacy internal status
+projection, distinguishes pending/failed/published, refuses conflicting evidence,
+and requires an actual share/ugcPost URN before reporting posted. Image AVAILABLE,
+drafts and unknown states cannot become published posts. No account IDs/mappings,
+new adapter/route/worker or provider mutation is introduced by this correction.
+
+Current primary references:
+[Post Schema](https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/post-api-schema?view=li-lms-2026-09),
+[Posts API](https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/posts-api?view=li-lms-2026-09),
+[Images API](https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/images-api?view=li-lms-2026-09).
+Image readiness and post publication have different state vocabularies. Versioned
+REST/Rest.li headers, Community Management entitlement, current organization roles,
+image upload/readiness, durable mutation barriers and exact-author/media readback
+are still mandatory before any LinkedIn runtime is registered. The retiring
+202511 version is not a safe release default. Member/ads grants are not assumed.
+
+Post-correction affected suite **214/214 passes**, including existing Facebook,
+Instagram, Business OAuth, preparation, authority and management regressions.
+Build/emitted application, scoped lint, helper typing and diff pass. The full
+4597/4567/30 acceptance below was completed BEFORE this small isolated LinkedIn
+branch correction; it is not relabelled as a new full run. No database changes or
+fresh browser/native/provider acceptance. Exact decoder adoption question remains
+pending; manifest/lock/shared dependencies are untouched. Same draft PR #991.
+
 ## Latest 16 November — concrete Instagram credentials and JPEG qualification, SOURCE ONLY
 
 Same draft PR #991 / #220, with no worker activation or production change. Both

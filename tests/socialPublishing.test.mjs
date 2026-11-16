@@ -156,6 +156,26 @@ test('container, upload, scheduled and unknown states never masquerade as posted
   for (const p of ['facebook', 'instagram', 'tiktok', 'linkedin', 'youtube']) assert.equal(normalize(p, { status: 'NEW_UNKNOWN_PROVIDER_STATE' }).state, 'unknown_outcome')
 })
 
+test('LinkedIn native lifecycle fields distinguish requested, failed and public states without accepting conflicting legacy status', () => {
+  const normalize = payload => policy.normalizePublishingObservation('linkedin', payload)
+  const postId = 'urn:li:ugcPost:123'
+  assert.equal(normalize({ lifecycleState: 'PUBLISH_REQUESTED', postId }).state, 'processing')
+  assert.equal(normalize({ lifecycleState: 'PUBLISH_FAILED', postId }).state, 'failed')
+  assert.equal(normalize({ lifecycleState: 'PUBLISHED', postId }).state, 'posted')
+  assert.equal(normalize({ status: 'PUBLISH_REQUESTED', postId }).state, 'processing')
+  for (const lifecycleState of ['DRAFT', 'AVAILABLE', 'WAITING_UPLOAD', 'PROCESSING_FAILED', 'UNKNOWN']) {
+    assert.equal(normalize({ lifecycleState, postId }).state, 'unknown_outcome')
+    assert.equal(normalize({ lifecycleState, status: 'PUBLISHED', postId }).state, 'unknown_outcome')
+  }
+  assert.equal(normalize({ lifecycleState: 'PUBLISH_FAILED', status: 'PUBLISHED', postId }).state, 'unknown_outcome')
+  assert.equal(normalize({ lifecycleState: null, status: 'PUBLISHED', postId }).state, 'unknown_outcome')
+  assert.equal(normalize({ lifecycleState: 'PUBLISHED' }).state, 'unknown_outcome')
+  for (const id of ['urn:li:image:123', 'urn:li:organization:123', 'https://foreign.invalid', 'urn:li:share:123/foreign']) {
+    assert.equal(normalize({ lifecycleState: 'PUBLISHED', postId: id }).state, 'unknown_outcome')
+    assert.equal(normalize({ status: 'PUBLISHED', postId: id }).state, 'unknown_outcome')
+  }
+})
+
 test('ambiguous submissions reconcile; proven throttles back off with bounded attempts', () => {
   const decide = policy.publishingRetryDecision
   assert.equal(decide({ stage: 'submission', httpStatus: 503, attempt: 0 }).action, 'reconcile')

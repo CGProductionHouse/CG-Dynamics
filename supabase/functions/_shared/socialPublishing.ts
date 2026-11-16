@@ -144,9 +144,14 @@ export function normalizePublishingObservation(platform: PublishingPlatform, pay
     if (payload.is_published === true && postId) return { state: 'posted', postId, operationId }
     if (payload.is_published === false && postId && typeof payload.scheduled_publish_time === 'number' && Number.isFinite(payload.scheduled_publish_time)) return { state: 'provider_scheduled', operationId, postId }
   } else if (platform === 'linkedin') {
-    if (status === 'PUBLISHED' && postId) return { state: 'posted', postId, operationId }
-    if (status === 'PROCESSING') return { state: 'processing', operationId }
-    if (status === 'PUBLISH_FAILED') return { state: 'failed', operationId, errorCode: 'PUBLISH_FAILED' }
+    // Posts API returns lifecycleState; image status AVAILABLE is NOT a post.
+    // Keep the internal status projection compatible, but conflicting evidence
+    // must not promote a failed/draft native receipt to published.
+    const lifecycle = Object.hasOwn(payload, 'lifecycleState') ? payload.lifecycleState : status
+    if (Object.hasOwn(payload, 'lifecycleState') && Object.hasOwn(payload, 'status') && lifecycle !== status) return { state: 'unknown_outcome', operationId, postId }
+    if (lifecycle === 'PUBLISHED' && postId && /^urn:li:(share|ugcPost):\d+$/.test(postId)) return { state: 'posted', postId, operationId }
+    if (lifecycle === 'PUBLISH_REQUESTED' || lifecycle === 'PROCESSING') return { state: 'processing', operationId }
+    if (lifecycle === 'PUBLISH_FAILED') return { state: 'failed', operationId, errorCode: 'PUBLISH_FAILED' }
   } else if (platform === 'youtube') {
     if (payload.uploadStatus === 'processed' && payload.privacyStatus === 'public' && postId) return { state: 'posted', postId, operationId }
     if (['failed', 'rejected', 'deleted'].includes(String(payload.uploadStatus))) return { state: 'failed', operationId, errorCode: String(payload.uploadStatus) }
