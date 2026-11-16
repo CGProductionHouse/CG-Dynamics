@@ -1,4 +1,36 @@
-## 16November — Wiseman internal send authorised; delivery access blocked
+## 16November — Wiseman four amended posters delivered; browser restored
+
+Fresh supported inventory now exposes company Chrome `cgproductionhouse.com`.
+Existing WhatsApp session's actual profile heading is Nolan; CG Picasso Approvals
+was verified before sending. Do not retain the earlier browser-unavailable state
+as current or infer that reinstalling the plugin was necessary: no such causal
+claim was established. No account relinking, security expansion or job interruption.
+
+Current saved source pages exported through Canva's normal Download UI as high
+quality2160x2700 PNG: DP01/DP02/DP04 R6 and DP03 R7. Actual downloaded files were
+dimension/hash checked and visually inspected. Canva's download-event waiter timed
+out for DP01 although the UI completed and the actual file existed; inspected the
+file instead of initiating a duplicate export. WhatsApp Photo HD was separately
+selected and its checked icon verified for each upload; its photo processing is
+not a lossless original-file transfer.
+
+Four separate poster-plus-allocated-caption messages show Delivered in Picasso
+Approvals on16November at15:40,15:42,15:43,15:44 SAST. No signatures. Amonique was
+selected from actual mention suggestions and separately tagged at15:45, Delivered.
+Current MSI handover/manifest now say DELIVERED / DO NOT SEND AGAIN. No full-set or
+photo-post resend. Human creative approval pending; no client/GDA forwarding or
+scheduling. DP03 official master page remains R6 pending its exact two-call approval;
+saved source and delivered export are R7. All other master pages untouched.
+
+Fresh actual Picasso feedback/history read and latest Wiseman Instagram artwork
+retained:443visible posts, latest Dfyjjl0Amgk shown8hoursago (woman/Motul photo),
+visually distinct from current DP source subjects. Existing442social/93current
+Canva/legacy/9approval image evidence retained. This is bounded reuse evidence,
+not global non-use certification; same-DP amendments remain iterations. Private
+receipts under production-r2/delivery-r7-authorised. Same #948/draft#956 lane,
+R0incremental cost; no runtime/dependency/deployment/production-data change.
+
+## 16November — Wiseman internal send authorised; delivery access blocked (historical)
 
 Owner explicitly asks to send amendments to CG Picasso Approvals once updates are
 done. No additional send permission is pending; captions must remain unsigned.

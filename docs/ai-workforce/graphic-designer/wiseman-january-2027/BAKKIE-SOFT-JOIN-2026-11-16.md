@@ -1,5 +1,22 @@
 # DP03 bakkie — bounded soft-background-join revision
 
+## Subsequent delivery proof
+
+Company Chrome browser connection became available on a fresh supported inventory.
+The saved R7 source was exported through Canva Download as2160x2700 PNG, hash/
+dimension checked and visually inspected at full resolution. The previous missing
+HD-export limitation below is historical. Upper join is softened in the actual
+export; original vehicle/wrap remain visible. No new creative approval is inferred.
+
+DP03 R7 plus its unchanged unsigned allocated caption was delivered as an HD photo
+from the verified Nolan WhatsApp account to CG Picasso Approvals at15:43 SAST on
+16November. The other three amended R6 posters were delivered in the same run,
+with a separate actual Amonique mention. Current private delivery manifest is in
+production-r2/delivery-r7-authorised; handover packet says DO NOT SEND AGAIN.
+WhatsApp's HD processing is not lossless document delivery. Official master DP03
+is still R6 pending the previously requested exact two-call replacement approval;
+no page deletion/transfer was performed during export/send. All101otherpages intact.
+
 Owner feedback identifies the direct background line as clumsy. Scope is DP03
 only. The four-poster R6 colour balance, all wording, typography, exact logo,
 vehicle/roof overlap and allocated caption are retained; no other poster is revised.
