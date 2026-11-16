@@ -1,4 +1,37 @@
-## Latest 16 November — private TikTok durable reconciliation bridge
+## Latest 16 November — private TikTok native publishing prerequisites
+
+Same DRAFT PR991/#220/#269. New private unregistered reader reuses actual
+encrypted Business identity/grant resolution around native settings/property
+GETs. Account token belongs only on settings; current documented property list
+is app_id/secret-scoped, not the historical advertiser label. Fixed HTTPS,
+bounded bodies/deadline/cancellation; no credential/signature/extra-field
+projection or logging. Six inspection/GET calls maximum, no provider mutation.
+No real credential/provider read occurred: synthetic fixtures/actual encryption.
+
+Settings retain actual privacy/engagement/duration; verified domains and exact
+URL prefixes remain app-level facts, not client publication rights. Metadata
+blocker enforces conservative HTTPS/clean-path scope, fresh exact binding and
+declared1800second lifetime. Existing five-minute Meta signed delivery stays
+unchanged and does not qualify. No media/DNS fetch, upload, codec proof, real
+expiry/bytes/source/rights/eligibility or passing default; canSubmit:false in
+both APIs. No route/tool/env parser/worker registration or OAuth/store rewrite.
+56new/279affected checks, actual cached Deno typing, lint/build/app bundle pass.
+Final frozen-source suite: **4962 total /4931 pass /31 skips /0 failures**,
+concurrency2. Source review passes for this private increment, not rollout.
+Only unrelated generated issue519 artifacts restored after completion.
+[Existing receipt](SOCIAL-PUBLISHING-220-2026-11-15.md) retains exact sources/gates.
+
+Mainb524a9f9 #984/#1000/#1001/#1002 preserved unchanged: brand panel + already
+applied20261111064719 migration (DO NOT REPLAY), stopped hourly dispatch and
+other owners' exact Dulux/PVC live/source snapshots. FOUR lane migrations still
+unapplied; no SQL restart/new SQL proof or new live/device acceptance. No new
+dependency/schema by this lane; no live SQL/data/config/secrets/permissions/
+OAuth/provider mutation/upload/posting/Microsoft/Vercel/deploy/hosting/cost.
+Teams/sync hold, staff/Nolan/OneDrive finals untouched. Native config/consent/
+acceptance, approved video-source/owned delivery, explicit disclosures and
+source-to-share_id uploader/pilot remain held. Tracker target unknown, no guess.
+
+## Earlier 16 November — private TikTok durable reconciliation bridge
 
 Same DRAFT PR991/#220/#269. Status-only binding now connects the exact canonical
 job/lease/submission receipt to the concrete Business credential/status reader,
@@ -55,6 +88,70 @@ Backend/config/consent/native acceptance/uploader/durable registration remain
 held; no publication/deploy/OAuth/SQL/config/secret/permission/provider mutation/
 Microsoft/Vercel/cost action. [Existing evidence](SOCIAL-PUBLISHING-220-2026-11-15.md).
 Tracker exact target unknown; no guessed write.
+
+## 16 November — authorised brand panel merge reconciliation (#984)
+
+Owner requested #984 into main before #999 into the existing PR910 branch.
+Reconciled current main 4449131 without replacing parallel work; removed 31
+accidentally tracked Python bytecode cache files and ignored future caches.
+Brand-panel source is unchanged. Brand migration is ALREADY applied under ledger
+20261111064719 per the Claude handover: do not re-apply or seed production.
+Local brandRules/videoPipeline checks pass 31/31; production build verification
+and exact merge receipt are recorded in PR #984. Git deployment remains OFF.
+No Vercel operation, production data write, new tracker or #910-base resolution.
+Source merge does not mean staff production browser acceptance or deployment.
+
+## 16 November — Dulux current report/November Plan LIVE; BrandHub remains private
+
+CA chose exact ACTIVE Dulux Paint & Paper Bloemfontein2aed8a31 next. Actual issued
+login200/own client; existing FB/IG refresh20posts/0duplicates/PacificOctober,
+TikTok1selectedvideo/fresh account health, native8facts remain partial snapshots.
+Meta13available/1NULL. Octoberb7a7c8f8 reviewed findings deliberately published
+16:57:40UTC with locked row/post/fact hashes and all other report fields preserved.
+
+Normal author continuation6afb1ddf saved/read back Nov/Dec corrections and Janv1.
+Independent audit caught later Novv6/Decv5 versus earlier v5/v4 receipt; only
+permitted gold fields changed, writer identity unverified. Latest actual copy
+reviewed, no stale overwrite/replay. Novemberv6 manually approved/published
+17:04:15UTC via existing authenticated RPC/revision/source/package/notes fences.
+Actual client reads10gold fields/2videos4photos4posters/no staff metadata; Decv5/
+Janv1 remain drafts. No auto-publication/scheduling or new task/model/config.
+
+Actual client isolation real foreign403/404/no draft leak, desktop/mobile390px/
+scale1/no overflow and TikTok cumulative/partial labels verified. BrandHub genuine
+hold:0registeredassets, disabled library; fresh exact safe BrandIdentity source
+successfully readEMPTY. Preserve approved17-private-skip, no substitute logo/
+enablement/filecopy/share. No Ads mapping guessed or website/provider changes.
+Common#1001ranking fix still SOURCE ONLY/release-held#679; no Vercel/runtime/
+migration/other-agent work.19focused checks/build/app-bearing bundle/diff green.
+[Exact Dulux receipt and gates](DULUX-CLIENT-READINESS-2026-11-16.md).
+
+## 16 November — All Around PVC current report/Plan LIVE; ranking fix release-held
+
+CA chose next client after Madison. Exact active All Around PVCfd16ebae,
+real issued login200/own client, October report5598a192 published16:25:36UTC
+with independently reviewed normal-author findings/other fields preserved.
+14fresh source posts,14current facts(11available/3NULL), no duplicates/Pacific
+period drift. No Ads/TikTok mapping invented or website/provider/package change.
+Manual canonical Novemberv6 approve/publish16:34:46UTC after source/content/
+version/package/guide/notes fencing; actual client reads10gold fields/1video/
+3photos/3posters/no staff metadata. Decv3/Janv1 genuine unpublished drafts.
+
+Original December Strategy Rollout chat reached maximum length. Existing
+CG Client & Industry Research task continuation6afb1ddf-480c-83e9-b29f-6afe02521136
+is directly verified active/useful (EmoyaJan save42/62lightweight coverage), then
+authored all three PVC saves/readbacks. Same task/model; no duplicate writer or
+configuration change. Existing supervisor-owned media/scope/source holds remain.
+
+Actual production client browser390px/scale1/no overflow and API/foreign403/404,
+published logo177488bytes accepted. Live Best platform still incorrectly names
+Instagram when Facebook reach unavailable. Small source correction requires
+complete observed reach across at least two reporting platforms;92tests/build/
+lint/diff plus actual local1280/390render pass. NO Vercel/frontend deployment;
+presentation release remains held by #679, not claimed fixed live. No migration/
+Edge/config/permissions/Microsoft/shared-worker/other-agent change. Exact receipt:
+[All Around PVC readiness](ALL-AROUND-PVC-CLIENT-READINESS-2026-11-16.md).
+Historical contact conflict/media/date/future-review gates remain explicit.
 
 ## 16 November — Madison current portal accepted; narrow guide fix LIVE
 
@@ -594,6 +691,21 @@ No new production dependency/schema/data/Edge/OAuth/settings, uploaded or publis
 content, deployment or spend. No all-provider readiness claim.
 Existing staff/Nolan/Picasso PRs untouched. #679 gates remain. Exact Google Control
 Centre target remains unavailable; no guessed tracker write.
+
+## 11 November — video editing system of record + brand rules panel
+
+CA set one system for every editor/agent: CG Dynamics is the video tracker
+(Video Pipeline status, assignment, review) and holds client brand rules
+(PR #984; tables applied with CA approval, ledger 20261111064719; CG Production
+House profile + 4 CG rules + 6 house rules seeded). Working files, feedback rounds
+and handovers live in company Google Drive `m.productions.cg@gmail.com` →
+**CG Video Editing System** (read its 00_START_HERE). Approved finals only go to
+the client portal OneDrive, linked in Dynamics. Read
+`docs/ops/VIDEO-EDITING-SYSTEM-OF-RECORD.md`. Nolan lanes unchanged; their trackers
+migrate into this layout. PR #984 app code is unmerged/undeployed (#679 gate).
+16 Nov (CA-approved): rules updated in production — retired `1fefef98`, added six
+CG rules and two house rules; full handover in PR #999
+(`docs/ops/CLAUDE-NOLAN-HANDOVER-2026-11-16.md`).
 
 ## 11 November — existing-film registration repair, local candidate only
 

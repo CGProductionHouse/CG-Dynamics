@@ -1,6 +1,90 @@
 # Social publishing — 15 November 2026
 
-## Latest 16 November — private TikTok queue reconciliation bridge, SOURCE ONLY
+## Latest 16 November — native TikTok publishing requirements, SOURCE ONLY
+
+Same DRAFT PR #991 / #220 / #269. Implemented PRIVATE, UNREGISTERED prerequisite
+reads for current Business account settings and app-level verified URL properties.
+Reuses the existing encrypted Business credentials and exact active canonical
+client/connection/account/username/grant resolver before AND after these reads;
+rotation, revocation or grant changes fail closed. No alternative token store,
+account connection, provider permission adoption, publishing eligibility write,
+public endpoint, env parser or worker registration. `canSubmit` remains false.
+
+Current primary documentation retrieved through the documentation skill:
+
+- [Public video publication](https://business-api.tiktok.com/portal/docs/publish-a-public-video-post-to-an-owned-account/v1.3):
+  video_url needs owned verified delivery and a recommended30-minute lifetime.
+  Native formats MP4/MOV/WebM, up to1GB, duration3–600seconds subject to the account
+  limit, at least360px dimensions and23–60fps. This increment does NOT qualify
+  codecs, decode video or extend the existing image-only snapshot inspector.
+  Caption limit is2200 UTF16 units/30mentions. Future publisher must explicitly
+  handle required brand disclosures, engagement restrictions, original-sound/AI/
+  draft/ads-only choices; no caption/default/setting is guessed here. share_id
+  remains task evidence rather than public completion or source proof.
+- [Account settings](https://business-api.tiktok.com/portal/docs/get-the-post-privacy-settings-of-a-tiktok-account/v1.3):
+  GET `/business/video/settings/` with exact business_id and account token.
+  Preserve actual privacy options, disabled engagement booleans and account
+  duration limit. Private account is a verified restriction, not unavailable/zero.
+- [Property inventory](https://business-api.tiktok.com/portal/docs/get-the-list-of-added-url-properties-under-an-ad-account/v1.3):
+  despite its historical title, current request is APP-scoped GET with app_id
+  and secret; no guessed advertiser_id/business_id/token header. Use only
+  property_status1. Native signatures/file names and all credentials are omitted
+  from output. The documented secret-bearing query is private fixed-host HTTPS,
+  never logged/returned; no live credential was read or transmitted in this run.
+- [Property matching](https://business-api.tiktok.com/portal/docs/manage-url-properties/v1.3):
+  verified domains cover their subdomains, not parent/suffix-lookalike domains;
+  URL prefixes require their exact HTTPS host and directory prefix. Redirects
+  are invalid. No add/verify/delete, DNS or hosted verification-file action.
+
+Reads are bounded to six native inspection/GET calls per invocation under one
+deadline, no refresh/retry/polling loop. Actual native account/property reads
+remain UNVERIFIED: all execution used synthetic SDK/provider fixtures and the
+real encryption primitive. Responses are bounded UTF8 JSON and errors fixed/
+sanitized. Shared cancellation prevents late SDK/settings responses proceeding
+to app-secret transmission. Canonical input/configuration is captured, and only
+the four exact binding fields are projected; caller extras cannot leak.
+
+Added a separate metadata-only URL blocker helper over these private facts.
+First delivery profile is conservatively HTTPS/normal DNS/clean ASCII paths,
+no credentials/fragments/nondefault ports/encoded or traversing paths. Declared
+lifetime must cover1800seconds. Existing generic five-minute signed delivery is
+therefore rejected for TikTok; Meta delivery is unchanged. Native ownership
+metadata is NOT proof of public availability, DNS, actual expiry, final bytes,
+immutable approved source/hash, rights, app review or permission to submit.
+The helper never fetches a media URL or returns its private query. Both reader
+and helper always return canSubmit:false; no passing capability is created.
+
+56 new /279 affected checks pass, including actual encrypted composition,
+canonical/native grant checks, mid-read rotation/revocation, empty/malformed/
+duplicate/oversized inventory, account privacy, subdomain/prefix boundaries,
+TTL, malformed/foreign/stale input, HTTP/MIME/body/deadline errors and secret/
+signature/extra-field projection. Cached actual Deno check, scoped lint and
+production build/app-bearing bundle pass. New private endpoint string is absent
+from client bundles. Final frozen-source suite: **4,962 total /4,931 passed /
+31 skipped /0 failures**, concurrency2,485779ms. Source self-review passes for
+this private prerequisite increment; native/SQL/rollout gates remain explicit.
+Only the two unrelated generated issue519 artifacts restored after completion.
+Evidence: task TEMP `cg-tiktok-requirements-focused.log`,
+`cg-tiktok-requirements-types.log`, `cg-tiktok-requirements-lint.log`,
+`cg-tiktok-requirements-build.log`, `cg-tiktok-requirements-full.log`.
+
+Integrated current mainb524a9f9, preserving brand panel/system-of-record #984,
+stopped hourly OpenCode dispatch #1000, report winner truth #1001 and exact
+Dulux/PVC readiness/live snapshots #1002. Their files match main unchanged;
+no new acceptance of the other owners' live/device receipts is claimed here.
+Brand migration20261111064719 is already applied per its owner: DO NOT REPLAY.
+This lane's FOUR publishing migration candidates remain UNAPPLIED. No new
+dependency/migration by this increment, no SQL container restart/new SQL proof,
+no new product UI/browser/phone/native-provider acceptance. Teams/sync hold,
+Nolan/staff/OneDrive finals remain separate. No production SQL/data/config/
+secrets/OAuth/mapping/permission/provider mutation, media upload/publication,
+Microsoft/Vercel/deployment/hosting/cost action. Remaining same-record gates:
+live backend/config/consent/native property/account acceptance; existing approved
+video-source qualification; real owned delivery/availability/TTL; explicit
+disclosures; immutable source-to-share_id uploader/proof and controlled pilot.
+Exact Google Control Centre target unavailable; no guessed tracker write.
+
+## Earlier 16 November — private TikTok queue reconciliation bridge, SOURCE ONLY
 
 Same DRAFT PR #991 / #220 / #269. Added a private status-only binding over the
 existing `background_jobs` claim/save contract and concrete Business credential
