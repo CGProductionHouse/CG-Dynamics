@@ -1,3 +1,28 @@
+## 16 November — Dulux current report/November Plan LIVE; BrandHub remains private
+
+CA chose exact ACTIVE Dulux Paint & Paper Bloemfontein2aed8a31 next. Actual issued
+login200/own client; existing FB/IG refresh20posts/0duplicates/PacificOctober,
+TikTok1selectedvideo/fresh account health, native8facts remain partial snapshots.
+Meta13available/1NULL. Octoberb7a7c8f8 reviewed findings deliberately published
+16:57:40UTC with locked row/post/fact hashes and all other report fields preserved.
+
+Normal author continuation6afb1ddf saved/read back Nov/Dec corrections and Janv1.
+Independent audit caught later Novv6/Decv5 versus earlier v5/v4 receipt; only
+permitted gold fields changed, writer identity unverified. Latest actual copy
+reviewed, no stale overwrite/replay. Novemberv6 manually approved/published
+17:04:15UTC via existing authenticated RPC/revision/source/package/notes fences.
+Actual client reads10gold fields/2videos4photos4posters/no staff metadata; Decv5/
+Janv1 remain drafts. No auto-publication/scheduling or new task/model/config.
+
+Actual client isolation real foreign403/404/no draft leak, desktop/mobile390px/
+scale1/no overflow and TikTok cumulative/partial labels verified. BrandHub genuine
+hold:0registeredassets, disabled library; fresh exact safe BrandIdentity source
+successfully readEMPTY. Preserve approved17-private-skip, no substitute logo/
+enablement/filecopy/share. No Ads mapping guessed or website/provider changes.
+Common#1001ranking fix still SOURCE ONLY/release-held#679; no Vercel/runtime/
+migration/other-agent work.19focused checks/build/app-bearing bundle/diff green.
+[Exact Dulux receipt and gates](DULUX-CLIENT-READINESS-2026-11-16.md).
+
 ## 16 November — All Around PVC current report/Plan LIVE; ranking fix release-held
 
 CA chose next client after Madison. Exact active All Around PVCfd16ebae,
