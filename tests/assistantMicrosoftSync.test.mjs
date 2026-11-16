@@ -6,7 +6,6 @@ import { createServer } from 'vite'
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8')
 const chatFn = read('../supabase/functions/cg-assistant-chat/index.ts')
 const syncLib = read('../src/lib/assistantMicrosoftSync.ts')
-const composer = read('../src/components/assistant/GlobalAssistantComposer.tsx')
 
 let server
 let parseAssistantAction
@@ -167,47 +166,4 @@ test('sync never claims success on a partial or failed run', () => {
 test('sync reports the real record count and does NOT claim it applied anything', () => {
   assert.match(syncLib, /recordCount = snapshot\.records\.length/)
   assert.match(syncLib, /Nothing has been changed yet — review and apply it on the Microsoft Import page/)
-})
-
-test('composer enforces admin-only truthfully instead of claiming not connected', () => {
-  const branch = composer.slice(composer.indexOf("p.type === 'microsoft.sync'"), composer.indexOf("p.type === 'calendar.create'"))
-  assert.match(branch, /profile\?\.role !== 'admin'/)
-  assert.match(branch, /restricted to admins/)
-  // A permission problem must never be reported as a connection problem. Check
-  // the user-facing strings only (comments may legitimately discuss the bug).
-  const userFacingStrings = [...branch.matchAll(/setProposalError\('([^']*)'\)/g)].map(m => m[1])
-  assert.ok(userFacingStrings.length >= 2, 'expected user-facing error strings')
-  for (const message of userFacingStrings) {
-    assert.doesNotMatch(message, /not connected/i, `permission/validation error must not claim a connection failure: ${message}`)
-  }
-})
-
-test('composer validates the confirmed range before running', () => {
-  const branch = composer.slice(composer.indexOf("p.type === 'microsoft.sync'"), composer.indexOf("p.type === 'calendar.create'"))
-  assert.match(branch, /rangeEnd <= rangeStart/)
-  assert.match(branch, /runMicrosoftSync\(rangeStart, rangeEnd/)
-})
-
-test('composer shows a confirmation step first and live progress while running', () => {
-  // The proposal preview is the confirmation gate: the action is only executed
-  // from applyProposal, which runs on explicit confirm.
-  const branch = composer.slice(composer.indexOf("p.type === 'microsoft.sync'"), composer.indexOf("p.type === 'calendar.create'"))
-  assert.match(branch, /setMicrosoftSyncNote/)
-  assert.match(composer, /Microsoft 365 sync<\/p>/)
-})
-
-// ── Conversational grounding (no model guessing) ────────────────────────────
-test('assistant context carries REAL Microsoft state, admin-scoped', () => {
-  assert.match(composer, /checkMicrosoftSyncAvailability\(\)/)
-  assert.match(composer, /microsoftStateRef/)
-  assert.match(composer, /microsoft365: CONNECTED/)
-  assert.match(composer, /microsoft365: unavailable for sync/)
-  // Only admins fetch it — the status endpoint is admin-gated server-side.
-  const effect = composer.slice(composer.indexOf('Live Microsoft 365 state for grounded answers'))
-  assert.match(effect.slice(0, 400), /profile\?\.role === 'admin'/)
-})
-
-test('a failed status lookup adds no line at all rather than guessing', () => {
-  const effect = composer.slice(composer.indexOf('Live Microsoft 365 state for grounded answers'))
-  assert.match(effect.slice(0, 600), /if \(!active \|\| profileIdRef\.current !== requestedProfileId \|\| state\.error\) return/)
 })

@@ -1,0 +1,26 @@
+✔ retained task assignment contract clarifies non-atomic updates and canonical matching (4.837811ms)
+✔ supported Work board routes supply assistant task context and hydrate notification deep links (0.407554ms)
+✔ Planner publishes plain task identity and clears stale task context on board switch (21.952315ms)
+✔ Content Workflow and shared run resolver retain exact run identity (3.633103ms)
+✔ Meta preview uses plain previous-month wording while payload remains backend compatible (0.274863ms)
+✔ schedule approval copy reflects manager and admin permissions (0.311157ms)
+✔ legacy assistant route replace-redirects to the existing authenticated workspace (1.051862ms)
+✔ retained My Assistant offers existing setup and work without a model composer (0.61776ms)
+WebSocket server error: Port 24678 is already in use
+✔ viewport geometry is applied synchronously, so a backgrounded tab resumes correctly (2058.161819ms)
+✔ shared viewport helper still recognizes landscape phones (1.02925ms)
+✔ opening the sheet freezes the page behind and restores its scroll on close (0.530349ms)
+✔ retired composer cannot hide the page from input or assistive technology (7.507769ms)
+✔ mobile navigation remains available with touch targets and safe-area padding (1.056245ms)
+✔ iOS still cannot zoom the composer inputs on focus (0.558403ms)
+✔ raw Edge Function and provider errors never reach the user (2.212338ms)
+✔ each failure explains what to do next (0.671191ms)
+✔ retrying is only offered when it can actually help (1.189481ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2915.030534

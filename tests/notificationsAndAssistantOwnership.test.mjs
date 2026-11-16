@@ -18,7 +18,6 @@ const read = p => readFileSync(new URL(p, import.meta.url), 'utf8').replace(/\r\
 const sql = read('../supabase/migrations/20260805120000_canonical_ownership_notifications.sql')
 const completedAuthoritySql = read('../supabase/migrations/20260806090001_assistant_linked_completed_authority.sql')
 const planner = read('../src/lib/planner.ts')
-const composer = read('../src/components/assistant/GlobalAssistantComposer.tsx')
 const assistant = read('../src/lib/assistant.ts')
 const myDay = read('../src/lib/workforceMyDay.ts')
 
@@ -87,28 +86,9 @@ test('the summary carries evidence without naming an owner', () => {
   assert.match(fn, /Never state that such a task belongs to a specific person/)
 })
 
-test('the Assistant is told the rule, not left to infer it', () => {
-  assert.match(composer, /These have NO verified owner — never say such a task belongs to a specific person; say it needs assignment review\./)
-})
-
-test('ownership review reaches managers only when they explicitly ask for it', () => {
-  assert.match(composer, /const asksForOwnershipReview = \/\\b\(assignment review\|ownership review\|unassigned\|assignment conflict\|who owns\)\\b\/i\.test\(userMessage\)/)
-  assert.match(composer, /if \(isManager && asksForOwnershipReview && ownershipReviewRef\.current\) parts\.push\(ownershipReviewRef\.current\)/)
-  // Guarded by the same isManager block that gates the cross-team summary.
-  const start = composer.indexOf('if (isManager) {')
-  const block = composer.slice(start, composer.indexOf('admin-gated server-side', start))
-  assert.match(block, /loadOwnershipReviewSummary\(\)/)
-})
-
-test('the review state is cleared when the signed-in user changes', () => {
-  assert.match(composer, /ownershipReviewRef\.current = null/)
-})
-
 test('the data call lives in the lib, not the component', () => {
   assert.match(planner, /export async function loadOwnershipReviewSummary/)
   assert.match(planner, /assistant_ownership_review_summary/)
-  assert.ok(!composer.includes("supabase.rpc('assistant_ownership_review_summary')"),
-    'the component must not call the RPC directly')
 })
 
 // ── Personal Assistant context inherits the PR 3 fix ────────────────────────
@@ -131,11 +111,10 @@ test('the stale name/helper setup note is gone', () => {
 
 // ── No second ownership implementation ─────────────────────────────────────
 test('PR 3B adds no competing ownership logic', () => {
-  for (const file of [planner, composer]) {
+  for (const file of [planner]) {
     const code = file.replace(/^\s*\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '')
     assert.ok(!/helper_names.*===.*profile|profile.*===.*helper_names/.test(code))
   }
   // Ownership truth still has exactly one home.
   assert.ok(!planner.includes('export function resolveOwnership'))
-  assert.ok(!composer.includes('export function resolveOwnership'))
 })

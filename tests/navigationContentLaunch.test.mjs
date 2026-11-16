@@ -75,7 +75,7 @@ test('/admin/invites redirects to /admin/users?tab=invites', () => {
 })
 
 test('Assistant route preserved at /admin/assistant', () => {
-  assert.match(app, /path="\/admin\/assistant" element=\{<AssistantPage \/>\}/)
+  assert.match(app, /path="\/admin\/assistant" element=\{<Navigate to="\/admin\/my-assistant" replace \/>\}/)
 })
 
 test('Integrations routes are manager-gated under RequireManager', () => {

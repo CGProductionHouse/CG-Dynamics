@@ -8,7 +8,6 @@ const REGISTRY = readFileSync('src/features/ai-workforce/agents/agentRegistry.ts
 const EDGE_AGENTS = readFileSync('supabase/functions/cg-assistant-chat/skilledAgents.ts', 'utf8')
 const EDGE = readFileSync('supabase/functions/cg-assistant-chat/index.ts', 'utf8')
 const CLIENT = readFileSync('src/lib/assistant.ts', 'utf8')
-const PAGE = readFileSync('src/pages/admin/AssistantPage.tsx', 'utf8')
 
 const STRATEGY_SLUGS = [
   'strategy-audience-segments-evidence-not-stereotypes',
@@ -109,6 +108,4 @@ test('specialist readiness comes from live active routing and is staff-safe', ()
   assert.match(EDGE.slice(statusIndex, adminGuardIndex), /approvedCards/)
   assert.match(EDGE.slice(statusIndex, adminGuardIndex), /available:/)
   assert.match(CLIENT, /fetchSpecialistReadiness/)
-  assert.match(PAGE, /not ready/)
-  assert.match(PAGE, /approved knowledge card/)
 })

@@ -1,0 +1,82 @@
+{
+  "previous_remote_head": "efabfd512d3393d63f68e7ffeb989b1d06326e95",
+  "tested_base": "206f4df9cc845a1b818f96fa4ab43ef1922b7772",
+  "latest_main_observed": "8bb8d45538295dadcd61edbc36b06e9e9e710cc6",
+  "latest_main_limit": "Separate reportStats/test/docs change (#1001); not merged or tested in this candidate.",
+  "workbook_head": "41bda9a96c2e73616f2a469ba9038a7b11c01af8",
+  "files": [
+    "tests/appShellMobileNavigation.test.mjs",
+    "tests/assistantAcceptanceMatrix.test.mjs",
+    "tests/assistantCancelAndNotes.test.mjs",
+    "tests/assistantCompoundActions.test.mjs",
+    "tests/assistantFinalFour.test.mjs",
+    "tests/assistantFrontendAcceptance.test.mjs",
+    "tests/assistantGroundedQueries.test.mjs",
+    "tests/assistantMarketingAi.test.mjs",
+    "tests/assistantMicrosoftSync.test.mjs",
+    "tests/assistantMobileRegressions.test.mjs",
+    "tests/assistantSemanticIntent.test.mjs",
+    "tests/completedTaskAuthority.test.mjs",
+    "tests/dailyAssistantCapture.test.mjs",
+    "tests/marketingAiDepartment.test.mjs",
+    "tests/mobileAssistantFullscreen.test.mjs",
+    "tests/mobileDailyAssistantVoiceStates.test.mjs",
+    "tests/mobileStaffHardening.test.mjs",
+    "tests/mobileStartupPerformance.test.mjs",
+    "tests/myDayContextShare.test.mjs",
+    "tests/navigationContentLaunch.test.mjs",
+    "tests/notificationsAndAssistantOwnership.test.mjs",
+    "tests/strategyResearchKnowledge.test.mjs",
+    "tests/voiceDebriefAiUsage.test.mjs",
+    "tests/workloadCompletedAuthority.test.mjs"
+  ],
+  "affected_tests": {
+    "pass": 430,
+    "fail": 0,
+    "skip": 0
+  },
+  "requested_two_files": {
+    "pass": 17,
+    "fail": 0,
+    "skip": 0
+  },
+  "full_suite": {
+    "tests": 4268,
+    "suites": 36,
+    "pass": 4243,
+    "fail": 2,
+    "skip": 23,
+    "cancelled": 0,
+    "duration_ms": 421915.061778,
+    "command": "VITE_SUPABASE_URL=http://127.0.0.1:1 VITE_SUPABASE_PUBLISHABLE_KEY=synthetic-test-key CG_LOCAL_PGLITE_MODULE=/tmp/cg-marketing-db/node_modules/@electric-sql/pglite/dist/index.js node --test --test-concurrency=2 tests/*.test.mjs"
+  },
+  "baseline_reproduction": {
+    "base": "206f4df9cc845a1b818f96fa4ab43ef1922b7772",
+    "file": "tests/commandCentreNavigation.test.mjs",
+    "pass": 11,
+    "fail": 2,
+    "skip": 0,
+    "failures": [
+      "desktop sidebar and mobile drawer both render the full hub list including the workflow",
+      "Team Work and Morning List Import reach managers via the More drawer, not the bottom bar"
+    ]
+  },
+  "lint": "full repository zero errors/17 existing warnings; changed tests zero errors/warnings",
+  "runtime": "No runtime, backend, schema, connector or dependency changes; prior build remains applicable by byte equality",
+  "limits": [
+    "Full suite is not green: two independently reproduced baseline failures left intact",
+    "23 optional/environment-gated skips are not acceptance passes",
+    "No hosted/browser/provider/production acceptance performed",
+    "No parity source or workbook guard changes"
+  ],
+  "log_sha256": {
+    "containment-obsolete-repro.log": "c0b0af7d7f0b2f8405ae1e93c93a9567d15a8a8270015df134a1f7e92af5323c",
+    "containment-requested-tests.log": "620cad915aa90a690fc91efdefb95de7055afaadd62e3defb38a661a7933d75d",
+    "containment-affected-final.log": "0e251a2f29bdf6cf33497a6cc200c768c5963874454dcea4bde987796be75d5c",
+    "containment-full-suite.log": "65fba2c7be4f9e91e5cfeea433fff44a610bfc1e10def0ab1c58a7ad704e9009",
+    "containment-base-navigation.log": "5ce6d1ac8e43ebd8342b6f46e161516ccafadf7cf9dac9216f051d13b8a91eda",
+    "containment-testfix-lint.log": "99bba8b1a6611e321d95bf5f40fc81284d4b57d15d84b5f738f8c69423c04dc3",
+    "containment-affected-lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "containment-retained-mixed-tests.log": "d0004644b98f676651b8187828a29427cdd7d3a1c9ef2ed2b3ee956b596a5587"
+  }
+}

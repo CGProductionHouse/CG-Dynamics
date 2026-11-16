@@ -1,3 +1,11 @@
+## 16 November — containment test-contract correction
+
+Same draft containment branch fixes obsolete reads of deleted AI UI files across
+24 tests; no runtime/parity/workbook changes. Affected430 PASS; full4243 PASS,
+2 independently reproduced base navigation failures,23 optional skips. No ENOENT.
+[Exact file list and evidence](staff-ai-containment-artifacts/test-correction-receipt.json).
+Main8bb8d455 advanced separately; candidate still tests base206f4df9. Not deployed.
+
 ## 16 November — containment artifacts preserved for review
 
 Same task preserves original phase A066b1a15/B edb0f97a on the explicit draft

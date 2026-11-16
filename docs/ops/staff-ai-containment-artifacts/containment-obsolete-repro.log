@@ -1,0 +1,56 @@
+node:fs:484
+    return binding.readFileUtf8(path, stringToFlags(options.flag));
+                   ^
+
+Error: ENOENT: no such file or directory, open '/workspace/dynamics-handler-containment/src/components/assistant/GlobalAssistantComposer.tsx'
+    at readFileSync (node:fs:484:20)
+    at read (file:///workspace/dynamics-handler-containment/tests/assistantFrontendAcceptance.test.mjs:5:22)
+    at file:///workspace/dynamics-handler-containment/tests/assistantFrontendAcceptance.test.mjs:6:18
+    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+    at async node:internal/modules/esm/loader:643:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/workspace/dynamics-handler-containment/src/components/assistant/GlobalAssistantComposer.tsx'
+}
+
+Node.js v24.19.0
+✖ tests/assistantFrontendAcceptance.test.mjs (165.181626ms)
+node:fs:484
+    return binding.readFileUtf8(path, stringToFlags(options.flag));
+                   ^
+
+Error: ENOENT: no such file or directory, open '/workspace/dynamics-handler-containment/src/components/assistant/GlobalAssistantComposer.tsx'
+    at readFileSync (node:fs:484:20)
+    at read (file:///workspace/dynamics-handler-containment/tests/mobileAssistantFullscreen.test.mjs:14:19)
+    at file:///workspace/dynamics-handler-containment/tests/mobileAssistantFullscreen.test.mjs:15:18
+    at ModuleJob.run (node:internal/modules/esm/module_job:439:25)
+    at async node:internal/modules/esm/loader:643:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5) {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/workspace/dynamics-handler-containment/src/components/assistant/GlobalAssistantComposer.tsx'
+}
+
+Node.js v24.19.0
+✖ tests/mobileAssistantFullscreen.test.mjs (365.674572ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 413.435845
+
+✖ failing tests:
+
+test at tests/assistantFrontendAcceptance.test.mjs:1:1
+✖ tests/assistantFrontendAcceptance.test.mjs (165.181626ms)
+  'test failed'
+
+test at tests/mobileAssistantFullscreen.test.mjs:1:1
+✖ tests/mobileAssistantFullscreen.test.mjs (365.674572ms)
+  'test failed'

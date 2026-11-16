@@ -7,7 +7,6 @@ const shared = read('supabase/functions/_shared/voiceTranscribe.ts')
 const meeting = read('supabase/functions/meeting-debrief/index.ts')
 const contentRun = read('supabase/functions/content-run-voice-debrief/index.ts')
 const contentUi = read('src/components/content/ContentRunVoiceDebrief.tsx')
-const composer = read('src/components/assistant/GlobalAssistantComposer.tsx')
 const meetingClient = read('src/lib/meetingDebrief.ts')
 const contentClient = read('src/lib/contentRunDebrief.ts')
 const requestIds = read('src/lib/voiceDebriefRequest.ts')
@@ -22,13 +21,12 @@ test('voice duration is capped at 300 seconds in shared code, both servers, and 
     assert.match(edge, /audio\.size > MAX_AUDIO_BYTES/)
     assert.doesNotMatch(edge, /durationSeconds > MAX_VOICE_SECONDS/)
   }
-  for (const ui of [contentUi, composer]) {
+  for (const ui of [contentUi]) {
     assert.match(ui, /MAX_VOICE_SECONDS \* 1000/)
     assert.match(ui, /stopRecording\(\)|stopDebriefRecording\(\)/)
     assert.match(ui, /Recording stopped automatically at the 5-minute limit/)
   }
   assert.match(contentUi, /remaining/)
-  assert.match(composer, /Record voice note \(5:00 max\)/)
 })
 
 test('browser uses a fresh user-scoped submission ID and reuses it only for a transport retry', () => {
@@ -45,7 +43,7 @@ test('browser uses a fresh user-scoped submission ID and reuses it only for a tr
 })
 
 test('recording countdowns and status messages are announced without shrinking touch controls', () => {
-  for (const ui of [contentUi, composer]) {
+  for (const ui of [contentUi]) {
     assert.match(ui, /aria-live="polite"/)
     assert.match(ui, /role="alert"/)
     assert.match(ui, /min-h-11/)

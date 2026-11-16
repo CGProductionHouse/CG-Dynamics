@@ -1,0 +1,443 @@
+✔ Command Centre nav entry is manager/admin-gated and points at the real route (1.944663ms)
+✔ /admin/command-centre renders the real Command Centre page, not a redirect (0.288844ms)
+✔ Morning List Import has a first-class nav entry opening the import experience (0.706481ms)
+✔ Work stays the staff-visible destination with no admin gate (0.5726ms)
+✔ Team Work and Morning List Import never render for staff/team roles (0.516357ms)
+✖ desktop sidebar and mobile drawer both render the full hub list including the workflow (7.028629ms)
+✔ mobile quick-nav is role-stable and never displaces Content or Calendar (0.406825ms)
+✖ Team Work and Morning List Import reach managers via the More drawer, not the bottom bar (1.216474ms)
+✔ removing Team Work or Morning List Import fails this regression suite (0.84954ms)
+✔ Work page links managers to Command Centre and Morning List Import (0.491873ms)
+✔ morning list parser still splits staff headings and bullet items (0.271336ms)
+✔ morning list parser resolves clients with confidence and flags uncertainty (0.489671ms)
+✔ morning list import never creates tasks before explicit review confirmation (0.179091ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 11
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1185.297454
+
+✖ failing tests:
+
+test at tests/commandCentreNavigation.test.mjs:57:1
+✖ desktop sidebar and mobile drawer both render the full hub list including the workflow (7.028629ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /renderNav\(false, closeMobile\)/. Input:
+  
+  "import { lazy, Suspense, useEffect, useEffectEvent, useState } from 'react'\n" +
+    "import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'\n" +
+    "import { useAuth } from '../../contexts/AuthContext'\n" +
+    "import { MyDayContextStoreProvider } from '../../contexts/MyDayContextStore'\n" +
+    "import BrandMark from '../../components/BrandMark'\n" +
+    "import { ActionSheet } from '../../components/ui/ActionSheet'\n" +
+    "import { mobileNavigationGroups } from '../../lib/mobileStaffNavigation'\n" +
+    "import { roleLabel } from '../../lib/roles'\n" +
+    "import { primaryNavItems, performanceNavItems, adminNavItems, canShowNavItem, isNavItemActive, isSharedNavZonePath, resolveNavZone, type NavItem, type NavZone } from './adminNavigation'\n" +
+    "import { dismissAssistantNotification, listMyNotifications, markAllNotificationsRead, markNotificationRead, refreshAssistantDayNotifications, safeNotificationLink, snoozeAssistantNotification, unreadNotificationCount, type AppNotification } from '../../lib/notifications'\n" +
+    '\n' +
+    "const GlobalAssistantComposer = lazy(() => import('../../components/assistant/GlobalAssistantComposer').then(module => ({ default: module.GlobalAssistantComposer })))\n" +
+    '\n' +
+    'const NOTIFICATION_POLL_MS = 30_000\n' +
+    "const ZONE_STORAGE_KEY = 'cg-nav-zone-v1'\n" +
+    '\n' +
+    '// The mobile primary nav: Hub / Work / Content / Calendar / More.\n' +
+    '// Manager-only work entries live in the More drawer instead of displacing the primary 5.\n' +
+    '// Client Schedule (Schedule) is a manager+ admin surface behind More.\n' +
+    "const MOBILE_PRIMARY_PATHS = ['/admin/cg-hub', '/admin/work', '/admin/content', '/admin/cg-calendar']\n" +
+    '\n' +
+    'function scheduleWhenIdle(callback: () => void) {\n' +
+    '  const idleWindow = window as Window & {\n' +
+    '    requestIdleCallback?: (handler: () => void, options?: { timeout: number }) => number\n' +
+    '    cancelIdleCallback?: (id: number) => void\n' +
+    '  }\n' +
+    '  if (idleWindow.requestIdleCallback) {\n' +
+    '    const id = idleWindow.requestIdleCallback(callback, { timeout: 1_500 })\n' +
+    '    return () => idleWindow.cancelIdleCallback?.(id)\n' +
+    '  }\n' +
+    '  const id = window.setTimeout(callback, 250)\n' +
+    '  return () => window.clearTimeout(id)\n' +
+    '}\n' +
+    '\n' +
+    'function notificationTime(value: string) {\n' +
+    '  const date = new Date(value)\n' +
+    "  if (Number.isNaN(date.getTime())) return 'Recently'\n" +
+    "  return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(date)\n" +
+    '}\n' +
+    '\n' +
+    'function notificationFallback(type: string) {\n' +
+    "  if (type === 'background_job_succeeded') return 'The background job finished successfully.'\n" +
+    "  if (type === 'background_job_failed') return 'The background job reached a terminal failure.'\n" +
+    "  if (type === 'schedule_change_applied') return 'Your Client Schedule change was approved and applied.'\n" +
+    "  if (type === 'schedule_change_rejected') return 'Your Client Schedule change was declined.'\n" +
+    "  if (type === 'schedule_change_proposed') return 'A Client Schedule change is waiting for review.'\n" +
+    "  if (type === 'task_assigned') return 'A Planner task was assigned to you.'\n" +
+    "  return 'There is an update to your work.'\n" +
+    '}\n' +
+    '\n' +
+    "function ZoneSwitcher({ zone, onChange, className = '' }: { zone: NavZone; onChange: (zone: NavZone) => void; className?: string }) {\n" +
+    "  const base = 'min-h-11 flex-1 rounded-md px-2 py-2 text-xs font-black uppercase tracking-[0.08em] transition-colors'\n" +
+    '  return (\n' +
+    '    <div className={`flex gap-1 rounded-lg border border-white/10 bg-white/[0.03] p-1 ${className}`} role="tablist" aria-label="Workspace zone">\n' +
+    '      <button type="button" role="tab" aria-selected={zone === \'hub\'} onClick={() => onChange(\'hub\')} className={`${base} ${zone === \'hub\' ? \'bg-brand-teal/15 text-brand-teal\' : \'text-brand-primary/60 hover:text-white\'}`}>Hub</button>\n' +
+    '      <button type="button" role="tab" aria-selected={zone === \'performance\'} onClick={() => onChange(\'performance\')} className={`${base} ${zone === \'performance\' ? \'bg-brand-teal/15 text-brand-teal\' : \'text-brand-primary/60 hover:text-white\'}`}>Performance</button>\n' +
+    '    </div>\n' +
+    '  )\n' +
+    '}\n' +
+    '\n' +
+    "const CG_HOURS_URL = 'https://cg-hours.vercel.app'\n" +
+    '\n' +
+    'function initials(name: string) {\n' +
+    '  const parts = name.trim().split(/\\s+/).filter(Boolean)\n' +
+    "  if (parts.length === 0) return '?'\n" +
+    "  return `${parts[0]?.[0] ?? ''}${parts.length > 1 ? parts.at(-1)?.[0] ?? '' : ''}`.toUpperCase()\n" +
+    '}\n' +
+    '\n' +
+    'function NavSection({ label, collapsed = false }: { label: string; collapsed?: boolean }) {\n' +
+    '  return (\n' +
+    "    <p className={`${collapsed ? 'sr-only' : 'mb-1 mt-3 px-3'} text-[10px] font-black uppercase tracking-[0.2em] text-brand-primary/40`}>\n" +
+    '      {label}\n' +
+    '    </p>\n' +
+    '  )\n' +
+    '}\n' +
+    '\n' +
+    'function NavigationLink({ item, active, collapsed = false, onClick }: { item: NavItem; active: boolean; collapsed?: boolean; onClick?: () => void }) {\n' +
+    '  return (\n' +
+    '    <Link\n' +
+    '      to={item.to}\n' +
+    '      onClick={onClick}\n' +
+    "      aria-current={active ? 'page' : undefined}\n" +
+    '      aria-label={collapsed ? item.label : undefined}\n' +
+    '      title={collapsed ? item.label : undefined}\n' +
+    "      className={`group relative flex min-h-11 items-center rounded-md px-3 text-sm font-bold transition-colors ${collapsed ? 'justify-center' : 'justify-between'} ${\n" +
+    '        active\n' +
+    "          ? 'bg-white/[0.07] text-white shadow-[inset_3px_0_0_rgba(45,212,191,0.75)]'\n" +
+    "          : 'text-brand-primary hover:bg-white/[0.05] hover:text-white'\n" +
+    '      }`}\n' +
+    '    >\n' +
+    '      {collapsed ? <span className="text-[11px] font-black tracking-tight">{item.marker}</span> : <span>{item.label}</span>}\n' +
+    '    </Link>\n' +
+    '  )\n' +
+    '}\n' +
+    '\n' +
+    'function ExternalHoursLink({ collapsed = false, onClick }: { collapsed?: boolean; onClick?: () => void }) {\n' +
+    '  return (\n' +
+    '    <a\n' +
+    '      href={CG_HOURS_URL}\n' +
+    '      target="_blank"\n' +
+    '      rel="noopener noreferrer"\n' +
+    '      onClick={onClick}\n' +
+    "      aria-label={collapsed ? 'CG Hours, external' : undefined}\n" +
+    "      title={collapsed ? 'CG Hours, external' : undefined}\n" +
+    "      className={`group flex min-h-11 items-center rounded-md px-3 text-sm font-bold text-brand-primary transition-colors hover:bg-white/[0.05] hover:text-white ${collapsed ? 'justify-center' : 'justify-between'}`}\n" +
+    '    >\n' +
+    "      <span>{collapsed ? 'CH' : 'CG Hours'}</span>\n" +
+    '      {!collapsed && <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-brand-primary/80 group-hover:border-white/20 group-hover:text-white">Ext</span>}\n' +
+    '    </a>\n' +
+    '  )\n' +
+    '}\n' +
+    '\n' +
+    'export default function AdminLayout() {\n' +
+    '  const { profile, signOut } = useAuth()\n' +
+    '  const location = useLocation()\n' +
+    '  const navigate = useNavigate()\n' +
+    '  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)\n' +
+    "  const [menuSearch, setMenuSearch] = useState('')\n" +
+    '  const [desktopCollapsed, setDesktopCollapsed] = useState(false)\n' +
+    '  const [notificationOpen, setNotificationOpen] = useState(false)\n' +
+    '  const [notifications, setNotifications] = useState<AppNotification[]>([])\n' +
+    '  const [unreadCount, setUnreadCount] = useState(0)\n' +
+    '  const [notificationsLoading, setNotificationsLoading] = useState(true)\n' +
+    '  const [notificationsError, setNotificationsError] = useState<string | null>(null)\n' +
+    '  // True while CG Assistant owns the whole mobile screen. The bottom navigation\n' +
+    '  // stands down and the page behind leaves the accessibility tree, so the\n' +
+    '  // assistant is a single focused surface rather than another floating layer.\n' +
+    '  const [assistantFullscreen, setAssistantFullscreen] = useState(false)\n' +
+    '  const [backgroundReady, setBackgroundReady] = useState(false)\n' +
+    '  const [selectedZone, setSelectedZone] = useState<NavZone>(() => {\n' +
+    '    const routeZone = resolveNavZone(location.pathname)\n' +
+    '    if (!isSharedNavZonePath(location.pathname)) return routeZone\n' +
+    '    const stored = window.localStorage.getItem(ZONE_STORAGE_KEY)\n' +
+    "    return stored === 'performance' || stored === 'hub' ? stored : routeZone\n" +
+    '  })\n' +
+    '  const [previousPath, setPreviousPath] = useState(location.pathname)\n' +
+    '  const routeZone = resolveNavZone(location.pathname)\n' +
+    '  if (previousPath !== location.pathname) {\n' +
+    '    setPreviousPath(location.pathname)\n' +
+    '    if (!isSharedNavZonePath(location.pathname) && selectedZone !== routeZone) setSelectedZone(routeZone)\n' +
+    '  }\n' +
+    '  const zone = isSharedNavZonePath(location.pathname) ? selectedZone : routeZone\n' +
+    "  const currentRole = profile?.role ?? 'team'\n" +
+    '  const displayRole = roleLabel(profile?.role)\n' +
+    '  const primaryItems = primaryNavItems.filter(item => canShowNavItem(item, currentRole))\n' +
+    '  const performanceItems = performanceNavItems.filter(item => canShowNavItem(item, currentRole))\n' +
+    '  const adminItems = adminNavItems.filter(item => canShowNavItem(item, currentRole))\n' +
+    "  const zoneItems = zone === 'performance' ? performanceItems : primaryItems\n" +
+    "  const mobilePrimaryItems = zone === 'performance'\n" +
+    '    ? zoneItems.slice(0, 4)\n' +
+    '    : primaryItems.filter(item => MOBILE_PRIMARY_PATHS.includes(item.to))\n' +
+    "  const assistantVisible = location.pathname !== '/admin/assistant'\n" +
+    "  const closeMobile = () => { setMobileMenuOpen(false); setMenuSearch('') }\n" +
+    '  const mobileGroups = mobileNavigationGroups(currentRole, menuSearch)\n' +
+    '\n' +
+    '  useEffect(() => {\n' +
+    '    window.localStorage.setItem(ZONE_STORAGE_KEY, zone)\n' +
+    '  }, [zone])\n' +
+    '\n' +
+    '  async function refreshNotifications(showLoading = false) {\n' +
+    '    if (showLoading) setNotificationsLoading(true)\n' +
+    '    await refreshAssistantDayNotifications().catch(() => null)\n' +
+    '    const [listResult, countResult] = await Promise.all([listMyNotifications(), unreadNotificationCount()])\n' +
+    '    const error = listResult.error ?? countResult.error\n' +
+    '    if (error) {\n' +
+    "      setNotificationsError(error.message || 'Could not load notifications.')\n" +
+    '    } else {\n' +
+    '      setNotifications((listResult.data ?? []) as AppNotification[])\n' +
+    '      setUnreadCount(countResult.count)\n' +
+    '      setNotificationsError(null)\n' +
+    '    }\n' +
+    '    setNotificationsLoading(false)\n' +
+    '  }\n' +
+    '\n' +
+    '  const pollNotifications = useEffectEvent(() => {\n' +
+    '    void refreshNotifications()\n' +
+    '  })\n' +
+    '\n' +
+    '  useEffect(() => {\n' +
+    '    let poll: number | null = null\n' +
+    '    const cancelIdle = scheduleWhenIdle(() => {\n' +
+    '      setBackgroundReady(true)\n' +
+    '      pollNotifications()\n' +
+    '      poll = window.setInterval(pollNotifications, NOTIFICATION_POLL_MS)\n' +
+    '    })\n' +
+    '    const refreshWhenVisible = () => {\n' +
+    "      if (poll !== null && document.visibilityState === 'visible') pollNotifications()\n" +
+    '    }\n' +
+    "    window.addEventListener('focus', refreshWhenVisible)\n" +
+    '    document.addEve'... 17645 more characters
+  
+      at TestContext.<anonymous> (file:///tmp/cg-containment-base-206f4df9/tests/commandCentreNavigation.test.mjs:63:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'import { lazy, Suspense, useEffect, useEffectEvent, useState } from \'react\'\nimport { Link, Outlet, useLocation, useNavigate } from \'react-router-dom\'\nimport { useAuth } from \'../../contexts/AuthContext\'\nimport { MyDayContextStoreProvider } from \'../../contexts/MyDayContextStore\'\nimport BrandMark from \'../../components/BrandMark\'\nimport { ActionSheet } from \'../../components/ui/ActionSheet\'\nimport { mobileNavigationGroups } from \'../../lib/mobileStaffNavigation\'\nimport { roleLabel } from \'../../lib/roles\'\nimport { primaryNavItems, performanceNavItems, adminNavItems, canShowNavItem, isNavItemActive, isSharedNavZonePath, resolveNavZone, type NavItem, type NavZone } from \'./adminNavigation\'\nimport { dismissAssistantNotification, listMyNotifications, markAllNotificationsRead, markNotificationRead, refreshAssistantDayNotifications, safeNotificationLink, snoozeAssistantNotification, unreadNotificationCount, type AppNotification } from \'../../lib/notifications\'\n\nconst GlobalAssistantComposer = lazy(() => import(\'../../components/assistant/GlobalAssistantComposer\').then(module => ({ default: module.GlobalAssistantComposer })))\n\nconst NOTIFICATION_POLL_MS = 30_000\nconst ZONE_STORAGE_KEY = \'cg-nav-zone-v1\'\n\n// The mobile primary nav: Hub / Work / Content / Calendar / More.\n// Manager-only work entries live in the More drawer instead of displacing the primary 5.\n// Client Schedule (Schedule) is a manager+ admin surface behind More.\nconst MOBILE_PRIMARY_PATHS = [\'/admin/cg-hub\', \'/admin/work\', \'/admin/content\', \'/admin/cg-calendar\']\n\nfunction scheduleWhenIdle(callback: () => void) {\n  const idleWindow = window as Window & {\n    requestIdleCallback?: (handler: () => void, options?: { timeout: number }) => number\n    cancelIdleCallback?: (id: number) => void\n  }\n  if (idleWindow.requestIdleCallback) {\n    const id = idleWindow.requestIdleCallback(callback, { timeout: 1_500 })\n    return () => idleWindow.cancelIdleCallback?.(id)\n  }\n  const id = window.setTimeout(callback, 250)\n  return () => window.clearTimeout(id)\n}\n\nfunction notificationTime(value: string) {\n  const date = new Date(value)\n  if (Number.isNaN(date.getTime())) return \'Recently\'\n  return new Intl.DateTimeFormat(undefined, { dateStyle: \'medium\', timeStyle: \'short\' }).format(date)\n}\n\nfunction notificationFallback(type: string) {\n  if (type === \'background_job_succeeded\') return \'The background job finished successfully.\'\n  if (type === \'background_job_failed\') return \'The background job reached a terminal failure.\'\n  if (type === \'schedule_change_applied\') return \'Your Client Schedule change was approved and applied.\'\n  if (type === \'schedule_change_rejected\') return \'Your Client Schedule change was declined.\'\n  if (type === \'schedule_change_proposed\') return \'A Client Schedule change is waiting for review.\'\n  if (type === \'task_assigned\') return \'A Planner task was assigned to you.\'\n  return \'There is an update to your work.\'\n}\n\nfunction ZoneSwitcher({ zone, onChange, className = \'\' }: { zone: NavZone; onChange: (zone: NavZone) => void; className?: string }) {\n  const base = \'min-h-11 flex-1 rounded-md px-2 py-2 text-xs font-black uppercase tracking-[0.08em] transition-colors\'\n  return (\n    <div className={`flex gap-1 rounded-lg border border-white/10 bg-white/[0.03] p-1 ${className}`} role="tablist" aria-label="Workspace zone">\n      <button type="button" role="tab" aria-selected={zone === \'hub\'} onClick={() => onChange(\'hub\')} className={`${base} ${zone === \'hub\' ? \'bg-brand-teal/15 text-brand-teal\' : \'text-brand-primary/60 hover:text-white\'}`}>Hub</button>\n      <button type="button" role="tab" aria-selected={zone === \'performance\'} onClick={() => onChange(\'performance\')} className={`${base} ${zone === \'performance\' ? \'bg-brand-teal/15 text-brand-teal\' : \'text-brand-primary/60 hover:text-white\'}`}>Performance</button>\n    </div>\n  )\n}\n\nconst CG_HOURS_URL = \'https://cg-hours.vercel.app\'\n\nfunction initials(name: string) {\n  const parts = name.trim().split(/\\s+/).filter(Boolean)\n  if (parts.length === 0) return \'?\'\n  return `${parts[0]?.[0] ?? \'\'}${parts.length > 1 ? parts.at(-1)?.[0] ?? \'\' : \'\'}`.toUpperCase()\n}\n\nfunction NavSection({ label, collapsed = false }: { label: string; collapsed?: boolean }) {\n  return (\n    <p className={`${collapsed ? \'sr-only\' : \'mb-1 mt-3 px-3\'} text-[10px] font-black uppercase tracking-[0.2em] text-brand-primary/40`}>\n      {label}\n    </p>\n  )\n}\n\nfunction NavigationLink({ item, active, collapsed = false, onClick }: { item: NavItem; active: boolean; collapsed?: boolean; onClick?: () => void }) {\n  return (\n    <Link\n      to={item.to}\n      onClick={onClick}\n      aria-current={active ? \'page\' : undefined}\n      aria-label={collapsed ? item.label : undefined}\n      title={collapsed ? item.label : undefined}\n      className={`group relative flex min-h-11 items-center rounded-md px-3 text-sm font-bold transition-colors ${collapsed ? \'justify-center\' : \'justify-between\'} ${\n        active\n          ? \'bg-white/[0.07] text-white shadow-[inset_3px_0_0_rgba(45,212,191,0.75)]\'\n          : \'text-brand-primary hover:bg-white/[0.05] hover:text-white\'\n      }`}\n    >\n      {collapsed ? <span className="text-[11px] font-black tracking-tight">{item.marker}</span> : <span>{item.label}</span>}\n    </Link>\n  )\n}\n\nfunction ExternalHoursLink({ collapsed = false, onClick }: { collapsed?: boolean; onClick?: () => void }) {\n  return (\n    <a\n      href={CG_HOURS_URL}\n      target="_blank"\n      rel="noopener noreferrer"\n      onClick={onClick}\n      aria-label={collapsed ? \'CG Hours, external\' : undefined}\n      title={collapsed ? \'CG Hours, external\' : undefined}\n      className={`group flex min-h-11 items-center rounded-md px-3 text-sm font-bold text-brand-primary transition-colors hover:bg-white/[0.05] hover:text-white ${collapsed ? \'justify-center\' : \'justify-between\'}`}\n    >\n      <span>{collapsed ? \'CH\' : \'CG Hours\'}</span>\n      {!collapsed && <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-brand-primary/80 group-hover:border-white/20 group-hover:text-white">Ext</span>}\n    </a>\n  )\n}\n\nexport default function AdminLayout() {\n  const { profile, signOut } = useAuth()\n  const location = useLocation()\n  const navigate = useNavigate()\n  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)\n  const [menuSearch, setMenuSearch] = useState(\'\')\n  const [desktopCollapsed, setDesktopCollapsed] = useState(false)\n  const [notificationOpen, setNotificationOpen] = useState(false)\n  const [notifications, setNotifications] = useState<AppNotification[]>([])\n  const [unreadCount, setUnreadCount] = useState(0)\n  const [notificationsLoading, setNotificationsLoading] = useState(true)\n  const [notificationsError, setNotificationsError] = useState<string | null>(null)\n  // True while CG Assistant owns the whole mobile screen. The bottom navigation\n  // stands down and the page behind leaves the accessibility tree, so the\n  // assistant is a single focused surface rather than another floating layer.\n  const [assistantFullscreen, setAssistantFullscreen] = useState(false)\n  const [backgroundReady, setBackgroundReady] = useState(false)\n  const [selectedZone, setSelectedZone] = useState<NavZone>(() => {\n    const routeZone = resolveNavZone(location.pathname)\n    if (!isSharedNavZonePath(location.pathname)) return routeZone\n    const stored = window.localStorage.getItem(ZONE_STORAGE_KEY)\n    return stored === \'performance\' || stored === \'hub\' ? stored : routeZone\n  })\n  const [previousPath, setPreviousPath] = useState(location.pathname)\n  const routeZone = resolveNavZone(location.pathname)\n  if (previousPath !== location.pathname) {\n    setPreviousPath(location.pathname)\n    if (!isSharedNavZonePath(location.pathname) && selectedZone !== routeZone) setSelectedZone(routeZone)\n  }\n  const zone = isSharedNavZonePath(location.pathname) ? selectedZone : routeZone\n  const currentRole = profile?.role ?? \'team\'\n  const displayRole = roleLabel(profile?.role)\n  const primaryItems = primaryNavItems.filter(item => canShowNavItem(item, currentRole))\n  const performanceItems = performanceNavItems.filter(item => canShowNavItem(item, currentRole))\n  const adminItems = adminNavItems.filter(item => canShowNavItem(item, currentRole))\n  const zoneItems = zone === \'performance\' ? performanceItems : primaryItems\n  const mobilePrimaryItems = zone === \'performance\'\n    ? zoneItems.slice(0, 4)\n    : primaryItems.filter(item => MOBILE_PRIMARY_PATHS.includes(item.to))\n  const assistantVisible = location.pathname !== \'/admin/assistant\'\n  const closeMobile = () => { setMobileMenuOpen(false); setMenuSearch(\'\') }\n  const mobileGroups = mobileNavigationGroups(currentRole, menuSearch)\n\n  useEffect(() => {\n    window.localStorage.setItem(ZONE_STORAGE_KEY, zone)\n  }, [zone])\n\n  async function refreshNotifications(showLoading = false) {\n    if (showLoading) setNotificationsLoading(true)\n    await refreshAssistantDayNotifications().catch(() => null)\n    const [listResult, countResult] = await Promise.all([listMyNotifications(), unreadNotificationCount()])\n    const error = listResult.error ?? countResult.error\n    if (error) {\n      setNotificationsError(error.message || \'Could not load notifications.\')\n    } else {\n      setNotifications((listResult.data ?? []) as AppNotification[])\n      setUnreadCount(countResult.count)\n      setNotificationsError(null)\n    }\n    setNotificationsLoading(false)\n  }\n\n  const pollNotifications = useEffectEvent(() => {\n    void refreshNotifications()\n  })\n\n  useEffect(() => {\n    let poll: number | null = null\n    const cancelIdle = scheduleWhenIdle(() => {\n      setBackgroundReady(true)\n      pollNotifications()\n      poll = window.setInterval(pollNotifications, NOTIFICATION_POLL_MS)\n    })\n    const refreshWhenVisible = () => {\n      if (poll !== null && document.visibilityState === \'visible\') pollNotifications()\n    }\n    window.addEventListener(\'focus\', refreshWhenVisible)\n    document.addEve'... 17645 more characters,
+    expected: /renderNav\(false, closeMobile\)/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at tests/commandCentreNavigation.test.mjs:77:1
+✖ Team Work and Morning List Import reach managers via the More drawer, not the bottom bar (1.216474ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /renderNav\(false, closeMobile\)/. Input:
+  
+  "import { lazy, Suspense, useEffect, useEffectEvent, useState } from 'react'\n" +
+    "import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'\n" +
+    "import { useAuth } from '../../contexts/AuthContext'\n" +
+    "import { MyDayContextStoreProvider } from '../../contexts/MyDayContextStore'\n" +
+    "import BrandMark from '../../components/BrandMark'\n" +
+    "import { ActionSheet } from '../../components/ui/ActionSheet'\n" +
+    "import { mobileNavigationGroups } from '../../lib/mobileStaffNavigation'\n" +
+    "import { roleLabel } from '../../lib/roles'\n" +
+    "import { primaryNavItems, performanceNavItems, adminNavItems, canShowNavItem, isNavItemActive, isSharedNavZonePath, resolveNavZone, type NavItem, type NavZone } from './adminNavigation'\n" +
+    "import { dismissAssistantNotification, listMyNotifications, markAllNotificationsRead, markNotificationRead, refreshAssistantDayNotifications, safeNotificationLink, snoozeAssistantNotification, unreadNotificationCount, type AppNotification } from '../../lib/notifications'\n" +
+    '\n' +
+    "const GlobalAssistantComposer = lazy(() => import('../../components/assistant/GlobalAssistantComposer').then(module => ({ default: module.GlobalAssistantComposer })))\n" +
+    '\n' +
+    'const NOTIFICATION_POLL_MS = 30_000\n' +
+    "const ZONE_STORAGE_KEY = 'cg-nav-zone-v1'\n" +
+    '\n' +
+    '// The mobile primary nav: Hub / Work / Content / Calendar / More.\n' +
+    '// Manager-only work entries live in the More drawer instead of displacing the primary 5.\n' +
+    '// Client Schedule (Schedule) is a manager+ admin surface behind More.\n' +
+    "const MOBILE_PRIMARY_PATHS = ['/admin/cg-hub', '/admin/work', '/admin/content', '/admin/cg-calendar']\n" +
+    '\n' +
+    'function scheduleWhenIdle(callback: () => void) {\n' +
+    '  const idleWindow = window as Window & {\n' +
+    '    requestIdleCallback?: (handler: () => void, options?: { timeout: number }) => number\n' +
+    '    cancelIdleCallback?: (id: number) => void\n' +
+    '  }\n' +
+    '  if (idleWindow.requestIdleCallback) {\n' +
+    '    const id = idleWindow.requestIdleCallback(callback, { timeout: 1_500 })\n' +
+    '    return () => idleWindow.cancelIdleCallback?.(id)\n' +
+    '  }\n' +
+    '  const id = window.setTimeout(callback, 250)\n' +
+    '  return () => window.clearTimeout(id)\n' +
+    '}\n' +
+    '\n' +
+    'function notificationTime(value: string) {\n' +
+    '  const date = new Date(value)\n' +
+    "  if (Number.isNaN(date.getTime())) return 'Recently'\n" +
+    "  return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(date)\n" +
+    '}\n' +
+    '\n' +
+    'function notificationFallback(type: string) {\n' +
+    "  if (type === 'background_job_succeeded') return 'The background job finished successfully.'\n" +
+    "  if (type === 'background_job_failed') return 'The background job reached a terminal failure.'\n" +
+    "  if (type === 'schedule_change_applied') return 'Your Client Schedule change was approved and applied.'\n" +
+    "  if (type === 'schedule_change_rejected') return 'Your Client Schedule change was declined.'\n" +
+    "  if (type === 'schedule_change_proposed') return 'A Client Schedule change is waiting for review.'\n" +
+    "  if (type === 'task_assigned') return 'A Planner task was assigned to you.'\n" +
+    "  return 'There is an update to your work.'\n" +
+    '}\n' +
+    '\n' +
+    "function ZoneSwitcher({ zone, onChange, className = '' }: { zone: NavZone; onChange: (zone: NavZone) => void; className?: string }) {\n" +
+    "  const base = 'min-h-11 flex-1 rounded-md px-2 py-2 text-xs font-black uppercase tracking-[0.08em] transition-colors'\n" +
+    '  return (\n' +
+    '    <div className={`flex gap-1 rounded-lg border border-white/10 bg-white/[0.03] p-1 ${className}`} role="tablist" aria-label="Workspace zone">\n' +
+    '      <button type="button" role="tab" aria-selected={zone === \'hub\'} onClick={() => onChange(\'hub\')} className={`${base} ${zone === \'hub\' ? \'bg-brand-teal/15 text-brand-teal\' : \'text-brand-primary/60 hover:text-white\'}`}>Hub</button>\n' +
+    '      <button type="button" role="tab" aria-selected={zone === \'performance\'} onClick={() => onChange(\'performance\')} className={`${base} ${zone === \'performance\' ? \'bg-brand-teal/15 text-brand-teal\' : \'text-brand-primary/60 hover:text-white\'}`}>Performance</button>\n' +
+    '    </div>\n' +
+    '  )\n' +
+    '}\n' +
+    '\n' +
+    "const CG_HOURS_URL = 'https://cg-hours.vercel.app'\n" +
+    '\n' +
+    'function initials(name: string) {\n' +
+    '  const parts = name.trim().split(/\\s+/).filter(Boolean)\n' +
+    "  if (parts.length === 0) return '?'\n" +
+    "  return `${parts[0]?.[0] ?? ''}${parts.length > 1 ? parts.at(-1)?.[0] ?? '' : ''}`.toUpperCase()\n" +
+    '}\n' +
+    '\n' +
+    'function NavSection({ label, collapsed = false }: { label: string; collapsed?: boolean }) {\n' +
+    '  return (\n' +
+    "    <p className={`${collapsed ? 'sr-only' : 'mb-1 mt-3 px-3'} text-[10px] font-black uppercase tracking-[0.2em] text-brand-primary/40`}>\n" +
+    '      {label}\n' +
+    '    </p>\n' +
+    '  )\n' +
+    '}\n' +
+    '\n' +
+    'function NavigationLink({ item, active, collapsed = false, onClick }: { item: NavItem; active: boolean; collapsed?: boolean; onClick?: () => void }) {\n' +
+    '  return (\n' +
+    '    <Link\n' +
+    '      to={item.to}\n' +
+    '      onClick={onClick}\n' +
+    "      aria-current={active ? 'page' : undefined}\n" +
+    '      aria-label={collapsed ? item.label : undefined}\n' +
+    '      title={collapsed ? item.label : undefined}\n' +
+    "      className={`group relative flex min-h-11 items-center rounded-md px-3 text-sm font-bold transition-colors ${collapsed ? 'justify-center' : 'justify-between'} ${\n" +
+    '        active\n' +
+    "          ? 'bg-white/[0.07] text-white shadow-[inset_3px_0_0_rgba(45,212,191,0.75)]'\n" +
+    "          : 'text-brand-primary hover:bg-white/[0.05] hover:text-white'\n" +
+    '      }`}\n' +
+    '    >\n' +
+    '      {collapsed ? <span className="text-[11px] font-black tracking-tight">{item.marker}</span> : <span>{item.label}</span>}\n' +
+    '    </Link>\n' +
+    '  )\n' +
+    '}\n' +
+    '\n' +
+    'function ExternalHoursLink({ collapsed = false, onClick }: { collapsed?: boolean; onClick?: () => void }) {\n' +
+    '  return (\n' +
+    '    <a\n' +
+    '      href={CG_HOURS_URL}\n' +
+    '      target="_blank"\n' +
+    '      rel="noopener noreferrer"\n' +
+    '      onClick={onClick}\n' +
+    "      aria-label={collapsed ? 'CG Hours, external' : undefined}\n" +
+    "      title={collapsed ? 'CG Hours, external' : undefined}\n" +
+    "      className={`group flex min-h-11 items-center rounded-md px-3 text-sm font-bold text-brand-primary transition-colors hover:bg-white/[0.05] hover:text-white ${collapsed ? 'justify-center' : 'justify-between'}`}\n" +
+    '    >\n' +
+    "      <span>{collapsed ? 'CH' : 'CG Hours'}</span>\n" +
+    '      {!collapsed && <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-brand-primary/80 group-hover:border-white/20 group-hover:text-white">Ext</span>}\n' +
+    '    </a>\n' +
+    '  )\n' +
+    '}\n' +
+    '\n' +
+    'export default function AdminLayout() {\n' +
+    '  const { profile, signOut } = useAuth()\n' +
+    '  const location = useLocation()\n' +
+    '  const navigate = useNavigate()\n' +
+    '  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)\n' +
+    "  const [menuSearch, setMenuSearch] = useState('')\n" +
+    '  const [desktopCollapsed, setDesktopCollapsed] = useState(false)\n' +
+    '  const [notificationOpen, setNotificationOpen] = useState(false)\n' +
+    '  const [notifications, setNotifications] = useState<AppNotification[]>([])\n' +
+    '  const [unreadCount, setUnreadCount] = useState(0)\n' +
+    '  const [notificationsLoading, setNotificationsLoading] = useState(true)\n' +
+    '  const [notificationsError, setNotificationsError] = useState<string | null>(null)\n' +
+    '  // True while CG Assistant owns the whole mobile screen. The bottom navigation\n' +
+    '  // stands down and the page behind leaves the accessibility tree, so the\n' +
+    '  // assistant is a single focused surface rather than another floating layer.\n' +
+    '  const [assistantFullscreen, setAssistantFullscreen] = useState(false)\n' +
+    '  const [backgroundReady, setBackgroundReady] = useState(false)\n' +
+    '  const [selectedZone, setSelectedZone] = useState<NavZone>(() => {\n' +
+    '    const routeZone = resolveNavZone(location.pathname)\n' +
+    '    if (!isSharedNavZonePath(location.pathname)) return routeZone\n' +
+    '    const stored = window.localStorage.getItem(ZONE_STORAGE_KEY)\n' +
+    "    return stored === 'performance' || stored === 'hub' ? stored : routeZone\n" +
+    '  })\n' +
+    '  const [previousPath, setPreviousPath] = useState(location.pathname)\n' +
+    '  const routeZone = resolveNavZone(location.pathname)\n' +
+    '  if (previousPath !== location.pathname) {\n' +
+    '    setPreviousPath(location.pathname)\n' +
+    '    if (!isSharedNavZonePath(location.pathname) && selectedZone !== routeZone) setSelectedZone(routeZone)\n' +
+    '  }\n' +
+    '  const zone = isSharedNavZonePath(location.pathname) ? selectedZone : routeZone\n' +
+    "  const currentRole = profile?.role ?? 'team'\n" +
+    '  const displayRole = roleLabel(profile?.role)\n' +
+    '  const primaryItems = primaryNavItems.filter(item => canShowNavItem(item, currentRole))\n' +
+    '  const performanceItems = performanceNavItems.filter(item => canShowNavItem(item, currentRole))\n' +
+    '  const adminItems = adminNavItems.filter(item => canShowNavItem(item, currentRole))\n' +
+    "  const zoneItems = zone === 'performance' ? performanceItems : primaryItems\n" +
+    "  const mobilePrimaryItems = zone === 'performance'\n" +
+    '    ? zoneItems.slice(0, 4)\n' +
+    '    : primaryItems.filter(item => MOBILE_PRIMARY_PATHS.includes(item.to))\n' +
+    "  const assistantVisible = location.pathname !== '/admin/assistant'\n" +
+    "  const closeMobile = () => { setMobileMenuOpen(false); setMenuSearch('') }\n" +
+    '  const mobileGroups = mobileNavigationGroups(currentRole, menuSearch)\n' +
+    '\n' +
+    '  useEffect(() => {\n' +
+    '    window.localStorage.setItem(ZONE_STORAGE_KEY, zone)\n' +
+    '  }, [zone])\n' +
+    '\n' +
+    '  async function refreshNotifications(showLoading = false) {\n' +
+    '    if (showLoading) setNotificationsLoading(true)\n' +
+    '    await refreshAssistantDayNotifications().catch(() => null)\n' +
+    '    const [listResult, countResult] = await Promise.all([listMyNotifications(), unreadNotificationCount()])\n' +
+    '    const error = listResult.error ?? countResult.error\n' +
+    '    if (error) {\n' +
+    "      setNotificationsError(error.message || 'Could not load notifications.')\n" +
+    '    } else {\n' +
+    '      setNotifications((listResult.data ?? []) as AppNotification[])\n' +
+    '      setUnreadCount(countResult.count)\n' +
+    '      setNotificationsError(null)\n' +
+    '    }\n' +
+    '    setNotificationsLoading(false)\n' +
+    '  }\n' +
+    '\n' +
+    '  const pollNotifications = useEffectEvent(() => {\n' +
+    '    void refreshNotifications()\n' +
+    '  })\n' +
+    '\n' +
+    '  useEffect(() => {\n' +
+    '    let poll: number | null = null\n' +
+    '    const cancelIdle = scheduleWhenIdle(() => {\n' +
+    '      setBackgroundReady(true)\n' +
+    '      pollNotifications()\n' +
+    '      poll = window.setInterval(pollNotifications, NOTIFICATION_POLL_MS)\n' +
+    '    })\n' +
+    '    const refreshWhenVisible = () => {\n' +
+    "      if (poll !== null && document.visibilityState === 'visible') pollNotifications()\n" +
+    '    }\n' +
+    "    window.addEventListener('focus', refreshWhenVisible)\n" +
+    '    document.addEve'... 17645 more characters
+  
+      at TestContext.<anonymous> (file:///tmp/cg-containment-base-206f4df9/tests/commandCentreNavigation.test.mjs:81:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'import { lazy, Suspense, useEffect, useEffectEvent, useState } from \'react\'\nimport { Link, Outlet, useLocation, useNavigate } from \'react-router-dom\'\nimport { useAuth } from \'../../contexts/AuthContext\'\nimport { MyDayContextStoreProvider } from \'../../contexts/MyDayContextStore\'\nimport BrandMark from \'../../components/BrandMark\'\nimport { ActionSheet } from \'../../components/ui/ActionSheet\'\nimport { mobileNavigationGroups } from \'../../lib/mobileStaffNavigation\'\nimport { roleLabel } from \'../../lib/roles\'\nimport { primaryNavItems, performanceNavItems, adminNavItems, canShowNavItem, isNavItemActive, isSharedNavZonePath, resolveNavZone, type NavItem, type NavZone } from \'./adminNavigation\'\nimport { dismissAssistantNotification, listMyNotifications, markAllNotificationsRead, markNotificationRead, refreshAssistantDayNotifications, safeNotificationLink, snoozeAssistantNotification, unreadNotificationCount, type AppNotification } from \'../../lib/notifications\'\n\nconst GlobalAssistantComposer = lazy(() => import(\'../../components/assistant/GlobalAssistantComposer\').then(module => ({ default: module.GlobalAssistantComposer })))\n\nconst NOTIFICATION_POLL_MS = 30_000\nconst ZONE_STORAGE_KEY = \'cg-nav-zone-v1\'\n\n// The mobile primary nav: Hub / Work / Content / Calendar / More.\n// Manager-only work entries live in the More drawer instead of displacing the primary 5.\n// Client Schedule (Schedule) is a manager+ admin surface behind More.\nconst MOBILE_PRIMARY_PATHS = [\'/admin/cg-hub\', \'/admin/work\', \'/admin/content\', \'/admin/cg-calendar\']\n\nfunction scheduleWhenIdle(callback: () => void) {\n  const idleWindow = window as Window & {\n    requestIdleCallback?: (handler: () => void, options?: { timeout: number }) => number\n    cancelIdleCallback?: (id: number) => void\n  }\n  if (idleWindow.requestIdleCallback) {\n    const id = idleWindow.requestIdleCallback(callback, { timeout: 1_500 })\n    return () => idleWindow.cancelIdleCallback?.(id)\n  }\n  const id = window.setTimeout(callback, 250)\n  return () => window.clearTimeout(id)\n}\n\nfunction notificationTime(value: string) {\n  const date = new Date(value)\n  if (Number.isNaN(date.getTime())) return \'Recently\'\n  return new Intl.DateTimeFormat(undefined, { dateStyle: \'medium\', timeStyle: \'short\' }).format(date)\n}\n\nfunction notificationFallback(type: string) {\n  if (type === \'background_job_succeeded\') return \'The background job finished successfully.\'\n  if (type === \'background_job_failed\') return \'The background job reached a terminal failure.\'\n  if (type === \'schedule_change_applied\') return \'Your Client Schedule change was approved and applied.\'\n  if (type === \'schedule_change_rejected\') return \'Your Client Schedule change was declined.\'\n  if (type === \'schedule_change_proposed\') return \'A Client Schedule change is waiting for review.\'\n  if (type === \'task_assigned\') return \'A Planner task was assigned to you.\'\n  return \'There is an update to your work.\'\n}\n\nfunction ZoneSwitcher({ zone, onChange, className = \'\' }: { zone: NavZone; onChange: (zone: NavZone) => void; className?: string }) {\n  const base = \'min-h-11 flex-1 rounded-md px-2 py-2 text-xs font-black uppercase tracking-[0.08em] transition-colors\'\n  return (\n    <div className={`flex gap-1 rounded-lg border border-white/10 bg-white/[0.03] p-1 ${className}`} role="tablist" aria-label="Workspace zone">\n      <button type="button" role="tab" aria-selected={zone === \'hub\'} onClick={() => onChange(\'hub\')} className={`${base} ${zone === \'hub\' ? \'bg-brand-teal/15 text-brand-teal\' : \'text-brand-primary/60 hover:text-white\'}`}>Hub</button>\n      <button type="button" role="tab" aria-selected={zone === \'performance\'} onClick={() => onChange(\'performance\')} className={`${base} ${zone === \'performance\' ? \'bg-brand-teal/15 text-brand-teal\' : \'text-brand-primary/60 hover:text-white\'}`}>Performance</button>\n    </div>\n  )\n}\n\nconst CG_HOURS_URL = \'https://cg-hours.vercel.app\'\n\nfunction initials(name: string) {\n  const parts = name.trim().split(/\\s+/).filter(Boolean)\n  if (parts.length === 0) return \'?\'\n  return `${parts[0]?.[0] ?? \'\'}${parts.length > 1 ? parts.at(-1)?.[0] ?? \'\' : \'\'}`.toUpperCase()\n}\n\nfunction NavSection({ label, collapsed = false }: { label: string; collapsed?: boolean }) {\n  return (\n    <p className={`${collapsed ? \'sr-only\' : \'mb-1 mt-3 px-3\'} text-[10px] font-black uppercase tracking-[0.2em] text-brand-primary/40`}>\n      {label}\n    </p>\n  )\n}\n\nfunction NavigationLink({ item, active, collapsed = false, onClick }: { item: NavItem; active: boolean; collapsed?: boolean; onClick?: () => void }) {\n  return (\n    <Link\n      to={item.to}\n      onClick={onClick}\n      aria-current={active ? \'page\' : undefined}\n      aria-label={collapsed ? item.label : undefined}\n      title={collapsed ? item.label : undefined}\n      className={`group relative flex min-h-11 items-center rounded-md px-3 text-sm font-bold transition-colors ${collapsed ? \'justify-center\' : \'justify-between\'} ${\n        active\n          ? \'bg-white/[0.07] text-white shadow-[inset_3px_0_0_rgba(45,212,191,0.75)]\'\n          : \'text-brand-primary hover:bg-white/[0.05] hover:text-white\'\n      }`}\n    >\n      {collapsed ? <span className="text-[11px] font-black tracking-tight">{item.marker}</span> : <span>{item.label}</span>}\n    </Link>\n  )\n}\n\nfunction ExternalHoursLink({ collapsed = false, onClick }: { collapsed?: boolean; onClick?: () => void }) {\n  return (\n    <a\n      href={CG_HOURS_URL}\n      target="_blank"\n      rel="noopener noreferrer"\n      onClick={onClick}\n      aria-label={collapsed ? \'CG Hours, external\' : undefined}\n      title={collapsed ? \'CG Hours, external\' : undefined}\n      className={`group flex min-h-11 items-center rounded-md px-3 text-sm font-bold text-brand-primary transition-colors hover:bg-white/[0.05] hover:text-white ${collapsed ? \'justify-center\' : \'justify-between\'}`}\n    >\n      <span>{collapsed ? \'CH\' : \'CG Hours\'}</span>\n      {!collapsed && <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-brand-primary/80 group-hover:border-white/20 group-hover:text-white">Ext</span>}\n    </a>\n  )\n}\n\nexport default function AdminLayout() {\n  const { profile, signOut } = useAuth()\n  const location = useLocation()\n  const navigate = useNavigate()\n  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)\n  const [menuSearch, setMenuSearch] = useState(\'\')\n  const [desktopCollapsed, setDesktopCollapsed] = useState(false)\n  const [notificationOpen, setNotificationOpen] = useState(false)\n  const [notifications, setNotifications] = useState<AppNotification[]>([])\n  const [unreadCount, setUnreadCount] = useState(0)\n  const [notificationsLoading, setNotificationsLoading] = useState(true)\n  const [notificationsError, setNotificationsError] = useState<string | null>(null)\n  // True while CG Assistant owns the whole mobile screen. The bottom navigation\n  // stands down and the page behind leaves the accessibility tree, so the\n  // assistant is a single focused surface rather than another floating layer.\n  const [assistantFullscreen, setAssistantFullscreen] = useState(false)\n  const [backgroundReady, setBackgroundReady] = useState(false)\n  const [selectedZone, setSelectedZone] = useState<NavZone>(() => {\n    const routeZone = resolveNavZone(location.pathname)\n    if (!isSharedNavZonePath(location.pathname)) return routeZone\n    const stored = window.localStorage.getItem(ZONE_STORAGE_KEY)\n    return stored === \'performance\' || stored === \'hub\' ? stored : routeZone\n  })\n  const [previousPath, setPreviousPath] = useState(location.pathname)\n  const routeZone = resolveNavZone(location.pathname)\n  if (previousPath !== location.pathname) {\n    setPreviousPath(location.pathname)\n    if (!isSharedNavZonePath(location.pathname) && selectedZone !== routeZone) setSelectedZone(routeZone)\n  }\n  const zone = isSharedNavZonePath(location.pathname) ? selectedZone : routeZone\n  const currentRole = profile?.role ?? \'team\'\n  const displayRole = roleLabel(profile?.role)\n  const primaryItems = primaryNavItems.filter(item => canShowNavItem(item, currentRole))\n  const performanceItems = performanceNavItems.filter(item => canShowNavItem(item, currentRole))\n  const adminItems = adminNavItems.filter(item => canShowNavItem(item, currentRole))\n  const zoneItems = zone === \'performance\' ? performanceItems : primaryItems\n  const mobilePrimaryItems = zone === \'performance\'\n    ? zoneItems.slice(0, 4)\n    : primaryItems.filter(item => MOBILE_PRIMARY_PATHS.includes(item.to))\n  const assistantVisible = location.pathname !== \'/admin/assistant\'\n  const closeMobile = () => { setMobileMenuOpen(false); setMenuSearch(\'\') }\n  const mobileGroups = mobileNavigationGroups(currentRole, menuSearch)\n\n  useEffect(() => {\n    window.localStorage.setItem(ZONE_STORAGE_KEY, zone)\n  }, [zone])\n\n  async function refreshNotifications(showLoading = false) {\n    if (showLoading) setNotificationsLoading(true)\n    await refreshAssistantDayNotifications().catch(() => null)\n    const [listResult, countResult] = await Promise.all([listMyNotifications(), unreadNotificationCount()])\n    const error = listResult.error ?? countResult.error\n    if (error) {\n      setNotificationsError(error.message || \'Could not load notifications.\')\n    } else {\n      setNotifications((listResult.data ?? []) as AppNotification[])\n      setUnreadCount(countResult.count)\n      setNotificationsError(null)\n    }\n    setNotificationsLoading(false)\n  }\n\n  const pollNotifications = useEffectEvent(() => {\n    void refreshNotifications()\n  })\n\n  useEffect(() => {\n    let poll: number | null = null\n    const cancelIdle = scheduleWhenIdle(() => {\n      setBackgroundReady(true)\n      pollNotifications()\n      poll = window.setInterval(pollNotifications, NOTIFICATION_POLL_MS)\n    })\n    const refreshWhenVisible = () => {\n      if (poll !== null && document.visibilityState === \'visible\') pollNotifications()\n    }\n    window.addEventListener(\'focus\', refreshWhenVisible)\n    document.addEve'... 17645 more characters,
+    expected: /renderNav\(false, closeMobile\)/,
+    operator: 'match',
+    diff: 'simple'
+  }

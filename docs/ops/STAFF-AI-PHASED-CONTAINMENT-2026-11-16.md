@@ -139,3 +139,28 @@ run stops before route execution/artifact/provider work. Existing specialist_sta
 diagnostics and test_provider code remains unchanged with its original permissions;
 provider diagnostic testing can still invoke providers and is NOT part of acceptance.
 This is retirement of staff chat/Marketing-run paths, not a global provider kill switch.
+
+## Test-contract correction after independent review
+
+The initial containment extraction missed legacy tests that eagerly read deleted
+UI files. Reproduced the reported ENOENT failures, then audited all references.
+24 test files now remove only deleted-UI assertions, preserve independent backend,
+RLS, role, notification, lifecycle and shared helper assertions (including mixed
+tests/loops), and cover retirement redirects, retained Today/Leads/setup, mobile
+navigation/accessibility/safe-area layout and removal of Marketing controls.
+No blanket skips or suppression of unrelated failures were added. Exact files,
+commands and hashes: [correction receipt](staff-ai-containment-artifacts/test-correction-receipt.json).
+
+Final affected selection: 430 PASS/0 FAIL/0 SKIP. Requested two files:17 PASS.
+Full suite:4268 total,4243 PASS,2 FAIL,23 SKIP,0 cancelled (421.915s). Both failures
+in untouched commandCentreNavigation.test.mjs reproduce independently on base
+206f4df9 (11 PASS/2 FAIL); they remain unresolved, not hidden. Full lint:0 errors/
+17 existing warnings; changed-test lint clean. Optional environment-gated skips
+are not verified passes. No ENOENT remains. Runtime and dependency files are
+byte-identical to the prior built candidate, so no redundant build was performed.
+
+Main advanced to8bb8d455 (#1001 report platform-winner fix) during this run; its
+separate runtime/test/docs delta is not merged/tested here. Workbook41bda9a9 remains
+separately owned. Original A/B commits and full parity PR995 remain unchanged.
+The current candidate includes the correction; original standalone A/B patches
+need the additional phase-c-retirement-test-contracts.patch for current tests.

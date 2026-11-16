@@ -1,0 +1,29 @@
+✔ the notification defect and its measured impact are recorded (1.270818ms)
+✔ person-specific notifications require canonical, non-superseded, verified tasks (0.267739ms)
+✔ a helper never receives an owner notification (0.116999ms)
+✔ unresolved and conflicting ownership raises a manager alert instead of being dropped (0.177548ms)
+✔ #176 does not recreate task notifications from the pre-ownership raw baseline (0.451233ms)
+✔ #176 preserves manager ownership review rather than replacing it (0.209297ms)
+✔ the ownership review summary is manager gated server-side (0.142517ms)
+✔ the summary reads canonical tasks only (0.279584ms)
+✔ the summary carries evidence without naming an owner (0.196107ms)
+✔ the data call lives in the lib, not the component (0.446281ms)
+✔ personal Assistant task context comes from canonical My Day matching (0.448768ms)
+✔ the stale name/helper setup note is gone (0.1658ms)
+✔ PR 3B adds no competing ownership logic (3.000012ms)
+✔ voice duration is capped at 300 seconds in shared code, both servers, and both recorders (1.404886ms)
+✔ browser uses a fresh user-scoped submission ID and reuses it only for a transport retry (0.507845ms)
+✔ recording countdowns and status messages are announced without shrinking touch controls (0.187293ms)
+✔ shared transcription reserves, records attempts and health, falls back, and always finalizes (0.380002ms)
+✔ debrief interpretation supplies canonical complex route context and transcript fingerprints (1.370935ms)
+✔ typed debrief skips transcription while audio gets canonical transcribe context (0.456608ms)
+✔ durable debrief IDs return an existing draft before paid calls and duplicate work is safe (0.821069ms)
+✔ content-run edge has no duplicate provider implementation or raw telemetry payloads (0.762675ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 168.612689

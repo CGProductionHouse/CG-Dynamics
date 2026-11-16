@@ -4,7 +4,6 @@ import { after, before, test } from 'node:test'
 import { createServer } from 'vite'
 
 const read = p => readFileSync(new URL(p, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
-const composer = read('../src/components/assistant/GlobalAssistantComposer.tsx')
 const chatFn = read('../supabase/functions/cg-assistant-chat/index.ts')
 const wfLib = read('../src/lib/marketingWorkflow.ts')
 
@@ -125,43 +124,7 @@ test('ordinary chat still falls through to conversation', () => {
 
 // ── Composer behaviour ──────────────────────────────────────────────────────
 test('the Assistant continues an existing artifact instead of duplicating records', () => {
-  assert.match(composer, /findOpenArtifact\(p\.clientId\)/)
-  assert.match(composer, /Continue the existing open artifact rather than duplicating records/)
   assert.match(wfLib, /\.in\('status', \['draft', 'in_review', 'changes_requested'\]\)/)
-})
-
-test('approve and reject are refused for non-managers in the Assistant too', () => {
-  const branch = composer.slice(composer.indexOf("p.type === 'marketing.decide'"), composer.indexOf("p.type === 'microsoft.sync'"))
-  assert.match(branch, /decision === 'approved' \|\| decision === 'rejected'\) && !isManager/)
-  assert.match(branch, /restricted to managers and admins/)
-  assert.match(branch, /You can request changes instead/)
-})
-
-test('a decision always targets the current version of the open artifact', () => {
-  const branch = composer.slice(composer.indexOf("p.type === 'marketing.decide'"), composer.indexOf("p.type === 'microsoft.sync'"))
-  assert.match(branch, /getCurrentVersion\(openArtifact\)/)
-  assert.match(branch, /recordMarketingDecision\(\{/)
-})
-
-test('insufficient evidence and provider exhaustion are reported honestly', () => {
-  assert.match(composer, /if \(result\.insufficientEvidence\)/)
-  assert.match(composer, /Honest insufficient-evidence \/ provider-exhaustion result/)
-  assert.match(composer, /Not enough approved knowledge to produce a grounded draft/)
-})
-
-test('the Assistant reports citations and points at the full artifact', () => {
-  assert.match(composer, /citing \$\{cited\} approved card/)
-  assert.match(composer, /Open it in Marketing AI to read the full draft/)
-})
-
-test('approving via the Assistant states plainly that nothing was published', () => {
-  assert.match(composer, /Nothing was published or changed on the client record/)
-})
-
-test('stage progress is surfaced while a specialist runs', () => {
-  assert.match(composer, /setMarketingNote/)
-  assert.match(composer, /Handing off to the next specialist/)
-  assert.match(composer, /Marketing AI<\/p>/)
 })
 
 // ── Truthful capability answers ─────────────────────────────────────────────

@@ -1,0 +1,1742 @@
+diff --git a/tests/appShellMobileNavigation.test.mjs b/tests/appShellMobileNavigation.test.mjs
+index e1e9383b..47bdf726 100644
+--- a/tests/appShellMobileNavigation.test.mjs
++++ b/tests/appShellMobileNavigation.test.mjs
+@@ -43,8 +43,6 @@ test('staff mobile controls meet touch target and safe-area requirements', () =>
+ })
+ 
+ test('shell padding clears mobile controls but drops unused desktop assistant space', () => {
+-  assert.match(layout, /const assistantVisible = location\.pathname !== '\/admin\/assistant'/)
+-  assert.match(layout, /pb-\[calc\(3\.5rem\+env\(safe-area-inset-bottom\)\)\] md:pb-16/)
+-  assert.match(layout, /pb-\[calc\(3\.5rem\+env\(safe-area-inset-bottom\)\)\] md:pb-0/)
++  assert.match(layout, /pb-\[calc\(3\.5rem\+env\(safe-area-inset-bottom\)\)\] md:h-screen md:pb-0/)
+   assert.doesNotMatch(layout, /md:pb-24/)
+ })
+diff --git a/tests/assistantAcceptanceMatrix.test.mjs b/tests/assistantAcceptanceMatrix.test.mjs
+index 38d2bef5..1e76cf61 100644
+--- a/tests/assistantAcceptanceMatrix.test.mjs
++++ b/tests/assistantAcceptanceMatrix.test.mjs
+@@ -4,7 +4,6 @@ import { readFileSync } from 'node:fs'
+ 
+ const read = path => readFileSync(new URL(path, import.meta.url), 'utf8')
+ const edge = read('../supabase/functions/cg-assistant-chat/index.ts')
+-const composer = read('../src/components/assistant/GlobalAssistantComposer.tsx')
+ const assistant = read('../src/lib/assistant.ts')
+ const actions = read('../src/lib/assistantActions.ts')
+ 
+@@ -16,7 +15,6 @@ test('#208-1: "sort me out for today" resolves to task lookup pattern', () => {
+ })
+ 
+ test('#208-1: buildLocalWorkResponse uses real My Day context', () => {
+-  assert.ok(composer.includes('workContextRef'), 'workContextRef must track My Day context')
+   assert.ok(edge.includes('focusCount'), 'localWorkContext must include focusCount')
+   assert.ok(edge.includes('overdueCount'), 'localWorkContext must include overdueCount')
+   assert.ok(edge.includes('dueTodayCount'), 'localWorkContext must include dueTodayCount')
+@@ -42,11 +40,6 @@ test('#208-2: task.create action exists with assignee and client', () => {
+   assert.ok(actions.includes('clientId'), 'task.create must support client binding')
+ })
+ 
+-test('#208-2: createAssistantTask RPC exists for task creation', () => {
+-  assert.ok(composer.includes('createAssistantTask'), 'UI must call createAssistantTask')
+-  assert.ok(composer.includes('task.create'), 'UI must handle task.create proposal')
+-})
+-
+ test('#208-2: due date resolution works for "tomorrow"', () => {
+   assert.ok(actions.includes('tomorrow'), 'parser must resolve "tomorrow"')
+   assert.ok(actions.includes('resolveRelativeDate'), 'parser must have relative date resolver')
+@@ -65,16 +58,10 @@ test('#208-3: task.update action exists with status=done', () => {
+ })
+ 
+ test('#208-3: follow-up context resolves "that" to last task', () => {
+-  assert.ok(composer.includes('lastTaskRef'), 'UI must track lastTaskRef for follow-ups')
+   assert.ok(actions.includes('lastTaskId'), 'parser must support lastTaskId from context')
+   assert.ok(actions.includes('currentTaskId'), 'parser must support currentTaskId from context')
+ })
+ 
+-test('#208-3: updateAssistantTask RPC exists for task completion', () => {
+-  assert.ok(composer.includes('updateAssistantTask'), 'UI must call updateAssistantTask')
+-  assert.ok(composer.includes('complete'), 'UI must pass action=complete')
+-})
+-
+ // ── #208 Acceptance Scenario 4: "What's Red Oak posting this week?" ───────
+ test('#208-4: client schedule query pattern matches "posting"', () => {
+   assert.ok(edge.includes('posting'), 'CLIENT_SCHEDULE_PATTERNS must include "posting"')
+@@ -103,11 +90,6 @@ test('#208-5: client name resolution for navigation', () => {
+   assert.ok(actions.includes('/admin/clients'), 'client route must be in PAGE_ROUTES')
+ })
+ 
+-test('#208-5: navigate() called for navigation.open', () => {
+-  assert.ok(composer.includes('navigation.open'), 'UI must handle navigation.open')
+-  assert.ok(composer.includes('navigate'), 'UI must call navigate()')
+-})
+-
+ // ── #208 Acceptance Scenario 6: "Take me to next Tuesday on the calendar." ─
+ test('#208-6: calendar navigation exists in PAGE_ROUTES', () => {
+   assert.ok(actions.includes('calendar'), 'PAGE_ROUTES must include calendar')
+@@ -131,16 +113,6 @@ test('#208-7: marketing specialist chain exists', () => {
+   assert.ok(edge.includes('handleSkilledChat'), 'handleSkilledChat must exist')
+ })
+ 
+-test('#208-7: runMarketingSpecialist exists for execution', () => {
+-  assert.ok(composer.includes('runMarketingSpecialist'), 'UI must call runMarketingSpecialist')
+-  assert.ok(composer.includes('marketing.start'), 'UI must handle marketing.start')
+-})
+-
+-test('#208-7: client context is passed to marketing', () => {
+-  assert.ok(composer.includes('clientId'), 'marketing must receive clientId')
+-  assert.ok(composer.includes('clientName'), 'marketing must receive clientName')
+-})
+-
+ // ── #208 Acceptance Scenario 8: "Check this caption against Red Oak's brand." ─
+ test('#208-8: brand guardian specialist is defined', () => {
+   // Brand guardian is defined in skilledAgents.ts, referenced via handleSkilledChat
+@@ -187,11 +159,6 @@ test('#208-10: task ambiguity returns clarification', () => {
+   assert.ok(actions.includes('Which task'), 'task ambiguity must ask "Which task"')
+ })
+ 
+-test('#208-10: exactly one clarification per ambiguous turn', () => {
+-  assert.ok(composer.includes('parsed.clarify'), 'UI must handle clarification response')
+-  assert.ok(composer.includes('pushAssistant(parsed.clarify)'), 'UI must show clarification to user')
+-})
+-
+ // ── #208 Acceptance Scenario 11: Unsupported/high-risk ────────────────────
+ test('#208-11: restricted data patterns exist', () => {
+   assert.ok(edge.includes('RESTRICTED_PATTERNS'), 'RESTRICTED_PATTERNS must exist')
+@@ -208,59 +175,16 @@ test('#208-11: restricted response is plain language', () => {
+ test('#208-11: output sanitization blocks internal reasoning', () => {
+   assert.ok(edge.includes('sanitizeAssistantOutput'), 'sanitizeAssistantOutput must exist')
+   assert.ok(edge.includes('unsafe_output_blocked'), 'unsafe outputs must be blocked')
+-  assert.ok(composer.includes('assistantPresentation'), 'presentation layer must sanitize')
+-})
+-
+-// ── #208 Additional: Voice and typed enter same pipeline ──────────────────
+-test('voice: speech recognition feeds same send() pipeline', () => {
+-  assert.ok(composer.includes('onresult'), 'speech recognition must have onresult handler')
+-  assert.ok(composer.includes('send'), 'onresult must call send()')
+-})
+-
+-test('voice: no duplicate submission from final transcript', () => {
+-  assert.ok(composer.includes('sendingRef'), 'sendingRef must prevent duplicate submission')
+-  assert.ok(composer.includes('voiceCommittedTranscriptRef'), 'voiceCommittedTranscriptRef must exist')
+-})
+-
+-test('voice: typed text preserved if recognition fails', () => {
+-  assert.ok(composer.includes('voiceCommittedTranscriptRef'), 'transcript must be preserved')
+ })
+ 
+ // ── #208 Additional: Concise output, no markdown leakage ──────────────────
+ test('output: no markdown tables or developer blocks', () => {
+-  assert.ok(composer.includes('presentAssistantReply'), 'presentation layer must exist')
+   assert.ok(edge.includes('plain text') || edge.includes('plain-text') || edge.includes('sanitize'), 'output must be plain text')
+ })
+ 
+-test('output: one progress state at a time', () => {
+-  assert.ok(composer.includes('sending'), 'sending state must exist')
+-  assert.ok(composer.includes('Checking'), 'progress must show "Checking"')
+-})
+-
+ // ── #208 Additional: Permission boundaries ─────────────────────────────────
+ test('permissions: microsoft sync is admin-gated', () => {
+   assert.ok(edge.includes('protected'), 'microsoft must be marked protected')
+-  assert.ok(composer.includes('admin'), 'microsoft sync must check admin role')
+-})
+-
+-test('permissions: marketing decide is role-gated', () => {
+-  assert.ok(composer.includes('marketing.decide'), 'marketing.decide must exist')
+-  assert.ok(composer.includes('role'), 'marketing.decide must check role')
+-})
+-
+-// ── #208 Additional: Follow-up context resolution ─────────────────────────
+-test('follow-ups: 6 context refs tracked', () => {
+-  assert.ok(composer.includes('lastTaskRef'), 'lastTaskRef must exist')
+-  assert.ok(composer.includes('lastClientRef'), 'lastClientRef must exist')
+-  assert.ok(composer.includes('lastScheduleItemRef'), 'lastScheduleItemRef must exist')
+-  assert.ok(composer.includes('lastCalendarEventRef'), 'lastCalendarEventRef must exist')
+-  assert.ok(composer.includes('lastContentRunRef'), 'lastContentRunRef must exist')
+-  assert.ok(composer.includes('lastMarketingArtifactRef'), 'lastMarketingArtifactRef must exist')
+-})
+-
+-test('follow-ups: context refs updated after actions', () => {
+-  assert.ok(composer.includes('lastTaskRef.current'), 'lastTaskRef must be updated')
+-  assert.ok(composer.includes('lastClientRef.current'), 'lastClientRef must be updated')
+ })
+ 
+ // ── #208 Additional: TOOL_REGISTRY accuracy ────────────────────────────────
+@@ -295,15 +219,6 @@ test('capabilities: system prompt includes live integration facts', () => {
+   assert.ok(edge.includes('microsoftState'), 'system prompt must include microsoft state')
+ })
+ 
+-// ── #208 Additional: Audit preservation ────────────────────────────────────
+-test('audit: task creation logged', () => {
+-  assert.ok(composer.includes('logPlannerActivity'), 'UI must log activity')
+-})
+-
+-test('audit: calendar creation logged', () => {
+-  assert.ok(composer.includes('assistant_created'), 'calendar creation must be audited')
+-})
+-
+ // ── #208 Additional: Exact-client isolation ────────────────────────────────
+ test('isolation: client queries are scoped to client', () => {
+   assert.ok(edge.includes('client_id'), 'queries must filter by client_id')
+@@ -323,23 +238,8 @@ test('conversation: no tool-unavailable phrasing', () => {
+   assert.ok(edge.includes('plain language') || edge.includes('limitation'), 'system prompt must instruct plain language limitations')
+ })
+ 
+-// ── #208 Additional: Latency/thinking UX ──────────────────────────────────
+-test('latency: progress indicators exist', () => {
+-  assert.ok(composer.includes('Checking'), 'progress must show "Checking"')
+-  assert.ok(composer.includes('Marketing') || composer.includes('marketing'), 'marketing progress must exist')
+-})
+-
+ test('latency: deterministic actions skip model round-trip', () => {
+   assert.ok(actions.includes('parseAssistantAction'), 'deterministic parser must exist')
+-  assert.ok(composer.includes('if (parsed'), 'UI must check parsed result before sending to server')
+-})
+-
+-// ── #208 Additional: Do it, don't explain how ─────────────────────────────
+-test('execution: actions execute directly, not via instructions', () => {
+-  assert.ok(composer.includes('applyProposal'), 'applyProposal must exist')
+-  assert.ok(composer.includes('createAssistantTask'), 'task creation must be direct')
+-  assert.ok(composer.includes('updateAssistantTask'), 'task update must be direct')
+-  assert.ok(composer.includes('createCompanyEvent'), 'calendar creation must be direct')
+ })
+ 
+ test('execution: no "open another page" instructions for supported actions', () => {
+diff --git a/tests/assistantCancelAndNotes.test.mjs b/tests/assistantCancelAndNotes.test.mjs
+index b8c87b06..e5dbd0a8 100644
+--- a/tests/assistantCancelAndNotes.test.mjs
++++ b/tests/assistantCancelAndNotes.test.mjs
+@@ -4,51 +4,8 @@ import test from 'node:test'
+ 
+ const read = path => readFileSync(new URL(path, import.meta.url), 'utf8')
+ const actions = read('../src/lib/assistantActions.ts')
+-const composer = read('../src/components/assistant/GlobalAssistantComposer.tsx')
+ const edge = read('../supabase/functions/cg-assistant-chat/index.ts')
+ 
+-// ── Calendar cancel executes directly (do it, don't explain how) ─────────────
+-test('calendar.cancel is executed in the composer, never routed to navigation', () => {
+-  assert.match(composer, /p\.type === 'calendar\.cancel'/)
+-  assert.ok(!composer.includes('Opening CG Calendar so you can finish this'), 'the navigation fallback must be gone')
+-})
+-
+-test('cancel uses the canonical calendar service with a reversible status change, not a delete', () => {
+-  assert.match(composer, /updateCompanyEvent\(p\.target\.id, \{ status: 'cancelled' \}\)/)
+-  assert.ok(!composer.includes('deleteCompanyEvent'), 'the Assistant must not hard-delete calendar events')
+-})
+-
+-test('cancel resolves the exact event before confirming (follow-up context or deterministic match)', () => {
+-  assert.match(composer, /resolveCalendarEventForCancel/)
+-  assert.match(composer, /getCompanyEvent\(followUpId\)/)
+-  assert.match(composer, /listCompanyEvents\(/)
+-  assert.match(composer, /target: \{ type: 'company_event', id: event\.id, label: event\.title \}/)
+-})
+-
+-test('cancel preview names the exact event and date in the header, with no misleading editable fields', () => {
+-  assert.match(composer, /title: `Cancel "\$\{event\.title\}" on \$\{when\}`/)
+-  assert.match(composer, /if \(proposal\.type === 'calendar\.cancel'\) return false/)
+-})
+-
+-test('cancel asks ONE small clarification when multiple events match equally', () => {
+-  assert.match(composer, /outcome\.ambiguous\.length > 1/)
+-  assert.match(composer, /Which one\?/)
+-})
+-
+-test('cancel writes an audit row like calendar.create does', () => {
+-  assert.match(composer, /action: 'assistant_cancelled'/)
+-  assert.match(composer, /entity_type: 'company_calendar_event'/)
+-})
+-
+-test('cancel respects the manager/admin boundary of the CG Calendar UI', () => {
+-  assert.match(composer, /Cancelling calendar events is restricted to managers and admins\./)
+-})
+-
+-test('cancel never mutates Outlook-imported events (Microsoft stays read-only upstream)', () => {
+-  assert.match(composer, /current\.data\.microsoft_source_type === 'outlook_event'/)
+-  assert.match(composer, /That event is an Outlook import/)
+-})
+-
+ test('parser exposes the company_event target type for calendar cancel', () => {
+   assert.match(actions, /'planner_task' \| 'content_run' \| 'company_event'/)
+   assert.match(actions, /type: 'calendar\.cancel'[\s\S]*?target: followUpId[\s\S]*?type: 'company_event'/)
+@@ -60,18 +17,6 @@ test('task.note is a first-class action type resolved like other task writes', (
+   assert.match(actions, /type: 'task\.note'/)
+ })
+ 
+-test('composer executes task notes through update_assistant_task comment action', () => {
+-  assert.match(composer, /p\.type === 'task\.note'/)
+-  assert.match(composer, /updateAssistantTask\(\{ taskId: p\.target\.id, action: 'comment', comment: note \}\)/)
+-})
+-
+-test('task notes stay on the canonical RPC path — no direct table access from the composer', () => {
+-  // The RPC enforces manager-or-assignee access server-side and writes the
+-  // audit row itself; the composer never opens a direct data connection.
+-  assert.ok(!composer.includes('supabase.from('), 'the composer must not write through tables directly')
+-  assert.ok(!composer.includes('deleteCompanyEvent'), 'no destructive calendar writes either')
+-})
+-
+ // ── Capability truth matches the real actions ───────────────────────────────
+ test('TOOL_REGISTRY reflects cancel and task notes as available', () => {
+   assert.ok(edge.includes('Query, create and cancel internal company calendar events.'))
+diff --git a/tests/assistantCompoundActions.test.mjs b/tests/assistantCompoundActions.test.mjs
+index 684035e0..ddcf144e 100644
+--- a/tests/assistantCompoundActions.test.mjs
++++ b/tests/assistantCompoundActions.test.mjs
+@@ -4,7 +4,6 @@ import { readFileSync } from 'node:fs'
+ 
+ const read = path => readFileSync(new URL(path, import.meta.url), 'utf8')
+ const edge = read('../supabase/functions/cg-assistant-chat/index.ts')
+-const composer = read('../src/components/assistant/GlobalAssistantComposer.tsx')
+ const assistant = read('../src/lib/assistant.ts')
+ 
+ // ── Compound intent schema validation ─────────────────────────────────────
+@@ -44,56 +43,6 @@ test('compound intent: Edge Function returns compound_action field', () => {
+   assert.ok(edge.includes("'is_compound' in action"))
+ })
+ 
+-// ── Client-side compound action handling ───────────────────────────────────
+-test('client: CompoundActionPlan interface exists', () => {
+-  assert.ok(composer.includes('interface CompoundActionPlan'))
+-  assert.ok(composer.includes('is_compound: true'))
+-  assert.ok(composer.includes('actions: Array<ActionProposal & { type: AssistantActionType }>'))
+-})
+-
+-test('client: compoundProposal state exists', () => {
+-  assert.ok(composer.includes('const [compoundProposal, setCompoundProposal]'))
+-})
+-
+-test('client: response.compound_action is handled', () => {
+-  assert.ok(composer.includes('response.compound_action'))
+-  assert.ok(composer.includes('setCompoundProposal(plan)'))
+-})
+-
+-test('client: compound proposal UI renders', () => {
+-  assert.ok(composer.includes('compoundProposal && ('))
+-  assert.ok(composer.includes('Bundle Preview'))
+-  assert.ok(composer.includes('{compoundProposal.actions.length} actions to confirm'))
+-})
+-
+-test('client: applyCompoundProposal function exists', () => {
+-  assert.ok(composer.includes('async function applyCompoundProposal()'))
+-})
+-
+-test('client: deterministic execution order is defined', () => {
+-  assert.ok(composer.includes('executionOrder'))
+-  assert.ok(composer.includes("'task.create'"))
+-  assert.ok(composer.includes("'task.assign'"))
+-  assert.ok(composer.includes("'calendar.create'"))
+-  assert.ok(composer.includes("'video.mark_shot'"))
+-})
+-
+-test('client: duplicate write protection exists', () => {
+-  assert.ok(composer.includes('completedActions'))
+-  assert.ok(composer.includes('completedActions.has(actionKey)'))
+-})
+-
+-test('client: partial failure handling exists', () => {
+-  assert.ok(composer.includes('results.filter(r => r.success)'))
+-  assert.ok(composer.includes('results.filter(r => !r.success)'))
+-  assert.ok(composer.includes('Failed:'))
+-})
+-
+-test('client: compound action outcome summary exists', () => {
+-  assert.ok(composer.includes('Done — ${actionList}'))
+-  assert.ok(composer.includes('All actions failed:'))
+-})
+-
+ // ── AssistantChatResponse compound_action field ────────────────────────────
+ test('assistant: AssistantChatResponse has compound_action field', () => {
+   assert.ok(assistant.includes('compound_action?:'))
+@@ -206,19 +155,6 @@ test('safety: compound plan requires client for marketing actions', () => {
+   assert.ok(edge.includes("if (!client) return null"))
+ })
+ 
+-// ── Partial failure handling ───────────────────────────────────────────────
+-test('partial failure: try/catch per action in compound plan', () => {
+-  assert.ok(composer.includes('try {'))
+-  assert.ok(composer.includes('} catch (err) {'))
+-  assert.ok(composer.includes('results.push({ index: i, type: action.type, title: action.title, success: false'))
+-})
+-
+-test('partial failure: outcome distinguishes success/failure', () => {
+-  assert.ok(composer.includes('succeeded.length === 0'))
+-  assert.ok(composer.includes('failed.length === 0'))
+-  assert.ok(composer.includes('Failed:'))
+-})
+-
+ // ── Conversational wording tests ───────────────────────────────────────────
+ test('conversational: compound prompts use natural language', () => {
+   // The examples should use conversational phrasing, not exact technical phrases.
+@@ -262,59 +198,3 @@ test('safety: prompt warns about no canonical video-assignment', () => {
+ test('compound example: Securiforce debrief clarifies descriptions not saved', () => {
+   assert.ok(edge.includes('NOTE: The video descriptions (X, Y) are NOT saved'))
+ })
+-
+-// ── Unsupported sub-action handling ─────────────────────────────────────────
+-test('compound execution: unsupported actions are tracked separately', () => {
+-  assert.ok(composer.includes('unsupported?: boolean'))
+-  assert.ok(composer.includes('Unsupported action type in compound plan'))
+-  assert.ok(composer.includes('Not yet supported:'))
+-})
+-
+-test('compound execution: unsupported actions do not count as success', () => {
+-  assert.ok(composer.includes('results.push({ index: i, type: action.type, title: action.title, success: false, error: \'This action type is not supported in compound plans\', unsupported: true })'))
+-})
+-
+-// ── Stale entity context regression tests ───────────────────────────────────
+-test('compound execution: re-resolves tasks before mutation', () => {
+-  assert.ok(composer.includes('Re-resolve entity immediately before mutation'))
+-  assert.ok(composer.includes('const taskExists = taskList.some(t => t.native_id === action.target!.id)'))
+-  assert.ok(composer.includes('That task is no longer available. Open it again before making changes.'))
+-})
+-
+-test('compound execution: re-resolves Content Run before mutation', () => {
+-  assert.ok(composer.includes('Verify Content Run still exists'))
+-  assert.ok(composer.includes('const run = await resolveContentRun(action.target.id)'))
+-  assert.ok(composer.includes('That Content Run is no longer available. Open it again before making changes.'))
+-})
+-
+-// ── Dependency-aware ordering tests ─────────────────────────────────────────
+-test('compound execution: dependency-aware ordering skips failed task targets', () => {
+-  assert.ok(composer.includes('failedActions'))
+-  assert.ok(composer.includes('Skip actions that depend on previously failed actions'))
+-  assert.ok(composer.includes('Skipped: dependent task action failed'))
+-})
+-
+-test('compound execution: failed task targets tracked for dependent actions', () => {
+-  assert.ok(composer.includes('if (action.target?.id) failedActions.add(action.target.id)'))
+-})
+-
+-// ── Retry/idempotency protection tests ──────────────────────────────────────
+-test('compound execution: duplicate action prevention survives retry', () => {
+-  assert.ok(composer.includes('const completedActions = new Set<string>()'))
+-  assert.ok(composer.includes('Prevent duplicate writes on retry'))
+-  assert.ok(composer.includes('completedActions.has(actionKey)'))
+-})
+-
+-// ── Truthful outcome wording tests ──────────────────────────────────────────
+-test('truthful outcome: compact confirmation lists action titles', () => {
+-  assert.ok(composer.includes('const actionList = succeeded.map(r => r.title).join(\', \')'))
+-  assert.ok(composer.includes('Done — ${actionList}'))
+-})
+-
+-test('truthful outcome: partial failure lists each failure reason', () => {
+-  assert.ok(composer.includes('Failed: ${failed.map(f => `${f.title}: ${f.error}`).join(\'; \')}'))
+-})
+-
+-test('truthful outcome: unsupported actions listed separately', () => {
+-  assert.ok(composer.includes('Not yet supported: ${unsupported.map(u => u.title).join(\', \')}'))
+-})
+diff --git a/tests/assistantFinalFour.test.mjs b/tests/assistantFinalFour.test.mjs
+index 28ca929d..9ddffba3 100644
+--- a/tests/assistantFinalFour.test.mjs
++++ b/tests/assistantFinalFour.test.mjs
+@@ -8,7 +8,6 @@ const worker = read('../supabase/functions/background-worker/index.ts')
+ const debriefFn = read('../supabase/functions/meeting-debrief/index.ts')
+ const debriefLib = read('../src/lib/meetingDebrief.ts')
+ const videosLib = read('../src/lib/assistantVideos.ts')
+-const composer = read('../src/components/assistant/GlobalAssistantComposer.tsx')
+ 
+ // ── Meeting debrief ─────────────────────────────────────────────────────────
+ test('meeting_debriefs is staff-read-only; only the service role writes; RLS on', () => {
+@@ -78,13 +77,6 @@ test('assistant_update_video reuses the proven debrief transition rules', () =>
+   assert.match(body, /'assistant_video_' \|\| p_action/)
+ })
+ 
+-test('composer executes video actions directly (no routing for supported actions)', () => {
+-  assert.match(composer, /assistantUpdateVideo\(\{ runId, videoNumber: n, action: 'shot' \}\)/)
+-  assert.match(composer, /'move_to_month' : 'move_next_month'/)
+-  // only calendar.cancel still routes
+-  assert.doesNotMatch(composer, /admin\/content\?tab=runs/)
+-})
+-
+ test('video lib resolves the run deterministically and asks instead of guessing', () => {
+   assert.match(videosLib, /resolveContentRun/)
+   assert.match(videosLib, /return null/)
+@@ -129,13 +121,3 @@ test('prepare_monthly_reports allows staff and the headless worker, never anon u
+   assert.match(body, /if not public\.is_staff\(\) and auth\.uid\(\) is not null then raise exception/)
+   assert.match(sql, /revoke all on function public\.prepare_monthly_reports\(date\) from public, anon/)
+ })
+-
+-// ── One editable confirmation before any write ──────────────────────────────
+-test('composer debrief flow shows one editable confirmation and applies only on confirm', () => {
+-  assert.match(composer, /Meeting debrief/)
+-  assert.match(composer, /Background notes/)
+-  assert.match(composer, /Decisions \(one per line\)/)
+-  assert.match(composer, /Unresolved \(one per line\)/)
+-  assert.match(composer, /confirmDebrief/)
+-  assert.match(composer, /Nothing is saved until you confirm/)
+-})
+diff --git a/tests/assistantFrontendAcceptance.test.mjs b/tests/assistantFrontendAcceptance.test.mjs
+index 111b3faa..f772449d 100644
+--- a/tests/assistantFrontendAcceptance.test.mjs
++++ b/tests/assistantFrontendAcceptance.test.mjs
+@@ -3,37 +3,13 @@ import { readFileSync } from 'node:fs'
+ import test from 'node:test'
+ 
+ const read = path => readFileSync(new URL(path, import.meta.url), 'utf8')
+-const composer = read('../src/components/assistant/GlobalAssistantComposer.tsx')
+-const assistantPage = read('../src/pages/admin/AssistantPage.tsx')
+ const actions = read('../src/lib/assistantActions.ts')
+ const videos = read('../src/lib/assistantVideos.ts')
+ const workflow = read('../src/pages/admin/ContentWorkflowPage.tsx')
+ const planner = read('../src/pages/admin/PlannerPage.tsx')
+ const work = read('../src/pages/admin/MyWorkPage.tsx')
+ 
+-test('assistant sessions are user-scoped and profile changes synchronously clear user state and context refs', () => {
+-  assert.match(composer, /`\$\{SESSION_KEY_PREFIX\}:\$\{userId\}`/)
+-  assert.match(assistantPage, /`\$\{SESSION_KEY_PREFIX\}:\$\{userId\}`/)
+-  const reset = composer.slice(composer.indexOf('if (profileIdRef.current !== profileId)'), composer.indexOf('const speechSupported'))
+-  for (const token of ['setMessages(loadSession(profileId))', 'setProposal(null)', 'setDebrief(null)', 'workContextRef.current = null', 'clientsRef.current = []', 'staffRef.current = []', 'managementRef.current = null', 'memoryRef.current = []']) assert.match(reset, new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
+-  assert.match(assistantPage, /if \(profileIdRef\.current !== profileId\)[\s\S]*setMessages\(loadSessionMessages\(profileId\)\)[\s\S]*setLocalWorkContext\(null\)/)
+-})
+-
+-test('both sends ignore prior-profile responses and always release sending state', () => {
+-  for (const source of [composer, assistantPage]) {
+-    assert.match(source, /const sendingProfileId = profileIdRef\.current/)
+-    assert.match(source, /profileIdRef\.current !== sendingProfileId/)
+-    assert.match(source, /finally \{/)
+-  }
+-})
+-
+-test('task.assign updates the exact open Planner task and never creates a replacement', () => {
+-  const assign = composer.slice(composer.indexOf("p.type === 'task.assign'"), composer.indexOf("p.type === 'task.update'"))
+-  assert.match(assign, /p\.target\?\.type !== 'planner_task'/)
+-  assert.match(assign, /updateAssistantTask\(\{ taskId: p\.target\.id, action: 'assign'/)
+-  assert.doesNotMatch(assign, /createAssistantTask/)
+-  assert.doesNotMatch(assign, /action: 'due'/)
+-  assert.match(assign, /The due date was not changed; update it separately/)
++test('retained task assignment contract clarifies non-atomic updates and canonical matching', () => {
+   assert.match(actions, /current backend cannot apply both atomically/)
+   // PR #203 removed the "open Planner first" instruction for task assignment;
+   // existing-task resolution now searches visible tasks with a canonical match.
+@@ -42,88 +18,12 @@ test('task.assign updates the exact open Planner task and never creates a replac
+ })
+ 
+ test('supported Work board routes supply assistant task context and hydrate notification deep links', () => {
+-  assert.match(composer, /location\.pathname === '\/admin\/work' \|\| location\.pathname === '\/admin\/my-work'/)
+-  assert.match(composer, /searchParams\.get\('tab'\) === 'board'/)
+-  assert.doesNotMatch(composer, /location\.pathname\.startsWith\('\/admin\/planner'\)/)
+   assert.match(planner, /getPlannerTaskBoardId\(routeTaskId\)/)
+   assert.match(planner, /setDrawerTask\(linkedTask\)/)
+   assert.match(planner, /if \(isPlannerHistoryTask\(linkedTask\)\) setWorkView\('history'\)/)
+   assert.match(work, /if \(taskId\) next\.set\('id', taskId\)/)
+ })
+ 
+-test('confirmed actions fail closed and recheck profile/action identity after every awaited write', () => {
+-  assert.match(composer, /const actionRequestId = \+\+actionRequestRef\.current/)
+-  assert.match(composer, /Boolean\(applyingProfileId\) && profileIdRef\.current === applyingProfileId && actionRequestRef\.current === actionRequestId/)
+-  const apply = composer.slice(composer.indexOf('async function applyProposal()'), composer.indexOf('// ── Meeting debrief flow'))
+-  for (const awaitedWrite of [
+-    'enqueueBackgroundJob',
+-    'nudgeBackgroundWorker',
+-    'createCompanyEvent',
+-    'logPlannerActivity',
+-    'proposeScheduleChange',
+-    'addAssistantMemory',
+-    'createAssistantTask',
+-  ]) {
+-    assert.match(apply, new RegExp(`await ${awaitedWrite}\\([\\s\\S]*?\\n\\s*if \\(!actionIsCurrent\\(\\)\\) return`), `${awaitedWrite} must recheck action identity`)
+-  }
+-  assert.match(apply, /catch \(err\) \{\s*if \(actionIsCurrent\(\)\) setProposalError/)
+-  assert.match(apply, /finally \{\s*if \(actionIsCurrent\(\)\) setApplying\(false\)/)
+-  const assign = apply.slice(apply.indexOf("p.type === 'task.assign'"), apply.indexOf("p.type === 'task.update'"))
+-  const update = apply.slice(apply.indexOf("p.type === 'task.update'"), apply.indexOf("p.type === 'video.mark_shot'"))
+-  for (const taskBranch of [assign, update]) assert.match(taskBranch, /await updateAssistantTask\([\s\S]*?if \(!actionIsCurrent\(\)\) return/)
+-  const videosBlock = composer.slice(composer.indexOf("p.type === 'video.mark_shot'"), composer.indexOf("} else {", composer.indexOf("p.type === 'video.mark_shot'")))
+-  assert.match(videosBlock, /if \(!actionIsCurrent\(\)\) return[\s\S]*assistantUpdateVideo[\s\S]*if \(!actionIsCurrent\(\)\) return/)
+-})
+-
+-test('profile replacement clears stale action errors and invalidates in-flight actions', () => {
+-  const reset = composer.slice(composer.indexOf('if (profileIdRef.current !== profileId)'), composer.indexOf('const speechSupported'))
+-  assert.match(reset, /actionRequestRef\.current \+= 1/)
+-  assert.match(reset, /setProposalError\(null\)/)
+-  const apply = composer.slice(composer.indexOf('async function applyProposal()'), composer.indexOf('// ── Meeting debrief flow'))
+-  assert.doesNotMatch(apply, /catch \(err\) \{\s*setProposalError/)
+-})
+-
+-test('meeting debrief analysis and confirmation use unique profile-bound request tokens', () => {
+-  assert.doesNotMatch(composer, /debriefActiveRef/)
+-  assert.match(composer, /interface DebriefRequestToken \{[\s\S]*id: number[\s\S]*profileId: string/)
+-  assert.match(composer, /const token = \{ id: \+\+debriefRequestSeqRef\.current, profileId: requestedProfileId \}/)
+-  assert.match(composer, /debriefAnalysisRequestRef\.current = token/)
+-  assert.match(composer, /debriefConfirmationRequestRef\.current = token/)
+-  assert.match(composer, /return current === token && profileIdRef\.current === token\.profileId/)
+-})
+-
+-test('meeting debrief async continuations cannot update another request or profile', () => {
+-  const recording = composer.slice(composer.indexOf('async function startDebriefRecording()'), composer.indexOf('function stopDebriefRecording()'))
+-  assert.match(recording, /await navigator\.mediaDevices\.getUserMedia[\s\S]*if \(!debriefRequestIsCurrent\('analysis', requestToken\)\)/)
+-  assert.match(recording, /catch \{\s*if \(debriefRequestIsCurrent\('analysis', requestToken\)\) setDebriefError/)
+-
+-  const analysis = composer.slice(composer.indexOf('async function analyseDebrief('), composer.indexOf('async function confirmDebrief()'))
+-  assert.match(analysis, /await analyseMeetingAudio|await analyseMeetingText/)
+-  assert.match(analysis, /await analyseMeetingText[\s\S]*if \(!debriefRequestIsCurrent\('analysis', requestToken\)\) return/)
+-  assert.match(analysis, /if \(debriefRequestIsCurrent\('analysis', requestToken\)\) setDebriefError/)
+-  assert.match(analysis, /finally \{\s*if \(debriefRequestIsCurrent\('analysis', requestToken\)\)[\s\S]*setDebriefBusy\(false\)/)
+-
+-  const confirmation = composer.slice(composer.indexOf('async function confirmDebrief()'), composer.indexOf('function closeDebrief()'))
+-  assert.match(confirmation, /const draft = debrief/)
+-  assert.match(confirmation, /await applyMeetingDebrief\([\s\S]*if \(!debriefRequestIsCurrent\('confirmation', requestToken\)\) return/)
+-  assert.match(confirmation, /catch \{\s*if \(debriefRequestIsCurrent\('confirmation', requestToken\)\) setDebriefError/)
+-  assert.match(confirmation, /finally \{\s*if \(debriefRequestIsCurrent\('confirmation', requestToken\)\)[\s\S]*setDebriefBusy\(false\)/)
+-})
+-
+-test('meeting debrief requests are invalidated on profile change, close, restart, new debrief, and unmount', () => {
+-  const profileReset = composer.slice(composer.indexOf('if (profileIdRef.current !== profileId)'), composer.indexOf('const speechSupported'))
+-  assert.match(profileReset, /invalidateDebriefRequests\(\)/)
+-  assert.match(composer, /useEffect\(\(\) => \(\) => \{\s*invalidateDebriefRequests\(\)/)
+-  for (const functionName of ['closeDebrief', 'startNewDebrief', 'restartDebriefDraft']) {
+-    const start = composer.indexOf(`function ${functionName}()`)
+-    const body = composer.slice(start, composer.indexOf('\n  }', start) + 4)
+-    assert.match(body, /invalidateDebriefRequests\(\)/, `${functionName} must invalidate pending requests first`)
+-  }
+-  assert.match(composer, /onClick=\{closeDebrief\}/)
+-  assert.match(composer, /onClick=\{startNewDebrief\}/)
+-  assert.match(composer, /onClick=\{restartDebriefDraft\}/)
+-})
+-
+ test('Planner publishes plain task identity and clears stale task context on board switch', () => {
+   assert.match(planner, /next\.set\('task', task\.title\)/)
+   const selectBoard = planner.slice(planner.indexOf('function selectBoard'), planner.indexOf('function refreshActiveBoardTasks'))
+@@ -132,52 +32,38 @@ test('Planner publishes plain task identity and clears stale task context on boa
+   assert.match(selectBoard, /setSearchParams\(next, \{ replace: true \}\)/)
+ })
+ 
+-test('Content Workflow preserves selected runId and Assistant validates that exact run before preview/write', () => {
++test('Content Workflow and shared run resolver retain exact run identity', () => {
+   assert.match(workflow, /next\.set\('runId', run\.id\)/)
+   assert.match(workflow, /const legacyRunId = searchParams\.get\('run'\)[\s\S]*const runId = searchParams\.get\('runId'\) \?\? legacyRunId/)
+   assert.match(workflow, /if \(canonicalize\) setSearchParams/)
+-  assert.match(composer, /const run = await resolveContentRun\(selectedRunId\)/)
+-  assert.match(composer, /target: \{ type: 'content_run', id: run\.id, label: run\.name \}/)
+   assert.match(videos, /\.eq\('id', runId\)[\s\S]*\.maybeSingle\(\)/)
+   assert.doesNotMatch(videos, /order\('run_date'|limit\(1\)|eq\('client_id'/)
+ })
+ 
+-test('schedule changes clarify before preview when no typed Client Schedule target is open', () => {
+-  assert.match(composer, /parsed\.type === 'schedule\.propose' && \(!location\.pathname\.startsWith\('\/admin\/client-schedule'\) \|\| !recordId\)/)
+-  assert.match(composer, /Open the Client Schedule post first so I know exactly which item to change/)
+-})
+-
+-test('composer uses visualViewport inset and 44px primary touch targets', () => {
+-  assert.match(composer, /useVisualViewportBottomInset\(\)/)
+-  assert.match(composer, /--assistant-viewport-inset/)
+-  assert.match(composer, /h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-teal/)
+-  assert.match(composer, /h-11 w-11 items-center justify-center rounded-full border/)
+-})
+-
+-test('operation errors are separate and sends use try-finally rather than leaving stale busy state', () => {
+-  for (const name of ['chatError', 'proposalError', 'debriefError']) assert.match(composer, new RegExp(`const \\[${name}, set${name[0].toUpperCase()}${name.slice(1)}\\]`))
+-  assert.match(composer, /setProposalError\(null\)/)
+-  assert.match(composer, /setDebriefError\(null\)/)
+-  assert.match(composer, /finally \{[\s\S]*setSending\(false\)/)
+-  assert.match(assistantPage, /finally \{[\s\S]*setIsSending\(false\)/)
+-})
+-
+ test('Meta preview uses plain previous-month wording while payload remains backend compatible', () => {
+   assert.match(actions, /sync_previous_month/)
+   assert.doesNotMatch(actions, /fields: \{ job: 'meta_sync', baseline:/)
+-  assert.match(composer, /Also sync the previous month/)
+-  assert.match(composer, /payload: jobType === 'meta_sync' \? \{ baseline: syncPreviousMonth \} : \{\}/)
+-})
+-
+-test('action preview hides internal job key, shows target identity, and keeps optional task fields editable', () => {
+-  assert.match(composer, /key === 'job' \|\| key === 'sync_previous_month'/)
+-  assert.match(composer, /proposal\.target\.type === 'planner_task' \? 'Task' : 'Content Run'/)
+-  assert.match(composer, /key === 'assignee' \|\| key === 'due_date'/)
+-  assert.match(composer, /placeholder=\{key === 'assignee' \|\| key === 'due_date' \? 'Optional'/)
+ })
+ 
+ test('schedule approval copy reflects manager and admin permissions', () => {
+   assert.match(actions, /manager or admin approves them/)
+-  assert.match(composer, /manager or admin approves it/)
+   assert.doesNotMatch(actions, /until an Admin approves/)
+ })
++
++// Keep the old route usable without replaying old query-string prompts.
++test('legacy assistant route replace-redirects to the existing authenticated workspace', () => {
++  const app = read('../src/App.tsx')
++  assert.match(app, /path="\/admin\/assistant" element=\{<Navigate to="\/admin\/my-assistant" replace \/>\}/)
++  assert.match(app, /path="\/admin\/my-assistant" element=\{<MyAssistantPage \/>\}/)
++  assert.doesNotMatch(app, /import\(['"].*\/AssistantPage['"]\)/)
++  assert.match(app, /<RequireStaff/)
++})
++
++test('retained My Assistant offers existing setup and work without a model composer', () => {
++  const page = read('../src/pages/admin/MyAssistantPage.tsx')
++  assert.match(page, /getMyDayContext\(profile\)/)
++  assert.match(page, /<TodayPanel/)
++  assert.match(page, /<LeadsPanel/)
++  assert.match(page, /<SetupPanel/)
++  assert.doesNotMatch(page, /GlobalAssistantComposer|DailyAssistantCapture|cg-assistant-chat/)
++})
+diff --git a/tests/assistantGroundedQueries.test.mjs b/tests/assistantGroundedQueries.test.mjs
+index 661cc4a9..225603c4 100644
+--- a/tests/assistantGroundedQueries.test.mjs
++++ b/tests/assistantGroundedQueries.test.mjs
+@@ -4,7 +4,6 @@ import { readFileSync } from 'node:fs'
+ 
+ const read = path => readFileSync(new URL(path, import.meta.url), 'utf8')
+ const edge = read('../supabase/functions/cg-assistant-chat/index.ts')
+-const composer = read('../src/components/assistant/GlobalAssistantComposer.tsx')
+ const actions = read('../src/lib/assistantActions.ts')
+ 
+ // ── Calendar query pattern matching ────────────────────────────────────────
+@@ -170,10 +169,6 @@ test('client-side parser does not intercept calendar queries', () => {
+   assert.doesNotMatch(actions, /calendar\.query/)
+   assert.doesNotMatch(actions, /schedule\.query_overdue/)
+ })
+-test('client-side composer does not handle calendar.query or schedule.query_overdue proposals', () => {
+-  assert.doesNotMatch(composer, /p\.type === 'calendar\.query'/)
+-  assert.doesNotMatch(composer, /p\.type === 'schedule\.query_overdue'/)
+-})
+ 
+ // ── Grounded queries fall through client-side parser (return null) ──────────
+ // The client-side parseAssistantAction must return null for these messages
+diff --git a/tests/assistantMarketingAi.test.mjs b/tests/assistantMarketingAi.test.mjs
+index cee4973b..3e0367b8 100644
+--- a/tests/assistantMarketingAi.test.mjs
++++ b/tests/assistantMarketingAi.test.mjs
+@@ -4,7 +4,6 @@ import { after, before, test } from 'node:test'
+ import { createServer } from 'vite'
+ 
+ const read = p => readFileSync(new URL(p, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
+-const composer = read('../src/components/assistant/GlobalAssistantComposer.tsx')
+ const chatFn = read('../supabase/functions/cg-assistant-chat/index.ts')
+ const wfLib = read('../src/lib/marketingWorkflow.ts')
+ 
+@@ -125,45 +124,9 @@ test('ordinary chat still falls through to conversation', () => {
+ 
+ // ── Composer behaviour ──────────────────────────────────────────────────────
+ test('the Assistant continues an existing artifact instead of duplicating records', () => {
+-  assert.match(composer, /findOpenArtifact\(p\.clientId\)/)
+-  assert.match(composer, /Continue the existing open artifact rather than duplicating records/)
+   assert.match(wfLib, /\.in\('status', \['draft', 'in_review', 'changes_requested'\]\)/)
+ })
+ 
+-test('approve and reject are refused for non-managers in the Assistant too', () => {
+-  const branch = composer.slice(composer.indexOf("p.type === 'marketing.decide'"), composer.indexOf("p.type === 'microsoft.sync'"))
+-  assert.match(branch, /decision === 'approved' \|\| decision === 'rejected'\) && !isManager/)
+-  assert.match(branch, /restricted to managers and admins/)
+-  assert.match(branch, /You can request changes instead/)
+-})
+-
+-test('a decision always targets the current version of the open artifact', () => {
+-  const branch = composer.slice(composer.indexOf("p.type === 'marketing.decide'"), composer.indexOf("p.type === 'microsoft.sync'"))
+-  assert.match(branch, /getCurrentVersion\(openArtifact\)/)
+-  assert.match(branch, /recordMarketingDecision\(\{/)
+-})
+-
+-test('insufficient evidence and provider exhaustion are reported honestly', () => {
+-  assert.match(composer, /if \(result\.insufficientEvidence\)/)
+-  assert.match(composer, /Honest insufficient-evidence \/ provider-exhaustion result/)
+-  assert.match(composer, /Not enough approved knowledge to produce a grounded draft/)
+-})
+-
+-test('the Assistant reports citations and points at the full artifact', () => {
+-  assert.match(composer, /citing \$\{cited\} approved card/)
+-  assert.match(composer, /Open it in Marketing AI to read the full draft/)
+-})
+-
+-test('approving via the Assistant states plainly that nothing was published', () => {
+-  assert.match(composer, /Nothing was published or changed on the client record/)
+-})
+-
+-test('stage progress is surfaced while a specialist runs', () => {
+-  assert.match(composer, /setMarketingNote/)
+-  assert.match(composer, /Handing off to the next specialist/)
+-  assert.match(composer, /Marketing AI<\/p>/)
+-})
+-
+ // ── Truthful capability answers ─────────────────────────────────────────────
+ test('the chat function reads REAL Marketing AI state, not a static claim', () => {
+   assert.match(chatFn, /async function getMarketingAiState/)
+diff --git a/tests/assistantMicrosoftSync.test.mjs b/tests/assistantMicrosoftSync.test.mjs
+index 85e29916..2b3c6e1e 100644
+--- a/tests/assistantMicrosoftSync.test.mjs
++++ b/tests/assistantMicrosoftSync.test.mjs
+@@ -6,7 +6,6 @@ import { createServer } from 'vite'
+ const read = path => readFileSync(new URL(path, import.meta.url), 'utf8')
+ const chatFn = read('../supabase/functions/cg-assistant-chat/index.ts')
+ const syncLib = read('../src/lib/assistantMicrosoftSync.ts')
+-const composer = read('../src/components/assistant/GlobalAssistantComposer.tsx')
+ 
+ let server
+ let parseAssistantAction
+@@ -168,46 +167,3 @@ test('sync reports the real record count and does NOT claim it applied anything'
+   assert.match(syncLib, /recordCount = snapshot\.records\.length/)
+   assert.match(syncLib, /Nothing has been changed yet — review and apply it on the Microsoft Import page/)
+ })
+-
+-test('composer enforces admin-only truthfully instead of claiming not connected', () => {
+-  const branch = composer.slice(composer.indexOf("p.type === 'microsoft.sync'"), composer.indexOf("p.type === 'calendar.create'"))
+-  assert.match(branch, /profile\?\.role !== 'admin'/)
+-  assert.match(branch, /restricted to admins/)
+-  // A permission problem must never be reported as a connection problem. Check
+-  // the user-facing strings only (comments may legitimately discuss the bug).
+-  const userFacingStrings = [...branch.matchAll(/setProposalError\('([^']*)'\)/g)].map(m => m[1])
+-  assert.ok(userFacingStrings.length >= 2, 'expected user-facing error strings')
+-  for (const message of userFacingStrings) {
+-    assert.doesNotMatch(message, /not connected/i, `permission/validation error must not claim a connection failure: ${message}`)
+-  }
+-})
+-
+-test('composer validates the confirmed range before running', () => {
+-  const branch = composer.slice(composer.indexOf("p.type === 'microsoft.sync'"), composer.indexOf("p.type === 'calendar.create'"))
+-  assert.match(branch, /rangeEnd <= rangeStart/)
+-  assert.match(branch, /runMicrosoftSync\(rangeStart, rangeEnd/)
+-})
+-
+-test('composer shows a confirmation step first and live progress while running', () => {
+-  // The proposal preview is the confirmation gate: the action is only executed
+-  // from applyProposal, which runs on explicit confirm.
+-  const branch = composer.slice(composer.indexOf("p.type === 'microsoft.sync'"), composer.indexOf("p.type === 'calendar.create'"))
+-  assert.match(branch, /setMicrosoftSyncNote/)
+-  assert.match(composer, /Microsoft 365 sync<\/p>/)
+-})
+-
+-// ── Conversational grounding (no model guessing) ────────────────────────────
+-test('assistant context carries REAL Microsoft state, admin-scoped', () => {
+-  assert.match(composer, /checkMicrosoftSyncAvailability\(\)/)
+-  assert.match(composer, /microsoftStateRef/)
+-  assert.match(composer, /microsoft365: CONNECTED/)
+-  assert.match(composer, /microsoft365: unavailable for sync/)
+-  // Only admins fetch it — the status endpoint is admin-gated server-side.
+-  const effect = composer.slice(composer.indexOf('Live Microsoft 365 state for grounded answers'))
+-  assert.match(effect.slice(0, 400), /profile\?\.role === 'admin'/)
+-})
+-
+-test('a failed status lookup adds no line at all rather than guessing', () => {
+-  const effect = composer.slice(composer.indexOf('Live Microsoft 365 state for grounded answers'))
+-  assert.match(effect.slice(0, 600), /if \(!active \|\| profileIdRef\.current !== requestedProfileId \|\| state\.error\) return/)
+-})
+diff --git a/tests/assistantMobileRegressions.test.mjs b/tests/assistantMobileRegressions.test.mjs
+index 5b6fc71b..1a1b5037 100644
+--- a/tests/assistantMobileRegressions.test.mjs
++++ b/tests/assistantMobileRegressions.test.mjs
+@@ -4,7 +4,6 @@ import { readFileSync } from 'node:fs'
+ import { createServer } from 'vite'
+ 
+ const read = path => readFileSync(new URL(path, import.meta.url), 'utf8')
+-const composer = read('../src/components/assistant/GlobalAssistantComposer.tsx')
+ const edge = read('../supabase/functions/cg-assistant-chat/index.ts')
+ 
+ let server
+@@ -18,14 +17,6 @@ before(async () => {
+ 
+ after(async () => { await server.close() })
+ 
+-test('one transient progress bubble is rendered and no message placeholder is inserted', () => {
+-  const send = composer.slice(composer.indexOf('async function send'), composer.indexOf('function handleSubmit'))
+-  const messages = composer.slice(composer.indexOf('{messages.map'), composer.indexOf('{chatError &&'))
+-  assert.doesNotMatch(send, /thinkingId|role:\s*'assistant'.{0,100}Checking/s)
+-  assert.equal((messages.match(/\{sending &&/g) ?? []).length, 1)
+-  assert.match(messages, /role="status" aria-live="polite">Checking…/)
+-})
+-
+ test('ordinary assistant output becomes short plain text with no literal Markdown markers', () => {
+   const answer = presentAssistantReply([
+     '**Assignment Conflicts:**',
+@@ -53,30 +44,9 @@ test('speech segments keep spaces and punctuation across Safari recognition rest
+     joinSpeechTranscript('Hey buddy can you please have a look at', 'all', 'the Germoparts profiles ?'),
+     'Hey buddy can you please have a look at all the Germoparts profiles?',
+   )
+-  assert.match(composer, /recognition\.continuous = true/)
+-  assert.match(composer, /voiceCommittedTranscriptRef\.current = joinSpeechTranscript/)
+-  assert.match(composer, /recognitionRestartTimerRef\.current = window\.setTimeout/)
+-  const listening = composer.slice(composer.indexOf('function startListening'), composer.indexOf('function onAttach'))
+-  assert.doesNotMatch(listening, /void send\(|send\(transcript/)
+-})
+-
+-test('mobile composer auto-grows to multiple lines and then scrolls inside a bounded height', () => {
+-  assert.match(composer, /const minHeight = isMobile && open \? 72 : 44/)
+-  assert.match(composer, /Math\.min\(192, Math\.max\(132, viewport\.height \* 0\.32\)\)/)
+-  assert.match(composer, /textarea\.style\.height = 'auto'/)
+-  assert.match(composer, /textarea\.style\.overflowY = textarea\.scrollHeight > maxHeight \? 'auto' : 'hidden'/)
+-  assert.match(composer, /rows=\{2\}/)
+ })
+ 
+ test('team and assignment-review debt are excluded unless the user explicitly asks for them', () => {
+-  const context = composer.slice(composer.indexOf('function currentContextLine'), composer.indexOf('// Mobile composer controls'))
+-  assert.match(context, /const asksForTeam/)
+-  assert.match(context, /const asksForOwnershipReview/)
+-  assert.match(context, /const asksForMicrosoft/)
+-  assert.match(context, /asksForTeam && managementRef\.current/)
+-  assert.match(context, /asksForOwnershipReview && ownershipReviewRef\.current/)
+-  assert.match(context, /asksForMicrosoft && microsoftStateRef\.current/)
+-  assert.match(composer, /currentContextLine\(clean\)/)
+   assert.doesNotMatch(edge.slice(edge.indexOf('function buildLocalWorkResponse'), edge.indexOf('// Client Schedule query')), /setupNotes/)
+ })
+ 
+diff --git a/tests/assistantSemanticIntent.test.mjs b/tests/assistantSemanticIntent.test.mjs
+index 5fef8c42..813d7c01 100644
+--- a/tests/assistantSemanticIntent.test.mjs
++++ b/tests/assistantSemanticIntent.test.mjs
+@@ -109,12 +109,6 @@ test('buildActionFromIntent: returns null for unsupported action types', () => {
+   assert.ok(edge.includes('return null'))
+ })
+ 
+-test('semantic intent: client-side handles action response', () => {
+-  const composer = read('../src/components/assistant/GlobalAssistantComposer.tsx')
+-  assert.ok(composer.includes('response.action'))
+-  assert.ok(composer.includes('setProposal(proposal)'))
+-})
+-
+ test('semantic intent: AssistantChatResponse has action field', () => {
+   const assistant = read('../src/lib/assistant.ts')
+   assert.ok(assistant.includes('action?:'))
+diff --git a/tests/completedTaskAuthority.test.mjs b/tests/completedTaskAuthority.test.mjs
+index fff18918..3133fbe0 100644
+--- a/tests/completedTaskAuthority.test.mjs
++++ b/tests/completedTaskAuthority.test.mjs
+@@ -36,9 +36,6 @@ const commandCentrePage = read('../src/pages/admin/CommandCentrePage.tsx')
+ const plannerPage = read('../src/pages/admin/PlannerPage.tsx')
+ const taskCard = read('../src/components/operations/TaskCard.tsx')
+ const dailyAssistant = read('../src/lib/dailyAssistant.ts')
+-const dailyAssistantCapture = read('../src/components/assistant/DailyAssistantCapture.tsx')
+-const globalAssistantComposer = read('../src/components/assistant/GlobalAssistantComposer.tsx')
+-const assistantPage = read('../src/pages/admin/AssistantPage.tsx')
+ const assistantMigration = read('../supabase/migrations/20260806090001_assistant_linked_completed_authority.sql')
+ const originalAssistantMigration = read('../supabase/migrations/20260803163045_personal_daily_assistant.sql')
+ const originalPushMigration = read('../supabase/migrations/20260804070651_iphone_web_push_notifications.sql')
+@@ -275,9 +272,6 @@ test('Assistant frontend exposes one derived helper backed by taskLifecycle', ()
+   assert.match(dailyAssistant, /export \{ isActiveAssistantDayItem \} from '\.\/taskLifecycle'/)
+   assert.doesNotMatch(dailyAssistant, /\['done',\s*'completed'\]|new Set\(\['done',\s*'completed'\]\)/)
+   assert.match(dailyAssistant, /items\.filter\(isActiveAssistantDayItem\)/)
+-  assert.match(dailyAssistantCapture, /items\.filter\(isActiveAssistantDayItem\)/)
+-  assert.match(globalAssistantComposer, /dailyAssistantContextLine\(captureResult\.data \?\? \[\], itemResult\.data \?\? \[\]\)/)
+-  assert.match(assistantPage, /dailyAssistantContextLine\(captureResult\.data \?\? \[\], itemResult\.data \?\? \[\]\)/)
+ })
+ 
+ test('both Assistant notification functions guard every assistant_day_items path', () => {
+diff --git a/tests/dailyAssistantCapture.test.mjs b/tests/dailyAssistantCapture.test.mjs
+index 4950c147..770bd9df 100644
+--- a/tests/dailyAssistantCapture.test.mjs
++++ b/tests/dailyAssistantCapture.test.mjs
+@@ -8,8 +8,6 @@ const migration = read('../supabase/migrations/20260803163045_personal_daily_ass
+ const replayMigration = read('../supabase/migrations/20260803194000_allow_daily_assistant_ai_replay.sql')
+ const edge = read('../supabase/functions/daily-assistant-capture/index.ts')
+ const client = read('../src/lib/dailyAssistant.ts')
+-const panel = read('../src/components/assistant/DailyAssistantCapture.tsx')
+-const composer = read('../src/components/assistant/GlobalAssistantComposer.tsx')
+ const chat = read('../supabase/functions/cg-assistant-chat/index.ts')
+ 
+ const clients = [
+@@ -84,7 +82,6 @@ test('repeat notes link recent same-client canonical tasks instead of duplicatin
+   assert.match(apply, /task\.created_at >= now\(\) - interval '45 days'/)
+   assert.match(apply, /existing_tasks_linked/)
+   assert.match(edge, /findDuplicate/)
+-  assert.match(panel, /This may already be covered by/)
+ })
+ 
+ test('audio is transcribed server-side and never persisted as bytes or a storage object', () => {
+@@ -118,24 +115,11 @@ test('manager interpretation context stays bounded for free-provider fallback',
+ 
+ test('nothing applies before the explicit mobile confirmation', () => {
+   assert.match(client, /applyDailyAssistantCapture/)
+-  assert.match(panel, /Confirm selected/)
+-  assert.match(panel, /Nothing writes until you review and confirm/)
+   const analysisPath = edge.slice(edge.indexOf("action !== 'analyse_audio'"))
+   assert.doesNotMatch(analysisPath.slice(0, analysisPath.indexOf("if (action === 'apply')")), /planner_tasks/)
+   assert.match(edge, /action === 'apply'[\s\S]*rpc\('apply_assistant_day_capture'/)
+ })
+ 
+-test('mobile capture protects drafts and safely stops recording on background/interruption', () => {
+-  assert.match(panel, /localStorage\.setItem\(draftKey/)
+-  assert.match(panel, /document\.visibilityState === 'hidden'/)
+-  assert.match(panel, /recorder\.start\(1000\)/)
+-  assert.match(panel, /MAX_VOICE_SECONDS/)
+-  assert.match(panel, /Uploading securely/)
+-  assert.match(panel, /Try again/)
+-  assert.match(panel, /min-h-20/)
+-  assert.match(panel, /safe-area-inset-bottom/)
+-})
+-
+ test('daily reminders are quiet-hour bounded, deduplicated, snoozable and dismissible', () => {
+   assert.match(migration, /if v_hour < 7 or v_hour >= 19 then return 0/)
+   for (const slot of ['morning', 'midday', 'end-of-day']) assert.match(migration, new RegExp(`'${slot}'`))
+@@ -145,8 +129,6 @@ test('daily reminders are quiet-hour bounded, deduplicated, snoozable and dismis
+ })
+ 
+ test('both assistant surfaces receive own timeline context and day questions route locally in EN/AF', () => {
+-  assert.match(composer, /DailyAssistantCapture/)
+-  assert.match(composer, /dailyAssistantContextLine/)
+   assert.match(chat, /personalDaySummary/)
+   assert.ok(chat.includes('what (have i done|did i promise|am i forgetting'))
+   assert.match(chat.toLowerCase(), /wat het ek vandag gedoen/)
+diff --git a/tests/marketingAiDepartment.test.mjs b/tests/marketingAiDepartment.test.mjs
+index fb0339fe..0bdbb142 100644
+--- a/tests/marketingAiDepartment.test.mjs
++++ b/tests/marketingAiDepartment.test.mjs
+@@ -256,10 +256,10 @@ test('UI exposes evidence, confidence, provider, specialist, creator and timesta
+   assert.match(page, /SPECIALIST_LABELS\[currentVersion\.specialist\]/)
+ })
+ 
+-test('UI offers routing choice, regenerate, compare, and all four decisions', () => {
+-  assert.match(page, /CG Assistant routes automatically/)
+-  assert.match(page, /Preview routing/)
+-  assert.match(page, /Regenerate current step/)
++test('Retired generation UI retains compare and all four human decisions', () => {
++  assert.doesNotMatch(page, /CG Assistant routes automatically/)
++  assert.doesNotMatch(page, /Preview routing/)
++  assert.doesNotMatch(page, /Regenerate current step/)
+   assert.match(page, /Compare with/)
+   for (const d of ['approved', 'rejected', 'changes_requested', 'returned']) {
+     assert.match(page, new RegExp(`decide\\('${d}'`))
+diff --git a/tests/mobileAssistantFullscreen.test.mjs b/tests/mobileAssistantFullscreen.test.mjs
+index 715c7043..4a06a238 100644
+--- a/tests/mobileAssistantFullscreen.test.mjs
++++ b/tests/mobileAssistantFullscreen.test.mjs
+@@ -3,16 +3,10 @@ import { readFileSync } from 'node:fs'
+ import { after, before, test } from 'node:test'
+ import { createServer } from 'vite'
+ 
+-// Mobile CG Assistant: focused full-screen experience.
+-//
+-// These lock the behaviour proven in the browser at iPhone viewports (390x844
+-// portrait and 844x390 landscape): the sheet is sized to the VISUAL viewport so
+-// the keyboard shrinks it instead of covering it, the page behind is frozen and
+-// untappable, the app's bottom navigation stands down, and closing restores the
+-// original scroll position.
++// Retirement shell contracts; retained shared viewport and error-safety checks.
++// These source/helper tests do not claim authenticated browser acceptance.
+ 
+ const read = p => readFileSync(new URL(p, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
+-const composer = read('../src/components/assistant/GlobalAssistantComposer.tsx')
+ const layout = read('../src/pages/admin/AdminLayout.tsx')
+ const viewportLib = read('../src/lib/mobileViewport.ts')
+ const indexCss = read('../src/index.css')
+@@ -28,31 +22,6 @@ before(async () => {
+ })
+ after(async () => { await server.close() })
+ 
+-// ── The sheet is sized to what the user can actually see ────────────────────
+-test('collapsed mobile launcher accepts taps without making the entire dock intercept input', () => {
+-  const launcher = composer.slice(composer.indexOf('{!mobileFullscreen && !open && isMobile ? ('), composer.indexOf('aria-label="Open CG Assistant"'))
+-  assert.match(launcher, /onClick=\{\(\) => setOpen\(true\)\}/)
+-  assert.match(launcher, /className="pointer-events-auto mx-auto flex h-11 w-11/)
+-  const dock = composer.slice(composer.indexOf('const shellClass'), composer.indexOf('const innerClass'))
+-  assert.match(dock, /pointer-events-none fixed/)
+-})
+-
+-test('the full-screen sheet is sized to the VISUAL viewport, never a vh unit', () => {
+-  // Measured in-browser: with a 336px keyboard on a 390x844 iPhone the sheet
+-  // ended at exactly 508px — the keyboard's top edge. A 100dvh sheet would have
+-  // run to 844 and put the composer under the keyboard.
+-  assert.match(composer, /height: `\$\{viewport\.height\}px`/)
+-  assert.match(composer, /transform: `translateY\(\$\{viewport\.offsetTop\}px\)`/)
+-  const shellClass = composer.slice(composer.indexOf('const shellClass'), composer.indexOf('const innerClass'))
+-  assert.doesNotMatch(shellClass, /100dvh|100vh|h-screen/, 'the sheet must not be sized with a viewport height unit')
+-})
+-
+-test('the composer is the fixed footer of the sheet, so it sits above the keyboard', () => {
+-  assert.match(composer, /mobileFullscreen \? 'shrink-0' : ''/)
+-  const scrollClass = composer.slice(composer.indexOf('const scrollClass'), composer.indexOf('const scrollClass') + 400)
+-  assert.match(scrollClass, /min-h-0 flex-1/, 'the message list must absorb the height change, not the composer')
+-})
+-
+ test('viewport geometry is applied synchronously, so a backgrounded tab resumes correctly', () => {
+   // requestAnimationFrame does not fire while the page is not compositing.
+   // Coalescing into a frame left the sheet holding a stale height after the app
+@@ -64,7 +33,7 @@ test('viewport geometry is applied synchronously, so a backgrounded tab resumes
+   assert.match(hook, /orientationchange/)
+ })
+ 
+-test('a landscape phone still gets the full-screen sheet', () => {
++test('shared viewport helper still recognizes landscape phones', () => {
+   // An iPhone 14 Pro in landscape is 844x390 — wider than the md breakpoint but
+   // only 390px tall, which is the case that needs full-screen most.
+   assert.match(viewportLib, /MOBILE_MAX_HEIGHT = 500/)
+@@ -79,76 +48,28 @@ test('opening the sheet freezes the page behind and restores its scroll on close
+   assert.match(lock, /position = 'fixed'/)
+   assert.match(lock, /top = `-\$\{scrollY\}px`/)
+   assert.match(lock, /window\.scrollTo\(0, scrollY\)/, 'closing must return the user to exactly where they were')
+-  assert.match(composer, /useBodyScrollLock\(mobileFullscreen\)/)
+-})
+-
+-test('the page behind cannot be tapped or reached by assistive tech', () => {
+-  assert.match(layout, /aria-hidden=\{assistantFullscreen \|\| undefined\}/)
+-  assert.match(layout, /inert=\{assistantFullscreen \|\| undefined\}/)
+-  assert.match(composer, /aria-modal=\{mobileFullscreen \? true : undefined\}/)
+-  assert.match(composer, /role=\{mobileFullscreen \? 'dialog' : undefined\}/)
+-})
+-
+-// ── Navigation hides and reliably comes back ─────────────────────────────────
+-test('the bottom navigation is removed while the sheet is open, not merely covered', () => {
+-  assert.match(layout, /\{!assistantFullscreen && \(\s*<nav[\s\S]*?Primary mobile navigation/)
+-  assert.match(layout, /<GlobalAssistantComposer onMobileFullscreenChange=\{setAssistantFullscreen\} \/>/)
+-})
+-
+-test('the navigation can never be left hidden if the composer unmounts while open', () => {
+-  assert.match(composer, /useEffect\(\(\) => \(\) => \{ onMobileFullscreenChangeRef\.current\?\.\(false\) \}, \[\]\)/)
+ })
+ 
+-test('back and Escape close the sheet instead of leaving the page', () => {
+-  assert.match(composer, /window\.history\.pushState\(\{ cgAssistant: true \}, ''\)/)
+-  assert.match(composer, /popstate/)
+-  assert.match(composer, /event\.key === 'Escape'/)
++test('retired composer cannot hide the page from input or assistive technology', () => {
++  const main = layout.slice(layout.indexOf('<main'), layout.indexOf('</main>'))
++  assert.match(main, /<Outlet \/>/)
++  assert.doesNotMatch(main, /aria-hidden|inert|assistantFullscreen/)
++  assert.doesNotMatch(layout, /GlobalAssistantComposer|onMobileFullscreenChange/)
+ })
+ 
+-// ── Desktop keeps its own experience ─────────────────────────────────────────
+-test('desktop keeps the docked panel and is never locked or made full-screen', () => {
+-  assert.match(composer, /const mobileFullscreen = isMobile && open && !onAssistantPage/)
+-  const shellClass = composer.slice(composer.indexOf('const shellClass'), composer.indexOf('const innerClass'))
+-  // The non-fullscreen branch keeps the existing docked positioning.
+-  assert.match(shellClass, /md:right-5/)
+-  assert.match(shellClass, /--assistant-viewport-inset/)
+-})
+-
+-// ── Recently completed mobile work is preserved ──────────────────────────────
+-test('the simplified mobile start screen is unchanged', () => {
+-  assert.match(composer, /What do you need\?/)
+-  assert.match(composer, /Record my update/)
+-  assert.match(composer, /Sort me out for today/)
+-  assert.match(composer, /mobileSuggestionAreaHidden/)
+-})
+-
+-test('the mobile composer control states are unchanged', () => {
+-  assert.match(composer, /const mobileMicPrimary = speechSupported && !sending && \(listening \|\| input\.trim\(\) === ''\)/)
+-  assert.match(composer, /const mobileSendPrimary = sending \|\| \(!listening && input\.trim\(\) !== ''\)/)
+-})
+-
+-test('the daily voice-state flow still renders and stays bounded in the sheet', () => {
+-  assert.match(composer, /<DailyAssistantCapture/)
+-  // An open capture/debrief/proposal takes the flexible space so it can never
+-  // push the composer off the bottom once the keyboard opens.
+-  assert.match(composer, /const overlayOpen = dailyCaptureOpen \|\| debriefOpen \|\| Boolean\(proposal\)/)
+-  assert.match(composer, /overlayOpen \? 'shrink' : 'flex-1'/)
+-  assert.match(composer, /mobileFullscreen && overlayOpen \? 'min-h-0 flex-1 overflow-y-auto overscroll-contain' : 'contents'/)
++test('mobile navigation remains available with touch targets and safe-area padding', () => {
++  const nav = layout.slice(layout.indexOf('<nav className="fixed'), layout.indexOf('</nav>', layout.indexOf('<nav className="fixed')))
++  assert.match(nav, /Primary mobile navigation/)
++  assert.match(nav, /mobilePrimaryItems\.map/)
++  assert.match(nav, /min-h-11 min-w-11/)
++  assert.match(nav, /safe-area-inset-bottom/)
++  assert.doesNotMatch(layout, /assistantFullscreen|assistantVisible/)
+ })
+ 
+ test('iOS still cannot zoom the composer inputs on focus', () => {
+   assert.match(indexCss, /\[data-assistant-composer\] textarea[\s\S]*font-size: 16px/)
+ })
+ 
+-// ── Safe areas ───────────────────────────────────────────────────────────────
+-test('the sheet respects the notch and the home indicator', () => {
+-  const innerClass = composer.slice(composer.indexOf('const innerClass'), composer.indexOf('const overlayOpen'))
+-  assert.match(innerClass, /env\(safe-area-inset-bottom\)/)
+-  assert.match(innerClass, /env\(safe-area-inset-left\)/)
+-  assert.match(innerClass, /env\(safe-area-inset-right\)/)
+-  assert.match(composer, /pt-\[max\(0\.625rem,env\(safe-area-inset-top\)\)\]/)
+-})
+-
+ // ── Errors a person can act on ───────────────────────────────────────────────
+ test('raw Edge Function and provider errors never reach the user', () => {
+   for (const raw of [
+@@ -179,17 +100,3 @@ test('retrying is only offered when it can actually help', () => {
+   assert.equal(friendlyAssistantError('AI usage quota exceeded').retryable, false)
+   assert.equal(friendlyAssistantError('JWT expired').retryable, false)
+ })
+-
+-test('the error surface offers a retry that does not duplicate the question', () => {
+-  assert.match(composer, /role="alert"/)
+-  assert.match(composer, /Try again/)
+-  assert.match(composer, /function retryLastMessage/)
+-  const body = composer.slice(composer.indexOf('function retryLastMessage'), composer.indexOf('function newChat'))
+-  assert.match(body, /trimmed\.at\(-1\)\?\.role === 'assistant'/)
+-  assert.match(body, /trimmed\.at\(-1\)\?\.role === 'user'/)
+-})
+-
+-test('a failure is never presented as a success', () => {
+-  assert.match(composer, /const friendly = friendlyAssistantError\(response\.error\)/)
+-  assert.match(composer, /setChatErrorRetryable\(friendly\.retryable\)/)
+-})
+diff --git a/tests/mobileDailyAssistantVoiceStates.test.mjs b/tests/mobileDailyAssistantVoiceStates.test.mjs
+index ef582da5..d667de33 100644
+--- a/tests/mobileDailyAssistantVoiceStates.test.mjs
++++ b/tests/mobileDailyAssistantVoiceStates.test.mjs
+@@ -1,172 +1,10 @@
+ import assert from 'node:assert/strict'
+-import { readFileSync } from 'node:fs'
++import { existsSync, readFileSync } from 'node:fs'
+ import test from 'node:test'
+ 
+-const read = path => readFileSync(new URL(path, import.meta.url), 'utf8')
+-const panel = read('../src/components/assistant/DailyAssistantCapture.tsx')
+-const composer = read('../src/components/assistant/GlobalAssistantComposer.tsx')
+-const client = read('../src/lib/dailyAssistant.ts')
+-
+-// ── Required state model: Ready → Recording → Transcribing → Reviewing → Applying → Complete (+ Failed) ──
+-
+-test('explicit seven-stage state machine drives the mobile voice flow', () => {
+-  assert.match(panel, /type CaptureStage = 'ready' \| 'recording' \| 'transcribing' \| 'reviewing' \| 'applying' \| 'complete' \| 'failed'/)
+-  for (const stage of ['ready', 'recording', 'transcribing', 'reviewing', 'applying', 'complete', 'failed']) {
+-    assert.ok(panel.includes(`stage === '${stage}'`), `panel must branch on the ${stage} stage`)
+-  }
+-})
+-
+-// 1. Ready shows one recording entry point.
+-test('ready state shows exactly one recording entry point', () => {
+-  assert.match(panel, /Record your update/)
+-  assert.match(panel, /Nothing writes until you review and confirm\./)
+-  const recordEntries = panel.match(/Record voice note/g) ?? []
+-  assert.equal(recordEntries.length, 1, 'exactly one record button')
+-  const startHandlers = panel.match(/onClick=\{\(\) => void startRecording\(\)\}/g) ?? []
+-  assert.equal(startHandlers.length, 1, 'exactly one microphone start handler')
+-  // The typed textarea is a typing path, not a second recording entry point.
+-  assert.match(panel, /placeholder="Or type what happened\.\.\."/)
+-  assert.match(panel, /Review this note/)
+-})
+-
+-// 2. Recording shows duration and one stop control.
+-test('recording state shows elapsed duration and a single stop control', () => {
+-  assert.match(panel, /formatDuration\(seconds\)/)
+-  assert.match(panel, />Recording<\/p>/)
+-  const stopButtons = panel.match(/Stop and review/g) ?? []
+-  assert.equal(stopButtons.length, 1, 'exactly one stop control')
+-  assert.match(panel, /aria-label="Stop recording and review"/)
+-  assert.match(panel, /Speak naturally\. You can mix English and Afrikaans\./)
+-})
+-
+-// 3. Duplicate recording start is blocked.
+-test('duplicate recording starts are blocked', () => {
+-  assert.match(panel, /if \(recorderRef\.current\) return/)
+-  assert.match(panel, /recorderRef\.current = recorder/)
+-})
+-
+-// 4. Stopping transitions directly to Transcribing.
+-test('stopping transitions directly to the transcribing state', () => {
+-  assert.match(panel, /if \(analyse && mountedRef\.current\) setStage\('transcribing'\)/)
+-  assert.match(panel, /Transcribing your update/)
+-  // No generic idle assistant view is rendered while transcribing.
+-  assert.doesNotMatch(panel, /stage === 'transcribing'[\s\S]{0,200}Record voice note/)
+-})
+-
+-// 5. Generic suggestions stay hidden during recording/transcribing/reviewing/applying.
+-test('generic suggestions stay hidden across every capture stage', () => {
+-  const hidden = composer.slice(composer.indexOf('const mobileSuggestionAreaHidden'), composer.indexOf('applying', composer.indexOf('const mobileSuggestionAreaHidden')) + 'applying'.length)
+-  assert.ok(hidden.includes('dailyCaptureOpen'), 'composer must hide suggestions while the daily capture panel is open')
+-  assert.doesNotMatch(panel, /What should I do next\?/)
+-  assert.ok(panel.includes('Applying your update'))
+-  assert.ok(panel.includes('Transcribing your update'))
+-})
+-
+-// 6. Reviewing preserves existing edit and confirmation handlers.
+-test('reviewing preserves the existing edit and confirmation handlers', () => {
+-  assert.match(panel, /Review before applying/)
+-  assert.match(panel, /onChange=\{patch => updateSuggestion\(index, patch\)\}/)
+-  assert.match(panel, /onClick=\{\(\) => void confirm\(\)\}/)
+-  assert.match(panel, /Confirm selected/)
+-  assert.match(panel, /applyDailyAssistantCapture\(analysis\)/)
+-  assert.match(panel, /This may already be covered by/)
+-})
+-
+-// 7. Applying disables duplicate apply.
+-test('applying state disables duplicate apply', () => {
+-  assert.match(panel, /if \(!analysis \|\| busy\) return/)
+-  assert.match(panel, /Applying your update/)
+-  const applyingCard = panel.slice(panel.indexOf("stage === 'applying'"), panel.indexOf("stage === 'complete'"))
+-  assert.doesNotMatch(applyingCard, /Confirm selected|onClick=\{\(\) => void confirm\(\)\}/, 'no apply button exists while applying')
+-})
+-
+-// 8. Complete uses verified result counts.
+-test('complete state summarises verified result counts only', () => {
+-  assert.match(panel, /completeResult\.tasks_created/)
+-  assert.match(panel, /completeResult\.tasks_updated/)
+-  assert.match(panel, /completeResult\.existing_tasks_linked/)
+-  assert.match(panel, /completeResult\.timeline_notes_saved/)
+-  assert.match(panel, />Done<\/button>/)
+-})
+-
+-// 9. Complete can reset to a clean Ready state.
+-test('complete state can reset to a clean ready state', () => {
+-  assert.match(panel, /Record another update/)
+-  assert.match(panel, /setCompleteResult\(null\)/)
+-  assert.match(panel, /setStage\('ready'\)/)
+-  assert.match(panel, /function startOver\(\)/)
+-})
+-
+-// 10. Failure presents plain-language Retry.
+-test('failure presents plain-language retry', () => {
+-  assert.match(panel, />Try again<\/button>/)
+-  assert.match(panel, /Nothing was applied\. Retry the note, or type it instead\./)
+-  assert.match(panel, /Microphone access is blocked\. Allow it in Safari settings, or type the note instead\./)
+-})
+-
+-// 11. Raw Edge Function/provider errors are not the primary user message.
+-test('raw provider errors never become the primary user message', () => {
+-  assert.match(panel, /const failureCopy = failedStep === 'recording'/)
+-  assert.doesNotMatch(panel, /setError\(result\.error\)/)
+-  assert.doesNotMatch(panel, /setError\(error\.message\)/)
+-  assert.match(panel, /console\.error\('\[daily-capture\] transcription failed', result\.error\)/)
+-  assert.match(panel, /console\.error\('\[daily-capture\] apply failed', result\.error\)/)
+-})
+-
+-// 12. No task is written before explicit confirmation.
+-test('no task write happens before explicit confirmation', () => {
+-  const occurrences = panel.match(/applyDailyAssistantCapture/g) ?? []
+-  assert.equal(occurrences.length, 2, 'apply appears only in the import and one confirm() call')
+-  const confirmBody = panel.slice(panel.indexOf('function confirm'), panel.indexOf('function retry'))
+-  assert.equal((confirmBody.match(/applyDailyAssistantCapture/g) ?? []).length, 1, 'apply is only reachable through confirm()')
+-  assert.match(confirmBody, /if \(!analysis \|\| busy\) return/)
+-  assert.match(confirmBody, /Resolve or deselect every amber item before saving\./)
+-})
+-
+-// 13. Desktop behaviour remains compatible.
+-test('desktop capture and timeline behaviour remain compatible', () => {
+-  assert.match(panel, /Today \/ open loops/)
+-  assert.match(panel, /'capture' \| 'timeline'/)
+-  assert.match(panel, /min-h-20 w-full/)
+-  assert.match(panel, /onClick=\{onClose\}/)
+-  assert.match(panel, /aria-label="Close daily capture"/)
+-})
+-
+-// 14. Existing daily-capture contract strings are preserved.
+-test('existing daily-capture contract strings are preserved', () => {
+-  for (const value of [
+-    'Confirm selected',
+-    'Nothing writes until you review and confirm.',
+-    'Uploading securely',
+-    'Try again',
+-    'min-h-20',
+-    'safe-area-inset-bottom',
+-    'localStorage.setItem(draftKey',
+-    "document.visibilityState === 'hidden'",
+-    'recorder.start(1000)',
+-    'MAX_VOICE_SECONDS',
+-    'Review this note',
+-    'My day capture',
+-  ]) {
+-    assert.ok(panel.includes(value), `panel must preserve "${value}"`)
++test('retired voice capture cannot mount from the shared shell or My Assistant', () => {
++  assert.equal(existsSync('src/components/assistant/DailyAssistantCapture.tsx'), false)
++  for (const path of ['src/pages/admin/AdminLayout.tsx', 'src/pages/admin/MyAssistantPage.tsx']) {
++    assert.doesNotMatch(readFileSync(path, 'utf8'), /DailyAssistantCapture|applyDailyAssistantCapture/)
+   }
+ })
+-
+-// ── Retry / idempotency ──────────────────────────────────────────────────────
+-
+-test('transcription retry reuses the preserved audio instead of re-requesting the mic', () => {
+-  assert.match(panel, /pendingAudioRef\.current = \{ blob, duration \}/)
+-  assert.match(panel, /function retry\(\) \{\s*if \(failedStep === 'recording'\) \{ void startRecording\(\); return \}/)
+-  assert.match(panel, /failedStep === 'transcription' && pendingAudioRef\.current/)
+-})
+-
+-test('apply retry can never duplicate writes because the RPC finalises the capture once', () => {
+-  assert.match(panel, /already been finalised/i)
+-  assert.match(panel, /async function settleFromAppliedCapture\(\)/)
+-  assert.match(panel, /applied_actions as Record<string, number> \| null \| undefined/)
+-})
+-
+-test('starting over from reviewing clears only the unconfirmed capture', () => {
+-  assert.match(panel, /function startOver\(\) \{\s*setAnalysis\(null\)\s*setText\(''\)/)
+-  assert.match(panel, /setFailedStep\(null\)\s*setStage\('ready'\)/)
+-})
+diff --git a/tests/mobileStaffHardening.test.mjs b/tests/mobileStaffHardening.test.mjs
+index d9de381e..edd0ae6c 100644
+--- a/tests/mobileStaffHardening.test.mjs
++++ b/tests/mobileStaffHardening.test.mjs
+@@ -6,7 +6,6 @@ const read = path => readFileSync(new URL(path, import.meta.url), 'utf8')
+ const sql = read('../supabase/migrations/20260801160000_assistant_hardening_notifications_and_rls.sql')
+ const cscrMigration = read('../supabase/migrations/20260731090000_client_schedule_change_approval.sql')
+ const commandCentre = read('../src/lib/commandCentre.ts')
+-const composer = read('../src/components/assistant/GlobalAssistantComposer.tsx')
+ const taskDrawer = read('../src/components/operations/TaskDetailDrawer.tsx')
+ const opsHub = read('../src/pages/admin/OpsHubPage.tsx')
+ const cgHub = read('../src/pages/admin/CgHubPage.tsx')
+@@ -140,36 +139,6 @@ test('ShootMode accepts + renders an error prop and Content Workflow wires it',
+   assert.match(contentWorkflow, /setShootMode\(false\); setCardError\(null\)/)
+ })
+ 
+-// ── Frontend: composer recordId + idempotency + debrief guard ─────────────────
+-
+-test('composer uses typed Planner task context for in-place task updates', () => {
+-  assert.match(composer, /const onPlannerBoard = \(location\.pathname === '\/admin\/work' \|\| location\.pathname === '\/admin\/my-work'\) && searchParams\.get\('tab'\) === 'board'/)
+-  assert.match(composer, /const plannerTaskId = onPlannerBoard \? \(searchParams\.get\('id'\) \?\? ''\) : ''/)
+-  assert.match(composer, /if \(plannerTaskId\) parts\.push\(`plannerTaskId: \$\{plannerTaskId\}`\)/)
+-  assert.match(composer, /updateAssistantTask\(\{ taskId: p\.target\.id, action \}\)/)
+-})
+-
+-test('composer enqueue idempotency key is user-scoped', () => {
+-  assert.match(composer, /idempotencyKey: `\$\{applyingProfileId\}:\$\{jobType\}-\$\{today\}/)
+-})
+-
+-test('composer debrief requests are profile-bound and invalidated on close', () => {
+-  assert.match(composer, /const token = \{ id: \+\+debriefRequestSeqRef\.current, profileId: requestedProfileId \}/)
+-  assert.match(composer, /return current === token && profileIdRef\.current === token\.profileId/)
+-  assert.match(composer, /if \(blob\.size > 0 && debriefRequestIsCurrent\('analysis', requestToken\)\) \{\s*void analyseDebrief\(\{ audio: blob, durationSeconds/)
+-  assert.match(composer, /function closeDebrief\(\) \{\s*invalidateDebriefRequests\(\)/)
+-})
+-
+-test('composer keeps the widest debrief candidate set so the meeting select never collapses', () => {
+-  assert.match(composer, /if \(res\.data\.candidates\.length > 0 && !input\.eventId\) setDebriefCandidates\(res\.data\.candidates\)/)
+-  assert.match(composer, /debriefCandidates\.map\(c =>/)
+-})
+-
+-test('composer success message is truthful about assignee notification', () => {
+-  assert.match(composer, /\? ' \(assignees notified\)' : ' — some assignee names could not be matched'/)
+-  assert.match(composer, /created on the board\$\{notificationNote\}/)
+-})
+-
+ // ── Frontend: recordId URL wiring on Planner + Client Schedule ────────────────
+ 
+ test('Planner openTask/closeTask set/clear ?id= so the composer can act on the record', () => {
+@@ -207,170 +176,4 @@ test('composer inputs/textareas sit at ≥16px on mobile so iOS does not auto-zo
+   assert.match(indexCss, /@media \(max-width: 640px\)/)
+   assert.match(indexCss, /\[data-assistant-composer\] input[\s\S]*font-size: 16px/)
+   assert.match(indexCss, /\[data-assistant-composer\] textarea[\s\S]*font-size: 16px/)
+-  assert.match(composer, /data-assistant-composer/)
+-})
+-
+-test('composer textarea can shrink below its placeholder width so the bar fits the viewport', () => {
+-  assert.match(composer, /min-h-\[4\.5rem\] min-w-0 flex-1 resize-none overflow-y-hidden/)
+-})
+-
+-test('composer bar respects left/right safe-area insets on mobile while desktop is unchanged', () => {
+-  assert.match(composer, /pl-\[max\(0\.5rem,env\(safe-area-inset-left\)\)\]/)
+-  assert.match(composer, /pr-\[max\(0\.5rem,env\(safe-area-inset-right\)\)\]/)
+-  assert.match(composer, /md:inset-x-auto md:right-5/)
+-  assert.match(composer, /md:px-0/)
+-})
+-
+-// ── Frontend: composer mobile initial-state simplification ───────────────────
+-
+-test('mobile idle shows exactly two primary actions before any interaction', () => {
+-  assert.match(composer, /What do you need\?/)
+-  assert.match(composer, /Record my update/)
+-  assert.match(composer, /Sort me out for today/)
+-  assert.match(composer, /grid grid-cols-2 gap-1\.5/)
+-  assert.match(composer, /messages\.length === 0 && !sending && !mobileSuggestionAreaHidden && \(/)
+-})
+-
+-test('secondary suggestions are hidden behind the More toggle, not on the idle surface', () => {
+-  assert.match(composer, /moreOpen \?/)
+-  assert.match(composer, /setMoreOpen\(true\)/)
+-  assert.match(composer, /setMoreOpen\(false\)/)
+-  assert.match(composer, />More<\/button>/)
+-})
+-
+-test('typing hides every mobile suggestion', () => {
+-  const start = composer.indexOf('const mobileSuggestionAreaHidden')
+-  const expr = composer.slice(start, composer.indexOf('applying', start))
+-  assert.match(expr, /input\.trim\(\) !== ''/)
+-})
+-
+-test('recording, transcribing, reviewing and applying all hide the suggestions', () => {
+-  const start = composer.indexOf('const mobileSuggestionAreaHidden')
+-  const expr = composer.slice(start, composer.indexOf('applying', start) + 'applying'.length)
+-  for (const term of ['sending', 'listening', 'dailyCaptureOpen', 'debriefOpen', 'debriefRecording', 'debriefBusy', 'Boolean(debrief)', 'Boolean(proposal)', 'applying']) {
+-    assert.ok(expr.includes(term), `expected mobileSuggestionAreaHidden to include ${term}`)
+-  }
+-})
+-
+-test('entering any non-idle state collapses More so idle restores the two primary actions', () => {
+-  assert.match(composer, /const mobileSuggestionAreaHidden =/)
+-  assert.match(composer, /onChange=\{event => \{ setInput\(event\.target\.value\); setMoreOpen\(false\) \}\}/)
+-  assert.match(composer, /async function send\(text: string\) \{[\s\S]*?setMoreOpen\(false\)/)
+-  assert.match(composer, /function startDailyCapture\(\) \{[\s\S]*?setMoreOpen\(false\)/)
+-  assert.match(composer, /function startNewDebrief\(\) \{[\s\S]*?setMoreOpen\(false\)/)
+-  assert.match(composer, /function startListening\(\) \{[\s\S]*?setMoreOpen\(false\)/)
+-  assert.match(composer, /function newChat\(\) \{[\s\S]*?setMoreOpen\(false\)/)
+-  assert.match(composer, /messages\.length === 0 && !sending && !mobileSuggestionAreaHidden && \(/)
+-})
+-
+-test('mobile context renders as one compact line', () => {
+-  assert.match(composer, /const mobileContextLabel = clientId/)
+-  assert.match(composer, /clientsRef\.current\.find\(c => c\.id === clientId\)\?\.name \?\? pageLabel/)
+-  assert.match(composer, />Context: \{mobileContextLabel\}</)
+-})
+-
+-test('desktop suggestion behaviour and header remain available', () => {
+-  assert.match(composer, /hidden space-y-2 py-2 md:block/)
+-  assert.match(composer, /Ask anything about your work, clients or this page\./)
+-  assert.match(composer, /md:block">Knows: \{pageLabel\}/)
+-})
+-
+-test('existing suggestion actions stay wired to the same handlers', () => {
+-  assert.match(composer, /onClick=\{startDailyCapture\}/)
+-  assert.match(composer, /onClick=\{\(\) => void send\('Sort me out for today'\)\}/)
+-  assert.match(composer, /onClick=\{\(\) => void send\(s\)\}/)
+-  const chipUses = composer.match(/\{starterChips\}/g) ?? []
+-  assert.equal(chipUses.length, 2, 'starter chips should be shared by mobile More and desktop, not duplicated')
+-})
+-
+-// ── Frontend: composer mobile control cleanup ────────────────────────────────
+-
+-test('empty mobile composer shows exactly one primary microphone action', () => {
+-  assert.match(composer, /const mobileMicPrimary = speechSupported && !sending && \(listening \|\| input\.trim\(\) === ''\)/)
+-  assert.match(composer, /const mobileSendPrimary = sending \|\| \(!listening && input\.trim\(\) !== ''\)/)
+-  assert.match(composer, /<div className="flex shrink-0 items-center md:hidden">/)
+-  assert.match(composer, /hidden shrink-0 items-center gap-1 md:flex/)
+-  assert.match(composer, /border border-transparent bg-brand-teal text-black font-black/)
+-  // Empty input → mic is primary, send is NOT rendered: exactly one of the two
+-  // branches can win inside the single mobile primary slot.
+-  assert.match(composer, /mobileSendPrimary \? \([\s\S]*?\) : mobileMicPrimary \? \([\s\S]*?\) : null/)
+-  assert.doesNotMatch(composer, /mobileSendPrimary[\s\S]{0,80}input\.trim\(\) === ''/)
+-})
+-
+-test('text input switches the primary action to send', () => {
+-  assert.match(composer, /sending \? 'bg-brand-teal\/70' : 'bg-brand-teal hover:bg-brand-teal\/90'/)
+-  assert.match(composer, /\{sending \? '[^']*' : '↑'\}/)
+-  assert.match(composer, /mobileSendPrimary \? \([\s\S]*?\) : mobileMicPrimary \? \([\s\S]*?\) : null/)
+-  // Typed input → mic drops out (mobileMicPrimary requires empty input or
+-  // listening), send becomes the only primary control.
+-  assert.match(composer, /mobileMicPrimary = speechSupported && !sending && \(listening \|\| input\.trim\(\) === ''\)/)
+-  assert.match(composer, /mobileSendPrimary = sending \|\| \(!listening && input\.trim\(\) !== ''\)/)
+-})
+-
+-test('duplicate send is blocked while sending', () => {
+-  assert.match(composer, /disabled=\{sending \|\| listening \|\| !input\.trim\(\)\}/)
+-  assert.match(composer, /if \(!clean \|\| sendingRef\.current \|\| sending \|\| applying \|\| !sendingProfileId\) return/)
+-})
+-
+-test('duplicate microphone start is blocked while listening', () => {
+-  assert.match(composer, /const listeningRef = useRef\(false\)/)
+-  assert.match(composer, /function startListening\(\) \{\s*if \(listeningRef\.current\) return/)
+-  assert.match(composer, /function toggleMic\(\) \{\s*if \(listeningRef\.current\) stopListening\(\)\s*else startListening\(\)/)
+-  assert.match(composer, /recognition\.onend = \(\) => \{[\s\S]*voiceManualStopRef\.current[\s\S]*recognitionRestartTimerRef\.current = window\.setTimeout/)
+-})
+-
+-test('controls stay within the mobile composer width', () => {
+-  assert.match(composer, /min-h-\[4\.5rem\] min-w-0 flex-1 resize-none overflow-y-hidden/)
+-  assert.match(composer, /h-11 w-11 shrink-0/)
+-  assert.match(composer, /mobileSendPrimary \? \([\s\S]*?\) : mobileMicPrimary \? \([\s\S]*?\) : null/)
+-  const mobilePrimaryDivs = composer.match(/<div className="flex shrink-0 items-center md:hidden">/g) ?? []
+-  assert.equal(mobilePrimaryDivs.length, 1, 'exactly one mobile right-control container')
+-  // The whole bar is width-constrained inside the 375px viewport: fixed inset-x-0
+-  // wrapper + safe-area side padding + a w-full inner column (no min-w).
+-  assert.match(composer, /fixed inset-x-0 bottom-\[calc\(3\.5rem\+env\(safe-area-inset-bottom\)/)
+-  assert.match(composer, /pl-\[max\(0\.5rem,env\(safe-area-inset-left\)\)\] pr-\[max\(0\.5rem,env\(safe-area-inset-right\)\)\]/)
+-  assert.match(composer, /pointer-events-auto mx-auto w-full max-w-2xl md:mx-0 md:w-\[26rem\]/)
+-})
+-
+-test('all main controls meet the 44px tap-target requirement', () => {
+-  const fixed44 = composer.match(/h-11 w-11/g) ?? []
+-  assert.equal(fixed44.length, 6, 'launcher, action, mobile mic/send and desktop mic/send are all exactly 44px')
+-  assert.match(composer, /min-h-11 min-w-11 rounded-md px-1 text-\[10px\]/)
+-})
+-
+-test('accessible labels and focus states exist on the composer controls', () => {
+-  assert.match(composer, /aria-label="Add action"/)
+-  assert.match(composer, /aria-expanded=\{plusOpen\}/)
+-  assert.match(composer, /aria-label=\{listening \? 'Stop voice input' : 'Start voice input'\}/)
+-  assert.match(composer, /aria-pressed=\{listening\}/)
+-  assert.match(composer, /aria-label="Send message"/)
+-  assert.match(composer, /aria-label="Ask CG Assistant"/)
+-  assert.match(composer, /focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-teal/)
+-})
+-
+-test('composer exposes the exact spec accessible names', () => {
+-  for (const name of ['Add action', 'Start voice input', 'Stop voice input', 'Send message']) {
+-    assert.ok(composer.includes(name), `composer must expose accessible name "${name}"`)
+-  }
+-})
+-
+-test('active voice state exposes an explicit stop label', () => {
+-  assert.match(composer, /aria-label=\{listening \? 'Stop voice input' : 'Start voice input'\}/)
+-  assert.match(composer, /animate-pulse[\s\S]*?bg-red-400\/15 text-red-200/)
+-})
+-
+-test('desktop composer controls remain available', () => {
+-  assert.match(composer, /onClick=\{\(\) => setMicLang\(l => \(l === 'en-ZA' \? 'af-ZA' : 'en-ZA'\)\)\}/)
+-  assert.match(composer, /\{micLang === 'en-ZA' \? 'EN' : 'AF'\}/)
+-  assert.match(composer, /hidden shrink-0 items-center gap-1 md:flex/)
+-  assert.match(composer, /className="hidden h-11 w-11 shrink-0/)
+-})
+-
+-test('existing send, voice and action handlers stay wired', () => {
+-  assert.match(composer, /onSubmit=\{handleSubmit\}/)
+-  assert.match(composer, /function handleSubmit\(event: FormEvent<HTMLFormElement>\) \{\s*event\.preventDefault\(\)\s*void send\(input\)/)
+-  assert.match(composer, /onClick=\{toggleMic\}/)
+-  assert.match(composer, /recognition\.start\(\)/)
+-  assert.match(composer, /onClick=\{\(\) => setPlusOpen\(value => !value\)\}/)
+-  assert.match(composer, /onClick=\{\(\) => \{ attachRef\.current\?\.click\(\) \}\}/)
+ })
+diff --git a/tests/mobileStartupPerformance.test.mjs b/tests/mobileStartupPerformance.test.mjs
+index 2b2b3d1e..4cf48d16 100644
+--- a/tests/mobileStartupPerformance.test.mjs
++++ b/tests/mobileStartupPerformance.test.mjs
+@@ -15,11 +15,9 @@ test('non-current route pages are split out of the mobile startup bundle', () =>
+   assert.match(layout, /<Suspense fallback=[\s\S]*<Outlet \/>/)
+ })
+ 
+-test('Assistant and notification work wait until after the critical shell render', () => {
+-  assert.match(layout, /const GlobalAssistantComposer = lazy/)
++test('Notification work waits until after the critical shell render; composer is retired', () => {
++  assert.doesNotMatch(layout, /GlobalAssistantComposer/)
+   assert.match(layout, /scheduleWhenIdle/)
+   assert.match(layout, /requestIdleCallback/)
+-  assert.match(layout, /setBackgroundReady\(true\)/)
+-  assert.match(layout, /backgroundReady && <Suspense fallback=\{null\}>/)
+   assert.doesNotMatch(layout, /setTimeout\(pollNotifications, 0\)/)
+ })
+diff --git a/tests/myDayContextShare.test.mjs b/tests/myDayContextShare.test.mjs
+index 87c6c59e..fcd069dc 100644
+--- a/tests/myDayContextShare.test.mjs
++++ b/tests/myDayContextShare.test.mjs
+@@ -53,15 +53,6 @@ test('direct navigation, a failed Hub load or no profile fall back to fetching',
+   assert.equal(share.workContextDelay('fetch'), share.COMPOSER_FETCH_DELAY_MS)
+ })
+ 
+-test('the composer decides at render time, not inside a timer that captured null', () => {
+-  const composer = code('src/components/assistant/GlobalAssistantComposer.tsx')
+-  assert.match(composer, /resolveWorkContextSource\(sharedMyDay, profileId\)/)
+-  assert.match(composer, /workContextDelay\(workContextSource\)/)
+-  assert.match(composer, /\[profile, profileId, workContextSource, sharedWorkContext\]/,
+-    'the effect must re-run when the Hub publishes, clearing the pending fallback timer')
+-  assert.doesNotMatch(composer, /sharedMyDayContext/, 'the old captured-at-mount pattern must be gone')
+-})
+-
+ test('the Hub announces its load before querying and always settles it', () => {
+   const hub = code('src/pages/admin/CgHubPage.tsx')
+   const body = hub.slice(hub.indexOf('async function loadAll()'), hub.indexOf('const loadAllEvent'))
+diff --git a/tests/navigationContentLaunch.test.mjs b/tests/navigationContentLaunch.test.mjs
+index 88e0c225..4734b15c 100644
+--- a/tests/navigationContentLaunch.test.mjs
++++ b/tests/navigationContentLaunch.test.mjs
+@@ -75,7 +75,7 @@ test('/admin/invites redirects to /admin/users?tab=invites', () => {
+ })
+ 
+ test('Assistant route preserved at /admin/assistant', () => {
+-  assert.match(app, /path="\/admin\/assistant" element=\{<AssistantPage \/>\}/)
++  assert.match(app, /path="\/admin\/assistant" element=\{<Navigate to="\/admin\/my-assistant" replace \/>\}/)
+ })
+ 
+ test('Integrations routes are manager-gated under RequireManager', () => {
+diff --git a/tests/notificationsAndAssistantOwnership.test.mjs b/tests/notificationsAndAssistantOwnership.test.mjs
+index 26358369..85dbfb90 100644
+--- a/tests/notificationsAndAssistantOwnership.test.mjs
++++ b/tests/notificationsAndAssistantOwnership.test.mjs
+@@ -18,7 +18,6 @@ const read = p => readFileSync(new URL(p, import.meta.url), 'utf8').replace(/\r\
+ const sql = read('../supabase/migrations/20260805120000_canonical_ownership_notifications.sql')
+ const completedAuthoritySql = read('../supabase/migrations/20260806090001_assistant_linked_completed_authority.sql')
+ const planner = read('../src/lib/planner.ts')
+-const composer = read('../src/components/assistant/GlobalAssistantComposer.tsx')
+ const assistant = read('../src/lib/assistant.ts')
+ const myDay = read('../src/lib/workforceMyDay.ts')
+ 
+@@ -87,28 +86,9 @@ test('the summary carries evidence without naming an owner', () => {
+   assert.match(fn, /Never state that such a task belongs to a specific person/)
+ })
+ 
+-test('the Assistant is told the rule, not left to infer it', () => {
+-  assert.match(composer, /These have NO verified owner — never say such a task belongs to a specific person; say it needs assignment review\./)
+-})
+-
+-test('ownership review reaches managers only when they explicitly ask for it', () => {
+-  assert.match(composer, /const asksForOwnershipReview = \/\\b\(assignment review\|ownership review\|unassigned\|assignment conflict\|who owns\)\\b\/i\.test\(userMessage\)/)
+-  assert.match(composer, /if \(isManager && asksForOwnershipReview && ownershipReviewRef\.current\) parts\.push\(ownershipReviewRef\.current\)/)
+-  // Guarded by the same isManager block that gates the cross-team summary.
+-  const start = composer.indexOf('if (isManager) {')
+-  const block = composer.slice(start, composer.indexOf('admin-gated server-side', start))
+-  assert.match(block, /loadOwnershipReviewSummary\(\)/)
+-})
+-
+-test('the review state is cleared when the signed-in user changes', () => {
+-  assert.match(composer, /ownershipReviewRef\.current = null/)
+-})
+-
+ test('the data call lives in the lib, not the component', () => {
+   assert.match(planner, /export async function loadOwnershipReviewSummary/)
+   assert.match(planner, /assistant_ownership_review_summary/)
+-  assert.ok(!composer.includes("supabase.rpc('assistant_ownership_review_summary')"),
+-    'the component must not call the RPC directly')
+ })
+ 
+ // ── Personal Assistant context inherits the PR 3 fix ────────────────────────
+@@ -131,11 +111,10 @@ test('the stale name/helper setup note is gone', () => {
+ 
+ // ── No second ownership implementation ─────────────────────────────────────
+ test('PR 3B adds no competing ownership logic', () => {
+-  for (const file of [planner, composer]) {
++  for (const file of [planner]) {
+     const code = file.replace(/^\s*\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '')
+     assert.ok(!/helper_names.*===.*profile|profile.*===.*helper_names/.test(code))
+   }
+   // Ownership truth still has exactly one home.
+   assert.ok(!planner.includes('export function resolveOwnership'))
+-  assert.ok(!composer.includes('export function resolveOwnership'))
+ })
+diff --git a/tests/strategyResearchKnowledge.test.mjs b/tests/strategyResearchKnowledge.test.mjs
+index 06debe21..3a329703 100644
+--- a/tests/strategyResearchKnowledge.test.mjs
++++ b/tests/strategyResearchKnowledge.test.mjs
+@@ -8,7 +8,6 @@ const REGISTRY = readFileSync('src/features/ai-workforce/agents/agentRegistry.ts
+ const EDGE_AGENTS = readFileSync('supabase/functions/cg-assistant-chat/skilledAgents.ts', 'utf8')
+ const EDGE = readFileSync('supabase/functions/cg-assistant-chat/index.ts', 'utf8')
+ const CLIENT = readFileSync('src/lib/assistant.ts', 'utf8')
+-const PAGE = readFileSync('src/pages/admin/AssistantPage.tsx', 'utf8')
+ 
+ const STRATEGY_SLUGS = [
+   'strategy-audience-segments-evidence-not-stereotypes',
+@@ -109,6 +108,4 @@ test('specialist readiness comes from live active routing and is staff-safe', ()
+   assert.match(EDGE.slice(statusIndex, adminGuardIndex), /approvedCards/)
+   assert.match(EDGE.slice(statusIndex, adminGuardIndex), /available:/)
+   assert.match(CLIENT, /fetchSpecialistReadiness/)
+-  assert.match(PAGE, /not ready/)
+-  assert.match(PAGE, /approved knowledge card/)
+ })
+diff --git a/tests/voiceDebriefAiUsage.test.mjs b/tests/voiceDebriefAiUsage.test.mjs
+index e1cff19a..11634ce1 100644
+--- a/tests/voiceDebriefAiUsage.test.mjs
++++ b/tests/voiceDebriefAiUsage.test.mjs
+@@ -7,7 +7,6 @@ const shared = read('supabase/functions/_shared/voiceTranscribe.ts')
+ const meeting = read('supabase/functions/meeting-debrief/index.ts')
+ const contentRun = read('supabase/functions/content-run-voice-debrief/index.ts')
+ const contentUi = read('src/components/content/ContentRunVoiceDebrief.tsx')
+-const composer = read('src/components/assistant/GlobalAssistantComposer.tsx')
+ const meetingClient = read('src/lib/meetingDebrief.ts')
+ const contentClient = read('src/lib/contentRunDebrief.ts')
+ const requestIds = read('src/lib/voiceDebriefRequest.ts')
+@@ -22,13 +21,12 @@ test('voice duration is capped at 300 seconds in shared code, both servers, and
+     assert.match(edge, /audio\.size > MAX_AUDIO_BYTES/)
+     assert.doesNotMatch(edge, /durationSeconds > MAX_VOICE_SECONDS/)
+   }
+-  for (const ui of [contentUi, composer]) {
++  for (const ui of [contentUi]) {
+     assert.match(ui, /MAX_VOICE_SECONDS \* 1000/)
+     assert.match(ui, /stopRecording\(\)|stopDebriefRecording\(\)/)
+     assert.match(ui, /Recording stopped automatically at the 5-minute limit/)
+   }
+   assert.match(contentUi, /remaining/)
+-  assert.match(composer, /Record voice note \(5:00 max\)/)
+ })
+ 
+ test('browser uses a fresh user-scoped submission ID and reuses it only for a transport retry', () => {
+@@ -45,7 +43,7 @@ test('browser uses a fresh user-scoped submission ID and reuses it only for a tr
+ })
+ 
+ test('recording countdowns and status messages are announced without shrinking touch controls', () => {
+-  for (const ui of [contentUi, composer]) {
++  for (const ui of [contentUi]) {
+     assert.match(ui, /aria-live="polite"/)
+     assert.match(ui, /role="alert"/)
+     assert.match(ui, /min-h-11/)
+diff --git a/tests/workloadCompletedAuthority.test.mjs b/tests/workloadCompletedAuthority.test.mjs
+index abe98a07..07fed006 100644
+--- a/tests/workloadCompletedAuthority.test.mjs
++++ b/tests/workloadCompletedAuthority.test.mjs
+@@ -6,7 +6,6 @@ import { isActiveWorkTask } from '../src/lib/taskLifecycle.ts'
+ const read = path => readFileSync(new URL(path, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
+ const migration = read('../supabase/migrations/20260809090000_planner_workload_completed_authority.sql')
+ const canonicalMigration = read('../supabase/migrations/20260805110000_canonical_task_authority.sql')
+-const assistant = read('../src/components/assistant/GlobalAssistantComposer.tsx')
+ 
+ function rpc(name, nextMarker) {
+   const start = migration.indexOf(`create or replace function public.${name}()`)
+@@ -100,11 +99,3 @@ test('workload RPC access contracts and return schemas remain unchanged', () =>
+   assert.match(migration, /grant execute on function public\.list_planner_workload_summary\(\) to authenticated;/)
+   assert.match(migration, /grant execute on function public\.list_planner_workload_tasks\(\) to authenticated;/)
+ })
+-
+-test('management Assistant consumes corrected workload metrics without a frontend status authority', () => {
+-  const management = assistant.slice(assistant.indexOf('listPlannerWorkloadSummary().then'), assistant.indexOf('// Ownership review state'))
+-  assert.match(management, /listPlannerWorkloadSummary\(\)/)
+-  for (const metric of ['overdue_count', 'blocked_count', 'unassigned_total', 'active_task_count']) assert.match(management, new RegExp(metric))
+-  assert.match(management, /busiest/)
+-  assert.doesNotMatch(management, /approved|scheduled|ready_internal_review|status not in|status ===/)
+-})
