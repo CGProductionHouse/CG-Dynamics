@@ -11,7 +11,7 @@ Shared tools: `render_scene.py PAGE SIZE NAME T0 T1` (one scene to MP4) and `con
 
 ## Run
 
-Assets are **not** in Git: client photos, screenshots, portraits and logos stay in each project's company-Drive folder (`CG Video Editing System / Projects / …`). Place them as the generator header says (`shots/`, `img/`). Requirements: Python 3 with Pillow and Playwright (Chromium), FFmpeg; Inter Display (CG film), Poppins and npm `@fontsource/cormorant-garamond@5` (Wilgehof). Set `AGENT_PHONE` for the Wilgehof CTA.
+Assets are **not** in Git: client photos, screenshots, portraits and logos stay in each project's company-Drive folder (`CG Video Editing System / Projects / …`). Download `cg-websites-R06-build-assets.zip` or `wilgehof-R02-build-assets.zip` from that folder and unzip it next to the generator (`shots/`, `img/`); see `docs/ops/CLAUDE-NOLAN-HANDOVER-2026-11-16.md`. Requirements: Python 3 with Pillow and Playwright (Chromium), FFmpeg; Inter Display (CG film), Poppins and npm `@fontsource/cormorant-garamond@5` (Wilgehof). Set `AGENT_PHONE` for the Wilgehof CTA.
 
 ```
 python property-wilgehof/build_timeline.py          # writes wilgehof.html

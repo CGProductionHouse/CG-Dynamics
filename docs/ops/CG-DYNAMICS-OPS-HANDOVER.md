@@ -63,6 +63,8 @@ number before a listing video's first render). Read back by id. CG websites
 video record `11833c8d` still shows internal_review; CA to approve or request
 changes in Dynamics. Property Gain is not a Dynamics client; nothing created.
 Drive START HERE tab 1 carries the same pointer.
+Merge/release order, Drive inventory and open items for Codex:
+`docs/ops/CLAUDE-NOLAN-HANDOVER-2026-11-16.md` (#984 → main via #679 gate; #999 → PR910 lane).
 
 ### Historical 11 November — registration LIVE and safe MSI pause
 
