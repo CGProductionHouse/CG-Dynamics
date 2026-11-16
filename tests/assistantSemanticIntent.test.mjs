@@ -109,12 +109,6 @@ test('buildActionFromIntent: returns null for unsupported action types', () => {
   assert.ok(edge.includes('return null'))
 })
 
-test('semantic intent: client-side handles action response', () => {
-  const composer = read('../src/components/assistant/GlobalAssistantComposer.tsx')
-  assert.ok(composer.includes('response.action'))
-  assert.ok(composer.includes('setProposal(proposal)'))
-})
-
 test('semantic intent: AssistantChatResponse has action field', () => {
   const assistant = read('../src/lib/assistant.ts')
   assert.ok(assistant.includes('action?:'))

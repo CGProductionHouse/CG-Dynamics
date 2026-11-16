@@ -4,7 +4,6 @@ import { readFileSync } from 'node:fs'
 
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8')
 const edge = read('../supabase/functions/cg-assistant-chat/index.ts')
-const composer = read('../src/components/assistant/GlobalAssistantComposer.tsx')
 const assistant = read('../src/lib/assistant.ts')
 
 // ── Compound intent schema validation ─────────────────────────────────────
@@ -42,56 +41,6 @@ test('compound intent: extractSemanticIntent handles compound intents', () => {
 test('compound intent: Edge Function returns compound_action field', () => {
   assert.ok(edge.includes('compound_action: action'))
   assert.ok(edge.includes("'is_compound' in action"))
-})
-
-// ── Client-side compound action handling ───────────────────────────────────
-test('client: CompoundActionPlan interface exists', () => {
-  assert.ok(composer.includes('interface CompoundActionPlan'))
-  assert.ok(composer.includes('is_compound: true'))
-  assert.ok(composer.includes('actions: Array<ActionProposal & { type: AssistantActionType }>'))
-})
-
-test('client: compoundProposal state exists', () => {
-  assert.ok(composer.includes('const [compoundProposal, setCompoundProposal]'))
-})
-
-test('client: response.compound_action is handled', () => {
-  assert.ok(composer.includes('response.compound_action'))
-  assert.ok(composer.includes('setCompoundProposal(plan)'))
-})
-
-test('client: compound proposal UI renders', () => {
-  assert.ok(composer.includes('compoundProposal && ('))
-  assert.ok(composer.includes('Bundle Preview'))
-  assert.ok(composer.includes('{compoundProposal.actions.length} actions to confirm'))
-})
-
-test('client: applyCompoundProposal function exists', () => {
-  assert.ok(composer.includes('async function applyCompoundProposal()'))
-})
-
-test('client: deterministic execution order is defined', () => {
-  assert.ok(composer.includes('executionOrder'))
-  assert.ok(composer.includes("'task.create'"))
-  assert.ok(composer.includes("'task.assign'"))
-  assert.ok(composer.includes("'calendar.create'"))
-  assert.ok(composer.includes("'video.mark_shot'"))
-})
-
-test('client: duplicate write protection exists', () => {
-  assert.ok(composer.includes('completedActions'))
-  assert.ok(composer.includes('completedActions.has(actionKey)'))
-})
-
-test('client: partial failure handling exists', () => {
-  assert.ok(composer.includes('results.filter(r => r.success)'))
-  assert.ok(composer.includes('results.filter(r => !r.success)'))
-  assert.ok(composer.includes('Failed:'))
-})
-
-test('client: compound action outcome summary exists', () => {
-  assert.ok(composer.includes('Done — ${actionList}'))
-  assert.ok(composer.includes('All actions failed:'))
 })
 
 // ── AssistantChatResponse compound_action field ────────────────────────────
@@ -206,19 +155,6 @@ test('safety: compound plan requires client for marketing actions', () => {
   assert.ok(edge.includes("if (!client) return null"))
 })
 
-// ── Partial failure handling ───────────────────────────────────────────────
-test('partial failure: try/catch per action in compound plan', () => {
-  assert.ok(composer.includes('try {'))
-  assert.ok(composer.includes('} catch (err) {'))
-  assert.ok(composer.includes('results.push({ index: i, type: action.type, title: action.title, success: false'))
-})
-
-test('partial failure: outcome distinguishes success/failure', () => {
-  assert.ok(composer.includes('succeeded.length === 0'))
-  assert.ok(composer.includes('failed.length === 0'))
-  assert.ok(composer.includes('Failed:'))
-})
-
 // ── Conversational wording tests ───────────────────────────────────────────
 test('conversational: compound prompts use natural language', () => {
   // The examples should use conversational phrasing, not exact technical phrases.
@@ -261,60 +197,4 @@ test('safety: prompt warns about no canonical video-assignment', () => {
 
 test('compound example: Securiforce debrief clarifies descriptions not saved', () => {
   assert.ok(edge.includes('NOTE: The video descriptions (X, Y) are NOT saved'))
-})
-
-// ── Unsupported sub-action handling ─────────────────────────────────────────
-test('compound execution: unsupported actions are tracked separately', () => {
-  assert.ok(composer.includes('unsupported?: boolean'))
-  assert.ok(composer.includes('Unsupported action type in compound plan'))
-  assert.ok(composer.includes('Not yet supported:'))
-})
-
-test('compound execution: unsupported actions do not count as success', () => {
-  assert.ok(composer.includes('results.push({ index: i, type: action.type, title: action.title, success: false, error: \'This action type is not supported in compound plans\', unsupported: true })'))
-})
-
-// ── Stale entity context regression tests ───────────────────────────────────
-test('compound execution: re-resolves tasks before mutation', () => {
-  assert.ok(composer.includes('Re-resolve entity immediately before mutation'))
-  assert.ok(composer.includes('const taskExists = taskList.some(t => t.native_id === action.target!.id)'))
-  assert.ok(composer.includes('That task is no longer available. Open it again before making changes.'))
-})
-
-test('compound execution: re-resolves Content Run before mutation', () => {
-  assert.ok(composer.includes('Verify Content Run still exists'))
-  assert.ok(composer.includes('const run = await resolveContentRun(action.target.id)'))
-  assert.ok(composer.includes('That Content Run is no longer available. Open it again before making changes.'))
-})
-
-// ── Dependency-aware ordering tests ─────────────────────────────────────────
-test('compound execution: dependency-aware ordering skips failed task targets', () => {
-  assert.ok(composer.includes('failedActions'))
-  assert.ok(composer.includes('Skip actions that depend on previously failed actions'))
-  assert.ok(composer.includes('Skipped: dependent task action failed'))
-})
-
-test('compound execution: failed task targets tracked for dependent actions', () => {
-  assert.ok(composer.includes('if (action.target?.id) failedActions.add(action.target.id)'))
-})
-
-// ── Retry/idempotency protection tests ──────────────────────────────────────
-test('compound execution: duplicate action prevention survives retry', () => {
-  assert.ok(composer.includes('const completedActions = new Set<string>()'))
-  assert.ok(composer.includes('Prevent duplicate writes on retry'))
-  assert.ok(composer.includes('completedActions.has(actionKey)'))
-})
-
-// ── Truthful outcome wording tests ──────────────────────────────────────────
-test('truthful outcome: compact confirmation lists action titles', () => {
-  assert.ok(composer.includes('const actionList = succeeded.map(r => r.title).join(\', \')'))
-  assert.ok(composer.includes('Done — ${actionList}'))
-})
-
-test('truthful outcome: partial failure lists each failure reason', () => {
-  assert.ok(composer.includes('Failed: ${failed.map(f => `${f.title}: ${f.error}`).join(\'; \')}'))
-})
-
-test('truthful outcome: unsupported actions listed separately', () => {
-  assert.ok(composer.includes('Not yet supported: ${unsupported.map(u => u.title).join(\', \')}'))
 })

@@ -59,3 +59,17 @@ for what remains (acceptance run, then workspace enablement).
 `supabase/functions/cg-dynamics-mcp/*`, OneDrive/OAuth implementation, migrations/schema,
 and anything owned by #311/#313/#307. This lane is packaging, skills, metadata, validation
 and connection handoff only.
+
+## Built-in model retirement (16 November candidate)
+
+ChatGPT and Nolan operate Dynamics through the existing authenticated connector,
+not the in-app chat model. All four skills, Project context, tool permissions and
+business actions remain unchanged. Use fresh tool discovery and the current
+`get_my_assistant_bootstrap` coexistence policy; do not treat older fallback-only
+skill wording as authority over the live policy. Missing tools are gaps to report,
+not permission to call retired chat/generation endpoints or invent a result.
+
+See [retirement coverage and release gates](../../docs/ops/STAFF-AI-RETIREMENT-2026-11-16.md).
+Legacy Marketing artifact review remains in Dynamics. External drafting does not
+itself save a legacy artifact version. No live acceptance or deployment is implied
+by this source package.

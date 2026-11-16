@@ -8,7 +8,6 @@ const worker = read('../supabase/functions/background-worker/index.ts')
 const debriefFn = read('../supabase/functions/meeting-debrief/index.ts')
 const debriefLib = read('../src/lib/meetingDebrief.ts')
 const videosLib = read('../src/lib/assistantVideos.ts')
-const composer = read('../src/components/assistant/GlobalAssistantComposer.tsx')
 
 // ── Meeting debrief ─────────────────────────────────────────────────────────
 test('meeting_debriefs is staff-read-only; only the service role writes; RLS on', () => {
@@ -78,13 +77,6 @@ test('assistant_update_video reuses the proven debrief transition rules', () => 
   assert.match(body, /'assistant_video_' \|\| p_action/)
 })
 
-test('composer executes video actions directly (no routing for supported actions)', () => {
-  assert.match(composer, /assistantUpdateVideo\(\{ runId, videoNumber: n, action: 'shot' \}\)/)
-  assert.match(composer, /'move_to_month' : 'move_next_month'/)
-  // only calendar.cancel still routes
-  assert.doesNotMatch(composer, /admin\/content\?tab=runs/)
-})
-
 test('video lib resolves the run deterministically and asks instead of guessing', () => {
   assert.match(videosLib, /resolveContentRun/)
   assert.match(videosLib, /return null/)
@@ -128,14 +120,4 @@ test('prepare_monthly_reports allows staff and the headless worker, never anon u
   const body = sql.slice(sql.indexOf('function public.prepare_monthly_reports'))
   assert.match(body, /if not public\.is_staff\(\) and auth\.uid\(\) is not null then raise exception/)
   assert.match(sql, /revoke all on function public\.prepare_monthly_reports\(date\) from public, anon/)
-})
-
-// ── One editable confirmation before any write ──────────────────────────────
-test('composer debrief flow shows one editable confirmation and applies only on confirm', () => {
-  assert.match(composer, /Meeting debrief/)
-  assert.match(composer, /Background notes/)
-  assert.match(composer, /Decisions \(one per line\)/)
-  assert.match(composer, /Unresolved \(one per line\)/)
-  assert.match(composer, /confirmDebrief/)
-  assert.match(composer, /Nothing is saved until you confirm/)
 })

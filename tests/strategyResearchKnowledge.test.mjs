@@ -8,7 +8,6 @@ const REGISTRY = readFileSync('src/features/ai-workforce/agents/agentRegistry.ts
 const EDGE_AGENTS = readFileSync('supabase/functions/cg-assistant-chat/skilledAgents.ts', 'utf8')
 const EDGE = readFileSync('supabase/functions/cg-assistant-chat/index.ts', 'utf8')
 const CLIENT = readFileSync('src/lib/assistant.ts', 'utf8')
-const PAGE = readFileSync('src/pages/admin/AssistantPage.tsx', 'utf8')
 
 const STRATEGY_SLUGS = [
   'strategy-audience-segments-evidence-not-stereotypes',
@@ -98,17 +97,4 @@ test('Historical Analyst contract keeps original claims separate from modern use
     assert.match(source, /Never present.*historic.*current platform rule/i)
   }
   assert.match(MIGRATION, /scientific-advertising-salesmanship row is intentionally not updated/)
-})
-
-test('specialist readiness comes from live active routing and is staff-safe', () => {
-  assert.match(EDGE, /\.eq\('status', 'active'\)/)
-  assert.match(EDGE, /specialistCounts: Object\.fromEntries\(perSpecialist\)/)
-  const statusIndex = EDGE.indexOf("action === 'specialist_status'")
-  const adminGuardIndex = EDGE.indexOf("if (action !== 'chat')", statusIndex)
-  assert.ok(statusIndex > 0 && adminGuardIndex > statusIndex)
-  assert.match(EDGE.slice(statusIndex, adminGuardIndex), /approvedCards/)
-  assert.match(EDGE.slice(statusIndex, adminGuardIndex), /available:/)
-  assert.match(CLIENT, /fetchSpecialistReadiness/)
-  assert.match(PAGE, /not ready/)
-  assert.match(PAGE, /approved knowledge card/)
 })

@@ -136,6 +136,10 @@ Deno.serve(async request => {
   }
   const action = typeof body.action === 'string' ? body.action : ''
 
+  if (action === 'run') {
+    return jsonResponse({ ok: false, code: 'STAFF_AI_RETIRED', error: 'Built-in marketing generation has been retired. Use the CG Dynamics connector in ChatGPT or Nolan. Saved artifacts remain available.' }, 410)
+  }
+
   // ── route: explain who would act, without running anything ────────────────
   if (action === 'route') {
     const req = typeof body.request === 'string' ? body.request.trim() : ''

@@ -2104,6 +2104,10 @@ Deno.serve(async (req) => {
   }
 
   const action = normalizeAction(body.action)
+  if (['chat'].includes(action)) {
+    return jsonResponse({ ok: false, code: 'STAFF_AI_RETIRED', error: 'The built-in CG Assistant has been retired. Use the CG Dynamics connector in ChatGPT or Nolan.' }, 410)
+  }
+
   const idempotencyKey = requestId(body.requestId)
 
   if (action === 'specialist_status') {

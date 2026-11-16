@@ -53,15 +53,6 @@ test('direct navigation, a failed Hub load or no profile fall back to fetching',
   assert.equal(share.workContextDelay('fetch'), share.COMPOSER_FETCH_DELAY_MS)
 })
 
-test('the composer decides at render time, not inside a timer that captured null', () => {
-  const composer = code('src/components/assistant/GlobalAssistantComposer.tsx')
-  assert.match(composer, /resolveWorkContextSource\(sharedMyDay, profileId\)/)
-  assert.match(composer, /workContextDelay\(workContextSource\)/)
-  assert.match(composer, /\[profile, profileId, workContextSource, sharedWorkContext\]/,
-    'the effect must re-run when the Hub publishes, clearing the pending fallback timer')
-  assert.doesNotMatch(composer, /sharedMyDayContext/, 'the old captured-at-mount pattern must be gone')
-})
-
 test('the Hub announces its load before querying and always settles it', () => {
   const hub = code('src/pages/admin/CgHubPage.tsx')
   const body = hub.slice(hub.indexOf('async function loadAll()'), hub.indexOf('const loadAllEvent'))

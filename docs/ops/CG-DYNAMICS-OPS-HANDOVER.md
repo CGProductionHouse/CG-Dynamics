@@ -1,3 +1,15 @@
+## 16 November — built-in staff AI retirement candidate, NOT LIVE
+
+Owner requested removal of the broken in-app model. Isolated branch
+`codex/retire-staff-ai-20261116` removes chat/composer/capture UI and marketing
+model controls, preserves artifact review, redirects old assistant links to the
+existing external-assistant workspace, and retires chat/marketing generation with
+an authenticated410. Shared router/skills/MCP/providers/data/permissions unchanged.
+Read [scope, parity limits and release gates](STAFF-AI-RETIREMENT-2026-11-16.md).
+#990 workbook and all other active lanes preserved. No merge/deploy/SQL/data or
+staff-desktop operation; #679 remains mandatory. Live external acceptance and raw
+legacy marketing artifact/skill-search parity are explicitly not claimed.
+
 ## 16 November — client opening crop corrective release LIVE
 
 CA's new screenshot confirms #993 reached the phone but the opening view still

@@ -4,7 +4,6 @@ import { readFileSync } from 'node:fs'
 
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8')
 const edge = read('../supabase/functions/cg-assistant-chat/index.ts')
-const composer = read('../src/components/assistant/GlobalAssistantComposer.tsx')
 const actions = read('../src/lib/assistantActions.ts')
 
 // ── Calendar query pattern matching ────────────────────────────────────────
@@ -169,10 +168,6 @@ test('schedule overdue query preserves read-only boundary (no insert/update/dele
 test('client-side parser does not intercept calendar queries', () => {
   assert.doesNotMatch(actions, /calendar\.query/)
   assert.doesNotMatch(actions, /schedule\.query_overdue/)
-})
-test('client-side composer does not handle calendar.query or schedule.query_overdue proposals', () => {
-  assert.doesNotMatch(composer, /p\.type === 'calendar\.query'/)
-  assert.doesNotMatch(composer, /p\.type === 'schedule\.query_overdue'/)
 })
 
 // ── Grounded queries fall through client-side parser (return null) ──────────

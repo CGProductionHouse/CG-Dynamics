@@ -6,7 +6,6 @@ import { isActiveWorkTask } from '../src/lib/taskLifecycle.ts'
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
 const migration = read('../supabase/migrations/20260809090000_planner_workload_completed_authority.sql')
 const canonicalMigration = read('../supabase/migrations/20260805110000_canonical_task_authority.sql')
-const assistant = read('../src/components/assistant/GlobalAssistantComposer.tsx')
 
 function rpc(name, nextMarker) {
   const start = migration.indexOf(`create or replace function public.${name}()`)
@@ -99,12 +98,4 @@ test('workload RPC access contracts and return schemas remain unchanged', () => 
   assert.match(migration, /revoke all on function public\.list_planner_workload_tasks\(\) from public, anon, authenticated;/)
   assert.match(migration, /grant execute on function public\.list_planner_workload_summary\(\) to authenticated;/)
   assert.match(migration, /grant execute on function public\.list_planner_workload_tasks\(\) to authenticated;/)
-})
-
-test('management Assistant consumes corrected workload metrics without a frontend status authority', () => {
-  const management = assistant.slice(assistant.indexOf('listPlannerWorkloadSummary().then'), assistant.indexOf('// Ownership review state'))
-  assert.match(management, /listPlannerWorkloadSummary\(\)/)
-  for (const metric of ['overdue_count', 'blocked_count', 'unassigned_total', 'active_task_count']) assert.match(management, new RegExp(metric))
-  assert.match(management, /busiest/)
-  assert.doesNotMatch(management, /approved|scheduled|ready_internal_review|status not in|status ===/)
 })
