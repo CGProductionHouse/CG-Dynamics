@@ -67,7 +67,8 @@ of #990. Hosted JWT/RLS integration remains a release gate.
 ### Continuation verification
 
 Integrated runtime/source tree: merge `1c77695` includes main `1c1bd36` (#996).
-Final focused suite:322pass/0fail/0skip (19.27s). This includes the actual MCP
+Final focused suite:323pass/0fail/0skip (23.09s) on `1d01b83`, including the
+ownership-summary regression. This includes the actual MCP
 routing/canonical-key path, existing MCP context/client/operational/strategy contracts,
 shared approval freshness, retirement guards, new knowledge/scope/redaction fixtures,
 and real isolated PostgreSQL execution. SQL tests exercise atomic append/replay/conflict,
