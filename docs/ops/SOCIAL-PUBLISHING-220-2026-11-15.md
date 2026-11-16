@@ -1,6 +1,86 @@
 # Social publishing — 15 November 2026
 
-## Latest 16 November — native Deno codec qualification, SOURCE ONLY
+## Latest 16 November — exact TikTok Business publication-status reads, SOURCE ONLY
+
+Same draft PR #991 / #220 / #269. Read the current official Business API v1.3
+[publishing-status reference](https://business-api.tiktok.com/portal/docs/get-the-publishing-status-of-a-tiktok-post/v1.3)
+in the existing company Chrome profile (`cgproductionhouse.com`); TikTok's own
+account menu confirms CGPRODUCTIONHOUSE. Preserved all user tabs/sessions. The
+reference is JS-rendered and not readable through ordinary web extraction; no
+app settings, consent, credentials or real API request were needed or changed.
+
+Verified native contract: one GET to `/open_api/v1.3/business/publish/status/`,
+`Access-Token` header, app-specific `open_id` as `business_id`, and original
+publication response's `share_id` as the request's `publish_id`. Successful API
+envelope is numeric `code:0` plus `data`. Native public receipts are `post_ids`,
+returned only with PUBLISH_COMPLETE when publicly viewable. TikTok says their
+availability can lag by three minutes. SEND_TO_USER_INBOX is creator action,
+not publication. PROCESSING_DOWNLOAD is pending; FAILED is a failed task.
+These are separate from the consumer API's differently named fields/states.
+
+Reproduced official Business `post_ids` being ignored by the existing generic
+normalizer. Added an **explicit `tiktok_accounts` route argument** for that
+contract; the original two-argument consumer behavior, existing consumer status
+handler and accepted read-only analytics are unchanged. No legacy fallback is
+used in Business reads. The private core and real fixed-host HTTP adapter read
+only an exact stored task; no search, submission, upload, OAuth refresh, queue
+mutation, first-account fallback or registration. Current exact active mapping,
+actual app entitlement/account identity and native Business credential/grants
+must still come from a REQUIRED unimplemented server credential resolver. The
+conservative video-pilot credential profile requires existing `video.publish`;
+this source work does not prove the app grant or authorize scope expansion.
+
+PUBLISH_COMPLETE without a native public post ID stays processing. A180-second
+next-read suggestion covers this documented lag; using the same interval for
+download processing is conservative application policy, not a provider rule.
+No timer/retry loop is started. Inbox delivery stays unknown/action-required;
+raw failure reasons are replaced by fixed safe codes. Malformed/foreign/nonzero
+API envelopes remain unavailable, never a genuine publication failure. Existing
+receipts survive contradictions. Multiple public IDs are retained privately for
+review, with no arbitrary first-post choice; future queue registration must
+persist/project that evidence safely. IDs use a bounded conservative source
+profile, not a claim to cover every valid provider identifier.
+
+HTTP has a maximum one GET per read port, no redirects or automatic retry,
+64KiB strict JSON/UTF8/body limit and deadlines/cancellation spanning fetch and
+body. Token goes only in its documented header. Freshness/expiry and exact
+client/connection/account are pinned and rechecked. Review reproduced/fixed
+factory-caller cancellation being lost after credential resolution; the original
+and read-caller signals now both cancel pending work. Existing LinkedIn deadline
+logic is extracted into shared `socialPublishingRead.ts`; its public wrapper,
+error codes and provider/credential behavior remain intact (69 regressions pass).
+
+**66 new TikTok checks / 242 affected checks pass**: native response states,
+public-ID lag/multiple/foreign receipts, envelope errors, cross-client/account/
+task isolation, credential scope/expiry, fixed GET/query/header, malformed and
+oversized bodies, cancellation/timeouts and legacy consumer/LinkedIn/OAuth
+regressions. Actual private HTTP composition uses synthetic fetch/credentials;
+no native account/API acceptance is claimed. Deno's actual cached type check,
+scoped lint and build/emitted app pass. Frozen-source full run: **4,759 total /
+4,728 passed / 31 skipped / 0 failures** (`--test-concurrency=2`, existing Git
+Bash/OpenSSL in process PATH). The prior full-run Vite timeout did not recur;
+no timeout assertion or staff source was weakened. Task TEMP evidence:
+`cg-tiktok-business-status-repro.log`, `cg-tiktok-cancellation-repro.log`,
+`cg-tiktok-business-status-focused.log`, `cg-tiktok-business-status-types.log`,
+`cg-tiktok-business-status-lint.log`, `cg-tiktok-business-status-build.log` and
+`cg-tiktok-business-status-full.log`. PostgreSQL remains intentionally unstarted;
+the opt-in SQL group is among skips, not fresh database acceptance. Restored only
+the unrelated generated issue519 access artifacts after completion. No new
+product browser/mobile acceptance; UI is unchanged. Self-review passes for this
+private source increment; native app/grant/pilot and deployment remain held.
+
+Merged current main1c1bd36e/PR996, resolving only the handover prepend conflict
+and preserving BOTH its Novus/January/owner-phone receipt and this lane's source
+history. Other owner's MCP/strategy/runtime files are byte-identical to main.
+No staff/Nolan/Teams/calendar ownership or Microsoft sync-hold change; no new
+dependency or migration. FOUR previous migration candidates remain unapplied.
+No publication/schedule/upload, production SQL/data/Edge/config/secrets/OAuth/
+mapping/permission/provider/Microsoft/Vercel/cost action. Actual Business grant,
+source-to-share_id uploader/provenance, durable registration/audit integration,
+controlled native pilot and release authorization remain gates. #269's old
+separate publish_jobs queue is not resurrected. No guessed tracker write.
+
+## Earlier 16 November — native Deno codec qualification, SOURCE ONLY
 
 Same draft PR #991 / #220. Closed the **standalone native Deno import/decoding**
 gap for CA's already-approved `jpeg-js@0.4.4` private adapter. Added only

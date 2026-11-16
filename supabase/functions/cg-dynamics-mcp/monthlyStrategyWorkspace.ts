@@ -24,8 +24,18 @@ const EXACT_STRATEGY_AUTHORITIES = new Set([
   'published_report_post', 'published_monthly_strategy',
 ])
 
-export function strategyMonthIsCurrentOrNext(today: string, month: string): boolean {
-  return /^\d{4}-(0[1-9]|1[0-2])-01$/.test(month) && strategyAutopilotMonths(today).includes(month)
+// Explicit company-admin planning can work two months ahead (Nov -> Jan).
+// Keep automatic seeding's existing current/next-month cadence unchanged.
+export function strategyMonthIsInPlanningWindow(today: string, month: string): boolean {
+  if (!/^\d{4}-(0[1-9]|1[0-2])-01$/.test(month)) return false
+  try {
+    const months = strategyAutopilotMonths(today)
+    const later = new Date(`${months[1]}T00:00:00Z`)
+    later.setUTCMonth(later.getUTCMonth() + 1)
+    return [...months, later.toISOString().slice(0, 10)].includes(month)
+  } catch {
+    return false
+  }
 }
 
 function canonicalJson(value: unknown): string {
@@ -59,7 +69,7 @@ export async function loadMonthlyStrategyWorkspace(
   today: string,
   dependencies: ReadDependencies = {},
 ) {
-  if (!strategyMonthIsCurrentOrNext(today, strategyMonth)) throw new Error('CURRENT_OR_NEXT_MONTH_REQUIRED')
+  if (!strategyMonthIsInPlanningWindow(today, strategyMonth)) throw new Error('CURRENT_OR_NEXT_TWO_MONTHS_REQUIRED')
   const [client, target, guide] = await Promise.all([
     readExact<Record<string, unknown>>(sb.from('clients').select('id,name,active,package_settings').eq('id', clientId).maybeSingle(), 'client'),
     readExact<StrategyRow>(sb.from('monthly_client_strategies')
@@ -144,7 +154,7 @@ export async function submitMonthlyStrategyProposal(
   },
   dependencies: ReadDependencies = {},
 ) {
-  if (!strategyMonthIsCurrentOrNext(input.today, input.strategyMonth)) return { error: 'CURRENT_OR_NEXT_MONTH_REQUIRED' }
+  if (!strategyMonthIsInPlanningWindow(input.today, input.strategyMonth)) return { error: 'CURRENT_OR_NEXT_TWO_MONTHS_REQUIRED' }
   const requestFingerprint = await sha256({
     clientId: input.clientId, strategyMonth: input.strategyMonth,
     evidenceFingerprint: input.evidenceFingerprint, expectedVersion: input.expectedVersion,

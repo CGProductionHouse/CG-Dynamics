@@ -1,3 +1,57 @@
+## Latest 16 November — TikTok Business task-status source path
+
+Same DRAFT PR991/#220/#269. Official v1.3 status contract read in company Chrome;
+profile/site account verified, no settings/auth changes. Exact app-specific
+business_id/open_id + publish_id/share_id GET with Access-Token header, numeric
+code0/data and native post_ids. Added PRIVATE core/HTTP reader, never registered.
+Explicit tiktok_accounts normalizer branch preserves the original two-argument
+consumer handler/analytics behavior. Missing public IDs remain pending (180s
+next-read suggestion, no timer); inbox delivery requires action, multiple public
+IDs remain private review evidence, contradictory receipts never overwrite the
+original. HTTP/envelope failures remain unavailable; diagnostics sanitized.
+
+Exact mapping/identity/app/grants/Business credentials remain a REQUIRED private
+server port, not a default pass or consumer/browser fallback. Fixed-host one-GET
+read, no redirects/retry, body/time/freshness bounds; cancellation gap reproduced
+and fixed. Shared deadline helper preserves existing LinkedIn API/errors/tests.
+66 new/242 affected checks, actual Deno type check, lint/build/emitted app pass.
+Full frozen-source regression **4759 total /4728 pass /31 skips /0 failures**
+at concurrency2; prior Vite timeout did not recur, no staff/test guard weakened.
+No live status API/browser product or phone acceptance; no PostgreSQL restart/
+SQL execution (opt-in group skipped, prior SQL evidence remains separate).
+Generated unrelated issue519 artifacts restored; source self-review passes.
+Actual grant, uploader/
+source-to-share_id provenance, durable multi-receipt integration and native pilot
+remain gates. No new dependency/migration; FOUR candidates unapplied; no deploy/
+publication/OAuth/provider/config/secret/mapping/permission/Microsoft/Vercel/cost
+action. Teams/sync hold/staff/Nolan preserved. Main1c1bd36e/PR996 integrated;
+other owner's exact source and live/phone receipt below retained unchanged.
+[Existing receipt](SOCIAL-PUBLISHING-220-2026-11-15.md). Tracker target unknown.
+
+## 16 November — Novus published; existing strategy author through January
+
+CA explicitly approved Novus October publication: exact report940f3153 is now
+published16Nov14:33UTC; independent client-role reads verify12posts/13ready facts
+and no foreign reports. GoogleAds historical/paused campaign and no-campaign-data
+truth retained; Wix disconnected. No package/provider/credential changes.
+CA also confirms Cape Lumber now opens correctly on the actual phone; this is
+owner device acceptance of #994, superseding the unverified wording below.
+
+Existing normal Chat **December Strategy Rollout** / task6ae868361b6c81918b6b333508a47a50
+now **CG Client & Industry Research** is independently UI-verified Active, hourly,
+RepeatON/endNever. Same author updated/read back January-preparation instructions;
+no new writer/model/task. New recovery performed0canonical saves; source triage
+is not substantive completion. #731 latest author receipt6919535126.
+Small three-file connector release admits current+nextTWO months (Nov→Jan)
+without changing automatic worker cadence/schema/staff/source/publication guards.
+136tests/build/lint/diff/full hosted Deno check pass. Existing MCPv83 ACTIVE:
+all41 deployed files match candidate, other38/auth unchanged; actual NovusJan
+brief ready, February refused, client-context authoring denied. Same author
+notified to continue January; no saved January row claimed at release acceptance.
+[Exact evidence, coverage and release boundary](STRATEGY-JANUARY-PLANNING-2026-11-16.md).
+Other agent work untouched; no Vercel. Google Control Centre target unavailable;
+no guessed tracker write.
+
 ## Latest 16 November — standalone native Deno JPEG qualification
 
 Same DRAFT PR991/#220. Added QA-only native Deno acceptance for the actual

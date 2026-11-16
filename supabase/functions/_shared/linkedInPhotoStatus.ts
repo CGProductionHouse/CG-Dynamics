@@ -1,4 +1,5 @@
 import { normalizePublishingObservation, type PublishingIntent, type PublishingObservation } from './socialPublishing.ts'
+import { boundedPublishingRead } from './socialPublishingRead.ts'
 
 export const LINKEDIN_ORGANIZATION_URN = /^urn:li:organization:\d{1,128}$/
 export const LINKEDIN_POST_URN = /^urn:li:(?:share|ugcPost):\d{1,128}$/
@@ -20,21 +21,8 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-
 
 /** Bounded GET/credential work only. No automatic retries or mutation methods. */
 export async function boundedLinkedInRead<T>(run: (signal: AbortSignal) => Promise<T>, milliseconds = 15_000, upstream?: AbortSignal): Promise<T> {
-  if (!Number.isSafeInteger(milliseconds) || milliseconds < 1 || milliseconds > 15_000) throw new LinkedInReadError('LINKEDIN_READ_TIMEOUT_INVALID')
-  const controller = new AbortController()
-  let timer: ReturnType<typeof setTimeout> | undefined
-  let abort: (() => void) | undefined
-  try {
-    return await Promise.race([Promise.resolve().then(() => {
-      if (controller.signal.aborted) throw new LinkedInReadError('LINKEDIN_READ_ABORTED')
-      return run(controller.signal)
-    }), new Promise<never>((_, reject) => {
-      abort = () => { controller.abort(); reject(new LinkedInReadError('LINKEDIN_READ_ABORTED')) }
-      if (upstream?.aborted) { abort(); return }
-      upstream?.addEventListener('abort', abort, { once: true })
-      timer = setTimeout(() => { controller.abort(); reject(new LinkedInReadError('LINKEDIN_READ_TIMEOUT')) }, milliseconds)
-    })])
-  } finally { clearTimeout(timer); if (abort) upstream?.removeEventListener('abort', abort) }
+  const codes = { timeout_invalid: 'LINKEDIN_READ_TIMEOUT_INVALID', aborted: 'LINKEDIN_READ_ABORTED', timeout: 'LINKEDIN_READ_TIMEOUT' }
+  return await boundedPublishingRead(run, { milliseconds, upstream, error: reason => new LinkedInReadError(codes[reason]) })
 }
 
 /** Single PHOTO receipt verifier, UNREGISTERED. AUTHOR state alone cannot prove

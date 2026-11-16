@@ -130,11 +130,27 @@ export type InstagramPublicationPhase = 'container_creating' | 'container_proces
 export interface InstagramPublicationProtocol { phase: InstagramPublicationPhase; publishAttempted: boolean; statusReads: number; startedAt: string | null }
 export interface PublishingObservation { state: 'processing' | 'provider_scheduled' | 'posted' | 'failed' | 'unknown_outcome'; operationId?: string; postId?: string; errorCode?: string; instagramPhase?: InstagramPublicationPhase }
 /** Provider IDs alone are not evidence that a post is live. Unknown states fail closed. */
-export function normalizePublishingObservation(platform: PublishingPlatform, payload: Record<string, unknown>): PublishingObservation {
+export function normalizePublishingObservation(platform: PublishingPlatform, payload: Record<string, unknown>, route?: PublishingRoute): PublishingObservation {
   const status = payload.status
   const postId = typeof payload.postId === 'string' && payload.postId.trim() ? payload.postId : undefined
   const operationId = typeof payload.operationId === 'string' && payload.operationId.trim() ? payload.operationId : undefined
-  if (platform === 'tiktok') {
+  if (route && PUBLISHING_PATHS[route]?.platform !== platform) return { state: 'unknown_outcome', operationId, postId }
+  if (platform === 'tiktok' && route === 'tiktok_accounts') {
+    // Business API v1.3 is a separate wire contract. The caller must first
+    // validate the exact-account read and successful response envelope.
+    const ids = payload.post_ids
+    if (status === 'PUBLISH_COMPLETE') {
+      if (ids === undefined || Array.isArray(ids) && ids.length === 0) return { state: 'processing', operationId, errorCode: 'TIKTOK_PUBLIC_POST_ID_PENDING' }
+      if (Array.isArray(ids) && ids.length === 1 && typeof ids[0] === 'string' && /^[1-9]\d{0,29}$/.test(ids[0])) return { state: 'posted', operationId, postId: ids[0] }
+      return { state: 'unknown_outcome', operationId, errorCode: 'TIKTOK_PUBLIC_POST_IDS_UNVERIFIED' }
+    }
+    if (status === 'PROCESSING_DOWNLOAD') return { state: 'processing', operationId }
+    if (status === 'SEND_TO_USER_INBOX') return { state: 'unknown_outcome', operationId, errorCode: 'TIKTOK_CREATOR_INBOX_ACTION_REQUIRED' }
+    if (status === 'FAILED') return { state: 'failed', operationId, errorCode: 'TIKTOK_PUBLISH_FAILED' }
+    return { state: 'unknown_outcome', operationId, postId, errorCode: 'TIKTOK_STATUS_UNVERIFIED' }
+  } else if (platform === 'tiktok') {
+    // Preserve the existing consumer read-only tiktok-post-status contract.
+    // Agency Business status must explicitly select tiktok_accounts above.
     const ids = payload.publicaly_available_post_id
     const id = Array.isArray(ids) && ids.find(v => typeof v === 'string' && v.trim())
     if (status === 'PUBLISH_COMPLETE' && id) return { state: 'posted', postId: id, operationId }
