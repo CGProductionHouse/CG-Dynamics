@@ -4,7 +4,7 @@ import { createServer } from 'vite'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 
-test('platform ranking requires observed finite reach, preserving zero and stable known ranking', async () => {
+test('platform ranking requires complete observed reach across at least two reporting platforms', async () => {
   const server = await createServer({ configFile: false, server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true }, esbuild: { jsx: 'automatic' }, define: {
     'import.meta.env.VITE_SUPABASE_URL': JSON.stringify('http://127.0.0.1:1'),
     'import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY': JSON.stringify('local-public-fixture'),
@@ -17,7 +17,9 @@ test('platform ranking requires observed finite reach, preserving zero and stabl
     for (const reach of [null, undefined, NaN, Infinity]) {
       assert.equal(bestPlatform([breakdown('facebook', reach), breakdown('instagram', reach)]), null)
     }
-    assert.equal(bestPlatform([breakdown('facebook', null), breakdown('instagram', 0)]).platform, 'instagram')
+    assert.equal(bestPlatform([breakdown('facebook', null), breakdown('instagram', 0)]), null)
+    assert.equal(bestPlatform([breakdown('instagram', 33)]), null)
+    assert.equal(bestPlatform([breakdown('facebook', 0), breakdown('instagram', 0)]).platform, 'facebook')
     assert.equal(bestPlatform([breakdown('facebook', 10), breakdown('instagram', 20)]).platform, 'instagram')
     assert.equal(bestPlatform([breakdown('instagram', 20), breakdown('facebook', 20)]).platform, 'facebook')
     assert.equal(bestPlatform([breakdown('facebook', 10, false)]), null)
@@ -32,7 +34,8 @@ test('platform ranking requires observed finite reach, preserving zero and stabl
     const performance = buildReportPerformance({ master: missing, previousMaster: null, currentManual: [], previousManual: [], monthLabel: 'September 2026', previousMonthLabel: null })
     assert.doesNotMatch(JSON.stringify(performance.nextSteps), /Use Instagram as the visibility driver|Extend Facebook reach to Instagram/)
     assert.equal(buildMasterReport([], []).bestPlatform, null)
-    assert.equal(buildMasterReport([post('facebook', null), post('instagram', 0)], []).bestPlatform.platform, 'instagram')
+    assert.equal(buildMasterReport([post('facebook', null), post('instagram', 0)], []).bestPlatform, null)
+    assert.equal(buildMasterReport([post('facebook', 0), post('instagram', 0)], []).bestPlatform.platform, 'facebook')
     assert.equal(buildMasterReport([post('facebook', 10), post('instagram', 20)], []).bestPlatform.platform, 'instagram')
     assert.deepEqual(missingPosts, before)
     const report = { id: 'fixture-report', client_id: 'fixture-client', status: 'published', period_start: '2026-09-01', period_end: '2026-09-30', report_title: 'Local report', posts: [] }
@@ -40,8 +43,22 @@ test('platform ranking requires observed finite reach, preserving zero and stabl
       googleAds: null, googleAdsState: 'unmapped', googleAdsError: null, verifiedCgPostIds: new Set(posts.map(post => post.id)), ...props }))
     assert.doesNotMatch(render([]), /Best platform/)
     assert.doesNotMatch(render(missingPosts), /Best platform/)
-    assert.match(render([post('instagram', 0)]), /Best platform/)
-    assert.match(render([post('facebook', 10)]), /Best platform/)
+    assert.doesNotMatch(render([post('instagram', 0)]), /Best platform/)
+    assert.doesNotMatch(render([post('facebook', 10)]), /Best platform/)
+    // The live All Around PVC source has Facebook reach unavailable while
+    // Instagram reach is observed. Missing Facebook evidence is not a loss.
+    for (const reach of [null, undefined, NaN, Infinity]) {
+      const partialPosts = [post('facebook', reach), post('instagram', 33)]
+      const partialBefore = structuredClone(partialPosts)
+      assert.equal(bestPlatform([breakdown('facebook', reach), breakdown('instagram', 33)]), null)
+      const partial = buildMasterReport(partialPosts, [])
+      assert.equal(partial.bestPlatform, null)
+      assert.equal(partial.platforms.find(view => view.platform === 'instagram').reach, 33)
+      const result = buildReportPerformance({ master: partial, previousMaster: null, currentManual: [], previousManual: [], monthLabel: 'October 2026', previousMonthLabel: null })
+      assert.doesNotMatch(JSON.stringify(result.nextSteps), /Use Instagram as the visibility driver|Extend Facebook reach to Instagram/)
+      assert.doesNotMatch(render(partialPosts), /Best platform/)
+      assert.deepEqual(partialPosts, partialBefore)
+    }
     assert.match(render([], { normalizedFactsAttempted: true }), /No verified performance figures for this period/)
     const fact = { platform: 'facebook', metricKey: 'brand_views', value: null, availability: 'unavailable', comparableGroup: null, aggregation: 'sum' }
     assert.match(render([], { facts: [fact], normalizedFactsAttempted: true }), /No verified performance figures for this period/)
