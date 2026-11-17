@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "status": "owner-rejected-r3-paused-do-not-send",
-  "observedAt": "2026-11-16",
+  "status": "resumed-r6-internal-creative-review-not-for-delivery",
+  "observedAt": "2026-11-17",
   "clientId": "29a28efd-c998-45e2-a57c-4a751e779e66",
   "clientName": "PSG Bloemfontein",
   "aliases": [
@@ -17,12 +17,12 @@
     "brandKit": "kAGn0ETkyhE",
     "officialMaster": "DAGHEr8Zu_o",
     "officialPageCountObserved": 199,
-    "workingDesign": "DAHbGaJ7U2o",
+    "workingDesign": "DAHbJ6mIth4",
     "workbenchOnly": true,
     "workingPageIds": [
-      "PBtBXTz6ft6Hgnrn",
-      "PB25NyYB8s2nnxrG",
-      "PBsZ583vGz7RbSHX"
+      "PBXM1LXVMGYttMgZ",
+      "PB08tp2KCFs21nmf",
+      "PBFycNH1LcTHcgx6"
     ],
     "guideline": "DAHIT-WgoXs",
     "guidelinePages": 99,
@@ -35,14 +35,10 @@
         "IBM Plex Serif",
         "IBM Plex Sans"
       ],
-      "workingChoice": "2026 guideline",
-      "resolved": false
+      "workingChoice": "Actual local Kit Montserrat; owner calls rebuilt photo-led direction closer",
+      "resolved": false,
+      "finalBrandApproval": false
     },
-    "palette": [
-      "#00AEEF",
-      "#353E43",
-      "#FFFFFF"
-    ],
     "secondaryPalette": [
       "#0054FF",
       "#FFDE21",
@@ -56,16 +52,33 @@
       "postedScheduled": 56,
       "humanNewYear": 38
     },
-    "officialInsertExecuted": false
+    "officialInsertExecuted": false,
+    "officialPageCountObservedAt": "2026-11-16",
+    "currentOfficialCountVerified": false,
+    "historicalGuidelinePalette": [
+      "#00AEEF",
+      "#353E43",
+      "#FFFFFF"
+    ],
+    "workingPalette": [
+      "#061F33",
+      "#46B0D1",
+      "#FFFFFF",
+      "#D8E6EB"
+    ],
+    "workingPaletteEvidence": "Local reference sample, not an exact Kit colour-token readback",
+    "exactKitPaletteVerified": false
   },
   "mediaAuthority": "OneDrive Clients/PSG",
   "oneDrive": {
     "driveId": "a2ac9fe4b255f52f",
     "clientRoot": "A2AC9FE4B255F52F!33925",
     "headshots": "A2AC9FE4B255F52F!s2e860cc939a244cfa361bc6c2ac008d8",
-    "selectedOriginal": "A2AC9FE4B255F52F!se81c1d1ab81549a7bd0849ddc6b4189d",
-    "selectedOriginalSha256": "6f2035a56f1c45517f9b17278a89fe35da9b62670fea4fb5a131ea5801c74e4a",
-    "modernLogo": "A2AC9FE4B255F52F!s347b2e6e51384c54bec16012e5b5d0f2"
+    "selectedOriginal": "A2AC9FE4B255F52F!s21b9d871294b42d6a4203dc5de587320",
+    "selectedOriginalSha256": "3194e368524a3fb18cdfd914994bdaa31f1d2d7b7959e3704290c1233982cb82",
+    "modernLogo": "A2AC9FE4B255F52F!s347b2e6e51384c54bec16012e5b5d0f2",
+    "rejectedR3Original": "A2AC9FE4B255F52F!se81c1d1ab81549a7bd0849ddc6b4189d",
+    "rejectedR3OriginalSha256": "6f2035a56f1c45517f9b17278a89fe35da9b62670fea4fb5a131ea5801c74e4a"
   },
   "package": {
     "designedPosters": 3,
@@ -83,9 +96,31 @@
     "packetObserved": "2026-11-16",
     "mutableValuesLastVerified": "2026-09-10",
     "freshnessVerifiedNow": false,
-    "notesMatchCanonical": true
+    "notesMatchCanonical": false,
+    "currentFooterIncluded": false,
+    "notesMatchMeaning": "Current source notes equal captions; remote note readback unavailable"
   },
-  "verification": {
+  "restrictions": [
+    "Personal/commercial insurance advice only from exact local current evidence",
+    "No guarantees, premiums, invented offers or coverage determinations",
+    "No brand-colour gradients or logo effects",
+    "No biometric identity database",
+    "No private source media supplied to image generator",
+    "No publication/scheduling/portal finals"
+  ],
+  "incrementalSpendZar": 0,
+  "ownerFeedback": {
+    "observedAt": "2026-11-16",
+    "allThreeRejected": true,
+    "reasons": [
+      "Not on brand",
+      "No depth",
+      "Insufficient skill and execution"
+    ],
+    "pausedByOwner": true,
+    "resume": "On owner request; study actual approved local PSG work and prove one poster before scaling"
+  },
+  "rejectedR3Evidence": {
     "liveTexts": 20,
     "editableMedia": 10,
     "nativeImportantInsetPx": 64,
@@ -108,24 +143,58 @@
     "psdVerified": false,
     "normalCompanyChatgptInvocationVerified": false
   },
-  "restrictions": [
-    "Personal/commercial insurance advice only from exact local current evidence",
-    "No guarantees, premiums, invented offers or coverage determinations",
-    "No brand-colour gradients or logo effects",
-    "No biometric identity database",
-    "No private source media supplied to image generator",
-    "No publication/scheduling/portal finals"
-  ],
-  "incrementalSpendZar": 0,
-  "ownerFeedback": {
-    "observedAt": "2026-11-16",
-    "allThreeRejected": true,
-    "reasons": [
-      "Not on brand",
-      "No depth",
-      "Insufficient skill and execution"
+  "rejectedR3Design": "DAHbGaJ7U2o",
+  "ownerResume": {
+    "observedAt": "2026-11-17",
+    "pausedNow": false,
+    "feedback": "This direction is closer—continue refining",
+    "meaning": "Directional feedback on R4 only; no final approval of R6 set"
+  },
+  "directionUpdate": {
+    "id": "50a63c7b-be68-4444-a842-af23f0ab9ba7",
+    "kind": "content_direction",
+    "reviewState": "unreviewed",
+    "readbackVerified": true,
+    "guideVersionUnchanged": 1
+  },
+  "verification": {
+    "currentVersion": "R6",
+    "declaredLocalLayers": 49,
+    "localSvgLiveTexts": 19,
+    "localSvgIndependentImages": 30,
+    "importantTextLogoInsetPx": 64,
+    "localFrameChecksPassed": true,
+    "actualSavedCanvaPreviewsInspected": 3,
+    "actualCanvaPreviewPixels": [
+      400,
+      500
     ],
-    "pausedByOwner": true,
-    "resume": "On owner request; study actual approved local PSG work and prove one poster before scaling"
-  }
+    "localHdPixels": [
+      2160,
+      2700
+    ],
+    "localHdIccPresent": true,
+    "localHdIsCanvaExport": false,
+    "nativeCanvaElementReadbackVerified": false,
+    "nativeCanvaAmendmentVerified": false,
+    "savedNotesReadbackVerified": false,
+    "localSvgSingleNodeAmendmentPassed": true,
+    "historyPreviewsPerSelectedSource": 199,
+    "historyReadErrors": 0,
+    "rawRoadFalsePositiveRetainedAndReviewed": true,
+    "globalUnusedCertified": false,
+    "actualSocialApprovalCoverageComplete": false,
+    "whatsappSent": false,
+    "humanFinalCreativeApproval": false,
+    "normalCompanyChatgptInvocationVerified": false,
+    "officialMasterChangedByThisRun": false
+  },
+  "currentHolds": [
+    "Full-set creative review",
+    "Exact Kit colour-token reconciliation",
+    "Actual social and approval-artwork reuse checks",
+    "January allocation including existing human New Year artwork",
+    "Native Canva editing/notes readback and genuine current HD export",
+    "Exact-authorised official working-lane transfer"
+  ]
 }

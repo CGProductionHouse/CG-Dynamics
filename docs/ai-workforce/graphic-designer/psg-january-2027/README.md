@@ -3,7 +3,88 @@
 Owner request16November: continue with PSG, with fresh January concepts.
 Same #948 / draft#956 lane and isolated worktree. No new agent or branch.
 
-## Owner rejection and pause — current authority
+## 17 November resumed — current R6 working set
+
+Owner resumed work and reviewed the single rebuilt R4 proof: **"This direction
+is closer—continue refining."** This is direction feedback, not final artwork or
+monthly approval. R3 remains rejected. Three current R6 working pages are saved
+in **DAHbJ6mIth4**, [open Canva](https://www.canva.com/d/lZtoQNNTE4G4QGm):
+
+| Slot | Current headline | Current composition |
+|---|---|---|
+| DP01 | Make a record. | Real licensed equipment flatlay, independent title plane, registered foreground camera overlap and separate light control; the earlier sparse paper layout was discarded |
+| DP02 | Grow. The business. Review the risks. | Real licensed workplace photograph, large live type, architectural arc/grid, matched source/foreground lighting and graduated photo join |
+| DP03 | New routine. Same cover? | Fresh genuine PSG portrait, South African road photograph, layered route device, compact bold type and restrained edge accent |
+
+Actual saved Canva previews for all three were downloaded and inspected. DP01's
+overlap initially obscured its title/logo and was rejected locally before import;
+current registered overlap begins below the message. DP02's hard photo join was
+corrected before current save. All19 local text and three explicit logo frames
+pass64px containment. Current local composition has49 independent layers, with
+19 live SVG text nodes and30 image layers; image-based graphics remain raster
+media, not native vectors. One local SVG text-node amendment preserves every
+other node and image payload. **These are local/source proofs, not fresh native
+Canva element readback or a Canva amendment test.**
+
+Current actual Kit Montserrat and local photo-led references99/100/104 guide this
+direction; the rejected IBM Plex style is not reused. Navy/cyan working values
+are sampled from local artwork, **not an exact Kit colour-token certificate**.
+The Kit/national-guide discrepancy and exact colour reconciliation remain open.
+Public stock comes from individually checked free Unsplash pages: John O'Nolan's
+[South African road](https://unsplash.com/photos/aerial-photography-of-vehicular-road-aD2g2AWMH7Y),
+Max Bvp's [equipment flatlay](https://unsplash.com/photos/cameras-and-a-phone-are-laid-out-BiMa05aIP7c)
+and Madeline Liu's [workplace](https://unsplash.com/photos/a-modern-empty-office-space-with-desks-computers-and-chairs-BCZNO1oCP64).
+No generated imagery used in R6. These are illustrative products/premises, not
+claimed client assets or a Bloemfontein location. Selected real PSG original
+0L8A0521 remains in OneDrive; identity/role was not inferred from its face.
+
+All four selected source images were compared with199 history previews. No
+suspected portrait/flatlay/office match; the road's page160 flag was retained and
+visually adjudicated as unrelated family silhouettes. A male portrait candidate
+was excluded as too close to existing same-shoot material. Missing actual social
+and approvals artwork is still a send hold; no global non-reuse certification.
+Colour management used original ICC/EXIF evidence; no generative reconstruction,
+clipped-data recovery, claimed skin retouch or body/face changes. Five import
+assets were losslessly compacted, preserving alpha and all visible RGB exactly;
+only fully transparent hidden RGB was cleared. Source originals remain unchanged.
+The guarded three-page HTML is8,974,193bytes; no raised limit or public hosting.
+
+Private current evidence under the existing job's `r4` folder:
+`scene-r6.json`, `PSG-January-R6-native.html`, three `DP0x-R6-editable.svg`,
+three2160x2700 **local** PNGs, `current-r6-receipt.private.json` and
+`PSG-January-R6-actual-Canva-board.jpg`. Actual Canva previews are400x500.
+**No current genuine Canva HD export.** Do not relabel local HD as Canva export.
+
+Tool regression on17November: advertised `start-editing-transaction` returned
+MCP -32602 **Tool start-editing-transaction not found**; content/notes/metadata
+reads returned INVALID_ARGUMENT. Copy/import/page-preview operations still work.
+This is not proof of a document-size or account-permission failure. Company
+Chrome was present with its known extension/profile but tab operations timed out.
+The internal Canva fallback exposed the correct saved account, then timed out
+during routine sign-in. The host then removed Computer Use from this session;
+do not bypass that unavailable control through external automation. No password, credential, security, account permission,
+restart or other-agent change. Native Canva amendment/notes readback and normal
+company-ChatGPT local execution remain unverified; do not claim full-circle success.
+
+Checkpoint verification: all source paths, current/rejected Brand Pack separation,
+three unsigned caption transport checks, local frame/SVG amendment assertions,
+lossless visible-pixel/alpha assertions, actual saved-preview inspection,
+`git diff --check` and `npm run build` pass. Existing Browserslist/large-chunk
+advisories remain. Runtime used Python3.13.14, Pillow12.2.0, OpenCV5.0.0 and
+ONNX Runtime1.31.0 already present on Windows; no new installation.
+
+One append-only, **unreviewed** content-direction update was recorded and read
+back in exact-client CG Dynamics: `50a63c7b-be68-4444-a842-af23f0ab9ba7`.
+It records the actual R3 rejection/R4 closer feedback, preserving guidev1 and
+Nolan video ownership. No final approval or publishing/schedule record created.
+No WhatsApp send, official-master insertion, portal-final promotion or production
+deployment. R0 incremental cost, no new install/dependency. Current review selector
+blocks delivery. Next: owner creative feedback on the full set, exact palette and
+actual social/approval-artwork coverage, then restored native editing/export and
+exact-authorised official transfer. R4/R5 intermediates are superseded working
+history, not additional official masters or delivery authority.
+
+## 16 November rejection and pause — R3 remains rejected
 
 Owner rejected **all three R3 posters** on16November: not on brand, insufficient
 creative skill, depth and execution. This overrides technical passes and all

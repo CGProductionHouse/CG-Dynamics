@@ -116,6 +116,15 @@ silently overwrite the Kit or call a guideline-led experiment brand-certified.
 An optional caption-footer packet must remain optional: check its actual values
 and freshness separately rather than forging a mandatory contract to pass a guard.
 
+Do not turn an advertised-tool failure into a document-capacity or permission
+diagnosis. On17November Canva's editing endpoint returned -32602 "Tool not found"
+while import and page previews still worked. Preserve the actual error and separate
+supported creation from unverified native amendment/export. Reconcile uncertain
+writes before retrying: an import succeeded even though local result decoding
+failed after an async reply; focused title search recovered it without a duplicate.
+Inspect registered foreground overlap on the actual render: DP01's camera initially
+covered its heading/logo. Restore readable hierarchy before counting that as depth.
+
 Distinguish connector editing limits from Canva document capacity. Central Canvas's
 222-page master could be read and all previews retrieved, but its native editing
 transaction was rejected as unsupported. No transaction opened. Record that exact

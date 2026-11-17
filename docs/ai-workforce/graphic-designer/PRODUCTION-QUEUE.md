@@ -1,8 +1,20 @@
 # Graphic designer production queue
 
-Owner steering16November2026; same #948 / draft#956 lane, no new agent or branch.
+Owner steering17November2026; same #948 / draft#956 lane, no new agent or branch.
 
-Current16November override: **PSG paused at the owner's request until tomorrow.**
+Current17November: **PSG resumed; R6 three-page working set saved** in DAHbJ6mIth4.
+Owner calls the rebuilt R4 local Montserrat/photo-led direction closer and asks
+for refinement; this is not final approval. DP01 reworked photographically,
+DP02 workplace/typographic composition, DP03 refined route/real-portrait treatment.
+All three actual Canva previews inspected; local49layers/19texts/3logo64px and
+isolated SVG amendment checks pass. Local2160x2700 PNGs and layered SVGs retained;
+no current Canva HD or native-edit/notes readback claim: advertised editing tool
+returns -32602 not found, while import/page previews work. Exact palette and actual
+social/approval reuse gates remain open. One exact-client unreviewed direction
+record saved/read back in Dynamics; guide, Nolan and schedule preserved.
+**No send or official insert.** R3 remains rejected; R4/R5 superseded. See PSG README.
+
+Historical16November override: **PSG paused at the owner's request until tomorrow.**
 Owner rejected all three R3 drafts as off brand and lacking depth/skill.
 **DAHbGaJ7U2o and its R3 exports are REJECTED / DO NOT SEND OR TRANSFER.**
 Technical checks do not override rejection. Resume only when requested: recover

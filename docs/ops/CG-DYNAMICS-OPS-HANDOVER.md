@@ -1,3 +1,23 @@
+## 17November — PSG resumed; local-brand R6 set under creative review
+
+Owner resumed and called one rebuilt R4 direction closer, asking refinement.
+Three R6 working drafts now saved in DAHbJ6mIth4; actual saved400x500 previews
+inspected. Local49layers/19texts/30media,64px important-frame and isolated SVG
+amendment checks pass. Local2160x2700 PNGs are not Canva HD exports. Exact current
+Kit palette, actual social/approval-image coverage and full-set creative approval
+remain open. **No PSG send, official insert, portal final or schedule/publication.**
+R3 stays rejected; R4/R5 are superseded working history. Same #948/draft#956 lane.
+One exact-client unreviewed content-direction update50a63c7b-be68-4444-a842-af23f0ab9ba7
+recorded/read back through authorised Dynamics tool; guidev1 and Nolan preserved.
+This is the only new application data write, no SQL/migration or runtime change.
+Advertised Canva editing endpoint returns -32602 Tool not found; imports/page
+previews work. Chrome profile/extension present but tab calls time out; internal
+Canva login fallback also timed out. No restart/reinstall/security/credential or
+other-agent change; do not blame physical laptop disconnection. Full normal
+ChatGPT/native-amend/export integration remains unverified. R0 incremental spend.
+PSG README/Brand Pack/private current-review selector are the current checkpoint.
+Control Centre exact reference still unavailable; no guessed tracker write.
+
 ## 16November — PSG owner rejected all R3 drafts; paused until tomorrow
 
 Owner rejected all three PSG posters as off brand and lacking depth/skill.
