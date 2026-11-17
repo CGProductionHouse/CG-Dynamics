@@ -12,6 +12,7 @@ import {
   mapWebsiteLeadRow,
   monthWindow,
   normaliseLeadLifecycle,
+  selectInboxLead,
   validateLeadLifecycle,
   whatsappNumber,
 } from '../src/lib/websiteLeads.ts'
@@ -22,6 +23,19 @@ const acceptance = read('./sql/405_website_lead_lifecycle_acceptance.sql')
 const page = read('../src/pages/client/ClientLeadsPage.tsx')
 const metricsCard = read('../src/components/website/WebsiteLeadMetricsCard.tsx')
 const db = read('../src/lib/db/websiteLeads.ts')
+
+test('inbox opens a new lead and keeps detail inside the selected status filter', () => {
+  const older = { enquiryId: 'older', status: 'closed_lost' }
+  const newest = { enquiryId: 'newest', status: 'new' }
+  const contacted = { enquiryId: 'contacted', status: 'contacted' }
+  const leads = [older, newest, contacted]
+  assert.equal(selectInboxLead(leads, 'all', null), newest)
+  assert.equal(selectInboxLead(leads, 'all', 'older'), older)
+  assert.equal(selectInboxLead(leads, 'contacted', 'older'), contacted)
+  assert.equal(selectInboxLead(leads, 'new', 'older'), newest)
+  assert.equal(selectInboxLead(leads, 'won', null), null)
+  assert.equal(selectInboxLead([], 'all', null), null)
+})
 
 test('poor leads require a reason and good/unreviewed leads carry none', () => {
   assert.equal(validateLeadLifecycle({ status: 'qualified', quality: 'good', poorReason: null, poorNote: null }), null)

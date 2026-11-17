@@ -92,6 +92,15 @@ export interface WebsiteLead {
   lifecycleUpdatedAt: string | null
 }
 
+/** Keep the detail panel aligned with the visible filter and surface new work first. */
+export function selectInboxLead(leads: readonly WebsiteLead[], filter: 'all' | LeadStatus, selectedId: string | null): WebsiteLead | null {
+  const visible = filter === 'all' ? leads : leads.filter(lead => lead.status === filter)
+  return visible.find(lead => lead.enquiryId === selectedId)
+    ?? visible.find(lead => lead.status === 'new')
+    ?? visible[0]
+    ?? null
+}
+
 export interface LeadLifecycleInput {
   status: LeadStatus
   quality: LeadQuality | null
