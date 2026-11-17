@@ -12,6 +12,14 @@ Source merge does not mean staff production browser acceptance or deployment.
 
 ## 16 November — Dulux logo LIVE; exact missing-logo continuation checkpoint
 
+17Nov continuation: Bloem Marble's already selected logo library now enabled,
+fresh DB one active asset/client-fields hash unchanged. Four enabled logos in
+this continuation overall; five remaining source copies still unpublished/private.
+Daisy selection/display label was not saved. Windows control stopped on URL
+verification after Chrome inventory showed WhatsApp; no further UI input. CA
+must keep Dynamics active for remaining steps. Same PR1003; no Vercel/runtime,
+package/provider/strategy/report change or duplicate copies. Receipt linked below.
+
 CA explicitly authorized exact OneDrive logos for Dulux and other missing-logo
 active clients. Dulux original294093bytes copied/hash-verified, selected through
 existing admin workflow and library enabled. Real client list/access/download200,

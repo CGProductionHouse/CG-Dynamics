@@ -1,5 +1,29 @@
 # Client logo continuation — 16 November 2026
 
+## 17 November continuation — Bloem Marble enabled; five publications remain
+
+Fresh current-main/PR1003/#668/#381 and read-only source/DB checks preceded
+actions. All eight copied names/sizes still match; seven Graph image SHA256
+values still match the reviewed originals, with Vrystaat PDF's earlier independent
+byte comparison retained. No file was copied again. The existing exact signed-in
+admin library page enabled Bloem Marble's already selected logo; DB readback
+confirms enabled=true/one active asset and unchanged client-fields hash
+`e2bf971fe7c557e556a4a0187668a5bd`. This supersedes its disabled state below.
+
+Daisy's exact file was selected and the unsaved display label set; it was NOT
+published. Fresh final DB read confirms Daisy/Econofoods/Emmanuel/Mimosa/Vrystaat
+remain disabled/zero active assets. Four logos are enabled in this continuation
+overall (Dulux, Bat Hill, Bohemia, Bloem Marble), five still await publication.
+
+The supported browser accessibility path briefly restored control, but its
+inspection connection dropped again. Windows Computer Use inventory then showed
+Chrome's current window as WhatsApp; its browser-URL safety check stopped further
+control. No app input followed that stop and no browser/security protection was
+bypassed. CA must keep the Dynamics tab active for the pending UI steps. No new
+runtime code, package/report/strategy/provider mutation, production migration or
+Vercel action. Existing28-test/build receipt below applies to unchanged runtime;
+no repeated tests or fresh mobile acceptance claimed.
+
 CA explicitly requested Dulux's OneDrive logo uploaded, then the same treatment
 for other active clients without logos. This expands the former internal-source
 promotion hold only for individually verified logos. It does not authorize other
