@@ -36,19 +36,27 @@ export default function NolanOverview() {
   const { lane, query, status: statusFilter, month } = readNolanViewState(searchParams, fallbackMonth)
   const changeView = (patch: Partial<NolanViewState>, replace = false) => setSearchParams(current => updateNolanViewState(current, patch, fallbackMonth), { replace })
   const scope = nolanReadScope(user?.id, profile?.is_active === false ? undefined : profile?.id, profile?.role, month)
+  const userId = user?.id
+  const profileId = profile?.id
+  const profileRole = profile?.role
   const [rawSnapshot, setSnapshot] = useState<Snapshot | null>(null)
   const snapshot = scope && rawSnapshot?.scope === scope ? rawSnapshot : null
   const [loading, setLoading] = useState(false)
   const [generation, setGeneration] = useState(0)
   useEffect(() => {
     let cancelled = false
-    if (!scope) { setSnapshot(null); setLoading(false); return }
+    if (!scope || !userId || !profileId || !profileRole) {
+      queueMicrotask(() => { if (!cancelled) { setSnapshot(null); setLoading(false) } })
+      return () => { cancelled = true }
+    }
     const readScope = scope
     async function load() {
+      await Promise.resolve()
+      if (cancelled) return
       setLoading(true)
       setSnapshot(previous => previous?.scope === readScope ? previous : null)
       try {
-        const [taskRead, videoRead, scheduleRead, clientRead, staffRead] = await withNolanVerifiedViewer({ userId: user!.id, profileId: profile!.id, role: profile!.role }, () => Promise.all([
+        const [taskRead, videoRead, scheduleRead, clientRead, staffRead] = await withNolanVerifiedViewer({ userId: userId!, profileId: profileId!, role: profileRole! }, () => Promise.all([
           captureNolanSource(() => listTasks({ requireCompleteSources: true })), captureNolanSource(() => listPipelineVideos()),
           captureNolanSource(() => listMonthlyDeliverablesByMonth(month)), captureNolanSource(() => listActiveClients()), captureNolanSource(() => listStaffProfiles()),
         ]))
@@ -82,7 +90,7 @@ export default function NolanOverview() {
     }
     void load()
     return () => { cancelled = true }
-  }, [month, generation, scope, user?.id, profile?.id, profile?.role])
+  }, [month, generation, scope, userId, profileId, profileRole])
   useEffect(() => {
     const refresh = () => setGeneration(n => n + 1)
     window.addEventListener('focus', refresh)
@@ -109,7 +117,7 @@ export default function NolanOverview() {
         </li>)}</ul>}
         <p>These are individual reader completion times, not upstream provider refresh times or complete external-source coverage.</p>
       </div></details>
-      {lane === 'packages' && <NolanPackageEvidence key={scope} month={month} refreshGeneration={generation} viewer={{ userId: user!.id, profileId: profile!.id, role: profile!.role }} />}
+      {lane === 'packages' && <NolanPackageEvidence key={scope} month={month} refreshGeneration={generation} viewer={{ userId: userId!, profileId: profileId!, role: profileRole! }} />}
       {lane === 'ownership' && <div className="coverage">Open tasks with canonical unresolved, conflicting or unassigned ownership. Missing profile evidence is not an unassigned conclusion; check source errors. Existing owners remain unchanged.</div>}
       {lane === 'needs' && <div className="coverage">Open work with recorded canonical assignment to your signed-in profile. Unrecorded personal decisions are not inferred from notes.</div>}
       {lane === 'special' && <div className="coverage">Existing Once-off and CG Socials tasks. Unclassified campaigns remain in Active work.</div>}

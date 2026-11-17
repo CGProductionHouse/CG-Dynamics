@@ -20,4 +20,3 @@ export async function loadNolanPackageEvidence(
   if (result.error) throw result.error
   return { data: result.data, checkedAt: now() }
 }
-

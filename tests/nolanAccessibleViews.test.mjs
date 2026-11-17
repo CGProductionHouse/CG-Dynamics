@@ -13,7 +13,10 @@ after(async () => { await server?.close() })
 test('master responsibility view renders real accessible headings and source anchors without fabricated status claims', async () => {
   const html = renderToStaticMarkup(React.createElement(MemoryRouter, null, React.createElement(MasterScope, {role: 'manager'})))
   assert.equal((html.match(/<article/g) ?? []).length,12)
-  assert.equal((html.match(/<h3>/g) ?? []).length,12)
+  const navigationCards = html.match(/<article\b[^>]*>[\s\S]*?<\/article>/g) ?? []
+  assert.equal(navigationCards.length, 12)
+  for (const card of navigationCards) assert.equal((card.match(/<h3>/g) ?? []).length, 1)
+  assert.ok(html.includes('<h3>Visible task snapshot</h3>'))
   assert.equal((html.match(/<a /g) ?? []).length,12)
   for (const text of ['Websites &amp; discovery','Special requests and CG campaigns','Canva, OneDrive','Open source']) assert.ok(html.includes(text))
   assert.doesNotMatch(html,/All healthy|All complete/)
