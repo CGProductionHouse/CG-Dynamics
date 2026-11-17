@@ -6,10 +6,10 @@ import { deflateSync } from 'node:zlib'
 // native Graph and Storage are explicit synthetic ports; SQL is real PostgreSQL.
 export async function facebookPostgresJourney({ server, sql, q, actor, rpcClient, mode = 'success' }) {
   const modules = await Promise.all(['facebookPublicationRuntime', 'facebookPublicationStaff', 'socialPublicationAuthorizationStore',
-    'socialPublishingQueue', 'socialPublicationManagement', 'metaTokenStorage'].map(name => server.ssrLoadModule(`/supabase/functions/_shared/${name}.ts`)))
-  const [runtimeModule, staff, store, queue, management, tokens] = modules
+    'socialPublishingQueue', 'socialPublicationManagement', 'metaTokenStorage', 'facebookPublicationInspection'].map(name => server.ssrLoadModule(`/supabase/functions/_shared/${name}.ts`)))
+  const [runtimeModule, staff, store, queue, management, tokens, inspection] = modules
   const ids = Object.fromEntries(['client', 'deliverable', 'review', 'connection', 'mapping', 'sourceJob', 'source', 'run', 'plan', 'bucket', 'task'].map(k => [k, randomUUID()]))
-  const due = new Date(Date.now() + 12_000).toISOString(), date = new Date(Date.parse(due) + 7200_000).toISOString().slice(0, 10)
+  const due = new Date(Date.now() + 20_000).toISOString(), date = new Date(Date.parse(due) + 7200_000).toISOString().slice(0, 10)
   const config = { graphVersion: 'v27.0', appId: '789', appSecret: 'fixture-only', projectUrl: 'https://fixture.supabase.co',
     encryptionKey: Buffer.alloc(32, 3).toString('base64'), keyVersion: 'v1' }
   const encrypted = await tokens.encryptMetaStoredToken('fixture-user-token', ids.connection, config.encryptionKey, 'v1')
@@ -78,8 +78,23 @@ export async function facebookPostgresJourney({ server, sql, q, actor, rpcClient
   try {
     const release = { approved: true, clientId: ids.client, connectionId: ids.connection, accountId: '123', route: 'facebook_page' }
     const runtime = runtimeModule.facebookPublicationRuntime(sb, { server: config, release })
-    const handler = staff.facebookPublicationStaffHandler({ runtime, authenticate: async () => ({ id: actor, role: 'manager', active: true }), persistence: store.socialPublicationAuthorizationStore(sb) })
+    const handler = staff.facebookPublicationStaffHandler({ runtime: mode === 'inspection-only' ? null : runtime,
+      inspect: inspection.facebookPublicationInspector(sb, config, null),
+      authenticate: async () => ({ id: actor, role: 'manager', active: true }), persistence: store.socialPublicationAuthorizationStore(sb) })
     const invoke = async body => { const response = await handler(new Request('https://fixture.invalid', { method: 'POST', body: JSON.stringify(body) })); return { status: response.status, body: await response.json() } }
+    const readiness = await invoke({ action: 'inspect', reviewId: ids.review })
+    assert.equal(readiness.status, 200, JSON.stringify(readiness))
+    assert.equal(readiness.body.inspection.canConfirm, false); assert.equal(readiness.body.inspection.canPublish, false)
+    assert.equal(readiness.body.inspection.checks.find(c => c.key === 'account').status, 'pass')
+    assert.equal(readiness.body.inspection.checks.find(c => c.key === 'image').status, 'pass')
+    assert.equal(readiness.body.inspection.checks.find(c => c.key === 'release').status, 'blocked')
+    assert.equal(posts, 0); assert.equal(signed, 0)
+    if (mode === 'inspection-only') {
+      assert.equal(readiness.body.inspection.checks.find(c => c.key === 'teams').status, 'unavailable')
+      assert.equal((await invoke({ action: 'confirm', reviewId: ids.review, expectedFingerprint: 'a'.repeat(64), confirmPublication: true })).status, 409)
+      assert.equal(json('select count(*)::int from background_jobs'), 0)
+      return
+    }
     const p = await invoke({ action: 'preview', reviewId: ids.review })
     assert.equal(p.status, 200, JSON.stringify(p)); assert.equal(signed, 0); assert.equal(posts, 0)
     assert.equal(json(`select count(*)::int from background_jobs where payload->'intent'->>'reviewVersionId'=${q(ids.review)}`), 0)

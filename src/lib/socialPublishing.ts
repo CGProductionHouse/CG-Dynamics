@@ -39,9 +39,61 @@ export interface StaffPublicationPreview {
   reviewId: string; clientId: string; accountId: string; platform: 'facebook'; caption: string; mediaType: 'image/png'
   assetSha256: string; scheduledAt: string; fingerprint: string
 }
+export interface StaffFacebookInspection {
+  reviewId: string; clientId: string; accountId: string; accountName: string | null; scheduledAt: string; checkedAt: string
+  assetSha256: string | null; canConfirm: false; canPublish: false
+  checks: { key: 'account' | 'image' | 'teams' | 'time' | 'release'; status: 'pass' | 'blocked' | 'unavailable'; code: string | null }[]
+}
+export const FACEBOOK_INSPECTION_LABELS = { account: 'Facebook Page and permissions', image: 'Approved image', teams: 'Teams schedule', time: 'Scheduled time', release: 'Publishing release' } as const
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const record = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v)
 const text = (v: unknown): v is string => typeof v === 'string' && !!v.trim() && v.length <= 512
+
+/** Readiness is diagnostic only. No inspection result becomes confirmation or
+ * provider authority, even when every individual read passes.
+ */
+export function projectFacebookInspection(value: unknown, reviewId: string): StaffFacebookInspection | null {
+  if (!record(value) || value.ok !== true || !record(value.inspection)) return null
+  const p = value.inspection
+  if (p.contract !== 'facebook_publication_readiness_v1' || p.reviewId !== reviewId || !UUID.test(reviewId)
+    || typeof p.clientId !== 'string' || !UUID.test(p.clientId) || typeof p.accountId !== 'string' || !/^\d+$/.test(p.accountId)
+    || p.canConfirm !== false || p.canPublish !== false || !Array.isArray(p.checks) || p.checks.length !== 5
+    || typeof p.scheduledAt !== 'string' || !Number.isFinite(Date.parse(p.scheduledAt)) || typeof p.checkedAt !== 'string' || !Number.isFinite(Date.parse(p.checkedAt))
+    || p.accountName !== null && (typeof p.accountName !== 'string' || !p.accountName.trim() || p.accountName.length > 200 || [...p.accountName].some(c => c.charCodeAt(0) < 32 || c.charCodeAt(0) === 127))
+    || p.assetSha256 !== null && (typeof p.assetSha256 !== 'string' || !/^[a-f0-9]{64}$/.test(p.assetSha256))) return null
+  const codes = { account: 'CURRENT_PROVIDER_PROOF_REQUIRED', image: 'REVIEWED_PROVIDER_MEDIA_PROOF_REQUIRED', teams: 'FRESH_TEAMS_EVIDENCE_REQUIRED', time: 'BLOCKED_OVERDUE_REVIEW', release: 'PUBLISHING_DISABLED' }
+  const checks: StaffFacebookInspection['checks'] = [], seen = new Set<string>()
+  for (const check of p.checks) {
+    if (!record(check) || typeof check.key !== 'string' || !Object.hasOwn(codes, check.key) || seen.has(check.key)
+      || !['pass', 'blocked', 'unavailable'].includes(String(check.status))
+      || (check.status === 'pass' ? check.code !== null : check.code !== codes[check.key as keyof typeof codes])) return null
+    seen.add(check.key)
+    checks.push({ key: check.key as StaffFacebookInspection['checks'][number]['key'], status: check.status as StaffFacebookInspection['checks'][number]['status'], code: check.code as string | null })
+  }
+  if ((checks.find(c => c.key === 'image')?.status === 'pass') !== (p.assetSha256 !== null)) return null
+  return { reviewId, clientId: p.clientId, accountId: p.accountId, accountName: p.accountName as string | null,
+    scheduledAt: p.scheduledAt, checkedAt: p.checkedAt, assetSha256: p.assetSha256 as string | null, canConfirm: false, canPublish: false, checks }
+}
+
+export async function inspectStaffPublication(reviewId: string): Promise<{ inspection: StaffFacebookInspection | null; message: string | null }> {
+  const unavailable = { inspection: null, message: 'Readiness could not be verified. Publishing stays unchanged; ask an administrator to check the read-only inspection setup.' }
+  if (!UUID.test(reviewId)) return unavailable
+  try {
+    const { data, error } = await supabase.functions.invoke('social-publication-authorization', { body: { action: 'inspect', reviewId } })
+    if (!error) {
+      const inspection = projectFacebookInspection(data, reviewId)
+      return inspection ? { inspection, message: null } : unavailable
+    }
+    // FunctionsHttpError contains its Response here. Read only fixed codes;
+    // SDK/provider message text and response extras never enter staff copy.
+    if (record(error) && error.context instanceof Response) {
+      const body: unknown = await error.context.clone().json()
+      if (record(body) && body.error === 'EXACT_ACCOUNT_MAPPING_REQUIRED') return { inspection: null, message: 'No single active Facebook Page mapping could be verified for this client. Ask an administrator to review the existing mapping.' }
+      if (record(body) && body.error === 'CURRENT_UNSCHEDULED_REVIEW_REQUIRED') return { inspection: null, message: 'This is not a current approved, unscheduled post. Review its approval and native schedule before continuing.' }
+    }
+    return unavailable
+  } catch { return unavailable }
+}
 
 export type PublicationReview = Pick<ContentReview, 'id' | 'state' | 'channels' | 'media_type'>
 

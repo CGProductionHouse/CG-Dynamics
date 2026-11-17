@@ -212,7 +212,7 @@ function componentHarness(io, reviewId, confirmation = false, reviewChanges = {}
     if (name === 'react') return react
     if (name === 'react/jsx-runtime') return runtime
     if (name.endsWith('.svg')) return { default: '/fixture-imported-icon.svg' }
-    if (name.endsWith('/socialPublishing')) return { PUBLICATION_STATE_LABELS: frontend.PUBLICATION_STATE_LABELS, canPrepareFacebookPhotoReview: frontend.canPrepareFacebookPhotoReview, publicationNextAction: frontend.publicationNextAction, ...io }
+    if (name.endsWith('/socialPublishing')) return { PUBLICATION_STATE_LABELS: frontend.PUBLICATION_STATE_LABELS, canPrepareFacebookPhotoReview: frontend.canPrepareFacebookPhotoReview, publicationNextAction: frontend.publicationNextAction, FACEBOOK_INSPECTION_LABELS: frontend.FACEBOOK_INSPECTION_LABELS, ...io }
     if (name.endsWith('/ContentPublicationConfirmation')) return { ContentPublicationConfirmation: () => null }
     throw new Error(`Unexpected component import ${name}`)
   }, Date, Intl })
@@ -319,6 +319,50 @@ test('manager sees the exact safe recovery action; uncertain attempts always tak
 const confirmationPreview = { reviewId: ids.review, clientId: ids.client, accountId: '12345', platform: 'facebook', caption: 'Approved caption', mediaType: 'image/png',
   assetSha256: 'a'.repeat(64), fingerprint: 'b'.repeat(64), scheduledAt: '2026-11-17T08:00:00Z' }
 const previewResponse = () => ({ ok: true, preview: { ...confirmationPreview, target: { reviewVersionId: ids.review, clientId: ids.client, accountId: '12345', route: 'facebook_page' } } })
+
+const inspectionResponse = () => ({ ok: true, inspection: { contract: 'facebook_publication_readiness_v1', reviewId: ids.review, clientId: ids.client,
+  accountId: '12345', accountName: 'Synthetic exact Page', scheduledAt: confirmationPreview.scheduledAt, checkedAt: new Date().toISOString(), assetSha256: 'a'.repeat(64), canConfirm: false, canPublish: false,
+  checks: [{ key: 'account', status: 'pass', code: null }, { key: 'image', status: 'pass', code: null },
+    { key: 'teams', status: 'unavailable', code: 'FRESH_TEAMS_EVIDENCE_REQUIRED' }, { key: 'time', status: 'pass', code: null }, { key: 'release', status: 'blocked', code: 'PUBLISHING_DISABLED' }] } })
+
+test('readiness browser adapter is exact-review, rejects authority/foreign/partial reports and never invokes confirmation', async () => {
+  const calls = [], response = inspectionResponse()
+  supabase.functions.invoke = async (name, options) => { calls.push([name, options]); return { data: response, error: null } }
+  const result = await frontend.inspectStaffPublication(ids.review)
+  assert.equal(result.message, null); assert.equal(result.inspection.canPublish, false)
+  assert.deepEqual(calls, [['social-publication-authorization', { body: { action: 'inspect', reviewId: ids.review } }]])
+  for (const change of [p => { p.reviewId = randomUUID() }, p => { p.canPublish = true }, p => { p.canConfirm = true }, p => { p.checks.pop() },
+    p => { p.checks[1] = { ...p.checks[0] } }, p => { p.checks[2].code = 'PRIVATE_TOKEN' }, p => { p.assetSha256 = null }, p => { p.accountName = 'bad\nname' }]) {
+    const data = inspectionResponse(); change(data.inspection)
+    assert.equal(frontend.projectFacebookInspection(data, ids.review), null)
+  }
+})
+
+test('inspection failures expose only fixed staff recovery copy', async () => {
+  supabase.functions.invoke = async () => ({ data: null, error: { context: Response.json({ error: 'EXACT_ACCOUNT_MAPPING_REQUIRED', raw: 'PRIVATE token' }, { status: 409 }) } })
+  assert.match((await frontend.inspectStaffPublication(ids.review)).message, /single active Facebook Page mapping/)
+  supabase.functions.invoke = async () => ({ data: null, error: { context: Response.json({ error: 'PRIVATE token' }, { status: 503 }) } })
+  assert.doesNotMatch((await frontend.inspectStaffPublication(ids.review)).message, /PRIVATE token/)
+})
+
+test('actual read-only UI shows independent source/account checks and cannot prepare while a check is held', async () => {
+  const p = frontend.projectFacebookInspection(inspectionResponse(), ids.review)
+  const c = componentHarness({ inspectStaffPublication: async () => ({ inspection: p, message: null }) }, ids.review, true)
+  c.click('Check Facebook readiness'); await settle()
+  assert.match(c.text(), /Synthetic exact Page/); assert.match(c.text(), /No publishing job created/)
+  assert.match(c.text(), /Facebook Page and permissions/); assert.match(c.text(), /Teams schedule/)
+  assert.match(c.text(), /sync hold/); assert.doesNotMatch(c.text(), /Confirm this Facebook schedule/)
+  assert.throws(() => c.click('Prepare Facebook schedule'))
+})
+
+test('late readiness cannot update a previous unmounted client review', async () => {
+  let resolve
+  const pending = new Promise(r => { resolve = r })
+  const c = componentHarness({ inspectStaffPublication: async () => pending }, ids.review, true)
+  c.click('Check Facebook readiness'); c.unmount()
+  resolve({ inspection: frontend.projectFacebookInspection(inspectionResponse(), ids.review), message: null }); await settle()
+  assert.equal(c.lateWrites.length, 0)
+})
 
 test('browser preview is default-hidden, requests only review ID and refuses foreign or malformed evidence', async () => {
   assert.equal(frontend.PUBLICATION_CONFIRMATION_VISIBLE, false)

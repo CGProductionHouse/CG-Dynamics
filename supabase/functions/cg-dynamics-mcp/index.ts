@@ -10,6 +10,7 @@
 
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { readMicrosoftScheduleSource } from './microsoftScheduleSource.ts'
+import { readFacebookPostReadiness } from './facebookPostReadiness.ts'
 import { fetchAllRows, fetchAllRowsByIdChunks } from '../_shared/paginatedRows.ts'
 import { CG_DYNAMICS_MCP_TOOLS, CG_DYNAMICS_MCP_SECURITY_SCHEMES } from './toolCatalog.ts'
 import { filterCapabilitiesByScope } from './capabilityManifest.ts'
@@ -3646,6 +3647,7 @@ const toolHandlers: Record<string, ToolHandler> = {
   read_microsoft_schedule_source: readMicrosoftScheduleSource,
   run_microsoft_sync: handleRunMicrosoftSync,
   get_provider_health: handleGetProviderHealth,
+  get_facebook_post_readiness: (staff, input) => readFacebookPostReadiness(staff.supabase, staff.profileId, input, name => Deno.env.get(name)),
   get_google_ads_audit: handleGetGoogleAdsAudit,
   run_provider_sync: handleRunProviderSync,
   find_content_runs: handleFindContentRuns,

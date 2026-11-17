@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { prepareStaffPublication, confirmStaffPublication, canPrepareFacebookPhotoReview, type PublicationReview, type StaffPublicationPreview } from '../../lib/socialPublishing'
+import { prepareStaffPublication, confirmStaffPublication, canPrepareFacebookPhotoReview, inspectStaffPublication, publicationNextAction, FACEBOOK_INSPECTION_LABELS, type StaffFacebookInspection, type PublicationReview, type StaffPublicationPreview } from '../../lib/socialPublishing'
 
 /** Staff-only parent, approved review, and source-only UI release flag. Backend
  * independently enforces its own default-off dispatch/exact-account packet.
@@ -7,15 +7,24 @@ import { prepareStaffPublication, confirmStaffPublication, canPrepareFacebookPho
 export function ContentPublicationConfirmation({ review, onConfirmed }: { review: PublicationReview; onConfirmed: () => void }) {
   const reviewId = review.id
   const [preview, setPreview] = useState<StaffPublicationPreview | null>(null)
+  const [inspection, setInspection] = useState<StaffFacebookInspection | null>(null)
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   const epoch = useRef(0)
   useEffect(() => () => { epoch.current++ }, [])
   const button = 'inline-flex min-h-11 items-center justify-center rounded-lg border border-white/15 px-3 text-sm text-white disabled:opacity-40'
+  async function inspect() {
+    if (busy || !canPrepareFacebookPhotoReview(review)) return
+    const request = ++epoch.current
+    setBusy(true); setPreview(null); setInspection(null); setMessage(null)
+    const result = await inspectStaffPublication(reviewId)
+    if (request !== epoch.current) return
+    setBusy(false); setInspection(result.inspection); setMessage(result.message)
+  }
   async function prepare() {
     if (busy || !canPrepareFacebookPhotoReview(review)) return
     const request = ++epoch.current
-    setBusy(true); setPreview(null); setMessage(null)
+    setBusy(true); setPreview(null); setInspection(null); setMessage(null)
     const result = await prepareStaffPublication(reviewId)
     if (request !== epoch.current) return
     setBusy(false); setPreview(result)
@@ -36,9 +45,20 @@ export function ContentPublicationConfirmation({ review, onConfirmed }: { review
   }
   if (!canPrepareFacebookPhotoReview(review)) return null
   return <div className="space-y-3 rounded-lg border border-white/10 p-3" aria-label="Confirm Facebook publishing">
-    <button className={button} type="button" disabled={busy} onClick={() => void prepare()}>Prepare Facebook schedule</button>
+    <div className="flex flex-wrap gap-2">
+      <button className={button} type="button" disabled={busy} onClick={() => void inspect()}>Check Facebook readiness</button>
+      <button className={button} type="button" disabled={busy || !!inspection?.checks.some(check => check.status !== 'pass')} onClick={() => void prepare()}>Prepare Facebook schedule</button>
+    </div>
     {busy && <p role="status" className="text-sm text-white/70">Checking the exact publication…</p>}
     {message && <p role="status" className="text-sm leading-relaxed text-amber-100">{message}</p>}
+    {inspection && <div className="space-y-3" aria-label="Facebook readiness results">
+      <p className="break-words text-sm font-semibold text-white">{inspection.accountName ?? 'Facebook Page'} · {inspection.accountId}</p>
+      <p className="text-xs text-white/60">Read-only check · {new Date(inspection.checkedAt).toLocaleString('en-ZA', { timeZone: 'Africa/Johannesburg' })} SAST. No publishing job created.</p>
+      <ul className="space-y-2">{inspection.checks.map(check => <li key={check.key} className="space-y-1 rounded-lg border border-white/10 p-3">
+        <div className="flex flex-wrap items-center justify-between gap-2"><span className="text-sm text-white">{FACEBOOK_INSPECTION_LABELS[check.key]}</span><span className={`text-xs ${check.status === 'pass' ? 'text-brand-teal' : 'text-amber-100'}`}>{check.status === 'pass' ? 'Verified' : check.status === 'blocked' ? 'Needs review' : 'Unavailable'}</span></div>
+        {check.status !== 'pass' && <p className="text-xs leading-relaxed text-white/70">{publicationNextAction({ state: 'blocked', errorCode: check.code, providerMayHaveStarted: false })}</p>}
+      </li>)}</ul>
+    </div>}
     {preview && <div className="min-w-0 space-y-3">
       <p className="break-words text-sm font-semibold text-white">Facebook Page · {preview.accountId}</p>
       <p className="text-sm text-brand-teal">{new Date(preview.scheduledAt).toLocaleString('en-ZA', { timeZone: 'Africa/Johannesburg' })} SAST</p>

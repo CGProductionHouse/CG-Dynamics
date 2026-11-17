@@ -41,14 +41,14 @@ export async function facebookPublishingUserToken(sb: SupabaseClient, intent: Re
  * A successful Page read is not rollout approval or staff publication consent.
  */
 export async function verifyFacebookPublishingTarget(sb: SupabaseClient, target: Readonly<PublicationTarget>, config: FacebookServerConfig,
-  ports: CredentialPorts & { fetch?: typeof fetch } = {}): Promise<{ binding: PublishingBinding; checkedAt: string }> {
+  ports: CredentialPorts & { fetch?: typeof fetch } = {}): Promise<{ binding: PublishingBinding; checkedAt: string; accountName: string | null }> {
   const selected = Object.freeze({ ...target }), settings = Object.freeze({ ...config })
   const intent = { ...selected, platform: 'facebook' as const }
   const credential = await facebookPublishingCredential(sb, intent, settings, ports)
   const access = await verifyFacebookPageAccess({ intent, graphVersion: settings.graphVersion, appSecret: settings.appSecret,
     resolveUserToken: async () => credential.accessToken, fetch: ports.fetch, now: ports.now })
   if (!(Date.parse(credential.tokenValidUntil) > Date.parse(access.checkedAt) + 120_000)) throw new Error('Exact Facebook publishing credential unavailable.')
-  return { checkedAt: access.checkedAt, binding: { clientId: selected.clientId, connectionId: selected.connectionId,
+  return { checkedAt: access.checkedAt, accountName: access.accountName, binding: { clientId: selected.clientId, connectionId: selected.connectionId,
     accountId: selected.accountId, route: selected.route, active: true, grantedScopes: credential.grantedScopes,
     tokenValidUntil: credential.tokenValidUntil, appAccessVerified: true, accountPublishingVerified: true, mediaContractVerified: false } }
 }

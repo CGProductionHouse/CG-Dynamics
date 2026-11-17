@@ -31,14 +31,15 @@ const listedTools = () => catalog.CG_DYNAMICS_MCP_TOOLS.map(tool => ({
 
 // ── Action exposure ─────────────────────────────────────────────────────────
 
-test('tools/list exposes 59 tools including guideline publication and client sharing', () => {
+test('tools/list exposes 60 tools including read-only Facebook readiness and client sharing', () => {
   const tools = listedTools()
-  assert.equal(tools.length, 59)
+  assert.equal(tools.length, 60)
   const names = tools.map(t => t.name)
   assert.ok(names.includes('resolve_project_context'), 'context bootstrap must be exposed')
   assert.ok(names.includes('read_microsoft_schedule_source'), 'bounded admin-only source evidence must be exposed')
   assert.equal(names[0], 'resolve_project_context', 'bootstrap is listed first')
   assert.ok(names.includes('get_google_ads_audit'), '#435 read-only Google Ads audit must be exposed')
+  assert.ok(names.includes('get_facebook_post_readiness'), '#220 read-only post readiness must be exposed')
   assert.ok(names.includes('ensure_content_guideline'), '#450 content preparation must be exposed')
   for (const cgHours of ['log_ordinary_hours', 'log_kilometre_entry', 'read_my_recent_entries', 'correct_my_entry']) {
     assert.ok(names.includes(cgHours), `#361 CG Hours action ${cgHours} must be exposed`)
@@ -47,7 +48,7 @@ test('tools/list exposes 59 tools including guideline publication and client sha
   assert.ok(names.includes('submit_monthly_strategy_draft'))
   assert.ok(names.includes('amend_monthly_strategy_draft'))
   for (const name of ['publish_content_guideline','get_content_guideline_share','revoke_content_guideline_share']) assert.ok(names.includes(name))
-  assert.equal(new Set(names).size, 59, 'no duplicate tool names')
+  assert.equal(new Set(names).size, 60, 'no duplicate tool names')
 })
 
 test('every listed tool advertises the OAuth securityScheme with the narrowed #318 scopes', () => {

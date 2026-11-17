@@ -25,6 +25,10 @@ const fixture = {
         from(){const q={select(){return q},eq(){return q},order(){return Promise.resolve({data:[],error:null})}};return q},
         functions:{async invoke(name,{body}){
           window.publicationCalls.push({name,body});
+          if(body.action==='inspect')return{data:{ok:true,inspection:{contract:'facebook_publication_readiness_v1',reviewId:'${reviewId}',clientId:'${clientId}',accountId:'12345',accountName:'Synthetic verified Page',scheduledAt:'2026-11-17T08:00:00Z',checkedAt:new Date().toISOString(),assetSha256:'a'.repeat(64),canConfirm:false,canPublish:false,checks:[
+            {key:'account',status:'pass',code:null},{key:'image',status:'pass',code:null},
+            {key:'teams',status:window.inspectionAllPass?'pass':'unavailable',code:window.inspectionAllPass?null:'FRESH_TEAMS_EVIDENCE_REQUIRED'},
+            {key:'time',status:'pass',code:null},{key:'release',status:window.inspectionAllPass?'pass':'blocked',code:window.inspectionAllPass?null:'PUBLISHING_DISABLED'}]}},error:null};
           if(body.action==='preview'){
             if(window.deferPreview)return await new Promise(resolve=>{window.resolvePreview=()=>resolve({data:preview,error:null})});
             return{data:preview,error:null};
@@ -82,6 +86,7 @@ try {
       await page.getByRole('button', { name: 'Publishing status', exact: true }).click()
       await page.getByText('Synthetic exact Page', { exact: true }).waitFor()
       assert.equal(await page.getByRole('button', { name: 'Prepare Facebook schedule', exact: true }).count(), 0)
+      assert.equal(await page.getByRole('button', { name: 'Check Facebook readiness', exact: true }).count(), 0)
       await page.getByRole('button', { name: 'Stop queued publishing', exact: true }).click()
       assert.equal(await page.evaluate(() => window.publicationCalls.filter(c => c.body.action === 'revoke').length), 0)
       await page.getByRole('button', { name: 'Keep current authority', exact: true }).click()
@@ -121,6 +126,22 @@ try {
     await page.getByRole('button', { name: 'Refresh status', exact: true }).click()
     await page.getByText(/A post may already exist/).waitFor()
     assert.equal(await page.getByText(/refresh the approved capture/).count(), 0)
+    cases += 2
+    await page.goto(`${origin}/review`)
+    await page.getByRole('button', { name: 'Publishing status', exact: true }).click()
+    await page.getByRole('button', { name: 'Check Facebook readiness', exact: true }).click()
+    const readiness = page.locator('[aria-label="Facebook readiness results"]')
+    await readiness.getByText('Synthetic verified Page · 12345', { exact: true }).waitFor()
+    assert.equal(await readiness.getByText('Verified', { exact: true }).count(), 3)
+    assert.equal(await page.getByRole('button', { name: 'Prepare Facebook schedule', exact: true }).isDisabled(), true)
+    assert.equal(await page.evaluate(() => window.publicationCalls.filter(c => ['confirm', 'revoke', 'preview'].includes(c.body.action)).length), 0)
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1))
+    await page.screenshot({ path: join(output, `readiness-${width}.png`), fullPage: true })
+    await page.evaluate(() => { window.inspectionAllPass = true })
+    await page.getByRole('button', { name: 'Check Facebook readiness', exact: true }).click()
+    assert.equal(await page.getByRole('button', { name: 'Prepare Facebook schedule', exact: true }).isDisabled(), false)
+    assert.equal(await page.getByRole('button', { name: 'Confirm this Facebook schedule', exact: true }).count(), 0)
+    assert.equal(await page.evaluate(() => window.publicationCalls.filter(c => ['confirm', 'revoke', 'preview'].includes(c.body.action)).length), 0)
     cases += 2
     await page.close(); cases++
   }

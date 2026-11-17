@@ -39,6 +39,8 @@ async function resolveFacebookPageAccess(input: FacebookPageAccessInput) {
   const resolvedAt = now()
   if (!Number.isFinite(resolvedAt)) failure('FACEBOOK_CONFIGURATION_INVALID')
   async function graph(token: string, method: 'GET' | 'POST', path: string, fields: Record<string, string | boolean>) {
+    const elapsed = now() - resolvedAt
+    if (!Number.isFinite(elapsed) || elapsed < 0 || elapsed >= 120_000) failure('FACEBOOK_CREDENTIAL_RECHECK_REQUIRED')
     const url = new URL(`${base}${path}`)
     const params = new URLSearchParams(Object.entries(fields).map(([k, v]) => [k, String(v)]))
     params.set('appsecret_proof', await proof(token, input.appSecret))
@@ -90,8 +92,10 @@ async function resolveFacebookPageAccess(input: FacebookPageAccessInput) {
     // Never follow provider paging.next URLs carrying tokens or another host.
   }
   if (!pageToken) failure('FACEBOOK_EXACT_PAGE_REQUIRED')
-  const pageIdentity = await graph(pageToken, 'GET', '/me', { fields: 'id' })
+  const pageIdentity = await graph(pageToken, 'GET', '/me', { fields: 'id,name' })
   if (pageIdentity.id !== intent.accountId) failure('FACEBOOK_PAGE_TOKEN_MISMATCH')
+  const accountName = typeof pageIdentity.name === 'string' && pageIdentity.name.trim() && pageIdentity.name.length <= 200
+    && ![...pageIdentity.name].some(c => c.charCodeAt(0) < 32 || c.charCodeAt(0) === 127) ? pageIdentity.name.trim() : null
   const checkedAt = now()
   if (!Number.isFinite(checkedAt) || checkedAt < resolvedAt || checkedAt - resolvedAt >= 120_000) failure('FACEBOOK_CREDENTIAL_RECHECK_REQUIRED')
   // Tokens remain captured by this PRIVATE server closure. Only the timestamp
@@ -100,16 +104,16 @@ async function resolveFacebookPageAccess(input: FacebookPageAccessInput) {
     const current = now()
     if (!Number.isFinite(current) || current < resolvedAt || current - resolvedAt >= 120_000) failure('FACEBOOK_CREDENTIAL_RECHECK_REQUIRED')
   }
-  return { checkedAt: new Date(checkedAt).toISOString(), assertFresh, async request(method: 'GET' | 'POST', path: string, fields: Record<string, string | boolean>) {
+  return { checkedAt: new Date(checkedAt).toISOString(), accountName, assertFresh, async request(method: 'GET' | 'POST', path: string, fields: Record<string, string | boolean>) {
     assertFresh()
     return await graph(pageToken, method, path, fields)
   } }
 }
 
 /** Read-only Page preflight. It cannot sign media or expose a mutation port. */
-export async function verifyFacebookPageAccess(input: FacebookPageAccessInput): Promise<{ checkedAt: string }> {
+export async function verifyFacebookPageAccess(input: FacebookPageAccessInput): Promise<{ checkedAt: string; accountName: string | null }> {
   const access = await resolveFacebookPageAccess(input)
-  return { checkedAt: access.checkedAt }
+  return { checkedAt: access.checkedAt, accountName: access.accountName }
 }
 
 export async function facebookPhotoTransport(input: {

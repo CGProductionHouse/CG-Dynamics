@@ -31,6 +31,44 @@ export interface PrivatePublicationPreparationChecks {
   now?: () => number
 }
 
+/** Canonical read shared by preparation and manager-only inspection. This does
+ * not grant publication authority; callers authenticate the active manager.
+ */
+export async function readApprovedPublicationSource(sb: SupabaseClient, target: Readonly<PublicationTarget>) {
+  if (![target.clientId, target.deliverableId, target.reviewVersionId, target.connectionId].every(id => UUID.test(id))
+    || !Object.hasOwn(profiles, target.route)) stop('PREPARATION_SCOPE_INVALID')
+  const profile = profiles[target.route as PhotoPublicationRoute]
+  const [review, deliverable, client] = await Promise.all([
+    sb.from('content_review_versions').select('id,deliverable_id,client_id,state,asset_path,media_type,caption,channels,scheduled_at')
+      .eq('id', target.reviewVersionId).eq('client_id', target.clientId).eq('deliverable_id', target.deliverableId).maybeSingle(),
+    sb.from('monthly_deliverables').select('id,client_id,scheduled_date,archived_at,posted_at,production_status,microsoft_task_id,microsoft_plan_id,microsoft_bucket_id')
+      .eq('id', target.deliverableId).eq('client_id', target.clientId).maybeSingle(),
+    sb.from('clients').select('id').eq('id', target.clientId).eq('active', true).maybeSingle(),
+  ])
+  if (review.error || deliverable.error || client.error || !review.data || !deliverable.data || !client.data) stop('CANONICAL_PUBLICATION_SOURCE_UNAVAILABLE')
+  const r = review.data, d = deliverable.data
+  if (r.id !== target.reviewVersionId || r.client_id !== target.clientId || r.deliverable_id !== target.deliverableId
+    || d.id !== target.deliverableId || d.client_id !== target.clientId || r.state !== 'approved' || d.archived_at !== null || d.posted_at !== null
+    || !Array.isArray(r.channels) || ['scheduled', 'posted'].includes(d.production_status) || !r.channels.includes(profile.platform)) stop('CURRENT_UNSCHEDULED_REVIEW_REQUIRED')
+  if (profile.platform === 'instagram' && r.media_type !== 'image/jpeg') stop('REVIEWED_PROVIDER_MEDIA_PROOF_REQUIRED')
+  if (profile.platform === 'instagram') {
+    const blocker = instagramCaptionBlocker(r.caption)
+    if (blocker) stop(blocker)
+  }
+  return { r, d, profile }
+}
+
+export async function readCapturedPublicationSchedule(sb: SupabaseClient, target: Readonly<PublicationTarget>, actorId: string,
+  d: { id: string; scheduled_date: string; microsoft_task_id: string }, now: number) {
+  const { data: schedule, error } = await sb.rpc('read_social_publication_schedule_evidence', { p_actor: actorId, p_deliverable: d.id, p_review: target.reviewVersionId })
+  if (error || !schedule || schedule.contract !== 'social_publication_schedule_evidence_v1' || schedule.clientId !== target.clientId
+    || schedule.deliverableId !== d.id || schedule.reviewVersionId !== target.reviewVersionId || schedule.recordId !== d.microsoft_task_id
+    || typeof schedule.recordId !== 'string' || !schedule.recordId.trim() || schedule.recordId.length > 512
+    || typeof schedule.revision !== 'string' || !/^[a-f0-9]{64}$/.test(schedule.revision) || schedule.scheduledDate !== d.scheduled_date
+    || !fresh(schedule.capturedAt, now) || !fresh(schedule.checkedAt, now)) stop('FRESH_TEAMS_EVIDENCE_REQUIRED')
+  return schedule
+}
+
 /** Concrete canonical source + captured Teams + private-byte reader. Read-only:
  * no signing, uploads, provider submission, Microsoft refresh/apply or grant.
  * Private provider/media qualification remains mandatory, with no default pass.
@@ -44,33 +82,10 @@ export function publicationCandidateReader(sb: SupabaseClient, checks: PrivatePu
     const actor = await sb.from('profiles').select('role,is_active').eq('id', actorId).maybeSingle()
     if (actor.error || actor.data?.is_active !== true || !['admin', 'manager'].includes(actor.data.role)) stop('ACTIVE_MANAGER_REQUIRED')
     if (!Object.hasOwn(profiles, target.route)) stop('EXACT_ACCOUNT_RELEASE_REQUIRED')
-    const profile = profiles[target.route as PhotoPublicationRoute]
     if (release.approved !== true || release.clientId !== target.clientId || release.connectionId !== target.connectionId
       || release.accountId !== target.accountId || release.route !== target.route || !/^\d+$/.test(target.accountId)) stop('EXACT_ACCOUNT_RELEASE_REQUIRED')
-    const [review, deliverable, client] = await Promise.all([
-      sb.from('content_review_versions').select('id,deliverable_id,client_id,state,asset_path,media_type,caption,channels,scheduled_at')
-        .eq('id', target.reviewVersionId).eq('client_id', target.clientId).eq('deliverable_id', target.deliverableId).maybeSingle(),
-      sb.from('monthly_deliverables').select('id,client_id,scheduled_date,archived_at,posted_at,production_status,microsoft_task_id')
-        .eq('id', target.deliverableId).eq('client_id', target.clientId).maybeSingle(),
-      sb.from('clients').select('id').eq('id', target.clientId).eq('active', true).maybeSingle(),
-    ])
-    if (review.error || deliverable.error || client.error || !review.data || !deliverable.data || !client.data) stop('CANONICAL_PUBLICATION_SOURCE_UNAVAILABLE')
-    const r = review.data, d = deliverable.data
-    if (r.id !== target.reviewVersionId || r.client_id !== target.clientId || r.deliverable_id !== target.deliverableId
-      || d.id !== target.deliverableId || d.client_id !== target.clientId || r.state !== 'approved' || d.archived_at !== null || d.posted_at !== null
-      || !Array.isArray(r.channels) || ['scheduled', 'posted'].includes(d.production_status)) stop('CURRENT_UNSCHEDULED_REVIEW_REQUIRED')
-    if (!r.channels.includes(profile.platform)) stop('CURRENT_UNSCHEDULED_REVIEW_REQUIRED')
-    if (profile.platform === 'instagram' && r.media_type !== 'image/jpeg') stop('REVIEWED_PROVIDER_MEDIA_PROOF_REQUIRED')
-    if (profile.platform === 'instagram') {
-      const blocker = instagramCaptionBlocker(r.caption)
-      if (blocker) stop(blocker)
-    }
-    const { data: schedule, error } = await sb.rpc('read_social_publication_schedule_evidence', { p_actor: actorId, p_deliverable: d.id, p_review: r.id })
-    if (error || !schedule || schedule.contract !== 'social_publication_schedule_evidence_v1' || schedule.clientId !== target.clientId
-      || schedule.deliverableId !== d.id || schedule.reviewVersionId !== r.id || schedule.recordId !== d.microsoft_task_id
-      || typeof schedule.recordId !== 'string' || !schedule.recordId.trim() || schedule.recordId.length > 512
-      || typeof schedule.revision !== 'string' || !/^[a-f0-9]{64}$/.test(schedule.revision) || schedule.scheduledDate !== d.scheduled_date
-      || !fresh(schedule.capturedAt, now) || !fresh(schedule.checkedAt, now)) stop('FRESH_TEAMS_EVIDENCE_REQUIRED')
+    const { r, d, profile } = await readApprovedPublicationSource(sb, target)
+    const schedule = await readCapturedPublicationSchedule(sb, target, actorId, d, now)
     const snapshot = await inspectPublicationSnapshot(sb, { clientId: target.clientId, deliverableId: d.id, reviewVersionId: r.id,
       platform: profile.platform, assetPath: r.asset_path, mediaType: r.media_type, caption: r.caption, scheduledAt: r.scheduled_at }, profile.maxBytes)
     let provider: Awaited<ReturnType<PrivatePublicationPreparationChecks['verifyProvider']>>

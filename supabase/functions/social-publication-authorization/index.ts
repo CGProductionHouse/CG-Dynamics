@@ -1,6 +1,7 @@
 import { requireAdminOrManager } from '../_shared/auth.ts'
 import { corsHeaders } from '../_shared/cors.ts'
-import { facebookPublicationRuntime, readFacebookPublicationConfiguration } from '../_shared/facebookPublicationRuntime.ts'
+import { facebookPublicationRuntime, readFacebookStaffConfiguration, readFacebookInspectionConfiguration } from '../_shared/facebookPublicationRuntime.ts'
+import { facebookPublicationInspector } from '../_shared/facebookPublicationInspection.ts'
 import { facebookPublicationStaffHandler } from '../_shared/facebookPublicationStaff.ts'
 import { socialPublicationAuthorizationStore } from '../_shared/socialPublicationAuthorizationStore.ts'
 
@@ -11,7 +12,8 @@ Deno.serve(async request => {
   const auth = await requireAdminOrManager(request)
   if (!auth.ok) return Response.json({ ok: false, error: 'PUBLICATION_ACCESS_UNAVAILABLE' }, { status: auth.status,
     headers: { ...corsHeaders, 'Cache-Control': 'no-store' } })
-  const sb = auth.value.supabase, configuration = readFacebookPublicationConfiguration(name => Deno.env.get(name))
+  const sb = auth.value.supabase, configuration = readFacebookStaffConfiguration(name => Deno.env.get(name))
+  const inspection = readFacebookInspectionConfiguration(name => Deno.env.get(name))
   const handler = facebookPublicationStaffHandler({
     async authenticate() {
       const { data, error } = await sb.from('profiles').select('role,is_active').eq('id', auth.value.user.id).maybeSingle()
@@ -19,6 +21,7 @@ Deno.serve(async request => {
     },
     runtime: configuration ? facebookPublicationRuntime(sb, configuration) : null,
     persistence: socialPublicationAuthorizationStore(sb),
+    inspect: inspection ? facebookPublicationInspector(sb, inspection, configuration) : undefined,
   })
   const result = await handler(request), headers = new Headers(result.headers)
   for (const [key, value] of Object.entries(corsHeaders)) headers.set(key, value)

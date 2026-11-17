@@ -1,5 +1,97 @@
 # Social publishing — 15 November 2026
 
+## 17 November continuation — read-only readiness, exact backend packet PREPARED
+
+Same PR991/#220/#236/#269, continuing ac55f313; no new scheduler or platform.
+Reproduced that the existing preview is unavailable when dispatch is disabled.
+Added an independent READ-ONLY inspection path using the SAME canonical approved
+review/source, original PNG/hash qualification, exact existing Meta mapping,
+encrypted-token/native Page scope/task/identity readers and captured Teams proof.
+Account/image checks run independently of a held/missing Teams capture. Missing
+evidence is unavailable, never a pass; time/config are distinct checks. Native
+Page name is read with its exact Page-token identity and control characters are
+discarded. Source, role and mapping drift invalidate the report. Results ALWAYS
+keep canConfirm:false/canPublish:false; no signing, enqueue/authorization,
+publication, refresh, account connection, permission or Microsoft mutation.
+
+Staff approved-Facebook-PNG review UI now has “Check Facebook readiness” with
+separate actionable rows. A held check disables preparation; an all-pass
+inspection alone never exposes a confirmation or creates a job. Stale async
+results cannot enter another review. Existing client/staff/superseded/non-PNG
+visibility gates remain. The source-only staff entry can run inspect independently
+of publishing via SOCIAL_FACEBOOK_PHOTO_INSPECTION_ENABLED. Its separate new
+SOCIAL_FACEBOOK_PHOTO_CONFIRMATION_ENABLED defaults off; worker flags cannot
+accidentally activate confirmation in a later inspection-only release. No flag
+was changed. UI and staff endpoint are NOT part of the proposed backend release.
+
+Added company-admin-only MCP get_facebook_post_readiness, closed schema and same
+OAuth/context policy. List mode pages25 future approved FB PNG review IDs for one
+exact active client, excluding archived/posted/scheduled canonical items. Returns
+has_more/next_offset; no complete fleet, rights or native-duplicate claim. Exact
+review mode calls the SAME inspector, rejects a foreign-client review and never
+grants authority. No SQL, model call or separate data store. Staff/client Projects
+cannot call this company-wide read. Candidate catalog60tools (30read/30write);
+live v84 still has the old catalog until separately approved release.
+
+Validation: completed full suite **4980 total /4949 pass /31 skips /0 failures**;
+final232affected tests pass after an equivalent control-character lint correction.
+**33 actual PostgreSQL checks** pass: inspection FIRST without ANY publishing
+migration, then the minimal Facebook pair/three queue journeys, then the other2
+migrations/remaining guards. **52 actual local Chrome cases** at375/390/430/1440
+pass, all external requests blocked. Build/app bundle, scoped lint, diff and actual
+cached Deno check of the PREPARED hosted MCP payload plus staff entry pass. Deno
+uses the established --sloppy-imports and private Vite/type-only checking files;
+those7 omitted frontend type files and local checker config are NOT uploaded.
+Graph/Storage/SDK transport remain synthetic; native API acceptance is not claimed.
+Owned network-none QA container stopped exit0; other DBs untouched. Only issue519
+generated test output is restored. No new dependency or migration.
+
+### Prepared exact READ-ONLY release — approval still required
+
+Read-only Management API inventory/source confirmed cg-dynamics-mcp ACTIVEv84,
+verify_jwt=false (existing custom authentication), import_map=false,41hosted files;
+social-publication* endpoints are absent. Fresh migration history read177entries:
+ALL4 publishing candidates absent; brand20261111064719 already applied. No SQL
+executed and no production mutation. This supersedes the prior unavailable
+metadata-read note below.
+
+Private captured v84 source SHA256:
+`e62cfae4292db68258dbd100c68de6d2dff022a9d070b704fa9297fe78d105c4`.
+Offline preparer: scripts/qa/prepare-facebook-readiness-release.mjs. It verifies
+the reviewed version/auth/import-map/three baseline files, closes local dependencies,
+rejects path escape/duplicates, and PREPARES ONLY; it has no deploy/network/config
+operation. The exact candidate:
+
+- Only existing MCP index.ts (import + getter binding), projectContext.ts (company
+  admin allowlist) and toolCatalog.ts (closed read-only definition) change.
+- Other38hosted files stay BYTE-IDENTICAL, including two hosted OneDrive files
+  that differ from repository versions. Never replace them from the checkout.
+- Adds22 reviewed transitive library/source files;63files total. No worker,
+  staff-authorizer endpoint or other Edge Function is released.
+- Only proposed config write: SOCIAL_FACEBOOK_PHOTO_INSPECTION_ENABLED=true.
+  Keep confirmation flag unset/false; no dispatch flag/release tuple, OAuth,
+  permission, encryption key/secret, mapping, client content, SQL or Vercel change.
+- Prepared payload SHA256:
+  `6ee8f42a2cce61f822b29dc092e350042c9e942f48c20c3e9e044715eb41dd46`.
+  Private manifest/payload/staged sources:
+  C:/Users/chris/.codex/artifacts/social-publishing-991/2026-11-17/readiness-release/.
+- Before any approved release, repeat v84/all-file hash preflight. Any version/
+  source drift stops release for reconciliation. Preserve current auth/importmap.
+  After release read back all63files and unauthenticated denial; then verify
+  tool discovery and ONE exact-client candidate/inspection through existing
+  company-admin connection. No test post, new approval or automatic sync.
+- Rollback, only if separately authorized: restore exact captured v84 files and
+  prior inspection-flag state. Keep all content, receipts and history. Do not
+  replay migrations, remove keys or reset accounts.
+
+Ownership: PR995 shares index/catalog/tests but its Staff AI/marketing business
+logic is untouched. PR1004 website lead work shares only ops handover. New getter
+uses no Nolan workboard/package/calendar authority. Fresh hosted source/version
+checks prevent either owner's later release from being overwritten. Source
+approval is NOT production approval. Google Control Centre target still unknown;
+no guessed write. Exact next step is CA approval for this bounded read-only MCP
+release+flag, then native Page/approved-post evidence, not platform expansion.
+
 ## Latest 17 November — Facebook first pathway, connected SQL acceptance
 
 Same DRAFT PR991/#220/#236/#269, parent `01102d009ed4eca46d2cb1eb93775dd83fc0f5ef`;

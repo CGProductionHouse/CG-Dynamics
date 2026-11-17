@@ -180,6 +180,7 @@ export const COMPANY_ADMIN_TOOLS: readonly string[] = [
   // company-wide provider/reconciliation engine), so they require the explicit admin context.
   'run_microsoft_sync',
   'get_provider_health',
+  'get_facebook_post_readiness',
   'get_google_ads_audit',
   'run_provider_sync',
 ]

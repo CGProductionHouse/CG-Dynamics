@@ -11,6 +11,31 @@ export interface FacebookPublicationConfiguration {
   release: PrivatePublicationPreparationChecks['release'] & { route: 'facebook_page' }
 }
 
+function readFacebookServerConfiguration(get: (name: string) => string | undefined): FacebookServerConfig | null {
+  try {
+    const server = { graphVersion: get('META_GRAPH_VERSION') ?? '', appId: get('META_APP_ID') ?? '', appSecret: get('META_APP_SECRET') ?? '',
+      projectUrl: get('SUPABASE_URL') ?? '', encryptionKey: get('META_TOKEN_ENCRYPTION_KEY_B64') ?? '', keyVersion: get('META_TOKEN_ENCRYPTION_KEY_VERSION') ?? '' }
+    const url = new URL(server.projectUrl)
+    if (!/^v\d+\.\d+$/.test(server.graphVersion) || !/^\d+$/.test(server.appId) || !server.appSecret || !server.encryptionKey || !server.keyVersion
+      || url.protocol !== 'https:' || url.username || url.password || url.pathname !== '/' || url.search || url.hash) return null
+    return server
+  } catch { return null }
+}
+
+/** Independently gated READ-ONLY diagnostics. This never enables a worker or
+ * supplies the exact approved release tuple needed for confirmation/dispatch.
+ */
+export function readFacebookInspectionConfiguration(get: (name: string) => string | undefined): FacebookServerConfig | null {
+  return get('SOCIAL_FACEBOOK_PHOTO_INSPECTION_ENABLED') === 'true' ? readFacebookServerConfiguration(get) : null
+}
+
+/** The undeployed staff entry may be released for inspection alone. Existing
+ * worker gates cannot accidentally enable staff confirmation in that release.
+ */
+export function readFacebookStaffConfiguration(get: (name: string) => string | undefined): FacebookPublicationConfiguration | null {
+  return get('SOCIAL_FACEBOOK_PHOTO_CONFIRMATION_ENABLED') === 'true' ? readFacebookPublicationConfiguration(get) : null
+}
+
 /** Disabled unless BOTH dispatch gates plus an exact SERVER account packet are
  * installed in a later approved release. No default client, Graph version, app,
  * credential or global permission is inferred from analytics/native UI access.
@@ -22,11 +47,8 @@ export function readFacebookPublicationConfiguration(get: (name: string) => stri
     if (!release || Array.isArray(release) || Object.keys(release).sort().join(',') !== 'accountId,clientId,connectionId'
       || ![release.clientId, release.connectionId].every(id => typeof id === 'string' && UUID.test(id))
       || typeof release.accountId !== 'string' || !/^\d+$/.test(release.accountId)) return null
-    const server = { graphVersion: get('META_GRAPH_VERSION') ?? '', appId: get('META_APP_ID') ?? '', appSecret: get('META_APP_SECRET') ?? '',
-      projectUrl: get('SUPABASE_URL') ?? '', encryptionKey: get('META_TOKEN_ENCRYPTION_KEY_B64') ?? '', keyVersion: get('META_TOKEN_ENCRYPTION_KEY_VERSION') ?? '' }
-    const url = new URL(server.projectUrl)
-    if (!/^v\d+\.\d+$/.test(server.graphVersion) || !/^\d+$/.test(server.appId) || !server.appSecret || !server.encryptionKey || !server.keyVersion
-      || url.protocol !== 'https:' || url.username || url.password || url.pathname !== '/' || url.search || url.hash) return null
+    const server = readFacebookServerConfiguration(get)
+    if (!server) return null
     return { server, release: { ...release, approved: true, route: 'facebook_page' } }
   } catch { return null }
 }

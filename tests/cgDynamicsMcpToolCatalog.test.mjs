@@ -50,7 +50,7 @@ test('read tools cover exact staff, task, calendar, schedule, lead, client conte
   assert.deepEqual(reads, [
     'resolve_project_context',
     'get_microsoft_sync_status', 'read_microsoft_schedule_source', 'list_company_tasks', 'list_company_recurring_tasks',
-    'get_provider_health', 'get_google_ads_audit', 'find_content_runs',
+    'get_provider_health', 'get_facebook_post_readiness', 'get_google_ads_audit', 'find_content_runs',
     'get_my_day', 'list_my_tasks', 'get_task', 'list_my_calendar',
     'list_client_schedule', 'get_client_context', 'list_monthly_strategy_clients', 'get_monthly_strategy_brief',
     'list_assignable_staff', 'list_my_leads', 'get_lead',
@@ -103,12 +103,12 @@ test('server instruction states the shared-connection contract and forbids unsaf
   assert.doesNotMatch(instructions, /Project name.*identity/i)
 })
 
-test('catalog contains exactly 59 tools: 29 read + 30 write', () => {
+test('catalog contains exactly 60 tools: 30 read + 30 write', () => {
   const tools = catalog.CG_DYNAMICS_MCP_TOOLS
-  assert.equal(tools.length, 59)
+  assert.equal(tools.length, 60)
   const reads = tools.filter(t => t.annotations.readOnlyHint)
   const writes = tools.filter(t => !t.annotations.readOnlyHint)
-  assert.equal(reads.length, 29)
+  assert.equal(reads.length, 30)
   assert.equal(writes.length, 30)
 })
 

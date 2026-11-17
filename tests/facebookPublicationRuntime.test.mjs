@@ -7,7 +7,7 @@ import { readFileSync } from 'node:fs'
 import ts from 'typescript'
 import vm from 'node:vm'
 
-let server, runtimeModule, staff, storeModule, queue, tokenModule
+let server, runtimeModule, staff, storeModule, queue, tokenModule, inspection, mcpReadiness
 const originalFetch = globalThis.fetch
 before(async () => {
   server = await createServer({ configFile: false, server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true }, logLevel: 'error' })
@@ -16,6 +16,25 @@ before(async () => {
   storeModule = await server.ssrLoadModule('/supabase/functions/_shared/socialPublicationAuthorizationStore.ts')
   queue = await server.ssrLoadModule('/supabase/functions/_shared/socialPublishingQueue.ts')
   tokenModule = await server.ssrLoadModule('/supabase/functions/_shared/metaTokenStorage.ts')
+  inspection = await server.ssrLoadModule('/supabase/functions/_shared/facebookPublicationInspection.ts')
+  mcpReadiness = await server.ssrLoadModule('/supabase/functions/cg-dynamics-mcp/facebookPostReadiness.ts')
+})
+
+test('read-only inspection verifies the mapped Page and original image while Teams is held and dispatch stays disabled', async () => {
+  const f = await fixture(), rpc = f.sb.rpc
+  f.sb.rpc = async (name, args) => name === 'read_social_publication_schedule_evidence' ? { data: null, error: {} } : rpc(name, args)
+  const inspect = inspection.facebookPublicationInspector(f.sb, f.config, null)
+  const report = await inspect(f.ids.review, f.ids.actor)
+  assert.equal(report.canConfirm, false); assert.equal(report.canPublish, false)
+  assert.equal(report.accountId, '123')
+  assert.equal(report.checks.find(c => c.key === 'account').status, 'pass')
+  assert.equal(report.checks.find(c => c.key === 'image').status, 'pass')
+  assert.equal(report.checks.find(c => c.key === 'teams').status, 'unavailable')
+  assert.equal(report.checks.find(c => c.key === 'release').status, 'blocked')
+  assert.equal(f.graphCalls.some(c => c[0] !== 'GET'), false)
+  assert.equal(f.calls.some(c => c[0] === 'sign'), false)
+  assert.equal(f.tables.background_jobs.length, 0)
+  assert.equal(JSON.stringify(report).includes('fixture-user-token'), false)
 })
 after(async () => { try { await server?.close() } finally { globalThis.fetch = originalFetch } })
 function staticPng() {
@@ -27,7 +46,7 @@ function staticPng() {
   const h = Buffer.from([0, 0, 0, 2, 0, 0, 0, 2, 8, 6, 0, 0, 0])
   return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk('IHDR', h), chunk('IDAT', deflateSync(Buffer.alloc(18))), chunk('IEND', Buffer.alloc(0))])
 }
-async function fixture() {
+async function fixture(options = {}) {
   const now = Date.now(), due = new Date(now + 60_000).toISOString(), ids = Object.fromEntries(['actor', 'client', 'connection', 'review', 'deliverable', 'job'].map(k => [k, randomUUID()]))
   const release = { approved: true, clientId: ids.client, connectionId: ids.connection, accountId: '123', route: 'facebook_page' }
   const config = { graphVersion: 'v27.0', appId: '789', appSecret: 'fixture-app-secret', projectUrl: 'https://fixture.supabase.co',
@@ -44,7 +63,7 @@ async function fixture() {
   const sb = { from(table) {
     const filters = []; const q = { select() { return q }, eq(k, v) { filters.push([k, v]); return q }, async maybeSingle() {
       calls.push(['read', table]); const found = tables[table].filter(row => filters.every(([k, v]) => row[k] === v))
-      return { data: found.length === 1 ? found[0] : null, error: found.length > 1 ? {} : null }
+      return { data: found.length === 1 ? structuredClone(found[0]) : null, error: found.length > 1 ? {} : null }
     } }; return q
   }, storage: { from(bucket) { assert.equal(bucket, 'content-review-snapshots'); return {
     async download(path) { calls.push(['download', path]); return { data: new Blob([image], { type: 'image/png' }), error: null } },
@@ -73,17 +92,94 @@ async function fixture() {
       data_access_expires_at: Math.floor(now / 1000) + 7200, scopes: ['pages_show_list', 'pages_manage_posts', 'pages_read_engagement'] } })
     if (path === '/me/permissions') return Response.json({ data: ['pages_show_list', 'pages_manage_posts', 'pages_read_engagement'].map(permission => ({ permission, status: 'granted' })) })
     if (path === '/me/accounts') return Response.json({ data: [{ id: '123', access_token: 'fixture-page-token', tasks: ['CREATE_CONTENT'] }] })
-    if (path === '/me') return Response.json({ id: '123' })
+    if (path === '/me') return Response.json({ id: '123', name: 'Synthetic verified Page' })
     if (path === '/123/photos') { if (mode === 'timeout') throw new Error('PRIVATE lost response'); return Response.json({ id: '456', post_id: '123_789' }) }
     if (path === '/123_789') return Response.json({ id: '123_789', is_published: true })
     throw new Error('Unexpected network route')
   }
   const runtime = runtimeModule.facebookPublicationRuntime(sb, { server: config, release })
   const actor = { id: ids.actor, role: 'manager', active: true }
-  const handler = staff.facebookPublicationStaffHandler({ runtime, authenticate: async () => actor, persistence: storeModule.socialPublicationAuthorizationStore(sb) })
+  const handler = staff.facebookPublicationStaffHandler({ runtime: options.inspectionOnly ? null : runtime, authenticate: async () => actor,
+    persistence: storeModule.socialPublicationAuthorizationStore(sb), inspect: options.inspectionOnly ? inspection.facebookPublicationInspector(sb, config, null) : undefined })
   const invoke = async body => { const response = await handler(new Request('https://fixture.invalid', { method: 'POST', body: JSON.stringify(body) })); return { status: response.status, body: await response.json() } }
   return { sb, config, release, ids, due, tables, runtime, actor, invoke, calls, graphCalls, timeout() { mode = 'timeout' } }
 }
+
+test('inspection-only HTTP action cannot confirm, revoke, override account/source or create authority', async () => {
+  const f = await fixture({ inspectionOnly: true })
+  const report = await f.invoke({ action: 'inspect', reviewId: f.ids.review })
+  assert.equal(report.status, 200); assert.equal(report.body.inspection.accountName, 'Synthetic verified Page')
+  assert.equal(report.body.inspection.canConfirm, false); assert.equal(report.body.inspection.canPublish, false)
+  for (const body of [{ action: 'confirm', reviewId: f.ids.review, expectedFingerprint: 'a'.repeat(64), confirmPublication: true },
+    { action: 'revoke', reviewId: f.ids.review }, { action: 'preview', reviewId: f.ids.review }]) {
+    assert.equal((await f.invoke(body)).status, 409)
+  }
+  for (const extra of [{ accountId: '999' }, { clientId: crypto.randomUUID() }, { rolloutApproved: true }])
+    assert.equal((await f.invoke({ action: 'inspect', reviewId: f.ids.review, ...extra })).status, 400)
+  assert.equal(f.tables.background_jobs.length, 0); assert.equal(f.calls.some(c => c[0] === 'sign'), false)
+  assert.equal(f.calls.filter(c => c[0] === 'rpc' && c[1] !== 'read_social_publication_schedule_evidence').length, 0)
+  assert.equal(f.graphCalls.some(c => c[0] !== 'GET'), false)
+})
+
+test('inspection refuses unapproved/foreign sources, ambiguous mappings and inactive roles before native reads', async () => {
+  for (const mutate of [f => { f.tables.content_review_versions[0].state = 'draft' }, f => { f.tables.clients[0].active = false },
+    f => { f.tables.content_review_versions[0].client_id = crypto.randomUUID() }, f => { f.tables.meta_client_assets.push({ ...f.tables.meta_client_assets[0] }) },
+    f => { f.tables.profiles[0].is_active = false }, f => { f.tables.profiles[0].role = 'staff' }]) {
+    const f = await fixture({ inspectionOnly: true }); mutate(f)
+    const result = await f.invoke({ action: 'inspect', reviewId: f.ids.review })
+    assert.ok([403, 409].includes(result.status)); assert.equal(f.graphCalls.length, 0)
+    assert.equal(f.tables.background_jobs.length, 0); assert.equal(f.calls.some(c => c[0] === 'sign'), false)
+  }
+})
+
+test('inspection never turns inaccessible provider/media evidence into passing checks or raw private errors', async () => {
+  const f = await fixture({ inspectionOnly: true })
+  f.tables.meta_connection_tokens.length = 0
+  const storage = f.sb.storage.from
+  f.sb.storage.from = () => ({ ...storage('content-review-snapshots'), async download() { throw Error('PRIVATE secret-token') } })
+  const result = await f.invoke({ action: 'inspect', reviewId: f.ids.review })
+  assert.equal(result.status, 200)
+  assert.equal(result.body.inspection.checks.find(c => c.key === 'account').status, 'unavailable')
+  assert.equal(result.body.inspection.checks.find(c => c.key === 'image').status, 'unavailable')
+  assert.equal(result.body.inspection.assetSha256, null)
+  assert.equal(JSON.stringify(result.body).includes('secret-token'), false)
+  assert.equal(f.tables.background_jobs.length, 0)
+})
+
+test('inspection gate is independent from publication gates and cannot manufacture a release', async () => {
+  const f = await fixture(), settings = { SOCIAL_FACEBOOK_PHOTO_INSPECTION_ENABLED: 'true', META_GRAPH_VERSION: f.config.graphVersion,
+    META_APP_ID: f.config.appId, META_APP_SECRET: f.config.appSecret, SUPABASE_URL: f.config.projectUrl,
+    META_TOKEN_ENCRYPTION_KEY_B64: f.config.encryptionKey, META_TOKEN_ENCRYPTION_KEY_VERSION: f.config.keyVersion }
+  assert.equal(runtimeModule.readFacebookInspectionConfiguration(k => settings[k]).appId, f.config.appId)
+  assert.equal(runtimeModule.readFacebookPublicationConfiguration(k => settings[k]), null)
+  assert.equal(runtimeModule.readFacebookStaffConfiguration(k => settings[k]), null)
+  for (const key of Object.keys(settings)) assert.equal(runtimeModule.readFacebookInspectionConfiguration(k => key === k ? undefined : settings[k]), null)
+})
+
+test('a source, mapping or role change during native inspection invalidates the report', async () => {
+  for (const mutate of [f => { f.tables.content_review_versions[0].caption += ' changed' },
+    f => { f.tables.profiles[0].role = 'staff' }, f => { f.tables.meta_client_assets[0].facebook_page_id = '999' },
+    f => { f.tables.monthly_deliverables[0].microsoft_task_id = 'another-task' }]) {
+    const f = await fixture({ inspectionOnly: true }), original = globalThis.fetch
+    globalThis.fetch = async (raw, init) => { const response = await original(raw, init); if (new URL(raw).pathname === '/v27.0/me') mutate(f); return response }
+    assert.equal((await f.invoke({ action: 'inspect', reviewId: f.ids.review })).status, 409)
+    assert.equal(f.tables.background_jobs.length, 0)
+  }
+})
+
+test('actual MCP exact-review adapter reuses the native inspector, refuses cross-client reviews and cannot authorize', async () => {
+  const f = await fixture(), settings = { SOCIAL_FACEBOOK_PHOTO_INSPECTION_ENABLED: 'true', META_GRAPH_VERSION: f.config.graphVersion,
+    META_APP_ID: f.config.appId, META_APP_SECRET: f.config.appSecret, SUPABASE_URL: f.config.projectUrl,
+    META_TOKEN_ENCRYPTION_KEY_B64: f.config.encryptionKey, META_TOKEN_ENCRYPTION_KEY_VERSION: f.config.keyVersion }
+  const result = await mcpReadiness.readFacebookPostReadiness(f.sb, f.ids.actor, { client_id: f.ids.client, review_id: f.ids.review }, key => settings[key])
+  assert.equal(result.data_state, 'available'); assert.equal(result.inspection.accountName, 'Synthetic verified Page')
+  assert.equal(result.canPublish, false); assert.equal(result.canConfirm, false)
+  const before = f.graphCalls.length, foreign = crypto.randomUUID()
+  f.tables.clients.push({ id: foreign, active: true })
+  const refused = await mcpReadiness.readFacebookPostReadiness(f.sb, f.ids.actor, { client_id: foreign, review_id: f.ids.review }, key => settings[key])
+  assert.equal(refused.data_state, 'unavailable'); assert.equal(f.graphCalls.length, before)
+  assert.equal(f.tables.background_jobs.length, 0); assert.equal(f.graphCalls.some(c => c[0] !== 'GET'), false)
+})
 
 test('concrete read-only preview → exact confirmation → worker submission → separate verified receipt uses one existing queue', async () => {
   const f = await fixture(), preview = await f.invoke({ action: 'preview', reviewId: f.ids.review })
@@ -176,6 +272,7 @@ test('actual authorization Edge entry honors preflight, authentication, active p
       if (name.endsWith('/cors.ts')) return { corsHeaders: { 'Access-Control-Allow-Origin': 'https://fixture.invalid' } }
       if (name.endsWith('/facebookPublicationRuntime.ts')) return runtimeModule
       if (name.endsWith('/facebookPublicationStaff.ts')) return staff
+      if (name.endsWith('/facebookPublicationInspection.ts')) return inspection
       if (name.endsWith('/socialPublicationAuthorizationStore.ts')) return storeModule
       throw new Error(`Unexpected Edge import ${name}`)
     } })
@@ -188,7 +285,7 @@ test('actual authorization Edge entry honors preflight, authentication, active p
   const disabled = await handler(new Request('https://fixture.invalid', { method: 'POST', body: '{}' }))
   assert.equal(disabled.status, 409); assert.equal(disabled.headers.get('cache-control'), 'no-store')
   assert.equal(disabled.headers.get('access-control-allow-origin'), 'https://fixture.invalid')
-  assert.deepEqual(envReads, ['SOCIAL_PUBLISHING_ENABLED'])
+  assert.deepEqual(envReads, ['SOCIAL_FACEBOOK_PHOTO_CONFIRMATION_ENABLED', 'SOCIAL_FACEBOOK_PHOTO_INSPECTION_ENABLED'])
   f.tables.profiles[0].is_active = false
   assert.equal((await handler(new Request('https://fixture.invalid', { method: 'POST', body: '{}' }))).status, 403)
   assert.equal(f.graphCalls.length, 0)

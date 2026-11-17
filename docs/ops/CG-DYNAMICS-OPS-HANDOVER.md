@@ -1,3 +1,39 @@
+## Latest 17 November — independent Facebook readiness; read-only packet PREPARED
+
+PR991/#220/#236/#269 continues ac55f313, current main b524a9f9. New read-only
+inspection separates native Page/image proof from held Teams capture and dispatch.
+Same approved review/mapping/PNG/hash/encrypted Meta readers; no alternate store,
+scope/approval/write authority or publishing. Staff UI displays per-check actions;
+company-admin MCP get_facebook_post_readiness lists paged exact-client approved
+future PNG candidates or inspects one exact review. Both canConfirm/canPublish
+remain false. Catalog source60tools (30read/30write); tool is NOT live yet.
+Separate inspection flag and default-off staff confirmation flag prevent worker
+gates accidentally enabling the new staff endpoint. Worker/publisher unchanged.
+
+Validation: full **4980total/4949pass/31skips/0fail**, final232affected,33 actual
+PostgreSQL checks (inspection before ANY candidate migration),52 isolated browser
+cases375/390/430/1440, fixture build/app/scoped lint/diff and cached actual Deno
+check of prepared hosted payload pass. Graph/Storage remain simulated; no native
+Meta acceptance. QA container stopped cleanly, no other DB services touched.
+
+Fresh read-only production evidence: MCP ACTIVEv84/41files/custom auth unchanged;
+publishing endpoints absent.177migration entries show ALL4 publishing candidates
+absent and brand20261111064719 applied. Prepared read-only MCP payload changes3
+existing files, preserves38 exactly (including hosted OneDrive variants) and adds22
+library files. Payload hash6ee8f42a2cce61f822b29dc092e350042c9e942f48c20c3e9e044715eb41dd46.
+Exact proposed config is only SOCIAL_FACEBOOK_PHOTO_INSPECTION_ENABLED=true;
+confirmation stays unset/false and no worker flag, key, account, SQL or permission
+change. NO production mutation/deploy/publication/Vercel/cost action occurred.
+
+Read [existing receipt](SOCIAL-PUBLISHING-220-2026-11-15.md) for exact preparer,
+manifest, all-file drift/readback/rollback and native acceptance steps. Requires
+CA's explicit approval before this one backend release+flag. PR995 shared MCP
+files/marketing retirement and PR1004 website leads remain separate; source
+snapshots must be refreshed before release to protect any later owner changes.
+MCP readiness enables native evidence without browser/session copying, publishing
+migrations or Vercel. Teams sync hold and exact content/permission/live pilot gates
+remain. Google Control Centre target unknown; no guessed write.
+
 ## Latest 17 November — Facebook first pathway in existing PR991
 
 Same DRAFT PR991/#220/#236/#269, parent01102d00; main unchanged b524a9f9.

@@ -167,6 +167,13 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
     dependency: 'main', canonicalContract: 'meta/google-ads/tiktok connection-status functions (#325)',
   },
   {
+    name: 'get_facebook_post_readiness', title: 'Check exact-client Facebook post readiness',
+    description: 'Company-admin only, READ ONLY. For one exact active client UUID, list up to25 future approved original-PNG Facebook reviews with has_more/next_offset, excluding archived/posted/already-scheduled canonical items. Follow pagination; a page is not a complete fleet. Supply review_id instead of offset to inspect that exact client review: existing mapped Page identity/name and native publishing permissions, original image/hash, fresh captured Teams schedule, future time and default-off release. Teams may be unavailable while account/image pass. Missing/failed evidence is unavailable. No job, creative approval, staff confirmation, publication, account connection, mapping, token refresh or Microsoft sync. All results explicitly keep canConfirm/canPublish false; no mocked/source-only result establishes native readiness.',
+    inputSchema: objectSchema({ client_id: uuid, review_id: uuid, offset: { type: 'integer', minimum: 0, maximum: 5000 } }, ['client_id']),
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
+    dependency: 'main', canonicalContract: 'existing content_review_versions + monthly_deliverables + meta_client_assets; shared read-only Facebook inspector (#220/#236)',
+  },
+  {
     name: 'get_google_ads_audit', title: 'Read exact-client Google Ads audit',
     description: 'Company-admin only. Read canonical stored Google Ads V2 account mapping, sync freshness, campaign daily facts and timestamped observed settings for one exact Dynamics client UUID and explicit account-local date range. A covering account sync with no mapped-campaign daily rows is no_campaign_rows, not available or verified zero activity. No live provider request or mutation. Missing audit surfaces are explicit.',
     inputSchema: objectSchema({ client_id: uuid, start_date: date, end_date: date }, ['client_id', 'start_date', 'end_date']),
