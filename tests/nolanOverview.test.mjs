@@ -22,8 +22,10 @@ test('Refresh is bounded to opening, focus and explicit action; cleanup suppress
   assert.doesNotMatch(page, /setInterval/)
 })
 test('Retains existing liked visual shell, scoped inside Dynamics without iframe or credential bridge', () => {
-  for (const text of ['nolan-board', 'Here’s the situation.', 'YOUR WORKBOARD', 'grid list', 'Coverage & source freshness']) assert.ok(page.includes(text))
+  for (const text of ['nolan-board', 'Here’s the situation.', 'YOUR WORKBOARD', 'Coverage & source freshness']) assert.ok(page.includes(text))
   assert.doesNotMatch(page, /iframe|postMessage|access_token/)
+  const records = readFileSync(new URL('../src/pages/admin/NolanPagedRecords.tsx', import.meta.url), 'utf8')
+  assert.ok(records.includes('className="grid list"'))
   const css = readFileSync(new URL('../src/pages/admin/nolanOverview.css', import.meta.url), 'utf8')
   assert.ok(css.includes('.nolan-board .card'))
   assert.doesNotMatch(css, /@import/)
