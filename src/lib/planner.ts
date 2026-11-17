@@ -548,12 +548,13 @@ export interface DeliverableFilters {
 }
 
 export async function listMonthlyDeliverables(filters?: DeliverableFilters) {
+  return fetchAllPages<MonthlyDeliverable>((from, to) => {
   let query = supabase
     .from(DELIVERABLES_TABLE)
     .select('*')
     .is('archived_at', null)
     .order('month', { ascending: false })
-    .order('instance_number')
+    .order('instance_number').order('id')
 
   if (filters?.clientId) {
     query = query.eq('client_id', filters.clientId)
@@ -580,7 +581,8 @@ export async function listMonthlyDeliverables(filters?: DeliverableFilters) {
     query = query.eq('package_id', filters.packageId)
   }
 
-  return query
+  return query.range(from, to)
+  })
 }
 
 export async function listMonthlyDeliverablesByMonth(month: string, filters?: Omit<DeliverableFilters, 'month'>) {

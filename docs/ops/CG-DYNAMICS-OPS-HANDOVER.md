@@ -224,6 +224,183 @@ performed. #900 owns tracking; #981 exact handoffs and #984 brand panel remain
 separate/additive. Shared editorial library remains PR910. Hosting #679 release
 gate remains; this candidate is not a claim of completed live-board backfill.
 
+## 16 November — Nolan final bounded checkpoint and review release path
+
+### Active-work operational summary
+
+Master now defaults to active tasks, with explicit completed history/all-record
+views and clickable account-visible active/blocked/waiting-client/unassigned
+snapshot counts. Shared lifecycle keeps approved/scheduled/deferred/reopened work
+active; no date-fallback deadline claim. Unavailable empty counts are Unknown;
+retained counts are last-known and unknown ownership is not called unassigned.
+34 focused checks plus build/lint/diff pass. Browser/device remains unexecuted;
+this is candidate UI, not whole-business/fleet coverage or live deployment.
+[Exact behavior and evidence](NOLAN-MASTER-EVIDENCE-2026-11-16.md).
+
+### Concise Master control-panel follow-up
+
+Master now pages 12 canonical task cards and bounds literal source-note previews
+to 600 characters, with explicit truncation and an always-visible source link.
+Search/filter covers the full authorized snapshot; full notes remain at source.
+Current workflow status, canonical owner and freshness remain visible; execution
+agent/device/verified next action stay Unknown, not inferred from cumulative logs.
+32 focused checks and local build/lint/diff pass; actual browser remains unexecuted.
+[Presentation behavior, synthetic large-log evidence and limits](NOLAN-MASTER-EVIDENCE-2026-11-16.md).
+
+### Latest integration checkpoint — 16 November
+
+PR990 reconciled with exact main `b524a9f91d61a5727db355194db2a988594b8af1`.
+Preserved all brand-panel, report-readiness and editing-system entries; PR984
+and PR999 merges belong to their authorized lane and were not repeated. PR995
+observed at `d5a02c0ce69c97e3c454c6500538f3abe1daf242`, remains separate/unmerged.
+Combined local tree preserves main's brand panel and report-ranking fixes with
+actual Nolan components. Focused integrated checks: 55 passed, no skips/failures;
+application TypeScript/Vite build and diff checks passed. No runtime conflict or
+new product defect was demonstrated; only this handover/checklist reconciliation
+is published. Master remains account-visible canonical tasks/workflow state,
+not whole-business/fleet coverage or verified agent/device/next-action evidence.
+Browser acceptance remains unexecuted; no environment investigation or retry.
+Existing runbook provides the approved same-host sandboxed-browser commands.
+No deployment, SQL apply, production change, paid upload or PR-description edit.
+
+Latest integration follow-up: main `34c4552ec5108d1bb0aab49140da7ee2807de08b`
+adds Madison acceptance; its complete entry is preserved above. Separate commit
+`1b39dfece9106292571cd7ad0e0cba03096ea4e8` removes only hourly autonomous schedule;
+manual dispatch is unchanged. Extracted draft PR1000 was independently approved
+and merged as `206f4df9cc845a1b818f96fa4ab43ef1922b7772`; main now has no hourly
+schedule. PR990 cleanly integrates with that exact main (no merge/rebase here).
+Local build passed; no workflow execution, duplicate-PR closure or issue churn.
+
+Read-only browser-runner coverage repaired: manager revocation/recovery now runs
+with Needs You off too. Local guards/AST/cancellation: 2 pass, 1 API skip; browser
+remains unexecuted, requiring an approved normal-sandbox same-host engine.
+[Exact runnable commands and limits](NOLAN-SAME-ORIGIN-ACCEPTANCE-2026-11-16.md).
+
+PR990 functional checkpoint `dcf24f98098b5da0fc1c2ef217588989fd26a556`: 12 genuine
+Auth/API tests passed, local build/lint passed. Debrief atomicity, sync create/
+Calendar/idempotency and deterministic two-session revocation are exercised.
+New statements after committed revocation deny; older statement snapshots may
+finish. No cancellation or whole-system revocation claim. SQL remains unapplied.
+[Exact evidence](NOLAN-FINAL-MUTATION-ACCEPTANCE-2026-11-16.md).
+
+Handover reconciled against main `62f7a88ad961468697bd24aecd48132bc38d1450`, preserving
+its entries. PR995/plugin and other lanes remain separate. Four actual-component
+sample preview contracts passed; refreshed HTML/receipt identify their exact SHA.
+Root owns the authorized protected static-only sample deployment; this lane only
+transfers artifacts. Genuine same-origin browser/device acceptance is unexecuted.
+Read-only workbook uses existing schema; Needs You/security drafts remain deferred.
+[Release scope, owners and actionable gates](NOLAN-AUTHENTICATED-ACCEPTANCE.md).
+
+## 16 November — Nolan inactive-source server-policy draft
+
+Next bounded mutation tranche reproduces and guards `assistant_update_video`
+and `apply_microsoft_sync_item` with retained real JWTs: 11 affected tests and
+build pass. Draft only; active behavior/grants preserved, no connector send or
+production application. Debrief coverage is now superseded by the final tranche below;
+other unexecuted inventory entries remain open. [Mutation evidence and limits](NOLAN-MUTATION-DEFINER-ACCEPTANCE-2026-11-16.md).
+
+Follow-up adds six independently owned Content Guideline/identity definer guards
+after real inactive-JWT reproductions; existing active/client/service-role access
+is preserved. PR995 exclusively owns the ownership-summary RPC. Broader inventory
+is not system-wide revocation acceptance. The handover preserves exact main
+`1c1bd36` strategy entries. [Definer evidence and remaining scope](NOLAN-DEFINER-ACCEPTANCE-2026-11-16.md).
+
+PR #990 adds an unapplied restrictive-policy draft for ten existing source tables
+and profiles, preserving self-read and existing active-role/client visibility.
+Real old GoTrue JWTs reproduced inactive reads, legacy task RPC access, direct
+task insertion and admin self-reactivation; the bounded draft denies these paths.
+Two returning Command Centre RPCs receive active-caller checks. No global role
+helper, UI/AI file, live database, activation or deployment change. The adjacent
+AI ownership-summary definer remains a separately identified revocation gap;
+do not claim system-wide account isolation or authenticated UI acceptance.
+[Exact scope, evidence and rollout boundary](NOLAN-SOURCE-POLICY-ACCEPTANCE-2026-11-16.md).
+
+## 16 November — Nolan actual-reader audit and profile freshness repair
+
+Draft #990 now tests actual SDK-backed task/staff/client/pipeline/schedule readers
+against the isolated same-origin services. All seeded paths pass; no replay gap
+blocks them. Reproduced inactive-session legacy source reads; workbook refresh now
+revalidates its own profile before/after reads and clears data on revocation.
+This does not repair legacy RLS: direct inactive-session source reads remain an
+explicit server-side release gate. 35 affected tests and build pass; browser
+stale/retry/revocation assertions are authored only. No production/guard change.
+[Exact evidence and boundaries](NOLAN-SOURCE-ADAPTER-ACCEPTANCE-2026-11-16.md).
+
+## 16 November — Nolan executable same-origin acceptance entry point
+
+Draft #990 now serves the actual app and genuine isolated GoTrue/PostgREST through
+one private loopback origin. Four synthetic sign-ins/JWT roles and source reads
+passed; no browser launched. Normal-sandbox browser entry/runbook is prepared;
+current blocked browser paths were not retried. Structured agent/device evidence
+integration stops at the unresolved exact-task/source contract (Control Centre
+sheet not resolved), not a new store or guessed assignment. See
+[same-origin runbook and bounded source contract](NOLAN-SAME-ORIGIN-ACCEPTANCE-2026-11-16.md).
+
+## 16 November — Nolan Master canonical task evidence candidate
+
+Existing draft #990 now replaces static-only Master content with existing task
+ownership/status/source-age rows and lazy exact-task activity evidence. Agent,
+device and independently verified actions remain explicitly unknown where the
+schema has no structured evidence; source notes are not parsed into assignments.
+No DB, auth, activation, release or other-lane change. See
+[Master evidence sources and verification](NOLAN-MASTER-EVIDENCE-2026-11-16.md).
+
+## 16 November — Nolan offline review artifact and integration rehearsal
+
+Draft #990 now has a self-contained HTML review using actual Nolan components
+and CSS with explicit sample-only adapters, saved to Library. Production auth
+and decision activation remain unchanged. Browser/device acceptance is still
+open. The local integration rehearsal preserves both this lane and current main;
+no integration commit, deployment or production action was performed. Exact
+artifact, test results and compared trees: [review receipt](NOLAN-REVIEW-PREVIEW-2026-11-16.md).
+
+## 16 November — Nolan real sign-in/JWT backend acceptance
+
+Existing draft #990 now passes genuine GoTrue password sign-in and PostgREST JWT
+role/revocation/RPC checks with synthetic accounts, in isolated containers with
+no external network or host ports. Combined DB/Auth selection: 42 passing tests.
+All eleven replay gaps are classified; canonical native decision/profile/task
+paths apply, while full platform/data parity remains open. Read
+[Auth/API receipt](NOLAN-AUTH-API-ACCEPTANCE-2026-11-16.md).
+Browser/same-origin/device acceptance remains open; no Chromium sandbox bypass,
+production change, activation, migration, deployment or PR-description retry.
+MSI/social ownership remains untouched.
+
+## 16 November — Nolan canonical policy replay, release still gated
+
+Existing draft #990 now exercises real repository profiles/native-task policies
+and triggers in isolated PostgreSQL, in addition to the minimal fixture. The
+30-test database selection passes; 202/213 repository SQL files fully apply and
+11 exact non-Nolan/platform/data-dependent failures remain disclosed. This is
+not full Supabase or authenticated-browser parity. Read
+[Nolan decision contract](NOLAN-DECISION-REQUEST-CONTRACT.md#16-november-canonical-policy-replay-continuation)
+and its manifest before relying on the evidence. No draft SQL/application change;
+Needs You and Git deployment stay false. Sandboxed Chromium startup and missing
+local Auth/PostgREST prevent signed-in browser acceptance. No sandbox bypass,
+production operation, PR-description retry or MSI/social-owner change.
+
+## 16 November — Nolan isolated database acceptance, still draft
+
+Existing #990 now has real PostgreSQL 17.12 acceptance in the fresh saved cloud
+runtime: 12 fixture tests pass, including seven overlapping-session lock/CAS/
+idempotency/revision/revocation cases. Fixed a reproduced test startup race;
+application and draft SQL unchanged. See [exact runtime and acceptance limits](NOLAN-DECISION-REQUEST-CONTRACT.md#16-november-cloud-postgresql-acceptance-supersedes-runtime-blocker-above).
+Canonical schema/profile-policy replay and legitimate signed-in browser/device
+acceptance remain open. Needs You activation and Git deployment remain false;
+no production migration, merge, release or change to the MSI social task/checkout.
+Other lane ownership and protected gates remain unchanged.
+
+## 15 November — Nolan workbook evidence disclosure, local continuation
+
+Existing draft #990 remains the native workbook owner. The core-only candidate
+now exposes canonical schedule, recorded-post and approval timestamps separately
+in package row details, without treating status or dates as provider publication
+proof. No scheduler/provider, security, DB, permissions or release change; the
+external pinned board stays in place. See
+[Nolan candidate and verification](NOLAN-NATIVE-OVERVIEW-2026-11-15.md).
+Authenticated role/browser/visual acceptance and actual-posted reconciliation
+remain open. #679 ZERO unapproved deployment gate and all other owners remain.
+
 ## 9 November — combined guideline release LIVE, acceptance complete
 
 Owner #896/#450. CA's exact combined approval executed: #977/main25657501 includes

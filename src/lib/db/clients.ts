@@ -1,4 +1,5 @@
 import { supabase } from '../supabase'
+import { fetchAllPages } from '../paginatedQuery'
 import {
   EMPTY_PACKAGE_SETTINGS,
   buildPackageFieldStates,
@@ -33,13 +34,13 @@ function columnMissing(error: { code?: string; message?: string } | null): boole
 }
 
 export async function listClients(filter: 'active' | 'archived' | 'all' = 'all') {
-  const base = supabase.from('clients').select('*').order('name')
-  const query =
-    filter === 'active' ? base.eq('active', true) :
-    filter === 'archived' ? base.eq('active', false) :
-    base
   const { data, error } = await withRequestTimeout(
-    query,
+    fetchAllPages<Client>((from, to) => {
+      let query = supabase.from('clients').select('*').order('name').order('id')
+      if (filter === 'active') query = query.eq('active', true)
+      if (filter === 'archived') query = query.eq('active', false)
+      return query.range(from, to)
+    }),
     'Loading clients took too long. Please try again.'
   )
   return { data: (data ?? []) as Client[], error }

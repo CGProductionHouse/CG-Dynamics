@@ -11,7 +11,7 @@ const clientReport = readFileSync(new URL('../src/pages/client/ClientReportView.
 test('website reporting is a server-only, exact-client bridge', () => {
   assert.match(edge, /Access-Control-Allow-Headers': 'authorization, apikey, content-type, x-client-info'/)
   assert.match(edge, /supabase\.auth\.getUser\(bearer\)/)
-  assert.match(edge, /\.from\('profiles'\).*\.select\('role'\)/)
+  assert.match(edge, /\.from\('profiles'\).*\.select\('role, is_active'\)/)
   assert.match(edge, /\.from\('clients'\).*\.eq\('id', input\.clientId\)/)
   assert.match(edge, /Object\.values\(mappings\).*\.length !== 1/)
   assert.match(edge, /report\.websiteId !== websiteId/)
@@ -86,4 +86,14 @@ test('the snapshot payload and client-safe period stay exactly half-open', () =>
   assert.match(migration, /'period', p_snapshot -> 'period'/)
   assert.match(edge, /p_period_end: input\.to/)
   assert.doesNotMatch(periodContract, /client_safe_website_report/)
+})
+
+// Source checks supplement the genuine isolated GoTrue/Edge execution receipt.
+test('service-role reporting rechecks active authorization before releasing reads', () => {
+  assert.match(edge, /profile\?\.is_active !== true/)
+  assert.match(edge, /const role = await authorize\(\)/)
+  assert.match(edge, /const respond = async[\s\S]*const currentRole = await authorize\(\)/)
+  assert.match(edge, /return respond\(\{ clientId: input\.clientId, state: report\.dataQuality\.state, report \}\)/)
+  assert.match(edge, /action === 'save_draft'[\s\S]*const currentRole = await authorize\(\)/)
+  assert.match(edge, /\['admin', 'manager'\]\.includes\(currentRole\)/)
 })

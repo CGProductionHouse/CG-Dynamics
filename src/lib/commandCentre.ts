@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { fetchAllPages } from './paginatedQuery'
 import { matchClient, clientSelection } from './clientMatcher'
 import { isMissingPlannerAssignmentRpcError, listPlannerBoardAssignments, listPlannerTaskRows, PLANNER_TASK_STATUS_LABELS } from './planner'
 
@@ -304,33 +305,38 @@ function plannerTaskToCommandTask(
 }
 
 export interface ListTaskOptions {
+  /** Workbook snapshots must not silently omit Planner or assignment evidence. */
+  requireCompleteSources?: boolean
   activeOnly?: boolean
 }
 
 export async function listTasks(options: ListTaskOptions = {}) {
+  const buildNativeQuery = () => {
   let nativeQuery = supabase
     .from(TABLE)
     .select('*')
-    .order('created_at', { ascending: false })
+    .order('created_at', { ascending: false }).order('id')
 
   if (options.activeOnly) {
     nativeQuery = nativeQuery.not('status', 'in', '(done,completed)')
   }
 
+  return nativeQuery
+  }
   const [nativeResult, plannerResult, assignmentResult] = await Promise.all([
-    nativeQuery,
+    fetchAllPages<CommandCentreTask>((from, to) => buildNativeQuery().range(from, to)),
     listPlannerTaskRows({ order: 'due', activeOnly: options.activeOnly }),
     listPlannerBoardAssignments(),
   ])
 
   if (nativeResult.error) return nativeResult
   if (plannerResult.error) {
-    if (plannerResult.error.message?.includes('does not exist') || plannerResult.error.code === '42P01') {
+    if (!options.requireCompleteSources && (plannerResult.error.message?.includes('does not exist') || plannerResult.error.code === '42P01')) {
       return nativeResult
     }
     return { data: nativeResult.data ?? [], error: plannerResult.error }
   }
-  if (assignmentResult.error && !isMissingPlannerAssignmentRpcError(assignmentResult.error)) {
+  if (assignmentResult.error && (options.requireCompleteSources || !isMissingPlannerAssignmentRpcError(assignmentResult.error))) {
     return { data: nativeResult.data ?? [], error: assignmentResult.error }
   }
 
@@ -349,10 +355,12 @@ export async function listTasks(options: ListTaskOptions = {}) {
   }
 
   if (bucketIds.length > 0) {
-    const { data: buckets } = await supabase
+    const { data: buckets, error: bucketError } = await supabase
       .from(PLANNER_BUCKETS_TABLE)
       .select('id, name')
       .in('id', bucketIds)
+
+    if (options.requireCompleteSources && bucketError) return { data: [], error: bucketError }
 
     for (const bucket of (buckets ?? []) as PlannerBucketRow[]) {
       bucketNames.set(bucket.id, bucket.name)
@@ -532,8 +540,8 @@ export interface ClientOption {
  */
 export async function listActiveClients() {
   const [clientsResult, aliasResult] = await Promise.all([
-    supabase.from('clients').select('id, name').eq('active', true).order('name'),
-    supabase.from('client_aliases').select('client_id, alias'),
+    fetchAllPages<{ id: string; name: string }>((from, to) => supabase.from('clients').select('id, name').eq('active', true).order('name').order('id').range(from, to)),
+    fetchAllPages<{ client_id: string; alias: string }>((from, to) => supabase.from('client_aliases').select('client_id, alias').order('client_id').order('alias').range(from, to)),
   ])
   if (clientsResult.error || !clientsResult.data) return clientsResult
 

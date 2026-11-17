@@ -313,17 +313,17 @@ export async function loadActiveClientPackageEvidenceMatrix(clients: Client[], t
   const [packages, deliverables, guides, contextUpdates] = await Promise.all([
     fetchAllPages<PackageRow>((from, to) => supabase.from('client_packages')
       .select('id,client_id,package_name,status,start_date,end_date,notes,updated_at,archived_at')
-      .in('client_id', clientIds).order('start_date', { ascending: false }).range(from, to)),
+      .in('client_id', clientIds).order('start_date', { ascending: false }).order('id').range(from, to)),
     fetchAllPages<PackageDeliverableEvidenceRow>((from, to) => supabase.from('monthly_deliverables')
       .select('id,client_id,package_id,template_id,month,deliverable_type,microsoft_source_type,microsoft_task_id,microsoft_last_synced_at')
       .in('client_id', clientIds).is('archived_at', null).gte('month', recentMonth)
       .order('month', { ascending: false }).order('id').range(from, to)),
     fetchAllPages<ClientGuideEvidenceRow>((from, to) => supabase.from('client_guides')
       .select('id,client_id,version,runtime_readiness,updated_at').in('client_id', clientIds)
-      .order('client_id').order('version', { ascending: false }).range(from, to)),
+      .order('client_id').order('version', { ascending: false }).order('id').range(from, to)),
     fetchAllPages<ClientContextEvidenceRow>((from, to) => supabase.from('client_context_updates')
       .select('id,client_id,title,review_state,created_at').in('client_id', clientIds)
-      .eq('review_state', 'incorporated').order('created_at', { ascending: false }).range(from, to)),
+      .eq('review_state', 'incorporated').order('created_at', { ascending: false }).order('id').range(from, to)),
   ])
   const firstError = packages.error ?? deliverables.error ?? guides.error ?? contextUpdates.error
   if (firstError) return { data: [], error: firstError }
@@ -333,7 +333,7 @@ export async function loadActiveClientPackageEvidenceMatrix(clients: Client[], t
     ? { data: [] as PackageTemplateRow[], error: null }
     : await fetchAllPages<PackageTemplateRow>((from, to) => supabase.from('package_deliverable_templates')
       .select('id,package_id,code,deliverable_type,title_template,count_per_month,active')
-      .in('package_id', packageIds).order('package_id').order('sort_order').range(from, to))
+      .in('package_id', packageIds).order('package_id').order('sort_order').order('id').range(from, to))
   if (templates.error) return { data: [], error: templates.error }
 
   return {

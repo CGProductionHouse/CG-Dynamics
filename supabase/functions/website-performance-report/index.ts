@@ -21,9 +21,22 @@ Deno.serve(async (request) => {
   const supabase = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } })
   const { data: { user }, error: authError } = await supabase.auth.getUser(bearer)
   if (authError || !user) return json({ error: 'Authentication required' }, 401)
-  const { data: profile, error: roleError } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle()
-  if (roleError) return json({ error: 'Authorization unavailable' }, 503)
-  if (!['admin', 'manager', 'staff', 'team'].includes(profile?.role ?? '')) return json({ error: 'Forbidden' }, 403)
+  const authorize = async (): Promise<string | Response> => {
+    const { data: profile, error: roleError } = await supabase.from('profiles').select('role, is_active').eq('id', user.id).maybeSingle()
+    if (roleError) return json({ error: 'Authorization unavailable' }, 503)
+    if (profile?.is_active !== true || !['admin', 'manager', 'staff', 'team'].includes(profile.role)) {
+      return json({ error: 'Forbidden' }, 403)
+    }
+    return profile.role
+  }
+  const role = await authorize()
+  if (typeof role !== 'string') return role
+  // Service-role reads bypass RLS. Recheck before releasing their result so a
+  // revocation committed during the read is observed at this final check.
+  const respond = async (body: unknown) => {
+    const currentRole = await authorize()
+    return typeof currentRole === 'string' ? json(body) : currentRole
+  }
 
   let input: { clientId?: unknown; from?: unknown; to?: unknown; action?: unknown }
   try { input = await request.json() } catch { return json({ error: 'Malformed request' }, 400) }
@@ -45,7 +58,7 @@ Deno.serve(async (request) => {
   let mappings: Record<string, number>
   try { mappings = JSON.parse(Deno.env.get('WEBSITE_REPORTING_CLIENT_MAP') ?? '{}') } catch { return json({ error: 'Reporting mapping invalid' }, 503) }
   const websiteId = mappings[input.clientId]
-  if (!Number.isSafeInteger(websiteId) || websiteId < 1) return json({ clientId: input.clientId, state: 'not_connected', report: null })
+  if (!Number.isSafeInteger(websiteId) || websiteId < 1) return respond({ clientId: input.clientId, state: 'not_connected', report: null })
   // Fail closed if one Builder website is accidentally assigned to multiple clients.
   if (Object.values(mappings).filter((id) => id === websiteId).length !== 1) return json({ error: 'Reporting mapping ambiguous' }, 503)
   try {
@@ -55,9 +68,9 @@ Deno.serve(async (request) => {
     endpoint.searchParams.set('to', input.to)
     endpoint.searchParams.set('clientId', input.clientId)
     const upstream = await fetch(endpoint, { headers: { Authorization: `Bearer ${builderToken}` } })
-    if (upstream.status === 409) return json({ clientId: input.clientId, state: 'not_connected', report: null })
-    if ([401, 403].includes(upstream.status)) return json({ clientId: input.clientId, state: 'permission_required', report: null })
-    if (!upstream.ok) return json({ clientId: input.clientId, state: 'unavailable', report: null })
+    if (upstream.status === 409) return respond({ clientId: input.clientId, state: 'not_connected', report: null })
+    if ([401, 403].includes(upstream.status)) return respond({ clientId: input.clientId, state: 'permission_required', report: null })
+    if (!upstream.ok) return respond({ clientId: input.clientId, state: 'unavailable', report: null })
     const report = await upstream.json()
     if (report?.version !== 1 || report.websiteId !== websiteId || report.identity?.dynamicsClientId !== input.clientId ||
       report.period?.from !== input.from || report.period?.to !== input.to) {
@@ -65,7 +78,9 @@ Deno.serve(async (request) => {
     }
     const action = String(input.action ?? 'preview')
     if (action === 'save_draft') {
-      if (!['admin', 'manager'].includes(profile?.role ?? '')) return json({ error: 'Manager access required' }, 403)
+      const currentRole = await authorize()
+      if (typeof currentRole !== 'string') return currentRole
+      if (!['admin', 'manager'].includes(currentRole)) return json({ error: 'Manager access required' }, 403)
       if (report.identity?.environment !== 'production' || !['available', 'partial'].includes(report.dataQuality?.state) || !report.dataQuality?.sourceReadAt) {
         return json({ error: 'Only available production reporting can be saved for review' }, 409)
       }
@@ -77,13 +92,13 @@ Deno.serve(async (request) => {
         p_actor_id: user.id,
       })
       if (saveError || !Array.isArray(saved) || !saved[0]) return json({ error: 'Website snapshot could not be saved' }, 503)
-      return json({
+      return respond({
         clientId: input.clientId,
         state: report.dataQuality.state,
         report,
         saved: { reportId: saved[0].report_id, snapshotId: saved[0].snapshot_id, revision: saved[0].revision },
       })
     }
-    return json({ clientId: input.clientId, state: report.dataQuality.state, report })
+    return respond({ clientId: input.clientId, state: report.dataQuality.state, report })
   } catch { return json({ error: 'Website report unavailable' }, 503) }
 })

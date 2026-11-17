@@ -151,9 +151,12 @@ test('planner activeOnly list excludes only genuine completion (done/completed)'
 })
 
 test('native task list activeOnly excludes only genuine completion', () => {
-  const fn = commandCentre.slice(commandCentre.indexOf('export async function listTasks'))
-  assert.match(fn.slice(0, 300), /not\('status', 'in', '\(done,completed\)'\)/)
-  assert.ok(!/moved_to_tomorrow/.test(fn.slice(0, 300)), 'moved_to_tomorrow must flow through for today-axis filtering')
+  const start = commandCentre.indexOf('export async function listTasks(')
+  const end = commandCentre.indexOf('\nexport ', start + 1)
+  assert.ok(start >= 0 && end > start, 'locate the complete listTasks function boundary')
+  const fn = commandCentre.slice(start, end)
+  assert.match(fn, /if \(options\.activeOnly\)\s*\{\s*nativeQuery = nativeQuery\.not\('status', 'in', '\(done,completed\)'\)/)
+  assert.ok(!/moved_to_tomorrow|approved,scheduled/.test(fn), 'deferred and scheduling states must remain active')
 })
 
 test('workforce MyDay filters through isActiveForToday, not a local set', () => {
