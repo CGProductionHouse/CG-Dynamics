@@ -4,6 +4,12 @@ CA requested Bat Hill's verified login, then continued active-client readiness.
 No Vercel. Existing branch/draft PR1003 retained; other worktrees and browser
 work left untouched. Login credentials and signed download URLs are private.
 
+**Latest continuation:** Case Bloemfontein and Central Canvas October reports +
+November Plans are published; real client reads/isolation and staff preservation
+pass. Case header PNG is prepared locally only, original PDF already accessible.
+[Exact later receipt](CASE-CENTRAL-CLIENT-READINESS-2026-11-17.md).
+Next CG Production Housec27d2185 is read-only triaged, Novemberv6 evidence-held.
+
 **Later 17 November continuation supersedes the next-client cursor below:**
 Bouwer, Braize and C&L October reports + November Plans are now published and
 their real client login/report/Plan/logo/isolation checks pass. C&L's historical

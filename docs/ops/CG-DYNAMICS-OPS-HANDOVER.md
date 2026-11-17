@@ -10,6 +10,39 @@ and exact merge receipt are recorded in PR #984. Git deployment remains OFF.
 No Vercel operation, production data write, new tracker or #910-base resolution.
 Source merge does not mean staff production browser acceptance or deployment.
 
+## 17 November — Case / Central Canvas report and Plan accepted; no Vercel
+
+Same isolated DRAFT PR1003. Case079df21e October994b048e published14:17:00UTC,
+Novemberea1dd4d6v6 published14:20:35UTC, confirmed2videos12posters. Central
+Canvas6b313cac October5bca0f00 published14:26:05UTC, November382e6063v5 published
+14:27:52UTC,1video4photos3posters. Routine exact-mapped refreshes PASS; Case
+19reobserved/20retained posts/14facts, Central8posts/6facts. Missinguniqueviewers
+stayNULL, follower counts snapshots, no inferred enquiries/sales/CG authorship.
+
+Narrow audited editorial corrections: Case objective staleOctober-unavailable
+sentence + testfield; Central testfield only. Replaced September figures outside
+the23Sept report cutoff with exact October observations. Other staff text/concepts
+preserved; manual existing review/approve/explicit-publish, no second author.
+Real issued logins/report/Plan200; exactscope/tenGoldfields, foreign403/files404,
+directreports0foreign/0draft. Both temporaryAPI sessions closed LOCAL-only204.
+Repository's actual client quality/visibility gates pass on published projections.
+No new browser/phone acceptance; other agent's company tabs untouched.
+
+Client/package rows,13other reports(including6olderpublished),6other-month
+strategies byte-stable; Novemberreports/Decemberstrategies remain drafts. Source
+approved Case PDF original download/hash pass. Liveheader missing (URL200HTML is
+NOT image success); faithful Bloemfontein-only PNG prepared locally from original
+PDF, NOT deployed. Central existingheader/original hashes pass, no upload needed.
+
+Latest#731author6950439539 genuinely added HMHIJanuaryv1, taskreported enabled,
+C&Loverride acknowledged resolved. New Case/Central report+Nov receipts unlock
+fresh author checks; no duplicated task/model/config. Bat Hill scope still pending.
+Next exactCGPHc27d2185: READ-ONLY Novembere62a6569v6 evidence-held;4videos8photos/
+4posters. No sync/login/publish yet; following Daisy/Delta only identity-listed.
+83focused serial tests pass after using exact synthetic localhost test fixture;
+no assertion/config change. LocalTS/Vitebuild/scopedlint/emittedPNGhash/diff pass.
+[Exact receipt, hashes and remaining gates](CASE-CENTRAL-CLIENT-READINESS-2026-11-17.md).
+
 ## 17 November — Bouwer/Braize/C&L current report and Plan accepted
 
 Same isolated draft PR1003, no Vercel or runtime release. Existing exact-mapped
