@@ -1,6 +1,114 @@
 # Social publishing — 15 November 2026
 
-## 17 November continuation — live company discovery/listing verified; original JPEG source increment
+## 17 November continuation — actual review admission to queue; lost-response recovery
+
+Same DRAFT PR991/#220/#236/#269, parent edbd573c; current main b524a9f9 unchanged.
+Current issues and active chats checked. Current #995/#1003/#1004 diffs overlap
+only the common handover, not this admission helper/form. No Nolan, staff AI,
+Teams, calendar, package, strategy or provider configuration lane taken over.
+
+### Concrete reproduced failure and focused repair
+
+Before implementation, three deterministic regressions failed against the actual
+frontend helper: a null mutation receipt returned success; a saved transaction
+with lost response raised a raw error; a UUID response with mismatched saved
+caption was accepted. This is before queue confirmation, so reliable queue code
+alone did not complete staff's normal final-creative workflow.
+
+src/lib/contentReviews.ts now captures an immutable attempt before upload and
+independently reads its exact unique asset_path+deliverable_id. Matching persisted
+UUID, MIME, caption, channel order, scheduled instant and client-approval choice
+are required. Review lifecycle state must be valid but is NOT treated as approval
+or publication authority. Existing RLS determines visibility; no service role in
+the browser. Null/lost responses may recover only from this actual saved row;
+missing/unreadable/contradictory evidence becomes UnverifiedContentReviewSubmission.
+Existing named source guard rejections retain their exact allowlisted actionable
+copy; private/unknown backend errors do not reach the UI. No blind automatic retry.
+Mutation uses12second AbortController deadline, receipt read8seconds, following
+[official Supabase abortSignal documentation](https://supabase.com/docs/reference/javascript/using-modifiers-abortsignal).
+The current official changelog was checked; no SDK upgrade/dependency/config change.
+The installed SDK retries only idempotent methods, not this POST.
+
+ContentProductionPanel retains the existing design and admission flow. A ref
+prevents same-event double submission before React renders disabled controls.
+An uncertain attempt freezes source/media/caption/channel/time/approval controls
+and offers Check submission, which ONLY reads the original attempt. Confirmed
+save clears file selection and displays current approval separately from scheduling.
+Ordinary staff cannot bypass client approval. Unmount/navigation fences late
+success/errors and prevents an old item's message entering the next item.
+Pending attempt is mounted-form memory only: no session/credential/localStorage
+copy or competing durable table. Reload/navigation still requires checking the
+canonical review history before explicitly sending another version. It does not
+promise exactly-once admission across browser restarts or lost client memory.
+
+### Actual approval functions now feed the same database journey
+
+tests/contentReviewAdmissionPostgres.test.mjs loads the UNCHANGED existing
+20260907150843_content_review_foundation and20260907163000_content_review_source_guards
+into a new random synthetic DB in the verified owned network-none QA container.
+The thin schema prerequisites/SDK/Storage transport are synthetic, not hosted
+PostgREST/Storage acceptance. Actual functions, triggers, policies and queue RPCs
+execute PostgreSQL. Authenticated upload obeys the original assigned-content
+Storage policy; actual submit RPC creates the immutable review and audit event.
+A deliberately lost response AFTER that transaction commits is recovered through
+the new exact read-back helper, with ONE upload and ONE submit call.
+
+The service-only enqueue RPC rejects the actual internal-review and client-review
+stages. Manager's original decide RPC advances to client_review; another client
+cannot approve it or see it in their safe queue; the correct client approves
+through the actual RPC. No direct UPDATE manufactures approval. Only then the
+same Facebook journey confirms atomically, waits for the real due instant,
+claims the existing job, performs ONE simulated POST and verifies a separate
+receipt. Canonical production_status remains approved, not silently rewritten
+to posted. TikTok/Instagram migration objects remain absent during this Facebook
+test. Initial QA harness omitted its existing claim RPC from a local allowlist;
+fixed that fixture omission, then the actual complete journey passed.
+
+tests/fixtures/facebookPostgresJourney.mjs now has one optional admission port
+for this integration; legacy seeded-source cases retain their existing behavior.
+ALL34 existing SQL queue/role/fencing/unknown-outcome/rollback tests also pass.
+Together this is35 actual database tests; provider and Storage responses remain
+simulated, so it is NOT native Facebook or hosted-stack launch acceptance.
+
+### Validation and remaining gates
+
+20 focused helper tests pass: exact scope/MIME/caption/channels/time/client-approval
+readback, unreadable receipt, missing/null response, late reconciliation, guarded
+source failures, input capture, invalid pre-upload input and bounded timeout.
+One uses the ACTUAL installed Supabase SDK with synthetic HTTP to confirm its
+POST-null-response and exact GET/maybeSingle behavior; no HTTP escapes the fake
+transport. The actual decoder and media protocol are unchanged from edbd573c.
+
+24 isolated actual Chrome cases at375/390/430/1440 pass against the real form,
+cards, helper and CSS: rapid double click, saved-but-lost response, repeated
+read-only uncertainty check then recovery, source rejection, navigation/unmount
+and staff client-approval restriction. External network is blocked; no signed-in
+profile or existing browser session is attached.390px recovery screenshot was
+visually reviewed at task TEMP cg-review-admission-browser/unverified-390.png.
+Browser script: scripts/qa/content-review-admission-browser.mjs.
+
+Build/emitted ClientSchedule app code, scoped lint, cached actual MCP typing and
+diff pass. Completed full suite: **5012 total /4980 pass /32 skips /0 failures**
+(516.5s). The final QA-only installed-SDK case
+passes separately after the broad run started; no production code changed after
+that run began. Source self-review is not independent/live acceptance. Generated
+issue519 test outputs restored after acceptance. Owned QA container stopped;
+other projects' DBs untouched. No new production migration or dependency.
+
+Last verified live MCP was v86 with exact-approved PNG-only source74327024;
+this continuation did not release/reconfigure it. JPEG, staff UI/authorizer/worker
+and four candidate migrations have not been deployed/applied by this lane.
+No deployment, live data, account, OAuth, permission, mapping, secret/config,
+provider, OneDrive, Microsoft, publication, Vercel or cost action occurred.
+Next real pilot STILL requires genuinely approved unscheduled original/caption,
+exact future SAST/UTC time, real Page/grants/native duplicate/media evidence and
+fresh complete Teams capture at confirmation AND dispatch. Do not bypass the
+Microsoft hold or use Cape's already-scheduled18Nov item. This local repair is
+not permission to release any schema/UI/backend or send a native test post.
+Existing issues/PR/#381 and canonical handover updated at the final revision;
+Google Control Centre target remains unidentified, no guessed write.
+
+## Earlier 17 November — live company discovery/listing verified; original JPEG source increment
 
 Same DRAFT PR991/#220/#236/#269, parent7686ca0c; fresh main b524a9f9 unchanged.
 Latest open PR ownership and #381 checked. No Nolan/staff/Teams/workboard/package/

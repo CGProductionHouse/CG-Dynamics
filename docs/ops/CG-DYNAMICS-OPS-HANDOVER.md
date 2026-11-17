@@ -1,4 +1,52 @@
-## Latest 17 November — company ChatGPT readiness verified; JPEG increment SOURCE ONLY
+## Latest 17 November — verified review admission and recovery, SOURCE ONLY
+
+Continued SAME DRAFT PR991/#220/#236/#269 from edbd573c; main b524a9f9 unchanged.
+Fresh issue/PR/active-chat checks preserve #995 staff AI, #1003 client readiness,
+#1004 website leads, Nolan/Teams/workboard/package lanes. Only shared handover
+overlap with those current diffs; no broad dispatch or duplicate scheduler.
+
+Reproduced three real final-creative admission failures before edits: null save
+receipt reported success, lost response could not recover the saved review, and
+a UUID with changed saved caption was accepted. Existing contentReviews helper
+now verifies the SAME unique immutable upload path, canonical deliverable, original
+MIME/caption/channels/time/client-approval choice and valid persisted review ID.
+Save/read deadlines are bounded. Lost/null responses reconcile read-only; neither
+reconciliation nor a matching receipt approves content or queues publication.
+Known source guards remain actionable; unexpected errors stay private/uncertain.
+
+Staff form now blocks rapid duplicate clicks and freezes the attempted fields
+while unresolved. Check submission reads the same attempt without upload/RPC
+replay. Verified save clears the file selection; later versions require explicit
+new file selection. Late completion cannot update another/unmounted item. Pending
+attempt is local mounted-form state, not a new durable store or reload guarantee;
+after navigation use the canonical review history before sending another version.
+
+New actual-PostgreSQL journey executes the EXISTING review foundation/source-guard
+SQL: assigned upload policy, submit RPC, internal then exact-client approval,
+pending-stage queue denial and foreign-client rejection, then the SAME due queue,
+separate receipt and one simulated native POST. A deliberately lost response after
+the actual transaction commits recovers with one upload/submission. Canonical
+approval/source history remains intact; no direct approval UPDATE substitutes for
+the normal workflow. Storage/SDK transport and Facebook HTTP remain simulated.
+Actual installed Supabase SDK marshalling is tested separately with synthetic HTTP.
+
+Validation:20 focused helper/SDK tests;24 isolated Chrome admission cases at
+375/390/430/1440; new actual SQL admission journey plus all34 prior queue/role/
+fencing tests pass. Build/emitted ClientSchedule app, scoped lint, actual cached
+MCP typing and diff pass. Full suite5012 total /4980 pass /32 skips /0 failures
+(516.5s). QA-only final installed-SDK test also passes separately. Owned
+network-none container stopped after SQL; generated issue519 outputs restored.
+
+No migration/dependency/production data/account/permission/Edge/config/OneDrive/
+Microsoft/Vercel/publication/cost changes. Last verified live MCP was v86 with
+approved PNG-only source74327024; this continuation did not release/reconfigure
+it. JPEG and staff UI/worker have not been deployed by this lane.
+Four candidate migrations and fresh Teams/real approved unscheduled source/native
+Page permissions/exact release approval gates remain. Detailed source/transport/
+role/phone evidence is in the SAME social-publishing receipt; no new checklist.
+Google Control Centre target remains unidentified; no guessed write.
+
+## Earlier 17 November — company ChatGPT readiness verified; JPEG increment SOURCE ONLY
 
 Continued SAME DRAFT PR991/#220/#236/#269 from7686ca0c; main b524a9f9 remains
 unchanged. Reconciled current PR ownership, including #995 shared MCP catalog,

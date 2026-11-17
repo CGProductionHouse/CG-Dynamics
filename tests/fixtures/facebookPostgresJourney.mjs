@@ -5,14 +5,14 @@ import { readFileSync } from 'node:fs'
 
 // Isolated SQL integration, not a live provider acceptance. No network escapes:
 // native Graph and Storage are explicit synthetic ports; SQL is real PostgreSQL.
-export async function facebookPostgresJourney({ server, sql, q, actor, rpcClient, mode = 'success', mediaType = 'image/png' }) {
+export async function facebookPostgresJourney({ server, sql, q, actor, rpcClient, mode = 'success', mediaType = 'image/png', admitReview }) {
   assert.ok(['image/png', 'image/jpeg'].includes(mediaType))
-  const filename = mediaType === 'image/jpeg' ? 'approved.jpg' : 'approved.png'
+  let filename = mediaType === 'image/jpeg' ? 'approved.jpg' : 'approved.png'
   const modules = await Promise.all(['facebookPublicationRuntime', 'facebookPublicationStaff', 'socialPublicationAuthorizationStore',
     'socialPublishingQueue', 'socialPublicationManagement', 'metaTokenStorage', 'facebookPublicationInspection'].map(name => server.ssrLoadModule(`/supabase/functions/_shared/${name}.ts`)))
   const [runtimeModule, staff, store, queue, management, tokens, inspection] = modules
   const ids = Object.fromEntries(['client', 'deliverable', 'review', 'connection', 'mapping', 'sourceJob', 'source', 'run', 'plan', 'bucket', 'task'].map(k => [k, randomUUID()]))
-  const due = new Date(Date.now() + 20_000).toISOString(), date = new Date(Date.parse(due) + 7200_000).toISOString().slice(0, 10)
+  const due = new Date(Date.now() + (admitReview ? 60_000 : 20_000)).toISOString(), date = new Date(Date.parse(due) + 7200_000).toISOString().slice(0, 10)
   const config = { graphVersion: 'v27.0', appId: '789', appSecret: 'fixture-only', projectUrl: 'https://fixture.supabase.co',
     encryptionKey: Buffer.alloc(32, 3).toString('base64'), keyVersion: 'v1' }
   const encrypted = await tokens.encryptMetaStoredToken('fixture-user-token', ids.connection, config.encryptionKey, 'v1')
@@ -26,7 +26,7 @@ export async function facebookPostgresJourney({ server, sql, q, actor, rpcClient
     insert into clients values(${q(ids.client)},true,'{}');
     insert into monthly_deliverables(id,client_id,scheduled_date,microsoft_source_type,microsoft_plan_id,microsoft_bucket_id,microsoft_task_id)
       values(${q(ids.deliverable)},${q(ids.client)},${q(date)},'planner_task',${q(ids.plan)},${q(ids.bucket)},${q(ids.task)});
-    insert into content_review_versions values(${q(ids.review)},${q(ids.deliverable)},${q(ids.client)},'approved',${q(`${ids.deliverable}/${filename}`)},${q(mediaType)},'Exact approved fixture caption',array['facebook'],${q(due)});
+    ${admitReview ? '' : `insert into content_review_versions values(${q(ids.review)},${q(ids.deliverable)},${q(ids.client)},'approved',${q(`${ids.deliverable}/${filename}`)},${q(mediaType)},'Exact approved fixture caption',array['facebook'],${q(due)});`}
     insert into meta_client_assets values(${q(ids.mapping)},${q(ids.client)},${q(ids.connection)},'123',true);
     insert into meta_connections values(${q(ids.connection)},'connected');
     insert into meta_connection_tokens values(${q(ids.connection)},${q(encrypted)});
@@ -65,6 +65,14 @@ export async function facebookPostgresJourney({ server, sql, q, actor, rpcClient
     }
     return rpcClient().rpc(name, args)
   } }
+  if (admitReview) {
+    const admitted = await admitReview({ ids, due, date, image, mediaType })
+    assert.match(admitted.reviewId, /^[0-9a-f-]{36}$/)
+    assert.ok(admitted.assetPath.startsWith(`${ids.deliverable}/`))
+    filename = admitted.assetPath.slice(ids.deliverable.length + 1)
+    assert.match(filename, /^[0-9a-f-]{36}\.jpg$/)
+    ids.review = admitted.reviewId
+  }
   const originalFetch = globalThis.fetch
   globalThis.fetch = async (raw, options = {}) => {
     const url = new URL(raw); assert.equal(url.origin, 'https://graph.facebook.com')
@@ -138,7 +146,7 @@ export async function facebookPostgresJourney({ server, sql, q, actor, rpcClient
       assert.equal(posts, mode === 'stale' ? 0 : 1)
       assert.equal(json(`select to_jsonb(claim_next_background_job(${q(worker)}))`)?.id, null, 'held/unknown jobs must not auto replay')
     }
-    assert.equal(json(`select to_jsonb(production_status) from monthly_deliverables where id=${q(ids.deliverable)}`), 'not_started')
+    assert.equal(json(`select to_jsonb(production_status) from monthly_deliverables where id=${q(ids.deliverable)}`), admitReview ? 'approved' : 'not_started')
     for (const role of ['staff', 'client']) {
       sql(`update profiles set role=${q(role)} where id=${q(actor)}`)
       try { await assert.rejects(management.readPublicationManagementStatus(sb, actor, ids.review)) }
