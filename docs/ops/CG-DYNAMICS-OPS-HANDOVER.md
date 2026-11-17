@@ -10,6 +10,38 @@ and exact merge receipt are recorded in PR #984. Git deployment remains OFF.
 No Vercel operation, production data write, new tracker or #910-base resolution.
 Source merge does not mean staff production browser acceptance or deployment.
 
+## 17 November — client rollout continued; manual Meta status fix SOURCE ONLY
+
+Bat Hill existing issued login reverified200/exact client, October latest,
+calendar safe reads200/empty and real foreign403. Its November strategy remains
+held at the canonical unknown-quantity guard. CA was asked flexible-vs-fixed
+allowance only; recurring social is already confirmed. No inferred quota.
+
+Bloem Marble October47152dc2 published09:12:58UTC, Novemberf1d93793v5 explicitly
+approved/published09:16:52UTC; actual client108posts/28facts/ten Gold fields/
+2videos4posters and original logo download/isolation pass. Outer manual refresh
+falsely failed AFTER all14facts persisted: independent platform runs FBpartial/
+IGsuccess prove fresh stored facts. Prepared narrow existing-meta-sync deadline
+completion guard; no deploy or fake receipt rewrite. Actual-handler regression
+red2/green6; skipped/throwing passes remain failed. Shared workers untouched.
+
+Bohemia Octobercb037352 published09:21:42UTC, November2e95fa11v5 explicitly
+approved/published09:23:56UTC; routine Meta refresh PASS/2reobserved/3retained,
+actual client12facts/ten Gold fields/2posters and original logo/isolation pass.
+Both November amendments refreshed provenance only: complete staff content
+byte-stable; package/client, six older reports and six other-month drafts stable.
+Current November reports remain drafts; no fake schedule dates or future publish.
+Bloem Vascular is confirmed once-off/non-social/no login; not auto-enabled.
+
+Research status correction: newer ordinary-author#731comment6942360216 reports
+the existing hourly task ENABLED/current run in_progress. Earlier404 receipt is
+historical, not the current best evidence. No duplicate task/model or Microsoft
+probe. Next exact recurring-social client Bouwer & Coetzee8e448cf9 has1video/
+7posters; only identity/package read so far. Same draft PR1003,112focused tests,
+scoped lint/cached actual Deno/TS+Vite/diff pass. No Vercel, runtime release,
+migration, provider setup, social publishing or other-agent tree change.
+[Exact current receipt](CLIENT-READINESS-CONTINUATION-2026-11-17.md).
+
 ## 16 November — Dulux logo LIVE; exact missing-logo continuation checkpoint
 
 17Nov completion SUPERSEDES partial states below: all five remaining Daisy,

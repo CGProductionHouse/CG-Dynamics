@@ -933,7 +933,12 @@ async function handleRequest(req: Request): Promise<Response> {
         }
       }
 
-      if ((client.facebookPageId || client.instagramAccountId) && Date.now() >= insightDeadline) {
+      // A pass may finish and persist its facts just after the best-effort
+      // deadline. Only work actually skipped by that deadline is incomplete;
+      // elapsed wall time must not turn completed facts into a failed receipt.
+      const accountFactsMissing = (client.facebookPageId && !Object.hasOwn(result.connectorFacts, 'facebook'))
+        || (client.instagramAccountId && !Object.hasOwn(result.connectorFacts, 'instagram'))
+      if (accountFactsMissing && Date.now() >= insightDeadline) {
         accountFactsFailed = true
         result.warnings.push('Normalized account facts were not completed before the sync time budget expired.')
       }

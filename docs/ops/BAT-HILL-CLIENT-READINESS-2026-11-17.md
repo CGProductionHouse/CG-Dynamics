@@ -1,5 +1,26 @@
 # Bat Hill Royale — 17 November client-readiness continuation
 
+## Later continuation — issued login rechecked; precise scope question held
+
+Fresh actual issued login200/exact subject and October-latest client read pass.
+The www login URL200 and non-www redirect were independently checked. Direct
+reports contain0foreign/0draft rows; November calendar capability/posts/events200
+and empty, with real other-active-client calendar denial403. No dates or account
+were invented/reset. Forwardable link/username/starter password returned only
+privately to CA; no credentials in this receipt or GitHub.
+
+Canonical November brief still blocks NO_CONFIRMED_MONTHLY_CONTENT_SCOPE. CA was
+asked only whether the agreement is flexible with no fixed quantities or has an
+actual fixed video/photo/poster allowance. Recurring-social inclusion is already
+confirmed and is not being questioned or changed. No publication/guard bypass.
+
+The earlier07:55research-task404 observation below is superseded by the ordinary
+author's10:00#731receipt6942360216: existing hourly task enabled/in_progress at
+that private check. No duplicate writer/task or independent scheduler claim here.
+Bloem Marble and Bohemia report/November acceptance, current client-list cursor
+and an undeployed manual Meta deadline correction are recorded in
+[the continuation receipt](CLIENT-READINESS-CONTINUATION-2026-11-17.md).
+
 CA requested the next client after the five remaining logo publications.
 Exact ACTIVE client `32bd9db3-5339-4404-825b-5a615cadec6a`; existing issued
 portal login200, exact client subject `e0eef830-be02-45e1-be0f-97f9a48c58de`,
