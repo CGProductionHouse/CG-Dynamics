@@ -45,6 +45,12 @@ export function WebsitePerformanceDashboard({
 
     {model.actions && !model.actions.tracked && <SetupNote>{model.actions.note}</SetupNote>}
 
+    {model.nextStep && <section className="rounded-2xl border border-teal-300/25 bg-teal-300/[0.055] px-5 py-4" aria-label="Next website action">
+      <h3 className="text-xs font-bold uppercase tracking-[0.16em] text-teal-200">Next action</h3>
+      <p className="mt-2 text-sm leading-6 text-slate-200">{model.nextStep.text}</p>
+      {model.nextStep.openLeadInbox && leadInboxHref && <Link to={leadInboxHref} className="mt-3 inline-flex rounded-xl border border-teal-300/40 px-4 py-2 text-sm font-bold text-teal-200 hover:bg-teal-300/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-200">Review Lead Inbox</Link>}
+    </section>}
+
     <LeadPerformance model={model} clientId={clientId} period={period} leadInboxHref={leadInboxHref} />
 
     {model.traffic && <section aria-label="Traffic" className="grid gap-5 lg:grid-cols-2">
@@ -106,7 +112,7 @@ function LeadPerformance({ model, clientId, period, leadInboxHref }: { model: Da
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-teal-300">From visits to enquiries</p>
         <h3 className="mt-2 text-2xl font-black text-white">Lead performance</h3>
       </div>
-      {leadInboxHref && leads.state === 'available' && <Link to={leadInboxHref} className="rounded-xl border border-teal-300/40 px-4 py-2 text-sm font-bold text-teal-200 hover:bg-teal-300/10">Open Lead Inbox</Link>}
+      {leadInboxHref && leads.state === 'available' && !model.nextStep?.openLeadInbox && <Link to={leadInboxHref} className="rounded-xl border border-teal-300/40 px-4 py-2 text-sm font-bold text-teal-200 hover:bg-teal-300/10">Open Lead Inbox</Link>}
     </div>
 
     {leads.state !== 'available'

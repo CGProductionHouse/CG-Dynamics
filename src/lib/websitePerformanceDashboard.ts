@@ -33,11 +33,13 @@ export interface DashboardModel {
     | {
       state: 'available'
       total: number
+      new: number
       qualificationRate: number | null
       pipeline: { key: 'new' | 'contacted' | 'qualified' | 'won' | 'closedLost'; label: string; value: number }[] | null
       quality: { good: number; poor: number; unreviewed: number }
     }
   traffic: { sources: RankedRow[]; pages: RankedRow[] } | null
+  nextStep: { text: string; openLeadInbox: boolean } | null
   confidence: { summary: string; notes: string[] }
 }
 
@@ -97,6 +99,7 @@ export function websitePerformanceDashboardModel(input: {
       leads = {
         state: 'available',
         total: m.total,
+        new: m.new,
         qualificationRate: rate,
         pipeline: consistent ? [
           { key: 'new', label: 'New', value: m.new },
@@ -123,7 +126,7 @@ export function websitePerformanceDashboardModel(input: {
   if (report) {
     if (isCount(report.conversions.total)) {
       actions = { tracked: true, total: report.conversions.total, byType: ranked(report.conversions.byType.map((row) => ({ label: row.type.replaceAll('_', ' '), value: row.count }))) }
-      kpis.push({ key: 'actions', label: 'Visitor actions', value: report.conversions.total, hint: 'Calls, WhatsApp and other tracked clicks' })
+      kpis.push({ key: 'actions', label: 'Visitor actions', value: report.conversions.total, hint: 'Tracked events; not confirmed enquiries' })
     } else {
       actions = { tracked: false, note: 'Action tracking (calls, WhatsApp, button clicks) is not configured yet, so it is not counted.' }
     }
@@ -134,6 +137,29 @@ export function websitePerformanceDashboardModel(input: {
     pages: ranked(report.traffic.topPages.map((row) => ({ label: row.label, value: row.pageviews }))),
   } : null
 
+  // Give staff one next action from the strongest available evidence. Never infer a
+  // received enquiry from a click or a traffic-provider conversion aggregate.
+  let nextStep: DashboardModel['nextStep'] = null
+  if (leads.state === 'loading') {
+    // Wait for the exact-client lead read before choosing a reporting action.
+  } else if (leads.state === 'available' && leads.new > 0) {
+    nextStep = { text: `${enquiries(leads.new)} still marked New. Confirm follow-up from the saved details and record the current status.`, openLeadInbox: true }
+  } else if (leads.state === 'available' && leads.quality.unreviewed > 0) {
+    nextStep = { text: `Review the quality of ${enquiries(leads.quality.unreviewed)} and record a Good or Poor outcome from the actual details.`, openLeadInbox: true }
+  } else if (leads.state === 'not_connected') {
+    nextStep = { text: 'Confirm the approved website enquiry route before reporting form leads for this client.', openLeadInbox: false }
+  } else if (leads.state === 'error' || leads.state === 'unavailable') {
+    nextStep = { text: 'Restore the exact-client lead read before interpreting enquiry or qualification figures.', openLeadInbox: false }
+  } else if (state === 'permission_required') {
+    nextStep = { text: 'Obtain reviewed analytics permission for this client before reporting visits or sources.', openLeadInbox: false }
+  } else if (state === 'not_connected') {
+    nextStep = { text: 'Connect approved analytics for this client before reporting visits or sources.', openLeadInbox: false }
+  } else if (state === 'provider_error' || state === 'unavailable') {
+    nextStep = { text: 'Restore website reporting before interpreting visits or traffic sources.', openLeadInbox: false }
+  } else if (actions?.tracked === false) {
+    nextStep = { text: 'Review first-party contact-action tracking setup. Click counts are unavailable and do not stand in for saved enquiries.', openLeadInbox: false }
+  }
+
   return {
     host: report?.identity.canonicalHost ?? null,
     status: { label: status.label, tone: status.tone },
@@ -141,6 +167,7 @@ export function websitePerformanceDashboardModel(input: {
     actions,
     leads,
     traffic,
+    nextStep,
     confidence: { summary: status.summary, notes: [...notes, ...(report?.dataQuality.gaps ?? [])] },
   }
 }

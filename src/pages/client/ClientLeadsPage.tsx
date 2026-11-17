@@ -15,6 +15,7 @@ import {
   leadOutcome,
   lifecycleForOutcome,
   monthWindow,
+  selectInboxLead,
   validateLeadLifecycle,
   type LeadLifecycleInput,
   type LeadOutcome,
@@ -62,7 +63,7 @@ export function LeadInbox({ clientId = null, preview = null }: { clientId?: stri
 
   const leads = useMemo(() => load?.state === 'ready' ? load.data : [], [load])
   const visible = filter === 'all' ? leads : leads.filter((lead) => lead.status === filter)
-  const selected = leads.find((lead) => lead.enquiryId === selectedId) ?? null
+  const selected = selectInboxLead(leads, filter, selectedId)
 
   if (!load) return <ClientPortalLoadingState />
   if (load.state === 'error') return <ClientPortalErrorState title="Your leads could not be loaded" message={load.message} onRetry={() => {
@@ -93,8 +94,8 @@ export function LeadInbox({ clientId = null, preview = null }: { clientId?: stri
             </label>
             <ul className="space-y-2" aria-label="Website leads">
               {visible.map((lead) => <li key={lead.enquiryId}>
-                <button type="button" onClick={() => setSelectedId(lead.enquiryId)} aria-current={lead.enquiryId === selectedId}
-                  className={`w-full rounded-2xl border px-4 py-3 text-left transition ${lead.enquiryId === selectedId ? 'border-brand-accent/60 bg-brand-accent/10' : 'border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06]'}`}>
+                <button type="button" onClick={() => setSelectedId(lead.enquiryId)} aria-current={lead.enquiryId === selected?.enquiryId}
+                  className={`w-full rounded-2xl border px-4 py-3 text-left transition ${lead.enquiryId === selected?.enquiryId ? 'border-brand-accent/60 bg-brand-accent/10' : 'border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06]'}`}>
                   <span className="flex items-center justify-between gap-3">
                     <span className="truncate font-bold text-white">{lead.contactName ?? lead.contactEmail ?? lead.contactPhone ?? 'Website enquiry'}</span>
                     <StatusBadge status={lead.status} />
