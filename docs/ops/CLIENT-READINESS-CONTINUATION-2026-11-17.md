@@ -4,6 +4,14 @@ CA requested Bat Hill's verified login, then continued active-client readiness.
 No Vercel. Existing branch/draft PR1003 retained; other worktrees and browser
 work left untouched. Login credentials and signed download URLs are private.
 
+**Later 17 November continuation supersedes the next-client cursor below:**
+Bouwer, Braize and C&L October reports + November Plans are now published and
+their real client login/report/Plan/logo/isolation checks pass. C&L's historical
+template hold is resolved by CA's explicit #504 override, without a package write.
+[Exact later receipt and preservation hashes](CLIENT-READINESS-BOUWER-BRAIZE-CL-2026-11-17.md).
+Next alphabetical client: Case Bloemfontein `079df21e-783a-4648-b3fa-0acae6e68867`;
+read-only brief v5 is held for missing exact current evidence, not yet accepted.
+
 ## Actual production results
 
 | Exact active client | Report / November Plan | Actual client checks | Remaining boundary |

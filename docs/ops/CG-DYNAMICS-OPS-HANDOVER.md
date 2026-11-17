@@ -10,6 +10,43 @@ and exact merge receipt are recorded in PR #984. Git deployment remains OFF.
 No Vercel operation, production data write, new tracker or #910-base resolution.
 Source merge does not mean staff production browser acceptance or deployment.
 
+## 17 November — Bouwer/Braize/C&L current report and Plan accepted
+
+Same isolated draft PR1003, no Vercel or runtime release. Existing exact-mapped
+October refreshes passed. Bouwer5db2b6d2 report published10:40:53UTC and November
+a0e52b08v6 published10:42:59UTC, scope1video7posters. Braize6a0e27bf report
+published10:50:28UTC and Novemberbf51b539v7 published10:52:35UTC, scope4photos/
+4posters. C&L52e5f18a report published10:58:21UTC and Novemberb7caa2c0v5
+published11:00:44UTC, scope2photos2posters. Existing authenticated manual
+review/approve/explicit-publish; no auto-publication or new strategy author.
+
+C&L legacy1video/4DP discrepancy is resolved by exact CA#504comment5796095876
+named2photo/2poster override and applied receipt5796786851; current package is
+already correct. NO package/template write, no inferred video; do not keep
+re-asking this resolved question or generalise it to Cape's separate later hold.
+
+Real issued logins/report/posts/facts/NovemberPlan200, ten Gold fields and exact
+scopes; real foreign report/calendar403/file404, zero foreign/draft direct rows.
+Own original logos and existing static header bytes pass; no upload/reference
+change. Braize's legacy username belongs to exact ACTIVE Braize; inactive
+namesake untouched. All three API sessions closed local-only204, browser work
+untouched. No new desktop/mobile acceptance. Calendars200/empty, no fake dates.
+
+Final11:06:58UTC readback: all3client/package rows,21other reports(including10
+olderpublished),10other-month strategies byte-stable. Bouwer/C&L full staff Plan
+text preserved; Braize removed only Photo04prefix, retaining all other content.
+Braize TikTok empty October video selection is not zero overall October activity;
+native partial profile/cohort semantics preserved. Unavailable metrics stayNULL.
+
+Ordinary#731author6944856327 reports task enabled and genuinely saved/read back
+BloemMarble January65c76b5bv1 while protecting Novv5published/Decv2draft. Same
+author/task, no duplicated scheduler/config. Bouwer/Braize January remain gaps;
+C&L Decv3/Janv1 drafts unchanged. Bat Hill question still pending. Next exact
+client Case Bloemfontein079df21e: fresh read-only package2videos12posters,
+Novemberea1dd4d6v5 blocked EXACT_STRATEGY_EVIDENCE_UNAVAILABLE; not yet accepted.
+Skip already-accepted Cape Lumber rather than replaying its release/package work.
+[Full exact-client receipts and hashes](CLIENT-READINESS-BOUWER-BRAIZE-CL-2026-11-17.md).
+
 ## 17 November — client rollout continued; manual Meta status fix SOURCE ONLY
 
 Bat Hill existing issued login reverified200/exact client, October latest,
