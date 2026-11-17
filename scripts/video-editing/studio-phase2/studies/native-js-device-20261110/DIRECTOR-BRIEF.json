@@ -1,0 +1,21 @@
+{
+  "purpose": "technical_proof",
+  "audience": "CG owner and Nolan editors comparing native coding capability, not consumers",
+  "duration_seconds": 18,
+  "canvas": {"width":1920,"height":1080,"fps":30,"frames":540},
+  "goal": "Demonstrate that a single self-contained HTML/JavaScript composition can produce a perspective device scene, animated metallic typography, controlled camera movement and reflections, with an explicit reusable render clock",
+  "palette_source": "Owner-supplied CG colours, with lighter tints for lighting and contrast",
+  "palette": ["#9b4f1b","#0a2f37","#000000","#787878","#ffffff"],
+  "typography": "Arial/Helvetica/system sans for this technical study only; no brand-font or cross-OS font-parity claim",
+  "asset_provenance": "Original procedural generic laptop and illustrative motion interface; no external assets or actual client screens",
+  "beats": [
+    {"time":[0,3.5],"job":"Metallic screen typography resolves while a close camera reveals device depth"},
+    {"time":[3.5,7.4],"job":"Camera pulls back to a laptop-and-reflection hero with readable title"},
+    {"time":[7.4,12.3],"job":"The screen changes to an illustrative timeline, showing coordinated camera/type/light states"},
+    {"time":[12.3,15.1],"job":"Metallic type returns and the camera settles; clean hierarchy rather than random clip cuts"},
+    {"time":[15.1,18],"job":"Resolve to the capability statement, not a fictional commercial claim"}
+  ],
+  "sound": "SILENT_VISUAL_STUDY; no unreviewed music or reference audio reuse",
+  "explicit_omissions": ["Osmo staff footage","fake CG logo","commercial release","native editor project","API-generated video","external paid services"],
+  "acceptance": "Technical proof only; owner creative acceptance, physical-phone comfort and full reference parity remain separate"
+}
