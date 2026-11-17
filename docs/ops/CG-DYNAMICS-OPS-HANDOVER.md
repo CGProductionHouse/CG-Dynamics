@@ -1,3 +1,9 @@
+## 17 November — Piek website enquiry production receipt (#405)
+
+Read-only production SQL against the exact Piek Group client `ed7aa1ae-de21-4151-a8f9-54796b234c1f` found two canonical `website_enquiries` for Website Editor Website 1 on `www.piekgroup.co.za`, both `environment=production` and each with one `generate_lead` event marked `is_synthetic=false`. The 2 October record's one notification job is `suppressed` with zero attempts, so it is not delivery proof. The 4 November `/contact` record has one job to the approved Piek recipient, one attempt, Resend provider acceptance at 06:36:02 UTC, and one applied `delivered` provider event at 06:36:07 UTC (processed at 06:36:09 UTC). This is a saved exact-client enquiry plus provider delivery receipt. It does not prove mailbox opening, client response, lead quality, or increased traffic/leads; the non-synthetic flag and absence of test markers do not establish the visitor's intent independently. No contact details or message content were extracted into this receipt.
+
+The company Chrome profile was present, but Computer Use's browser URL policy denied access to the Dynamics tab. The agent stopped that UI path; authenticated client/staff Lead Inbox rendering, client-role isolation and mailbox readback were not reverified here. No synthetic form submission, production write, SQL migration, deployment, permission, provider or client-site change occurred. #405 still owns lead lifecycle and delivery acceptance; #679 release gates remain. Use this evidence to reconcile the older "first genuine delivery proof pending" wording in #405/#27, then complete authorised client/recipient acceptance without replaying the intake.
+
 ## 16 November — authorised brand panel merge reconciliation (#984)
 
 Owner requested #984 into main before #999 into the existing PR910 branch.
