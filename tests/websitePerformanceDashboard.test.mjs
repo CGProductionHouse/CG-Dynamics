@@ -111,6 +111,47 @@ test('zero enquiries is a real canonical zero; inconsistent lead figures never f
   assert.ok(good.confidence.notes.includes('2 enquiries not yet marked Good or Poor.'))
 })
 
+test('next action prioritises saved new enquiries, then review, then measurement gaps', () => {
+  const withNew = websitePerformanceDashboardModel({
+    performance: null, performanceFailed: true,
+    leads: metrics({ total: 2, new: 1, contacted: 0, qualified: 0, won: 0, closedLost: 1, lost: 0, good: 0, poor: 1, unreviewed: 1, qualificationRate: 0 }),
+  })
+  assert.deepEqual(withNew.nextStep, {
+    text: '1 enquiry awaiting follow-up. Review the saved details and confirm who will respond.',
+    openLeadInbox: true,
+  })
+
+  const needsReview = websitePerformanceDashboardModel({
+    performance: performance(), performanceFailed: false,
+    leads: metrics({ total: 2, new: 0, contacted: 1, qualified: 0, won: 0, closedLost: 1, lost: 0, good: 0, poor: 1, unreviewed: 1, qualificationRate: 0 }),
+  })
+  assert.deepEqual(needsReview.nextStep, {
+    text: 'Review the quality of 1 enquiry and record a Good or Poor outcome from the actual details.',
+    openLeadInbox: true,
+  })
+
+  const missingAnalytics = websitePerformanceDashboardModel({
+    performance: { clientId: 'piek', state: 'permission_required', report: null }, performanceFailed: false,
+    leads: metrics(),
+  })
+  assert.match(missingAnalytics.nextStep.text, /reviewed analytics permission/)
+  assert.equal(missingAnalytics.nextStep.openLeadInbox, false)
+
+  const clickOnly = websitePerformanceDashboardModel({
+    performance: performance(piekReport({ conversions: { total: 9, byType: [{ type: 'contact_click', count: 9 }] } })),
+    performanceFailed: false, leads: { state: 'unavailable' },
+  })
+  assert.match(clickOnly.nextStep.text, /Restore the exact-client lead read/)
+  assert.equal(kpi(clickOnly, 'enquiries'), undefined)
+  assert.equal(kpi(clickOnly, 'actions').hint, 'Tracked events; not confirmed enquiries')
+
+  const loading = websitePerformanceDashboardModel({ performance: performance(), performanceFailed: false, leads: null })
+  assert.equal(loading.nextStep, null, 'do not flash a measurement recommendation while exact-client leads load')
+
+  const providerFailure = websitePerformanceDashboardModel({ performance: null, performanceFailed: true, leads: metrics() })
+  assert.match(providerFailure.nextStep.text, /Restore website reporting/)
+})
+
 test('staff panel uses the shared dashboard, canonical leads and a read-only Lead Inbox preview', () => {
   const panel = read('../src/components/admin/WebsitePerformancePanel.tsx')
   const dashboard = read('../src/components/website/WebsitePerformanceDashboard.tsx')
@@ -124,6 +165,7 @@ test('staff panel uses the shared dashboard, canonical leads and a read-only Lea
   assert.match(panel, /leadInboxHref=\{`\/admin\/website-leads\?client=\$\{clientId\}`\}/)
   assert.match(dashboard, /Open Lead Inbox/)
   assert.match(dashboard, /Data confidence/)
+  assert.match(dashboard, /Next action/)
   // Staff route behind RequireStaff; preview is read-only and inert.
   assert.match(app, /<Route path="\/admin\/website-leads" element=\{<WebsiteLeadsPreviewPage \/>\} \/>/)
   assert.ok(app.indexOf('/admin/website-leads') > app.indexOf('<Route element={<RequireStaff />}>'))
