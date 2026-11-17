@@ -1,5 +1,48 @@
 # Social publishing — 15 November 2026
 
+## 17 November approved read-only release — LIVE, native acceptance pending
+
+CA approved the exact read-only readiness release and inspection flag in this
+chat. Tested source is PR #991 revision `74327024ec8976e3d4747701af1c3234b6228a06`.
+Fresh preflight compared ALL 41 hosted v84 file contents against the reviewed
+baseline; no drift. Applied the exact prepared payload
+`6ee8f42a2cce61f822b29dc092e350042c9e942f48c20c3e9e044715eb41dd46`
+once to existing cg-dynamics-mcp (v85), then set ONLY
+`SOCIAL_FACEBOOK_PHOTO_INSPECTION_ENABLED=true` through the authenticated CLI.
+
+Supabase's project-secret update incremented every function version: MCP is now
+ACTIVE **v86**. This is not a second source deployment. Readback matches all
+**63 uploaded file contents** exactly, including the 38 preserved hosted files.
+All other **48 function bundle hashes, authentication and import-map settings
+are unchanged**, with versions incremented by one. Existing custom authentication
+and verify_jwt=false/import_map=false remain. Anonymous tools/list is denied401
+with an authentication challenge. BOTH existing CG Dynamics plugin links resolve
+company_admin as CG Production House Admin after the release.
+
+Secret-name-only readback confirms inspection present; staff confirmation,
+publishing worker flags and exact Facebook release tuple remain absent. Existing
+Meta settings/keys were not read or changed. No other source deploy, production
+SQL/migration/data, OAuth/account/mapping/permission, native post, Microsoft,
+Vercel or cost action. The source-only staff endpoint and UI remain undeployed.
+The four publishing migrations remain held; none was applied by this release.
+
+Acceptance limit: this chat's available plugin tool catalog still lacks the new
+get_facebook_post_readiness action. Existing authenticated context resolution is
+verified; native Page/permissions/image inspection has NOT executed. Company
+Chrome was identified by its CG (cgproductionhouse.com) profile and signed-in
+Dynamics Admin page. Computer Use then stopped because it could not establish
+the current browser URL safely. No further browser input, alternate session,
+credential copying or control bypass followed; existing tabs remain intact.
+Next: refresh supported connector discovery, then inspect one exact client's
+existing approved PNG review through the new read-only action. This does NOT
+authorize a post, queue confirmation, native connection or further deployment.
+Fresh Teams capture and the exact controlled pilot approval remain separate.
+
+Private release evidence: readiness-release/applied-readback.json beside the
+existing manifest/payload. No runtime source changed after its completed full
+4,980/4,949 pass/31 skip run, 33 SQL and 52 browser checks; no unchanged full-test
+rerun. Rollback remains separately authorized, preserving all content/history.
+
 ## 17 November continuation — read-only readiness, exact backend packet PREPARED
 
 Same PR991/#220/#236/#269, continuing ac55f313; no new scheduler or platform.

@@ -1,4 +1,28 @@
-## Latest 17 November — independent Facebook readiness; read-only packet PREPARED
+## Latest 17 November — approved Facebook readiness backend LIVE
+
+CA approved and applied ONLY PR #991 source74327024's read-only MCP packet plus
+SOCIAL_FACEBOOK_PHOTO_INSPECTION_ENABLED=true. Preflight all41 hosted v84 files
+matched; source deployed once asv85. Standard project-secret update advanced MCP
+to ACTIVEv86 and the other48 function versions by one. ALL63 MCP source files
+match the reviewed payload; ALL48 other function bundle hashes/auth/importmaps
+remain unchanged. Existing custom auth preserved; anonymous tools/list denied401;
+both existing plugin links resolve company_admin as CG Production House Admin.
+Publishing/confirmation flags and exact release tuple remain absent. No native
+post, SQL/migration/data, OAuth/mapping/permission, Microsoft, Vercel or other code
+deployment. Staff UI/entry remain source-only. Approved payload hash:
+6ee8f42a2cce61f822b29dc092e350042c9e942f48c20c3e9e044715eb41dd46.
+
+Native inspection NOT executed: new action is absent from this chat's tool list;
+browser verification stopped at Computer Use's current-URL safety check after
+identifying the correct company profile and Dynamics Admin. No bypass/session
+copy or further browser input. Next is supported tool discovery refresh and ONE
+exact approved-client-PNG inspection, then separate pilot approval; do not redeploy
+this packet or repeat unchanged full tests. Teams freshness/sync hold remains.
+See existing social-publishing receipt and private applied-readback.json for full
+source/config/auth proof. PR #995/#1004 and Nolan/staff lanes remain untouched;
+Google Control Centre target still unknown, no guessed write.
+
+## Earlier 17 November — independent Facebook readiness; packet preparation
 
 PR991/#220/#236/#269 continues ac55f313, current main b524a9f9. New read-only
 inspection separates native Page/image proof from held Teams capture and dispatch.
