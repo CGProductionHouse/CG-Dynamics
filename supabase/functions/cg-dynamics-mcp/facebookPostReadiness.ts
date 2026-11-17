@@ -2,25 +2,60 @@ import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { facebookPublicationInspector } from '../_shared/facebookPublicationInspection.ts'
 import { readFacebookInspectionConfiguration, readFacebookStaffConfiguration } from '../_shared/facebookPublicationRuntime.ts'
 import { publicationPreparationBlocker } from '../_shared/socialPublicationAuthorization.ts'
+import { verifyFacebookPublishingTarget } from '../_shared/facebookPublishingProvider.ts'
 
 const uuid = (v: unknown): v is string => typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v)
 const unavailable = (code: string) => ({ data_state: 'unavailable', code, canConfirm: false, canPublish: false })
 
 /** Company-admin adapter over the SAME inspector as the staff UI. Listing is
- * exact-client, paged metadata only; inspection is exact-review. No write port,
+ * exact-client, paged metadata only; inspection is exact-review or explicitly
+ * account-only, with no fabricated review/source IDs. No write port,
  * media URL, approval/authorization, token refresh or global-client sweep.
  */
 export async function readFacebookPostReadiness(sb: SupabaseClient, actorId: string, rawInput: Record<string, unknown>, get: (name: string) => string | undefined) {
   const input = Object.freeze({ ...rawInput })
   if (!uuid(actorId) || !uuid(input.client_id) || input.review_id !== undefined && !uuid(input.review_id)
-    || Object.keys(input).some(key => !['client_id', 'review_id', 'offset'].includes(key))
+    || Object.keys(input).some(key => !['client_id', 'review_id', 'offset', 'account_only'].includes(key))
+    || input.account_only !== undefined && typeof input.account_only !== 'boolean'
     || input.offset !== undefined && (!Number.isSafeInteger(input.offset) || Number(input.offset) < 0 || Number(input.offset) > 5000)
-    || input.review_id !== undefined && input.offset !== undefined) return unavailable('READINESS_INPUT_INVALID')
+    || input.review_id !== undefined && input.offset !== undefined
+    || input.account_only === true && (input.review_id !== undefined || input.offset !== undefined)) return unavailable('READINESS_INPUT_INVALID')
   try {
     const actor = await sb.from('profiles').select('role,is_active').eq('id', actorId).maybeSingle()
     if (actor.error || actor.data?.is_active !== true || !['admin', 'manager'].includes(actor.data.role)) return unavailable('ACTIVE_MANAGER_REQUIRED')
     const client = await sb.from('clients').select('id,active').eq('id', input.client_id).eq('active', true).maybeSingle()
     if (client.error || client.data?.id !== input.client_id || client.data.active !== true) return unavailable('CANONICAL_PUBLICATION_SOURCE_UNAVAILABLE')
+    if (input.account_only === true) {
+      const settings = readFacebookInspectionConfiguration(get)
+      if (!settings) return unavailable('PUBLICATION_INSPECTION_DISABLED')
+      const readMapping = () => sb.from('meta_client_assets').select('connection_id,facebook_page_id')
+        .eq('client_id', input.client_id).eq('is_active', true).maybeSingle()
+      const mapping = await readMapping(), m = mapping.data
+      if (mapping.error || !m || !uuid(m.connection_id) || typeof m.facebook_page_id !== 'string' || !/^\d+$/.test(m.facebook_page_id)) return unavailable('EXACT_ACCOUNT_MAPPING_REQUIRED')
+      const target = Object.freeze({ clientId: input.client_id, connectionId: m.connection_id, accountId: m.facebook_page_id, route: 'facebook_page' as const })
+      const account = await verifyFacebookPublishingTarget(sb, target, settings), b = account.binding, completed = Date.now()
+      if (!Number.isFinite(completed) || !(Date.parse(account.checkedAt) >= completed - 120_000) || !(Date.parse(account.checkedAt) <= completed + 30_000)
+        || !(Date.parse(b.tokenValidUntil ?? '') > completed + 120_000) || b.clientId !== target.clientId || b.connectionId !== target.connectionId
+        || b.accountId !== target.accountId || b.route !== target.route || !b.active || b.appAccessVerified !== true || b.accountPublishingVerified !== true
+        || !Array.isArray(b.grantedScopes) || !['pages_show_list', 'pages_manage_posts', 'pages_read_engagement'].every(scope => b.grantedScopes.includes(scope))) return unavailable('CURRENT_PROVIDER_PROOF_REQUIRED')
+      // A slow provider read cannot certify a removed client, revoked role or
+      // a mapping that now belongs to a different account/connection.
+      const [finalActor, finalClient, finalMapping] = await Promise.all([
+        sb.from('profiles').select('role,is_active').eq('id', actorId).maybeSingle(),
+        sb.from('clients').select('id,active').eq('id', target.clientId).eq('active', true).maybeSingle(), readMapping(),
+      ])
+      if (finalActor.error || finalActor.data?.is_active !== true || !['admin', 'manager'].includes(finalActor.data.role)) return unavailable('ACTIVE_MANAGER_REQUIRED')
+      if (finalClient.error || finalClient.data?.id !== target.clientId || finalClient.data.active !== true) return unavailable('CANONICAL_PUBLICATION_SOURCE_UNAVAILABLE')
+      if (finalMapping.error || finalMapping.data?.connection_id !== target.connectionId || finalMapping.data.facebook_page_id !== target.accountId) return unavailable('EXACT_ACCOUNT_MAPPING_REQUIRED')
+      const finished = Date.now()
+      if (!Number.isFinite(finished) || finished < completed || Date.parse(account.checkedAt) < finished - 120_000
+        || !(Date.parse(b.tokenValidUntil ?? '') > finished + 120_000)) return unavailable('CURRENT_PROVIDER_PROOF_REQUIRED')
+      return { data_state: 'available', scope: 'facebook_account_readiness', client_id: target.clientId,
+        checked_at: new Date(finished).toISOString(), account: { account_id: target.accountId, account_name: account.accountName,
+          native_access_verified: true, required_permissions_verified: true, create_content_task_verified: true },
+        canConfirm: false, canPublish: false,
+        note: 'Mapped Page access only. App review/release eligibility, approved creative, original media, Teams/time, native duplicates and publication are not checked. No review ID, upload, job, confirmation, account connection or Microsoft sync was created.' }
+    }
     if (input.review_id !== undefined) {
       const review = await sb.from('content_review_versions').select('id,client_id').eq('id', input.review_id).eq('client_id', input.client_id).maybeSingle()
       if (review.error || review.data?.id !== input.review_id || review.data.client_id !== input.client_id) return unavailable('CANONICAL_PUBLICATION_SOURCE_UNAVAILABLE')

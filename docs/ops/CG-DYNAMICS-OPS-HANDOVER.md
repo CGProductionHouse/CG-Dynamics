@@ -1,4 +1,63 @@
-## Latest 17 November — verified review admission and recovery, SOURCE ONLY
+## Latest 17 November — account-only Facebook readiness; exact read-only upgrade prepared
+
+Same DRAFT PR991/#220/#236/#269 continues51750a58; main b524a9f9 unchanged.
+Current PRs/issues/active chats checked; preserve #995 shared catalog and the
+#1003/#1004/Nolan/staff/Teams/package/calendar/strategy lanes. No duplicate queue.
+
+Reproduced that existing readiness rejected account-only inspection when no
+approved review existed. Added account_only:true to the SAME read-only getter,
+mutually exclusive with review_id/offset; no extra tool/context permission.
+It resolves only the existing active exact-client mapping, reuses private
+encrypted credential/native app/scope/Page-token/CREATE_CONTENT readers, and
+projects only Page ID/name/checked permissions. No guessed review/deliverable ID,
+media, Storage signing, queue, confirmation, approval, OAuth refresh or sync.
+Final role/client/mapping drift and expired proof invalidate the result.
+canConfirm/canPublish ALWAYS false. App-review eligibility, creative, media,
+Teams/time, native duplicates and release remain explicitly NOT checked.
+
+Fresh read-only production inventory: MCP ACTIVEv86/63files/custom authentication
+unchanged, import_map=false. All63 contents exactly match the prior approved
+payload6ee8f42a2cce61f822b29dc092e350042c9e942f48c20c3e9e044715eb41dd46.
+Canonical file digest4ec1fa21f19ac4e29858a41f97f0d261452faa3176ca0e6089aa116e863784a1.
+No production mutation occurred. New packet is PREPARED, NOT AUTHORIZED/DEPLOYED.
+
+Upgrade uses the existing offline preparer --upgrade-v86. Changes ONLY five
+existing files: readiness getter, catalog, Facebook inspector/runtime/provider.
+Preserves58 hosted files BYTE-IDENTICALLY, including hosted-only OneDrive variants;
+adds2 private JPEG helpers,65files total. Uses the already-approved pinned codec.
+NO config/secret/flag/permission/auth/mapping/schema/other-function change. Keeps
+MCP index/context policy and all48 other functions. Staff UI/authorizer/worker
+and four candidate migrations are excluded. New source payload SHA256:
+bbec134a9d84f6adce371021bdcbd10db8e575179078a4c2e96e2390d077ae81.
+Private artifact root: C:/Users/chris/.codex/artifacts/social-publishing-991/
+2026-11-17/account-readiness-upgrade/. Use candidate-final, NOT earlier candidate.
+Includes fresh hosted-v86.json and functions-before.json; old approved packet is
+untouched. Preparer refuses whole-source drift, path/junction escape, duplicate
+paths, unreviewed dependencies and overwriting any existing packet.
+
+Validation:79focused checks,35 actual isolated SQL checks (account-only before
+ANY publishing migration, then existing full approval/queue/role/fencing cases),
+7native actual-decoder Deno tests and ACTUAL prepared hosted MCP Deno type check
+pass. Build/emitted app, scoped lint and diff pass. Full suite5030total /
+4998pass /32skips /0fail (525.5s); final79focused tests also pass after a QA-only
+negative-test precision improvement. No runtime source changed after that run began.
+No UI changes/new browser acceptance claimed; prior51750a58's24mobile-width Chrome
+cases remain unchanged. Native Graph/Storage transport is still simulated in QA;
+the new account mode has NOT executed against a real Page. Owned QA container
+stopped cleanly. Source self-review is not independent/native acceptance.
+
+Next protected action is CA's exact approval for this ONE read-only MCP source
+upgrade. No config writes or publishing. Freshly compare ALL63 v86 files before
+any approved upload; any version/content drift stops for owner reconciliation.
+After approved release, read back65files/auth/anonymous denial and unchanged48
+other-function metadata, refresh supported company tool discovery, then inspect
+ONE exact client's existing mapped account. Do not publish or synthesize approval.
+Rollback requires exact approval: restore captured v86 source only, preserving
+config/secrets/permissions/content/receipts. The live post packet still needs real
+approved unscheduled original/caption/time/native-duplicate and fresh Teams evidence.
+Google Control Centre target remains unidentified; no guessed write. No Vercel.
+
+## Earlier 17 November — verified review admission and recovery, SOURCE ONLY
 
 Continued SAME DRAFT PR991/#220/#236/#269 from edbd573c; main b524a9f9 unchanged.
 Fresh issue/PR/active-chat checks preserve #995 staff AI, #1003 client readiness,

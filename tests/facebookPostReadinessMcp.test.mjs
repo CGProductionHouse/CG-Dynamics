@@ -86,9 +86,27 @@ test('exact inspection refuses a different client review and stays off without i
   f.tables.content_review_versions[0].client_id = id(999)
   assert.equal((await f.read({ client_id: client, review_id: id(1) })).code, 'CANONICAL_PUBLICATION_SOURCE_UNAVAILABLE')
 })
+test('account-only inspection does not require an approved review and retains its explicit read-only gate', async () => {
+  const f = fixture(0), result = await f.read({ client_id: client, account_only: true })
+  assert.equal(result.code, 'PUBLICATION_INSPECTION_DISABLED')
+  assert.equal(result.canConfirm, false); assert.equal(result.canPublish, false)
+  assert.equal(f.calls.includes('content_review_versions'), false)
+})
+
+test('account-only rejects overrides, wrong types and conflicting modes; false keeps ordinary metadata listing', async () => {
+  for (const change of [{ account_only: 'true' }, { account_only: null }, { account_only: 1 }, { account_only: true, offset: 0 },
+    { account_only: true, review_id: id(1) }, { account_only: true, account_id: '999' }, { account_only: true, connection_id: id(2) }]) {
+    const f = fixture(0), result = await f.read({ client_id: client, ...change })
+    assert.equal(result.code, 'READINESS_INPUT_INVALID'); assert.deepEqual(f.calls, []); assert.deepEqual(f.envReads, [])
+  }
+  const f = fixture(0), result = await f.read({ client_id: client, account_only: false })
+  assert.equal(result.data_state, 'available'); assert.deepEqual(result.candidates, []); assert.deepEqual(f.envReads, [])
+})
+
 test('actual catalog and operating-context policy expose a closed read-only company-admin tool only', () => {
   const tool = catalog.CG_DYNAMICS_MCP_TOOLS.find(t => t.name === 'get_facebook_post_readiness')
   assert.equal(tool.annotations.readOnlyHint, true); assert.equal(tool.inputSchema.additionalProperties, false)
+  assert.equal(tool.inputSchema.properties.account_only.type, 'boolean')
   assert.deepEqual(tool.inputSchema.required, ['client_id', 'context'])
   assert.equal(policy.assertToolAllowedInContext(tool.name, 'company_admin').allowed, true)
   for (const context of ['staff', 'client']) assert.equal(policy.assertToolAllowedInContext(tool.name, context).allowed, false)

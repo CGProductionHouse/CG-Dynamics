@@ -1,6 +1,129 @@
 # Social publishing — 15 November 2026
 
-## 17 November continuation — actual review admission to queue; lost-response recovery
+## 17 November continuation — independent mapped-account readiness and exact upgrade packet
+
+Same DRAFT PR991/#220/#236/#269, parent51750a58; main b524a9f9 unchanged.
+Current open PRs/issues/active chats checked. #995 shares the catalog; #1003/#1004
+and Nolan/staff/Teams/package/strategy/calendar remain separate. Continue Facebook
+first, no new scheduler, account connection, native publication or deployment.
+
+### Prerequisite check without manufacturing approved content
+
+Reproduction before implementation: account_only:true on a genuinely empty review
+fixture returned READINESS_INPUT_INVALID. An approved review was required even
+to inspect the mapped Page's independent API access. Added the optional boolean
+to the existing get_facebook_post_readiness schema and company-admin contract;
+no new tool, context privilege or mutation capability. Default listing remains
+metadata-only with no provider/settings reads. Account-only conflicts with a
+review ID or offset and rejects caller account/connection/proof overrides.
+
+Account mode requires the existing explicit inspection flag/config, active
+manager/admin, exact active client and unique active Facebook mapping. It calls
+the SAME private encrypted-token/app/current-permission/Page-task/token-identity
+reader as review inspection. Its target type now correctly needs only client,
+connection, account and route; no invented review/deliverable UUID. Required
+permissions and CREATE_CONTENT agree with current official
+[Meta Page publishing requirements](https://developers.facebook.com/docs/graph-api/reference/page/feed/).
+No endpoint/scopes/OAuth setting changed. Current Supabase changelog rechecked;
+no relevant SDK/CLI upgrade was made. Direct Meta guide retrieval429 was bounded;
+official indexed reference supplied the documented requirements.
+
+Successful result contains Page ID/name, check time and checked-access booleans
+only. Both canConfirm and canPublish remain false. It explicitly does NOT inspect
+app-review/release eligibility, creative approval, media, Teams/time or native
+duplicates. No read of reviews/schedule/Storage/queue is needed. No token, mapping
+connection ID, credential, arbitrary diagnostic or mutation handle is projected.
+Role/client/mapping are re-read after the native GETs; a slow final database
+read cannot return expired proof. Missing/ambiguous mapping, revoked access,
+missing native permission, drift or failure remain unavailable, never healthy.
+
+### Exact read-only source release — PREPARED, approval required
+
+Fresh connected read-only Management inventory/source verified Dynamics project
+ehtjfntukiwbgptqgbzy MCP cg-dynamics-mcp ACTIVEv86/63files, verify_jwt=false with
+EXISTING custom authentication, import_map=false. All63 file contents match the
+previous approved payload6ee8f42a2cce61f822b29dc092e350042c9e942f48c20c3e9e044715eb41dd46
+exactly. Canonical sorted name/content SHA256:
+4ec1fa21f19ac4e29858a41f97f0d261452faa3176ca0e6089aa116e863784a1.
+Captured49function metadata for source/bundle/version/auth comparison; no token
+or secret values read. This does not reauthorize or repeat the prior release.
+
+The EXISTING scripts/qa/prepare-facebook-readiness-release.mjs gains explicit
+--upgrade-v86 mode with a pinned whole-source digest, baseline source74327024 and
+five-file allowlist. It prepares offline ONLY; no network/deploy/config action.
+It also refuses existing output packets, unsafe/duplicate paths and output via
+a junction back into the checkout. No approved private artifact was overwritten.
+
+Proposed change to ONE existing MCP function:
+
+- Modify5 existing files: cg-dynamics-mcp/facebookPostReadiness.ts and toolCatalog.ts;
+  _shared/facebookPublicationInspection.ts, facebookPublicationRuntime.ts and
+  facebookPublishingProvider.ts. Includes the previously source-only original
+  JPEG qualification fix plus this account-only check.
+- Preserve58 hosted files BYTE-IDENTICALLY, including hosted-only OneDrive variants,
+  MCP index.ts/projectContext.ts/auth/other handlers; do not replace them from git.
+- Add2 existing reviewed source helpers: facebookPublicationMedia.ts and
+  publicationJpegCodec.ts. Original publicationJpeg.ts already exists in v86.
+  New runtime import is the ALREADY-approved pinned npm:jpeg-js@0.4.4; no new
+  dependency adoption. Preserve upstream packaged licensing notices.
+-65 total files. NO settings, flags, secrets, auth, scopes, mappings, accounts,
+  permissions, schema, queue, Microsoft, Vercel or other48function changes.
+- Staff UI/admission repair, social-publication endpoints/worker and four held
+  candidate migrations are NOT part of this release. Publishing stays disabled.
+
+Exact proposed payload SHA256:
+bbec134a9d84f6adce371021bdcbd10db8e575179078a4c2e96e2390d077ae81.
+Private root C:/Users/chris/.codex/artifacts/social-publishing-991/2026-11-17/
+account-readiness-upgrade/: hosted-v86.json, functions-before.json and
+candidate-final/{manifest.json,payload.json,source/,checker/}. Earlier candidate
+is obsolete; NEVER use it or overwrite the prior approved readiness-release/.
+
+After exact CA approval ONLY: fresh get/version/all63-file digest comparison;
+stop on drift, then upload the exact reviewed65-file payload once to the same
+MCP. No secret-setting step. Read back all65contents/custom auth/import-map and
+anonymous denial, compare other48function bundle/version/auth metadata, refresh
+company ChatGPT tool discovery, resolve ONE exact client and call account_only:true.
+Confirm canConfirm/canPublish false. Native success OR unavailable must be reported
+as actually observed; do not infer app review or overall publishing readiness.
+No publication, new connection/consent, content/approval write or forced sync.
+Rollback needs exact authorization and restores only captured v86 source; current
+settings/secrets/permissions/content/history/uncertain receipts remain preserved.
+
+### Validation and handoff
+
+79 focused tests pass, including no-review account-only inspection via the actual
+private native reader with synthetic Graph, four GETs only, zero Storage/RPC/job,
+no credential leakage, missing permission, role/client/mapping drift, proof expiry,
+closed schema and old default behavior. Offline packet guard tests reject wrong
+version/auth/file count, duplicate/escaping paths, whole-source drift, checkout/
+junction output, overwrite and unknown mode. Actual private positive preparation
+passes against the verified hosted source; no simulated baseline is blessed.
+
+35 actual isolated PostgreSQL checks pass. The existing pre-migration inspection
+case now also runs account-only readiness before ANY publishing migration;
+normal full approval/admission, JPEG, due queue, identity/role/fencing/receipt and
+unknown-outcome cases remain green. Native Graph and Storage transport are
+simulated. Owned network-none QA container stopped; other DBs untouched.
+7 native actual-codec Deno tests pass; actual candidate-final hosted MCP index
+passes cached Deno typing with its local-only analysis type files omitted from
+the upload. Build/emitted app, scoped lint and diff pass.
+Completed full suite: **5030 total /4998 pass /32 skips /0 failures** (525.5s).
+Final79focused cases also pass after a QA-only negative-test precision improvement;
+no runtime source changed after the broad run began. Source self-review completed; not independent/live
+acceptance. No new browser/physical-device run claimed: UI code unchanged from
+51750a58's24isolated browser cases. Generated issue519 outputs restored.
+
+New account mode is SOURCE ONLY. No production SQL/data/schema/config/secrets/
+permissions/provider/OAuth/mapping/Edge/OneDrive/Microsoft/Vercel/publication/cost
+write occurred. Its live release requires explicit CA approval under AGENTS.md;
+the prior approval was for source74327024, not this new packet. The controlled
+live post still requires an approved unscheduled original/caption, exact future
+SAST time, real native rights/media/duplicate proof and owner-resolved fresh Teams
+capture. Do not bypass the sync hold or reuse already-scheduled Cape18Nov.
+Existing PR/issues/#381 and ops handover updated at the verified revision. Google
+Control Centre target remains unidentified; no guessed write or duplicate tracker.
+
+## Earlier 17 November — actual review admission to queue; lost-response recovery
 
 Same DRAFT PR991/#220/#236/#269, parent edbd573c; current main b524a9f9 unchanged.
 Current issues and active chats checked. Current #995/#1003/#1004 diffs overlap

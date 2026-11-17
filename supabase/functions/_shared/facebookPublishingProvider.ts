@@ -18,6 +18,7 @@ export interface FacebookServerConfig {
  * Read-only diagnostics verify the current app, scopes and token lifetime.
  */
 type CredentialTarget = Pick<PublishingIntent, 'platform' | 'route' | 'accountId' | 'clientId' | 'connectionId'>
+export type FacebookAccountTarget = Pick<PublicationTarget, 'route' | 'accountId' | 'clientId' | 'connectionId'>
 type CredentialPorts = MetaPublishingCredentialPorts
 async function facebookPublishingCredential(sb: SupabaseClient, intent: Readonly<CredentialTarget>, config: FacebookServerConfig,
   ports: CredentialPorts = {}) {
@@ -41,7 +42,7 @@ export async function facebookPublishingUserToken(sb: SupabaseClient, intent: Re
  * returns only exact-account metadata, never a token, URL or mutation handle.
  * A successful Page read is not rollout approval or staff publication consent.
  */
-export async function verifyFacebookPublishingTarget(sb: SupabaseClient, target: Readonly<PublicationTarget>, config: FacebookServerConfig,
+export async function verifyFacebookPublishingTarget(sb: SupabaseClient, target: Readonly<FacebookAccountTarget>, config: FacebookServerConfig,
   ports: CredentialPorts & { fetch?: typeof fetch } = {}): Promise<{ binding: PublishingBinding; checkedAt: string; accountName: string | null }> {
   const selected = Object.freeze({ ...target }), settings = Object.freeze({ ...config })
   const intent = { ...selected, platform: 'facebook' as const }

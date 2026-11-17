@@ -39,6 +39,73 @@ test('read-only inspection verifies the mapped Page and original image while Tea
 })
 after(async () => { try { await server?.close() } finally { globalThis.fetch = originalFetch } })
 
+function accountEnvironment(config) {
+  const values = { SOCIAL_FACEBOOK_PHOTO_INSPECTION_ENABLED: 'true', META_GRAPH_VERSION: config.graphVersion, META_APP_ID: config.appId,
+    META_APP_SECRET: config.appSecret, SUPABASE_URL: config.projectUrl, META_TOKEN_ENCRYPTION_KEY_B64: config.encryptionKey,
+    META_TOKEN_ENCRYPTION_KEY_VERSION: config.keyVersion }
+  return name => values[name]
+}
+
+test('account-only MCP checks the actual private native reader with no review, source, storage or queue', async () => {
+  const f = await fixture({ inspectionOnly: true })
+  f.tables.content_review_versions.length = 0; f.tables.monthly_deliverables.length = 0
+  const result = await mcpReadiness.readFacebookPostReadiness(f.sb, f.ids.actor, { client_id: f.ids.client, account_only: true }, accountEnvironment(f.config))
+  assert.equal(result.data_state, 'available', JSON.stringify(result)); assert.equal(result.scope, 'facebook_account_readiness')
+  assert.deepEqual(result.account, { account_id: '123', account_name: 'Synthetic verified Page', native_access_verified: true,
+    required_permissions_verified: true, create_content_task_verified: true })
+  assert.equal(result.canConfirm, false); assert.equal(result.canPublish, false)
+  assert.match(result.note, /App review\/release eligibility.*not checked/)
+  assert.equal(f.calls.some(c => ['sign', 'download', 'rpc'].includes(c[0])), false)
+  assert.equal(f.calls.some(c => c[0] === 'read' && ['content_review_versions','monthly_deliverables','background_jobs'].includes(c[1])), false)
+  assert.equal(f.graphCalls.length, 4); assert.equal(f.graphCalls.some(c => c[0] !== 'GET'), false)
+  assert.doesNotMatch(JSON.stringify(result), /fixture-user-token|fixture-page-token|encrypted_access_token|appSecret/)
+})
+
+test('account-only MCP refuses ambiguous/absent mappings and inactive/client roles before provider access', async () => {
+  for (const change of [f => { f.tables.meta_client_assets.length = 0 }, f => { f.tables.meta_client_assets.push({ ...f.tables.meta_client_assets[0] }) },
+    f => { f.tables.clients[0].active = false }, f => { f.tables.profiles[0].role = 'client' }, f => { f.tables.profiles[0].is_active = false }]) {
+    const f = await fixture({ inspectionOnly: true }); change(f)
+    const result = await mcpReadiness.readFacebookPostReadiness(f.sb, f.ids.actor, { client_id: f.ids.client, account_only: true }, accountEnvironment(f.config))
+    assert.equal(result.data_state, 'unavailable'); assert.equal(result.canPublish, false); assert.equal(f.graphCalls.length, 0)
+  }
+})
+
+test('account-only native missing permission stays unavailable, never healthy from reporting access', async () => {
+  const f = await fixture({ inspectionOnly: true }), fetcher = globalThis.fetch
+  globalThis.fetch = async (url, options) => new URL(url).pathname.endsWith('/me/permissions') ? Response.json({ data: [] }) : fetcher(url, options)
+  const result = await mcpReadiness.readFacebookPostReadiness(f.sb, f.ids.actor, { client_id: f.ids.client, account_only: true }, accountEnvironment(f.config))
+  assert.equal(result.data_state, 'unavailable'); assert.equal(result.canConfirm, false); assert.equal(result.canPublish, false)
+  assert.equal(f.graphCalls.some(c => c[0] !== 'GET'), false); assert.equal(f.tables.background_jobs.length, 0)
+  assert.doesNotMatch(JSON.stringify(result), /fixture-user-token|fixture-page-token/)
+})
+
+for (const [name, change, code] of [
+  ['role', f => { f.tables.profiles[0].is_active = false }, 'ACTIVE_MANAGER_REQUIRED'],
+  ['client', f => { f.tables.clients[0].active = false }, 'CANONICAL_PUBLICATION_SOURCE_UNAVAILABLE'],
+  ['mapping', f => { f.tables.meta_client_assets[0].facebook_page_id = '999' }, 'EXACT_ACCOUNT_MAPPING_REQUIRED'],
+]) test(`account-only ${name} drift during native read invalidates the proof`, async () => {
+  const f = await fixture({ inspectionOnly: true }), fetcher = globalThis.fetch
+  globalThis.fetch = async (url, options) => { const response = await fetcher(url, options); if (new URL(url).pathname === '/v27.0/me') change(f); return response }
+  const result = await mcpReadiness.readFacebookPostReadiness(f.sb, f.ids.actor, { client_id: f.ids.client, account_only: true }, accountEnvironment(f.config))
+  assert.equal(result.data_state, 'unavailable'); assert.equal(result.code, code); assert.equal(result.canPublish, false)
+  assert.equal(f.calls.some(c => ['sign', 'download', 'rpc'].includes(c[0])), false)
+})
+
+test('slow final account readback cannot return an expired native proof', async t => {
+  const f = await fixture({ inspectionOnly: true }), from = f.sb.from
+  let clock = Date.now(), reads = 0
+  t.mock.method(Date, 'now', () => clock)
+  f.sb.from = table => {
+    const query = from(table)
+    if (table === 'profiles') { const read = query.maybeSingle; query.maybeSingle = async () => {
+      const result = await read(); if (++reads === 2) clock += 121_000; return result
+    } }
+    return query
+  }
+  const result = await mcpReadiness.readFacebookPostReadiness(f.sb, f.ids.actor, { client_id: f.ids.client, account_only: true }, accountEnvironment(f.config))
+  assert.equal(result.data_state, 'unavailable'); assert.equal(result.code, 'CURRENT_PROVIDER_PROOF_REQUIRED'); assert.equal(result.canPublish, false)
+})
+
 test('original JPEG follows Facebook inspection, confirmation and worker submission without conversion', async () => {
   const f = await fixture({ image: readFileSync('tests/fixtures/publication-baseline-320.jpg'), mediaType: 'image/jpeg' })
   const report = await inspection.facebookPublicationInspector(f.sb, f.config, null)(f.ids.review, f.ids.actor)

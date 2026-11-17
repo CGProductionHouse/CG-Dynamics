@@ -101,6 +101,12 @@ export async function facebookPostgresJourney({ server, sql, q, actor, rpcClient
     assert.equal(readiness.body.inspection.checks.find(c => c.key === 'release').status, 'blocked')
     assert.equal(posts, 0); assert.equal(signed, 0)
     if (mode === 'inspection-only') {
+      const accountModule = await server.ssrLoadModule('/supabase/functions/cg-dynamics-mcp/facebookPostReadiness.ts')
+      const settings = { SOCIAL_FACEBOOK_PHOTO_INSPECTION_ENABLED: 'true', META_GRAPH_VERSION: config.graphVersion, META_APP_ID: config.appId,
+        META_APP_SECRET: config.appSecret, SUPABASE_URL: config.projectUrl, META_TOKEN_ENCRYPTION_KEY_B64: config.encryptionKey, META_TOKEN_ENCRYPTION_KEY_VERSION: config.keyVersion }
+      const account = await accountModule.readFacebookPostReadiness(sb, actor, { client_id: ids.client, account_only: true }, name => settings[name])
+      assert.equal(account.data_state, 'available'); assert.equal(account.scope, 'facebook_account_readiness')
+      assert.equal(account.canConfirm, false); assert.equal(account.canPublish, false)
       assert.equal(readiness.body.inspection.checks.find(c => c.key === 'teams').status, 'unavailable')
       assert.equal((await invoke({ action: 'confirm', reviewId: ids.review, expectedFingerprint: 'a'.repeat(64), confirmPublication: true })).status, 409)
       assert.equal(json('select count(*)::int from background_jobs'), 0)
