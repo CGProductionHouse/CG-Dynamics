@@ -1,3 +1,42 @@
+## 17 November — CG / Daisy social and logo checks; CG Plan privacy hold
+
+Same isolated DRAFT PR1003, no Vercel. CGc27d2185 Octoberd9b2bb8a published
+15:03:56UTC; Daisy3404f726 October117e47ed published15:04:00UTC. Routine exact
+mapped Meta refreshes PASS; CG33posts/14facts, Daisy4reobserved/6retained/6facts.
+FB unavailable metrics remainNULL, followers snapshots, no audience/ROI inflation.
+CGFB/IG and DaisyFB automatic November checkpoints succeeded15:14/15:19UTC;
+FB remains verified_partial. CGTikTok October5video nativecohort refreshed; later
+token expiry handled by ONE existing November-only refresh15:26:46UTC. Readback
+PASS/fresh/refreshPending=false,2current-month-selected videos; no OAuth/config.
+
+Daisy November8c4cebe1v5 reviewed/published15:07:18UTC, exact1video3photos3posters.
+Changed only unsupported reach-ranking wording in Gold successSignals; other
+staff content/concepts/notes retained. Real login/report/Plan200, foreign403/
+file404, noforeign/draft reportrows. Actual source quality gates pass; ownAPI
+sessions closed LOCAL-only204, browser/other-agent tabs untouched. No freshphone
+claim. DaisyJanuaryv1/Decemberv3 and CGDecemberv2 remaindraft; #731 writer reused.
+
+CGNovembere62a6569v6 stays byte-identical DRAFT: pure projection read reproduced
+unused internal calendar meetings. Real client still sees0strategyrows. Source
+privacy migration20261117150038 + regression/disposablePostgres acceptance now
+prepared, UNAPPLIED. Exact boolean-true calendar entries only; all10Goldfields/
+privileges/source/published snapshots preserved. Separate authorised backend
+review/apply and fresh semantic review required before CGPlan publication.
+
+Both live header logo hashes match verified artwork. Daisy original download/
+source hash and isolation pass; no duplicate upload. CGheader matches exact
+OneDriveWhiteTransparent original found read-only via existingportalparent.
+CGBrandHub disabled/empty and canonical internalfolder binding404remainheld;
+no remap/copy/share/enablement. Existing Case header candidate stillNOTLIVE.
+
+Final15:27:53UTC: client/packages,14otherreports(8olderpublished),8protected
+strategies unchanged; November-onlyTikTok recovery did not change published
+October. Fresh92report/strategy/library/privacy(includingrealSQL)+112TikTok
+tests pass,0fail/skip; localbuild/scopedlint/diffpass. No migration/runtime release,
+provider setup, social publishing or other-agent edits. Next exactDeltaGas06b20bb1.
+Full hashes, actual states and later guarded migration runbook:
+[CG / Daisy receipt](CGPH-DAISY-CLIENT-READINESS-2026-11-17.md).
+
 ## 16 November — authorised brand panel merge reconciliation (#984)
 
 Owner requested #984 into main before #999 into the existing PR910 branch.
