@@ -117,7 +117,7 @@ test('next action prioritises saved new enquiries, then review, then measurement
     leads: metrics({ total: 2, new: 1, contacted: 0, qualified: 0, won: 0, closedLost: 1, lost: 0, good: 0, poor: 1, unreviewed: 1, qualificationRate: 0 }),
   })
   assert.deepEqual(withNew.nextStep, {
-    text: '1 enquiry awaiting follow-up. Review the saved details and confirm who will respond.',
+    text: '1 enquiry still marked New. Confirm follow-up from the saved details and record the current status.',
     openLeadInbox: true,
   })
 

@@ -143,7 +143,7 @@ export function websitePerformanceDashboardModel(input: {
   if (leads.state === 'loading') {
     // Wait for the exact-client lead read before choosing a reporting action.
   } else if (leads.state === 'available' && leads.new > 0) {
-    nextStep = { text: `${enquiries(leads.new)} awaiting follow-up. Review the saved details and confirm who will respond.`, openLeadInbox: true }
+    nextStep = { text: `${enquiries(leads.new)} still marked New. Confirm follow-up from the saved details and record the current status.`, openLeadInbox: true }
   } else if (leads.state === 'available' && leads.quality.unreviewed > 0) {
     nextStep = { text: `Review the quality of ${enquiries(leads.quality.unreviewed)} and record a Good or Poor outcome from the actual details.`, openLeadInbox: true }
   } else if (leads.state === 'not_connected') {
