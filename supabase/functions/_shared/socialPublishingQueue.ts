@@ -1,4 +1,5 @@
 import { executePublishingIntent, type PublishingExecutionPorts } from './socialPublishingExecution.ts'
+import { publicationPreparationBlocker } from './socialPublicationAuthorization.ts'
 import { instagramPublishingContinuationDecision, type InstagramPublicationProtocol, type PublishingContext, type PublishingIntent, type PublishingObservation } from './socialPublishing.ts'
 
 export const SOCIAL_PUBLICATION_JOB = 'social_publish'
@@ -107,7 +108,13 @@ export async function runClaimedSocialPublication(input: {
     catch { observation = { state: 'unknown_outcome', errorCode: 'STATUS_READ_UNVERIFIED' } }
     return await save(observation)
   }
-  const result = await executePublishingIntent(ports, input.key, input.now)
+  // Current-source/provider failures happen BEFORE the durable mutation barrier.
+  // Persist an actionable hold instead of losing the reason to generic retries.
+  // Never catch submission/persistence failures here: they may be ambiguous.
+  let current: PublishingContext
+  try { current = await input.bindings.readCurrent(claim.intent) }
+  catch (error) { return await save({ state: 'blocked', errorCode: publicationPreparationBlocker(error) ?? 'PUBLICATION_PREFLIGHT_UNAVAILABLE' }) }
+  const result = await executePublishingIntent({ ...ports, readCurrent: async () => current }, input.key, input.now)
   if (['posted', 'processing', 'provider_scheduled', 'failed', 'unknown_outcome'].includes(result.state)) return { managed: true, publication: result }
   return await save({ state: 'blocked', errorCode: result.state.toUpperCase() })
 }

@@ -28,7 +28,13 @@ const hash = (s: unknown): s is string => typeof s === 'string' && /^[a-f0-9]{64
 const preparationBlockers = new Set(['PREPARATION_SCOPE_INVALID', 'ACTIVE_MANAGER_REQUIRED', 'EXACT_ACCOUNT_RELEASE_REQUIRED',
   'CANONICAL_PUBLICATION_SOURCE_UNAVAILABLE', 'CURRENT_UNSCHEDULED_REVIEW_REQUIRED', 'FRESH_TEAMS_EVIDENCE_REQUIRED',
   'CURRENT_PROVIDER_PROOF_REQUIRED', 'REVIEWED_PROVIDER_MEDIA_PROOF_REQUIRED', 'PREPARATION_SOURCE_CHANGED',
-  'INSTAGRAM_CAPTION_INVALID', 'INSTAGRAM_CAPTION_TOO_LONG', 'INSTAGRAM_HASHTAG_LIMIT', 'INSTAGRAM_MENTION_LIMIT'])
+  'INSTAGRAM_CAPTION_INVALID', 'INSTAGRAM_CAPTION_TOO_LONG', 'INSTAGRAM_HASHTAG_LIMIT', 'INSTAGRAM_MENTION_LIMIT', 'PRIVATE_PREFLIGHT_UNAVAILABLE'])
+
+/** Only fixed preparation codes may enter staff receipts; never exception text. */
+export function publicationPreparationBlocker(error: unknown): string | null {
+  const code = record(error) && typeof error.code === 'string' ? error.code : null
+  return code && preparationBlockers.has(code) ? code : null
+}
 
 /** This is a stale-preview detector, NOT a bearer capability. Authorization
  * still requires an active manager, fresh private preflight and atomic storage.
@@ -129,8 +135,8 @@ export function socialPublicationAuthorizationHandler(ports: PublicationAuthoriz
       return respond(200, { ok: true, publication: { jobId: receipt.jobId, authorizationId: receipt.authorizationId,
         fingerprint: receipt.fingerprint, status: receipt.status, state: receipt.state } })
     } catch (error) {
-      const code = record(error) && typeof error.code === 'string' ? error.code : null
-      if (code && preparationBlockers.has(code)) return respond(409, { ok: false, error: 'PUBLICATION_PREFLIGHT_BLOCKED', blockers: [code] })
+      const code = publicationPreparationBlocker(error)
+      if (code) return respond(409, { ok: false, error: 'PUBLICATION_PREFLIGHT_BLOCKED', blockers: [code] })
       return respond(503, { ok: false, error: 'PUBLICATION_VERIFICATION_UNAVAILABLE' })
     }
   }

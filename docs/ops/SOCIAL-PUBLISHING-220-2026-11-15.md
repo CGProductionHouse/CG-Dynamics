@@ -1,5 +1,147 @@
 # Social publishing — 15 November 2026
 
+## Latest 17 November — Facebook first pathway, connected SQL acceptance
+
+Same DRAFT PR991/#220/#236/#269, parent `01102d009ed4eca46d2cb1eb93775dd83fc0f5ef`;
+reconciled against unchanged main `b524a9f9`. Current PRs/active chats were checked;
+Nolan/Picasso/staff/Teams/workboard/Microsoft sync ownership stays separate.
+Facebook original static PNG is the shortest IMPLEMENTED candidate: existing
+approval, manager confirmation, encrypted Meta adapter, due queue and separate
+native receipt reader. No other route was demonstrated closer. A real exact
+pilot account and approved creative remain unverified, so this is conditional.
+
+Reproduced before changes: a due-time `FRESH_TEAMS_EVIDENCE_REQUIRED` error escaped
+the worker without persisting an actionable publication receipt. New regression
+failed, then passed after the fix. ONLY current-preflight errors before the
+submission barrier now become blocked receipts with allowlisted codes; unknown
+exception text is discarded. Submission/persistence ambiguity and read-only
+reconciliation retain their existing behavior. Managers see a specific next
+action for source, Teams capture, original media, account or release failures.
+A possibly-started attempt always requires native reconciliation first; no
+retry/publish shortcut. Existing active-admin/manager visibility remains;
+ordinary staff/client roles cannot grant authority or inspect management data.
+These are actual-code fixture role checks; named staff/profile acceptance in
+the real signed-in publishing UI remains part of the controlled pilot packet.
+
+Connected test now composes the real Facebook runtime/staff/canonical readers,
+media/hash checks, encrypted credential reader, SQL confirmation, generic due
+claim, submission barrier/save and staff status against REAL isolated PostgreSQL.
+Original synthetic approval/date/intent are not time-shifted: it waits until the
+actual due instant. Repeated confirmation yields one job; future claims cannot
+take it. Mutation acceptance is processing; independent GET must verify posted.
+Stale capture blocks before signing/submission; lost response becomes unknown
+and cannot auto replay. Canonical/Teams production_status remains unchanged.
+Only the local receipt-poll delay is accelerated. Graph/Storage and SDK query
+transport are SYNTHETIC ports, not native API or hosted PostgREST acceptance.
+Canonical reads and all queue RPCs execute actual service-role SQL in a random
+synthetic DB in the verified network-none owned `cg-dynamics-social-220-qa`
+container. Docker Desktop and only this QA container were started for the user's
+explicit local-testing request; no other projects' databases were started.
+
+Validation: **32 actual PostgreSQL checks pass** including the3 connected
+Facebook journeys (success/stale/lost response); **96 affected runtime/management/
+status-bridge checks pass**. Status-only bridge test now asserts blocked/no provider
+attempt instead of the previous thrown-preflight contract; TikTok code unchanged.
+Local isolated Chrome: **44 cases at375/390/430/1440**, external
+requests blocked, including staff/client exclusion, exact confirmation, stale
+async ownership, manager recovery action and uncertainty precedence. Images:
+`%TEMP%/cg-publication-review-browser/blocked-390.png` and `blocked-1440.png`
+(synthetic). Build/emitted app, scoped lint, actual cached Deno check and diff
+pass. Final complete suite: **4964 total /4933 pass /31 skips /0 failures**
+(explicit loopback fixture, concurrency2); actual SQL acceptance is separate above.
+Source self-review passes for this increment, not production release. Only the2
+unrelated issue519 generated outputs were restored after tests. Exact committed
+revision is recorded in the completion comment. Owned QA container stopped with
+exit0 after the SQL runs; no other project's services were started/stopped.
+
+### Exact live-test blockers and review packet
+
+Read-only Meta health shows an authorized REPORTING connection and47 mapped
+assets; this does not prove publishing grants or a pilot Page. The existing
+Chrome window was found, then Computer Use stopped because it could not establish
+the current browser URL safely. No further UI input, profile/session/credential
+copying or alternate attachment was attempted. Company-browser identity, pilot
+review, caption/hash and native Page permissions remain UNVERIFIED.
+
+Before requesting controlled-live approval, read back all these exact fields:
+
+1. Canonical active client ID, existing connection ID, numeric Page ID/native
+   Page name; current app access/review eligibility, token health,
+   pages_show_list/pages_manage_posts/pages_read_engagement and CREATE_CONTENT.
+   Never choose a global/latest credential or silently connect an account.
+2. Current approved review ID + deliverable ID, exact caption, original PNG
+   path/SHA256 and creative/rights approval; no existing Dynamics/Teams/native
+   posting or schedule. **Actual account/content fields remain UNSELECTED.**
+3. One explicit future SAST/UTC instant, exact Teams plan/task IDs and complete
+   matching capture. Confirmation AND due-time dispatch require evidence under
+   5minutes old. Microsoft sync hold remains: old evidence cannot support an
+   unattended next-day job. Hold owner must resolve the exact refresh path;
+   do not weaken freshness, start refresh/apply or write Microsoft to bypass it.
+4. Exact reviewed migration/Edge/config/release tuple and kill switches. None is
+   live from this PR. Preview currently shares the default-off backend rollout
+   gate; source presence is not a live read-only readiness probe.
+5. Proposed live scope: ONE approved original PNG/caption to ONE Page, ONE manager
+   confirmation, due dispatch, separate GET and native visual review, staff
+   receipt. Timeout stops mutation for reconciliation. No blind retry, second
+   account/platform, bulk action or campaign/native-schedule/Microsoft change.
+   Do not ask approval on an incomplete packet; no live test is authorized yet.
+
+Official [Page photos](https://developers.facebook.com/docs/graph-api/reference/page/photos/)
+and [Post receipt](https://developers.facebook.com/docs/graph-api/reference/page-post/)
+references rechecked17November via current official search; direct retrieval429.
+This route uses Dynamics due-time submission, not native future scheduling.
+Queued-in-Dynamics, provider processing/scheduled and verified posted stay distinct.
+
+### Four UNAPPLIED candidates, security and rollback
+
+| Migration | Scope / gate |
+| --- | --- |
+| `20261115104948_social_publishing_queue.sql` | Existing background_jobs column/indexes, restrictive active-manager read, atomic confirm/lease/begin/save, service-role-only RPC grants. Queue foundation. |
+| `20261115104950_tiktok_business_oauth.sql` | RLS/encrypted Business token/state/authorization store and identity/refresh fences; no browser token/state grants; no account connected by schema. Not needed for Facebook. |
+| `20261116085815_social_publication_preparation_evidence.sql` | Service-only exact complete captured Teams instruction,5minute freshness/date/duplicate gates; no collector/upstream write. Facebook source proof. |
+| `20261116102019_instagram_publication_steps.sql` | Existing-queue container/publish barriers and retained receipts; Facebook passes under combined set. Not Instagram release authority. |
+
+All4 applied ONLY in isolated synthetic DB. Final rehearsal ran Facebook's3
+journeys with ONLY queue+captured-evidence migrations installed (asserting TikTok
+Business tables/Instagram publish RPC absent), THEN applied the other2 and ran
+all remaining SQL checks:32/32 pass. The minimal Facebook pair is thus locally
+verified independently; production application remains unapproved.
+Production unapplied status is the current handover's record; a read-only
+Supabase metadata refresh returned no result this run. No SQL or retry followed.
+No new migration/dependency. Main's brand migration20261111064719 is already
+applied by its owner: do not replay. Rollback must disable new dispatch/authority,
+preserve all jobs/consent/receipts/ambiguity and retain read-only reconciliation.
+No destructive schema/audit removal or automatic native deletion. Any production
+switch, exact unsent-job withdrawal or schema action needs its own authorization.
+
+After NATIVE Facebook acceptance: Instagram needs exact route/account/app grants,
+hosted JPEG/Edge resource acceptance, delivery and controlled container→publish→GET
+pilot. TikTok needs actual Business grant/app review, verified owned media origin,
+video bytes/codecs/disclosures and immutable-source-to-share_id uploader/registered
+durable path; current readers alone cannot publish. LinkedIn needs existing #493
+ownership coordination, actual OAuth/current organization/role resolver and
+qualified uploader/post mutation; GET-only receipt core is not a publisher.
+YouTube is future-only: no connection assumed; project/API/OAuth/channel access,
+resumable upload, explicit privacy/publishAt/processing/receipts, quotas/audit.
+
+No production SQL/data/OAuth/provider/settings/permission/secret/Edge deploy,
+Vercel/publication/cost/Microsoft action. Existing PR retained DRAFT.
+
+Local full-suite fixture (no real credentials or API origin):
+
+```powershell
+$env:VITE_SUPABASE_URL='http://127.0.0.1:1'
+$env:VITE_SUPABASE_PUBLISHABLE_KEY='local-public-fixture'
+$env:PATH='C:/Program Files/Git/bin;C:/Program Files/Git/usr/bin;'+$env:PATH
+node --test --test-concurrency=2 tests/*.test.mjs
+# Separate real SQL run in the verified task-owned network-none container:
+$env:CG_SOCIAL_QA_CONTAINER='cg-dynamics-social-220-qa'
+node --test tests/socialPublishingQueuePostgres.test.mjs
+```
+
+Initial broad run was aborted after missing synthetic Supabase environment was
+identified; it is not counted as passing. Use the explicit fixture above.
+
 ## Latest 16 November — native TikTok publishing requirements, SOURCE ONLY
 
 Same DRAFT PR #991 / #220 / #269. Implemented PRIVATE, UNREGISTERED prerequisite

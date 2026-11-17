@@ -32,7 +32,7 @@ const fixture = {
           if(body.action==='confirm')return{data:{ok:true,publication:{jobId:'${jobId}',authorizationId:'${authorizationId}',fingerprint:'b'.repeat(64),status:'queued',state:'queued'}},error:null};
           if(body.action==='revoke')return{data:{ok:true,publication:{jobId:'${jobId}',state:'cancelled',authorizationRevoked:true,providerMayHaveStarted:false}},error:null};
           if(body.action!=='status')throw Error('Unexpected synthetic action');
-          return{data:{ok:true,status:{reviewId:'${reviewId}',clientId:'${clientId}',canAuthorize:false,items:[{jobId:'${jobId}',platform:'facebook',accountId:'12345',accountLabel:'Synthetic exact Page',scheduledAt:'2026-11-17T08:00:00Z',state:'queued',authorizationState:'recorded',providerMayHaveStarted:false,postUrl:null,errorCode:null}]}},error:null};
+          return{data:{ok:true,status:{reviewId:'${reviewId}',clientId:'${clientId}',canAuthorize:false,items:[{jobId:'${jobId}',platform:'facebook',accountId:'12345',accountLabel:'Synthetic exact Page',scheduledAt:'2026-11-17T08:00:00Z',state:window.publicationState??'queued',authorizationState:'recorded',providerMayHaveStarted:window.providerStarted??false,postUrl:null,errorCode:window.publicationError??null}]}},error:null};
         }},
       };`
     if (id !== '\0virtual:publication-app') return
@@ -110,6 +110,18 @@ try {
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1))
     assert.deepEqual(errors, [])
     await page.screenshot({ path: join(output, `superseded-${width}.png`), fullPage: true })
+    await page.evaluate(() => { window.publicationState = 'blocked'; window.publicationError = 'FRESH_TEAMS_EVIDENCE_REQUIRED' })
+    await page.getByRole('button', { name: 'Refresh status', exact: true }).click()
+    await page.getByText('Publishing manager action needed', { exact: true }).waitFor()
+    await page.getByText(/Ask the scheduling owner to review the sync hold/).waitFor()
+    assert.equal(await page.getByRole('button', { name: /retry/i }).count(), 0)
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1))
+    await page.screenshot({ path: join(output, `blocked-${width}.png`), fullPage: true })
+    await page.evaluate(() => { window.publicationState = 'unknown_outcome'; window.providerStarted = true })
+    await page.getByRole('button', { name: 'Refresh status', exact: true }).click()
+    await page.getByText(/A post may already exist/).waitFor()
+    assert.equal(await page.getByText(/refresh the approved capture/).count(), 0)
+    cases += 2
     await page.close(); cases++
   }
   console.log(JSON.stringify({ passed: true, engine: 'isolated Chromium', widths: [375, 390, 430, 1440], cases, externalNetwork: 'blocked', liveWrites: 0, output }))

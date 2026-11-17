@@ -61,7 +61,7 @@ async function fixture() {
       state: row.publication.state, observation: row.publication.observation, attempt: 1 } }
     if (name === 'save_social_publication') {
       assert.equal(args.p_fence, row.publication.fence)
-      assert.ok(['processing', 'unknown_outcome'].includes(args.p_observation.state))
+      assert.ok(['processing', 'unknown_outcome', 'blocked'].includes(args.p_observation.state))
       row.publication.observation = { ...row.publication.observation, ...stripNulls(JSON.parse(JSON.stringify(args.p_observation))) }; row.publication.state = args.p_observation.state
       return { error: null, data: true }
     }
@@ -221,12 +221,15 @@ test('caller abort cancels the private flow without changing queue/provider stat
   const f = await fixture(), c = new AbortController(); c.abort(); f.options.signal = c.signal
   const r = await read(f); assert.equal(r.state, 'unknown_outcome'); assert.equal(f.db.length, 0); assert.equal(f.http.length, 0); assert.equal(f.rpc.length, 0)
 })
-test('submission and queued preflight are deliberately unavailable on status-only bindings', async () => {
+test('status-only bindings cannot submit; queued preflight persists a sanitized hold without a provider attempt', async () => {
   const f = await fixture(), bindings = bridge.tiktokBusinessQueueStatusBindings(f.sb, f.config, f.ids.job, f.options)
   await assert.rejects(bindings.submit(f.intent), /not configured/); await assert.rejects(bindings.readCurrent(f.intent), /not configured/)
-  f.row.publication.state = 'queued'; await assert.rejects(queue.runClaimedSocialPublication({ sb: f.sb, jobId: f.ids.job, key: f.intent.key,
-    worker: f.row.locked_by, now: new Date(NOW).toISOString(), enabled: true, bindings }), /not configured/)
-  assert.deepEqual(f.rpc.map(r => r.name), ['claim_social_publication']); assert.equal(f.http.length, 0)
+  f.row.publication.state = 'queued'; delete f.row.publication.started_at; f.row.publication.observation = {}
+  const result = await queue.runClaimedSocialPublication({ sb: f.sb, jobId: f.ids.job, key: f.intent.key,
+    worker: f.row.locked_by, now: new Date(NOW).toISOString(), enabled: true, bindings })
+  assert.deepEqual(result.publication, { state: 'blocked', errorCode: 'PUBLICATION_PREFLIGHT_UNAVAILABLE' })
+  assert.equal(f.row.publication.state, 'blocked'); assert.equal(f.row.publication.started_at, undefined)
+  assert.deepEqual(f.rpc.map(r => r.name), ['claim_social_publication', 'save_social_publication']); assert.equal(f.http.length, 0)
 })
 test('manager status projection does not return the private multi-ID native audit', async () => {
   const f = await fixture(); f.row.publication.state = 'unknown_outcome'; f.row.status = 'failed'

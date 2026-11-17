@@ -212,7 +212,7 @@ function componentHarness(io, reviewId, confirmation = false, reviewChanges = {}
     if (name === 'react') return react
     if (name === 'react/jsx-runtime') return runtime
     if (name.endsWith('.svg')) return { default: '/fixture-imported-icon.svg' }
-    if (name.endsWith('/socialPublishing')) return { PUBLICATION_STATE_LABELS: frontend.PUBLICATION_STATE_LABELS, canPrepareFacebookPhotoReview: frontend.canPrepareFacebookPhotoReview, ...io }
+    if (name.endsWith('/socialPublishing')) return { PUBLICATION_STATE_LABELS: frontend.PUBLICATION_STATE_LABELS, canPrepareFacebookPhotoReview: frontend.canPrepareFacebookPhotoReview, publicationNextAction: frontend.publicationNextAction, ...io }
     if (name.endsWith('/ContentPublicationConfirmation')) return { ContentPublicationConfirmation: () => null }
     throw new Error(`Unexpected component import ${name}`)
   }, Date, Intl })
@@ -293,6 +293,27 @@ test('actual panel preserves in-flight truth after withdrawal and never makes pr
   panel.click('Publishing status'); await settle(); panel.click('Withdraw publishing authority'); panel.click('Confirm withdrawal'); await settle()
   assert.match(panel.text(), /Submission started/); assert.match(panel.text(), /nothing was deleted/)
   assert.equal(panel.text().includes('Stopped in Dynamics'), false)
+})
+
+test('manager sees the exact safe recovery action; uncertain attempts always take precedence over source errors', async () => {
+  const f = await fixture(), status = await readStatus(f), item = status.items[0]
+  Object.assign(item, { state: 'blocked', errorCode: 'FRESH_TEAMS_EVIDENCE_REQUIRED', providerMayHaveStarted: false })
+  const panel = componentHarness({ getStaffPublicationStatus: async () => status }, ids.review)
+  panel.click('Publishing status'); await settle()
+  assert.match(panel.text(), /Publishing manager action needed/)
+  assert.match(panel.text(), /scheduling owner.*sync hold/)
+  item.providerMayHaveStarted = true
+  assert.match(panel.text(), /A post may already exist/)
+  assert.doesNotMatch(panel.text(), /refresh the approved capture/)
+  Object.assign(item, { errorCode: 'PRIVATE_TOKEN_ERROR', providerMayHaveStarted: false })
+  assert.doesNotMatch(panel.text(), /PRIVATE_TOKEN_ERROR/)
+  for (const [errorCode, message] of [['BLOCKED_SOURCE_CHANGED', /approved content or schedule changed/],
+    ['BLOCKED_OVERDUE_REVIEW', /planned time has passed/], ['BLOCKED_TOKEN_OR_TIME', /account token or scheduled time/]]) {
+    assert.match(frontend.publicationNextAction({ state: 'blocked', errorCode, providerMayHaveStarted: false }), message)
+  }
+  for (const state of ['queued', 'processing', 'provider_scheduled', 'posted', 'cancelled']) {
+    assert.equal(frontend.publicationNextAction({ state, errorCode: null, providerMayHaveStarted: false }), null)
+  }
 })
 
 const confirmationPreview = { reviewId: ids.review, clientId: ids.client, accountId: '12345', platform: 'facebook', caption: 'Approved caption', mediaType: 'image/png',

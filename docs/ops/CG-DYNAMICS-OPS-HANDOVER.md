@@ -1,3 +1,34 @@
+## Latest 17 November — Facebook first pathway in existing PR991
+
+Same DRAFT PR991/#220/#236/#269, parent01102d00; main unchanged b524a9f9.
+Reproduced due-time preflight exception losing the staff recovery reason; now
+records allowlisted blocked receipt BEFORE any submission barrier. Actual manager
+panel shows source/account/media/release actions and gives uncertainty precedence;
+no new retry/publication authority, staff/client management access or second queue.
+Real connected PostgreSQL journeys now cover approval→preview→atomic confirm→
+actual due claim→submission→independent receipt→manager status, plus stale-source
+hold and lost-response no-replay. **32 actual SQL checks /96 affected checks /
+44 isolated Chrome cases at375/390/430/1440 pass**. Facebook's3 SQL journeys passed
+with ONLY queue+evidence migrations, then the other2 applied and32/32 still passed.
+Graph/Storage/SDK transport
+remain synthetic; no native publication acceptance. Build/app/scoped lint/cached
+Deno/diff pass. Final full suite: **4964 total /4933 pass /31 skips /0 failures**
+(explicit loopback fixture, concurrency2). Exact revision in PR completion comment.
+Docker Desktop + only task-owned network-none QA container started; no other DBs.
+
+Real pilot account/approved creative/grants remain UNSELECTED. Reporting health
+read is not publishing proof. Computer Use halted on inability to establish
+Chrome URL safely; no further UI or alternate auth/session access. FOUR lane
+migrations STILL UNAPPLIED in production. Exact future SAST/UTC time, approved
+PNG/caption/hash, native dedup/account/task/grants and due-time Teams evidence
+are required before a live packet;5minute capture gate cannot be bypassed while
+Microsoft sync hold remains. Rollback retains receipts/audit, disables new
+authority and reconciles possible provider operations. Full exact gates, migration
+scopes and later-platform dependencies in the [existing receipt](SOCIAL-PUBLISHING-220-2026-11-15.md).
+No production mutation/deploy/publish/OAuth/settings/cost; Nolan/staff/Teams/Picasso
+and current main brand/report lanes preserved. Google Control Centre target remains
+unidentified; no guessed write. Continue Facebook native preparation, not breadth.
+
 ## Latest 16 November — private TikTok native publishing prerequisites
 
 Same DRAFT PR991/#220/#269. New private unregistered reader reuses actual

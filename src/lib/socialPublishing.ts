@@ -13,6 +13,28 @@ export interface StaffPublication {
   authorizationState: 'recorded' | 'revoked' | 'unconfirmed'; providerMayHaveStarted: boolean; postUrl: string | null; errorCode: string | null
 }
 export interface StaffPublicationStatus { reviewId: string; clientId: string; items: StaffPublication[]; canAuthorize: false }
+
+/** Fixed staff instructions, not raw provider errors or a retry permission. */
+export function publicationNextAction(item: Pick<StaffPublication, 'state' | 'errorCode' | 'providerMayHaveStarted'>): string | null {
+  if (item.state === 'unknown_outcome' || item.providerMayHaveStarted && ['blocked', 'failed'].includes(item.state))
+    return 'A post may already exist. Check the native platform and reconcile this attempt before scheduling again.'
+  if (!['blocked', 'failed'].includes(item.state)) return null
+  if (item.errorCode === 'FRESH_TEAMS_EVIDENCE_REQUIRED')
+    return 'The Teams schedule could not be verified as current. Ask the scheduling owner to review the sync hold and refresh the approved capture; do not change Teams or reschedule this post to bypass it.'
+  if (['CURRENT_UNSCHEDULED_REVIEW_REQUIRED', 'CANONICAL_PUBLICATION_SOURCE_UNAVAILABLE', 'PREPARATION_SOURCE_CHANGED', 'BLOCKED_SOURCE_CHANGED', 'CLAIM_OR_SOURCE_LOST'].includes(item.errorCode ?? ''))
+    return 'The approved content or schedule changed. Review the current creative, date and any native schedule before preparing a new confirmation.'
+  if (item.errorCode === 'BLOCKED_OVERDUE_REVIEW')
+    return 'The planned time has passed. Check the native platform and agree a new schedule before preparing a new confirmation.'
+  if (item.errorCode === 'BLOCKED_TOKEN_OR_TIME')
+    return 'The account token or scheduled time could not be verified. Ask an administrator to review both before preparing a new confirmation.'
+  if (['PRIVATE_PREFLIGHT_UNAVAILABLE', 'CURRENT_PROVIDER_PROOF_REQUIRED'].includes(item.errorCode ?? ''))
+    return 'The exact Facebook account or publishing permission could not be verified. Ask an administrator to check the connection; do not choose a different client account.'
+  if (item.errorCode === 'REVIEWED_PROVIDER_MEDIA_PROOF_REQUIRED')
+    return 'The approved image did not pass the publishing checks. Review the original file before preparing a new confirmation.'
+  if (['PUBLISHING_DISABLED', 'PROVIDER_BINDING_NOT_CONFIGURED', 'EXACT_ACCOUNT_RELEASE_REQUIRED'].includes(item.errorCode ?? ''))
+    return 'Dynamics publishing is not enabled for this account. Continue with Teams and the native platform until the controlled release is approved.'
+  return 'Ask a publishing manager to review this attempt and the native platform before scheduling again. No automatic publication retry is available here.'
+}
 export interface StaffPublicationPreview {
   reviewId: string; clientId: string; accountId: string; platform: 'facebook'; caption: string; mediaType: 'image/png'
   assetSha256: string; scheduledAt: string; fingerprint: string

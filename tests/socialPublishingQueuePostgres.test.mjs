@@ -4,6 +4,7 @@ import { execFileSync, spawn } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import { randomUUID } from 'node:crypto'
 import { createServer } from 'vite'
+import { facebookPostgresJourney } from './fixtures/facebookPostgresJourney.mjs'
 
 // Opt-in REAL PostgreSQL. Never use a shared/project database or a network port.
 const container = process.env.CG_SOCIAL_QA_CONTAINER
@@ -58,9 +59,7 @@ before(async () => {
   const legacy = readFileSync('supabase/migrations/20260801170000_backend_acceptance_hardening.sql', 'utf8')
   sql(legacy.slice(legacy.indexOf('create or replace function public.claim_next_background_job('), legacy.indexOf('drop function if exists public.update_background_job_progress(')))
   sql(readFileSync('supabase/migrations/20261115104948_social_publishing_queue.sql', 'utf8'))
-  sql(readFileSync('supabase/migrations/20261115104950_tiktok_business_oauth.sql', 'utf8'))
   sql(readFileSync('supabase/migrations/20261116085815_social_publication_preparation_evidence.sql', 'utf8'))
-  sql(readFileSync('supabase/migrations/20261116102019_instagram_publication_steps.sql', 'utf8'))
   server = await createServer({ configFile: false, server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true }, logLevel: 'error' })
   queue = await server.ssrLoadModule('/supabase/functions/_shared/socialPublishingQueue.ts')
   authorization = await server.ssrLoadModule('/supabase/functions/_shared/socialPublicationAuthorization.ts')
@@ -160,6 +159,13 @@ function readyInstagramFixture() {
 }
 
 test('real PostgreSQL: queue, source/role fences, crash recovery, receipts and OAuth transactions', { skip: !enabled }, async t => {
+  for (const mode of ['success', 'stale', 'timeout']) await t.test(`Facebook connected SQL journey: ${mode}`, async () => {
+    await facebookPostgresJourney({ server, sql, q, actor, rpcClient, mode })
+  })
+  // Facebook must work with ONLY its queue + captured-source migrations.
+  // Rehearse the two later-platform migrations afterwards, on the same database.
+  sql(readFileSync('supabase/migrations/20261115104950_tiktok_business_oauth.sql', 'utf8'))
+  sql(readFileSync('supabase/migrations/20261116102019_instagram_publication_steps.sql', 'utf8'))
   await t.test('Instagram uses four persisted claims, two distinct mutations and an owner-verified final receipt', async () => {
     const f = instagramFixture(), worker = `ig-flow-${randomUUID()}`, calls = []; let published = false
     const transport = { approvedMediaUrl: async () => 'https://fixture.invalid/approved.jpg', async request(method, path) {

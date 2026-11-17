@@ -128,6 +128,21 @@ test('lost provider response remains unknown, reconciles without another POST, a
   }
 })
 
+test('due-time preflight failure is persisted for manager action, without a provider attempt or blind retry', async () => {
+  for (const code of ['FRESH_TEAMS_EVIDENCE_REQUIRED', 'PRIVATE_PREFLIGHT_UNAVAILABLE', 'PRIVATE token=secret']) {
+    const f = await fixture(), p = await f.invoke({ action: 'preview', reviewId: f.ids.review })
+    await f.invoke({ action: 'confirm', reviewId: f.ids.review, expectedFingerprint: p.body.preview.fingerprint, confirmPublication: true })
+    const job = f.tables.background_jobs[0]
+    const bindings = { ...f.runtime.workerBindings(job.id), async readCurrent() { throw Object.assign(new Error(code), { code }) } }
+    const result = await queue.runClaimedSocialPublication({ sb: f.sb, jobId: job.id, key: job.payload.intent.key, worker: 'fixture', now: f.due, enabled: true, bindings })
+    assert.equal(result.publication.state, 'blocked')
+    assert.equal(result.publication.errorCode, code.startsWith('PRIVATE token') ? 'PUBLICATION_PREFLIGHT_UNAVAILABLE' : code)
+    assert.equal(job.publication.state, 'blocked'); assert.equal(job.publication.started_at, undefined)
+    assert.equal(f.graphCalls.filter(c => c[0] === 'POST').length, 0)
+    assert.equal(JSON.stringify(result).includes('secret'), false)
+  }
+})
+
 test('inactive actor and missing rollout fail before any candidate, media, provider or queue access', async () => {
   const f = await fixture(); f.actor.active = false
   assert.equal((await f.invoke({ action: 'preview', reviewId: f.ids.review })).status, 403)

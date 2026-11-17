@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import clockIcon from '../../assets/lucide/clock.svg'
 import externalLinkIcon from '../../assets/lucide/external-link.svg'
-import { getStaffPublicationStatus, withdrawStaffPublication, canPrepareFacebookPhotoReview, PUBLICATION_STATE_LABELS, PUBLICATION_CONFIRMATION_VISIBLE, type PublicationReview, type StaffPublication, type StaffPublicationStatus } from '../../lib/socialPublishing'
+import { getStaffPublicationStatus, withdrawStaffPublication, canPrepareFacebookPhotoReview, publicationNextAction, PUBLICATION_STATE_LABELS, PUBLICATION_CONFIRMATION_VISIBLE, type PublicationReview, type StaffPublication, type StaffPublicationStatus } from '../../lib/socialPublishing'
 import { ContentPublicationConfirmation } from './ContentPublicationConfirmation'
 
 export function ContentPublicationPanel({ review }: { review: PublicationReview }) {
@@ -58,12 +58,16 @@ function PublicationPanelBody({ review }: { review: PublicationReview }) {
       {!busy && data?.items.length === 0 && <p className="text-sm text-white/70">No Dynamics publication jobs for this review. This does not check native platform schedules.</p>}
       {data?.items.map(item => {
         const needsReview = ['failed', 'blocked', 'unknown_outcome'].includes(item.state)
+        const nextAction = publicationNextAction(item)
         return <div key={item.jobId} className="min-w-0 space-y-2 rounded-lg border border-white/10 bg-white/[0.025] p-3">
           <div className="flex flex-wrap items-center justify-between gap-2"><span className="min-w-0 break-all text-sm font-semibold text-white">{item.accountLabel}</span><span className={`text-xs ${needsReview ? 'text-amber-200' : 'text-brand-teal'}`}>{PUBLICATION_STATE_LABELS[item.state]}</span></div>
           <p className="text-xs text-white/60">{new Date(item.scheduledAt).toLocaleString('en-ZA', { timeZone: 'Africa/Johannesburg' })} SAST</p>
           {item.authorizationState === 'revoked' && <p className="text-xs text-white/60">Publishing authority withdrawn.</p>}
           {item.authorizationState === 'unconfirmed' && <p className="text-xs text-amber-200">No staff confirmation is recorded. This job cannot start publishing.</p>}
-          {needsReview && <p className="text-xs leading-relaxed text-white/60">Check the existing attempt before scheduling again. Do not assume a failed response means nothing was posted.</p>}
+          {nextAction && <div role="status" className="space-y-1 rounded-lg border border-amber-300/20 bg-amber-300/5 p-3">
+            <p className="text-sm font-semibold text-amber-100">Publishing manager action needed</p>
+            <p className="text-sm leading-relaxed text-white/80">{nextAction}</p>
+          </div>}
           <div className="flex flex-wrap gap-2">
             {item.postUrl && <a className={button} href={item.postUrl} target="_blank" rel="noopener noreferrer"><img src={externalLinkIcon} alt="" aria-hidden="true" className="h-4 w-4 invert" />Open verified post</a>}
             {item.authorizationState === 'recorded' && item.state !== 'cancelled' && <button type="button" className={button} disabled={busy} onClick={() => setSelected(item)}>{item.providerMayHaveStarted ? 'Withdraw publishing authority' : 'Stop queued publishing'}</button>}
