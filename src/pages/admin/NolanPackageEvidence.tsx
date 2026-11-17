@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import { NolanPackageRecordEvidence } from './NolanPackageRecordEvidence'
-import { loadNolanPackageEvidence } from '../../lib/nolanPackageEvidence'
+import { loadVerifiedNolanPackageEvidence } from '../../lib/nolanPackageEvidence'
 import type { ActiveClientPackageEvidence } from '../../lib/packageEvidence'
 
 // Lazy, read-only evidence disclosure. Reuse package authority rather than
 // declaring template counts, scheduled rows or invoices to be paid entitlement.
-export function NolanPackageEvidence({ month, refreshGeneration }: { month: string; refreshGeneration: number }) {
+export function NolanPackageEvidence({ month, refreshGeneration, viewer: { userId, profileId, role } }: { month: string; refreshGeneration: number; viewer: { userId: string; profileId: string; role: string } }) {
   const [requested, setRequested] = useState(false)
   const [data, setData] = useState<ActiveClientPackageEvidence[] | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -21,14 +21,14 @@ export function NolanPackageEvidence({ month, refreshGeneration }: { month: stri
       setData(null)
       setCheckedAt(null)
       try {
-        const result = await loadNolanPackageEvidence()
+        const result = await loadVerifiedNolanPackageEvidence({ userId, profileId, role })
         if (!cancelled) { setData(result.data); setCheckedAt(result.checkedAt) }
       } catch (e) { if (!cancelled) setError(e instanceof Error ? e.message : 'Package evidence unavailable.') }
       finally { if (!cancelled) setLoading(false) }
     }
     void load()
     return () => { cancelled = true }
-  }, [requested, retry, refreshGeneration, month])
+  }, [requested, retry, refreshGeneration, month, userId, profileId, role])
   return <details className="coverage-details" onToggle={e => { if (e.currentTarget.open) setRequested(true) }}><summary>Package evidence & reconciliation gaps</summary>
     <div className="coverage"><p>Current recorded package evidence, not proof of payment or historical entitlement for {month}. Scheduled counts, actual published posts and revision/crosspost deduplication remain separate.</p>
       {checkedAt && <p>Package evidence last read: {new Date(checkedAt).toLocaleString('en-ZA', { timeZone: 'Africa/Johannesburg' })} SAST. This is a source-read time, not independent verification.</p>}

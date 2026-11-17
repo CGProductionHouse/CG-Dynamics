@@ -109,7 +109,7 @@ export default function NolanOverview() {
         </li>)}</ul>}
         <p>These are individual reader completion times, not upstream provider refresh times or complete external-source coverage.</p>
       </div></details>
-      {lane === 'packages' && <NolanPackageEvidence key={scope} month={month} refreshGeneration={generation} />}
+      {lane === 'packages' && <NolanPackageEvidence key={scope} month={month} refreshGeneration={generation} viewer={{ userId: user!.id, profileId: profile!.id, role: profile!.role }} />}
       {lane === 'ownership' && <div className="coverage">Open tasks with canonical unresolved, conflicting or unassigned ownership. Missing profile evidence is not an unassigned conclusion; check source errors. Existing owners remain unchanged.</div>}
       {lane === 'needs' && <div className="coverage">Open work with recorded canonical assignment to your signed-in profile. Unrecorded personal decisions are not inferred from notes.</div>}
       {lane === 'special' && <div className="coverage">Existing Once-off and CG Socials tasks. Unclassified campaigns remain in Active work.</div>}

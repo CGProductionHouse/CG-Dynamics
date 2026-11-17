@@ -1,5 +1,13 @@
 import { listClients } from './db/clients'
 import { loadActiveClientPackageEvidenceMatrix } from './packageEvidence'
+import { withNolanVerifiedViewer } from './nolanVerifiedViewer'
+
+export function loadVerifiedNolanPackageEvidence(
+  viewer: { userId: string; profileId: string; role: string },
+  read = loadNolanPackageEvidence,
+) {
+  return withNolanVerifiedViewer(viewer, read)
+}
 
 export async function loadNolanPackageEvidence(
   readClients = () => listClients('active'),

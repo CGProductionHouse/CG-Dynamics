@@ -31,7 +31,7 @@ test('UI refresh/retry cancels superseded reads and clears stale results, with i
   const page = readFileSync('src/pages/admin/NolanPackageEvidence.tsx','utf8')
   const parent = readFileSync('src/pages/admin/NolanOverview.tsx','utf8')
   assert.ok(parent.includes('refreshGeneration={generation}'))
-  assert.ok(page.includes('[requested, retry, refreshGeneration, month]'))
+  assert.ok(page.includes('[requested, retry, refreshGeneration, month, userId, profileId, role]'))
   assert.ok(page.includes('return () => { cancelled = true }'))
   assert.ok(page.includes('if (!cancelled) { setData(result.data); setCheckedAt(result.checkedAt) }'))
   for (const text of ['setData(null)','setCheckedAt(null)','setError(null)','Retry package evidence','Package evidence last read:','disabled={loading}']) assert.ok(page.includes(text))
