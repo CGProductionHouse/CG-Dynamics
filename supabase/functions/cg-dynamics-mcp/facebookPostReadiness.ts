@@ -31,12 +31,12 @@ export async function readFacebookPostReadiness(sb: SupabaseClient, actorId: str
     }
     const offset = Number(input.offset ?? 0), checkedAt = new Date().toISOString()
     const reviews = await sb.from('content_review_versions').select('id,client_id,deliverable_id,state,channels,media_type,scheduled_at')
-      .eq('client_id', input.client_id).eq('state', 'approved').eq('media_type', 'image/png').contains('channels', ['facebook'])
+      .eq('client_id', input.client_id).eq('state', 'approved').in('media_type', ['image/png', 'image/jpeg']).contains('channels', ['facebook'])
       .gt('scheduled_at', checkedAt).order('scheduled_at').order('id').range(offset, offset + 25)
     if (reviews.error || !Array.isArray(reviews.data) || reviews.data.length > 26) return unavailable('CANONICAL_PUBLICATION_SOURCE_UNAVAILABLE')
     const rows = reviews.data.slice(0, 25), seen = new Set<string>()
     for (const r of rows) {
-      if (!uuid(r.id) || !uuid(r.deliverable_id) || r.client_id !== input.client_id || r.state !== 'approved' || r.media_type !== 'image/png'
+      if (!uuid(r.id) || !uuid(r.deliverable_id) || r.client_id !== input.client_id || r.state !== 'approved' || !['image/png', 'image/jpeg'].includes(r.media_type)
         || !Array.isArray(r.channels) || !r.channels.includes('facebook') || typeof r.scheduled_at !== 'string'
         || !(Date.parse(r.scheduled_at) > Date.parse(checkedAt)) || seen.has(r.id)) return unavailable('CANONICAL_PUBLICATION_SOURCE_UNAVAILABLE')
       seen.add(r.id)
@@ -54,7 +54,7 @@ export async function readFacebookPostReadiness(sb: SupabaseClient, actorId: str
           candidates.push({ review_id: r.id, deliverable_id: r.deliverable_id, scheduled_at: r.scheduled_at })
       }
     }
-    return { data_state: 'available', scope: 'future_approved_facebook_png_reviews', client_id: input.client_id, checked_at: checkedAt,
+    return { data_state: 'available', scope: 'future_approved_facebook_photo_reviews', client_id: input.client_id, checked_at: checkedAt,
       candidates, has_more: reviews.data.length > 25, next_offset: reviews.data.length > 25 ? offset + 25 : null,
       canConfirm: false, canPublish: false, note: 'Candidate metadata only. Inspect the exact review before preparing any separate publication confirmation. No native duplicate or publishing permission is inferred.' }
   } catch (error) { return unavailable(publicationPreparationBlocker(error) ?? 'PUBLICATION_VERIFICATION_UNAVAILABLE') }

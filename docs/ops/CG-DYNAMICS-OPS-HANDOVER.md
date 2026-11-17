@@ -1,4 +1,60 @@
-## Latest 17 November — approved Facebook readiness backend LIVE
+## Latest 17 November — company ChatGPT readiness verified; JPEG increment SOURCE ONLY
+
+Continued SAME DRAFT PR991/#220/#236/#269 from7686ca0c; main b524a9f9 remains
+unchanged. Reconciled current PR ownership, including #995 shared MCP catalog,
+#1003 client readiness and #1004 website leads; those lanes remain untouched.
+Company Chrome verified CG(cgproductionhouse.com)/info@cgproductionhouse.com.
+Refreshed ONLY the installed Dynamics plugin's tool discovery; both connections,
+permission mode, signed-in sessions and pinned WhatsApp preserved. Catalog now
+shows30read/30write, including get_facebook_post_readiness. Real company ChatGPT
+[acceptance chat](https://chatgpt.com/c/6afc2fd1-7e60-83e9-8022-40499ad9372c)
+resolved exact Cape Lumber and called the new tool successfully. Bounded MCPv86
+names-only logs independently confirm invocation17Nov10:44:55UTC. Returned
+available/zero candidates/has_more:false/canConfirm:false/canPublish:false.
+This verifies discovery/authentication/candidate listing, NOT native Page/media
+qualification or publication: no eligible approved review exists in that scope.
+
+Signed-in staff review list shows no content awaiting review. Exact Cape Schedule
+17–30Nov:18Nov F3 already scheduled (EXCLUDE, never repost);23Nov DP4 to_do,
+unassigned;25Nov video repost to_do. Microsoft mirror is2Nov, sync hold unchanged.
+Existing23Nov drawer's immutable final-creative admission is present but unsaved;
+its09:00 default is NOT an approved posting time. No source/approval/job writes.
+
+Direct OneDrive canonical portal Graphic Design folder lists dated JPEG+caption
+pairs through18Nov, no23Nov-named final in those14children. Separate1.png–7.png
+are undated/ambiguous: do NOT map or approve them by inference. Search indexing
+missed existing files; use direct listing. One attempted raw18Nov JPEG fetch
+failed403 serviceReadOnly; do not claim real Cape bytes qualified or loop on it.
+
+Reproduced original JPEG rejected by PNG-only Facebook inspection. Source now
+shares the ALREADY approved pinned jpeg-js0.4.4 decoder with Instagram, qualifies
+unchanged strict baseline JPEG originals at inspection/preparation/pre-delivery,
+preserves original SHA256/MIME and retains PNG checks. MCP listing and manager UI
+accept PNG/JPEG metadata without treating it as qualification/approval. No new
+dependency/migration/table/authority/flag. JPEG support is NOT deployed; approved
+v86 PNG-only packet remains unchanged and must not be reused for a new delta.
+
+Validation:95 focused checks,34 actual isolated PostgreSQL checks (including JPEG
+confirmation→real due claim→separate receipt and no duplicate POST),56 local Chrome
+cases375/390/430/1440 and7 actual native-Deno decoder tests pass. External browser
+traffic blocked; Graph/Storage remain simulated. Build/emitted app, scoped lint,
+cached actual MCP/staff/worker type checks and diff pass. Corrected complete suite:
+4992 total /4961 pass /31 skips /0 failures. Initial invalid fixture run aborted;
+only the corrected complete run counts. Generated issue519 test output restored.
+Source self-review is not independent/live acceptance. Owned network-none QA
+container stopped cleanly; other DBs unchanged. Existing four production migration
+holds, Microsoft hold, staff-only management roles and exact live pilot gates stay.
+
+Next: admit one genuinely approved unscheduled original/caption with exact future
+SAST time through existing Schedule flow; qualify actual bytes/native Page/grants
+read-only and resolve fresh captured Teams evidence with its owner. Do not ask
+for a live publication approval on an incomplete packet. Any later JPEG backend,
+staff endpoint/UI, migration or controlled pilot release needs exact approval.
+No production/data/account/settings/Microsoft/Vercel/publication/cost action this
+continuation. Full details in the existing social-publishing receipt. Google
+Control Centre target remains unidentified; no guessed tracker write.
+
+## Earlier 17 November — approved Facebook readiness backend LIVE
 
 CA approved and applied ONLY PR #991 source74327024's read-only MCP packet plus
 SOCIAL_FACEBOOK_PHOTO_INSPECTION_ENABLED=true. Preflight all41 hosted v84 files

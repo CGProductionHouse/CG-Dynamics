@@ -3,7 +3,8 @@ import { resolveMetaPublishingCredential, type MetaPublishingCredentialPorts } f
 import { readFacebookPhotoStatus, submitFacebookPhoto } from './facebookPublishing.ts'
 import { facebookPhotoTransport, verifyFacebookPageAccess } from './facebookPublishingTransport.ts'
 import { approvedSnapshotDelivery, inspectPublicationSnapshot } from './socialPublishingMedia.ts'
-import { verifyFacebookPhotoMedia, FACEBOOK_PHOTO_MAX_BYTES } from './facebookPhotoMedia.ts'
+import { FACEBOOK_PHOTO_MAX_BYTES } from './facebookPhotoMedia.ts'
+import { verifyFacebookPublicationMedia } from './facebookPublicationMedia.ts'
 import type { PublishingIntent, PublishingBinding } from './socialPublishing.ts'
 import type { PublicationTarget } from './socialPublicationAuthorization.ts'
 
@@ -63,7 +64,7 @@ export function facebookPhotoProvider(sb: SupabaseClient, config: FacebookServer
     graphVersion: config.graphVersion, appSecret: config.appSecret,
     resolveUserToken: () => facebookPublishingUserToken(sb, intent, config), approvedMediaUrl: async candidate => {
       // Revalidate the original bytes immediately before creating delivery URL.
-      await verifyFacebookPhotoMedia(await inspectPublicationSnapshot(sb, candidate, FACEBOOK_PHOTO_MAX_BYTES), candidate)
+      await verifyFacebookPublicationMedia(await inspectPublicationSnapshot(sb, candidate, FACEBOOK_PHOTO_MAX_BYTES), candidate)
       return await media(candidate)
     } })
   return {

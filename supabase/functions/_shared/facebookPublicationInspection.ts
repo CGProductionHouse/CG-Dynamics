@@ -1,6 +1,7 @@
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { verifyFacebookPublishingTarget, type FacebookServerConfig } from './facebookPublishingProvider.ts'
-import { verifyFacebookPhotoMedia, FACEBOOK_PHOTO_MAX_BYTES } from './facebookPhotoMedia.ts'
+import { FACEBOOK_PHOTO_MAX_BYTES } from './facebookPhotoMedia.ts'
+import { verifyFacebookPublicationMedia } from './facebookPublicationMedia.ts'
 import { inspectPublicationSnapshot } from './socialPublishingMedia.ts'
 import { readApprovedPublicationSource, readCapturedPublicationSchedule, PublicationPreparationError } from './socialPublicationPreparation.ts'
 import type { FacebookPublicationConfiguration } from './facebookPublicationRuntime.ts'
@@ -31,7 +32,7 @@ export function facebookPublicationInspector(sb: SupabaseClient, server: Faceboo
     const target = Object.freeze({ clientId: row.client_id as string, deliverableId: row.deliverable_id as string, reviewVersionId: reviewId,
       connectionId: mapping.data.connection_id as string, accountId: mapping.data.facebook_page_id as string, route: 'facebook_page' as const })
     const { r, d } = await readApprovedPublicationSource(sb, target)
-    if (r.media_type !== 'image/png' || typeof r.caption !== 'string' || !r.caption.trim() || r.caption.length > 63_206
+    if (!['image/png', 'image/jpeg'].includes(r.media_type) || typeof r.caption !== 'string' || !r.caption.trim() || r.caption.length > 63_206
       || typeof r.scheduled_at !== 'string' || !Number.isFinite(Date.parse(r.scheduled_at))) fail('REVIEWED_PROVIDER_MEDIA_PROOF_REQUIRED')
     const checks: FacebookInspection['checks'] = []
     let accountName: string | null = null, assetSha256: string | null = null
@@ -42,7 +43,7 @@ export function facebookPublicationInspector(sb: SupabaseClient, server: Faceboo
       (async () => {
         const snapshot = await inspectPublicationSnapshot(sb, { clientId: target.clientId, deliverableId: d.id, reviewVersionId: r.id,
           platform: 'facebook', assetPath: r.asset_path, mediaType: r.media_type, caption: r.caption, scheduledAt: r.scheduled_at }, FACEBOOK_PHOTO_MAX_BYTES)
-        await verifyFacebookPhotoMedia(snapshot, target)
+        await verifyFacebookPublicationMedia(snapshot, target)
         return snapshot.assetSha256
       })(),
       readCapturedPublicationSchedule(sb, target, actorId, d, Date.now()),

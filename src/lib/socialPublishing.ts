@@ -36,7 +36,7 @@ export function publicationNextAction(item: Pick<StaffPublication, 'state' | 'er
   return 'Ask a publishing manager to review this attempt and the native platform before scheduling again. No automatic publication retry is available here.'
 }
 export interface StaffPublicationPreview {
-  reviewId: string; clientId: string; accountId: string; platform: 'facebook'; caption: string; mediaType: 'image/png'
+  reviewId: string; clientId: string; accountId: string; platform: 'facebook'; caption: string; mediaType: 'image/png' | 'image/jpeg'
   assetSha256: string; scheduledAt: string; fingerprint: string
 }
 export interface StaffFacebookInspection {
@@ -97,12 +97,12 @@ export async function inspectStaffPublication(reviewId: string): Promise<{ inspe
 
 export type PublicationReview = Pick<ContentReview, 'id' | 'state' | 'channels' | 'media_type'>
 
-/** UI affordance only: the current candidate supports approved Facebook PNGs.
+/** UI affordance only: the current candidate supports approved Facebook PNG/JPEG.
  * Other-platform history/withdrawal remains visible. This does not prove access
  * or override the backend's exact-account/source/authorization release gates.
  */
 export function canPrepareFacebookPhotoReview(review: PublicationReview | null | undefined): boolean {
-  return !!review && UUID.test(review.id) && review.state === 'approved' && review.media_type === 'image/png'
+  return !!review && UUID.test(review.id) && review.state === 'approved' && ['image/png', 'image/jpeg'].includes(review.media_type)
     && Array.isArray(review.channels) && review.channels.includes('facebook')
 }
 
@@ -160,12 +160,12 @@ export async function prepareStaffPublication(reviewId: string): Promise<StaffPu
     const p = data?.preview, t = p?.target
     if (error || data?.ok !== true || !record(p) || !record(t) || t.reviewVersionId !== reviewId || t.route !== 'facebook_page'
       || typeof t.clientId !== 'string' || !UUID.test(t.clientId) || typeof t.accountId !== 'string' || !/^\d+$/.test(t.accountId)
-      || p.platform !== 'facebook' || p.mediaType !== 'image/png' || typeof p.caption !== 'string' || !p.caption.trim() || p.caption.length > 63_206
+      || p.platform !== 'facebook' || !['image/png', 'image/jpeg'].includes(p.mediaType as string) || typeof p.caption !== 'string' || !p.caption.trim() || p.caption.length > 63_206
       || typeof p.assetSha256 !== 'string' || !/^[a-f0-9]{64}$/.test(p.assetSha256)
       || typeof p.fingerprint !== 'string' || !/^[a-f0-9]{64}$/.test(p.fingerprint)
       || typeof p.scheduledAt !== 'string' || !Number.isFinite(Date.parse(p.scheduledAt))) return null
     return { reviewId, clientId: t.clientId, accountId: t.accountId, platform: 'facebook', caption: p.caption,
-      mediaType: 'image/png', assetSha256: p.assetSha256, fingerprint: p.fingerprint, scheduledAt: p.scheduledAt }
+      mediaType: p.mediaType as StaffPublicationPreview['mediaType'], assetSha256: p.assetSha256, fingerprint: p.fingerprint, scheduledAt: p.scheduledAt }
   } catch { return null }
 }
 

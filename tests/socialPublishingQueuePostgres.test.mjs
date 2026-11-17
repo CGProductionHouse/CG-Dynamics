@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs'
 import { randomUUID } from 'node:crypto'
 import { createServer } from 'vite'
 import { facebookPostgresJourney } from './fixtures/facebookPostgresJourney.mjs'
+import { publicationCodecVite } from './fixtures/publicationCodecVite.mjs'
 
 // Opt-in REAL PostgreSQL. Never use a shared/project database or a network port.
 const container = process.env.CG_SOCIAL_QA_CONTAINER
@@ -58,7 +59,7 @@ before(async () => {
   sql("alter table background_jobs add constraint background_jobs_allowed_type check(job_type in ('meta_sync','report_prep','tiktok_analytics_refresh')); grant all on all tables in schema public to service_role;")
   const legacy = readFileSync('supabase/migrations/20260801170000_backend_acceptance_hardening.sql', 'utf8')
   sql(legacy.slice(legacy.indexOf('create or replace function public.claim_next_background_job('), legacy.indexOf('drop function if exists public.update_background_job_progress(')))
-  server = await createServer({ configFile: false, server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true }, logLevel: 'error' })
+  server = await createServer({ configFile: false, plugins: [publicationCodecVite], ssr: { external: ['jpeg-js'] }, server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true }, logLevel: 'error' })
   queue = await server.ssrLoadModule('/supabase/functions/_shared/socialPublishingQueue.ts')
   authorization = await server.ssrLoadModule('/supabase/functions/_shared/socialPublicationAuthorization.ts')
   authorizationStore = await server.ssrLoadModule('/supabase/functions/_shared/socialPublicationAuthorizationStore.ts')
@@ -164,6 +165,9 @@ test('real PostgreSQL: queue, source/role fences, crash recovery, receipts and O
   sql(readFileSync('supabase/migrations/20261116085815_social_publication_preparation_evidence.sql', 'utf8'))
   for (const mode of ['success', 'stale', 'timeout']) await t.test(`Facebook connected SQL journey: ${mode}`, async () => {
     await facebookPostgresJourney({ server, sql, q, actor, rpcClient, mode })
+  })
+  await t.test('Facebook original JPEG: real durable confirmation, due claim and separate verified receipt', async () => {
+    await facebookPostgresJourney({ server, sql, q, actor, rpcClient, mediaType: 'image/jpeg' })
   })
   // Facebook must work with ONLY its queue + captured-source migrations.
   // Rehearse the two later-platform migrations afterwards, on the same database.

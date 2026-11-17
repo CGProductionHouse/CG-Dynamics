@@ -7,6 +7,7 @@ import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { decodeInstagramPublicationJpeg, instagramPublicationCodecRuntime } from '../../supabase/functions/_shared/instagramPublicationCodec.ts'
 import { PUBLICATION_JPEG_DECODE_OPTIONS, verifyPublicationJpeg } from '../../supabase/functions/_shared/publicationJpeg.ts'
 import type { PublishingIntent } from '../../supabase/functions/_shared/socialPublishing.ts'
+import { verifyFacebookPublicationMedia } from '../../supabase/functions/_shared/facebookPublicationMedia.ts'
 
 const fixture = new URL('../../tests/fixtures/publication-baseline-320.jpg', import.meta.url)
 const clientId = '11111111-1111-4111-8111-111111111111'
@@ -62,6 +63,22 @@ Deno.test('real native decoder rejects corrupt entropy; qualification keeps the 
   await rejects(() => decodeInstagramPublicationJpeg(corrupt, PUBLICATION_JPEG_DECODE_OPTIONS))
   await rejects(async () => verifyPublicationJpeg(await snapshot(corrupt), target, decodeInstagramPublicationJpeg),
     'Original publication JPEG qualification unavailable.')
+})
+
+Deno.test('Facebook uses the same actual pinned decoder, preserving bytes and rejecting corrupt entropy or MIME substitution', async () => {
+  const source = await snapshot(await Deno.readFile(fixture)), facebook = { ...target, route: 'facebook_page' as const }
+  const proof = await verifyFacebookPublicationMedia(source, facebook)
+  assert(proof.verified && proof.profile === 'facebook_baseline_jpeg_v1')
+  assert((await snapshot(await Deno.readFile(fixture))).assetSha256 === source.assetSha256)
+  await rejects(() => verifyFacebookPublicationMedia({ ...source, mediaType: 'image/png' }, facebook))
+  await rejects(() => verifyFacebookPublicationMedia({ ...source, assetSha256: 'a'.repeat(64) }, facebook))
+  const original = source.bytes
+  const marker = original.findIndex((value, i) => value === 255 && original[i + 1] === 218)
+  assert(marker > 0)
+  const start = marker + 2 + new DataView(original.buffer).getUint16(marker + 2)
+  const corrupt = new Uint8Array(start + 3)
+  corrupt.set(original.subarray(0, start)); corrupt.set([0, 255, 217], start)
+  await rejects(async () => verifyFacebookPublicationMedia(await snapshot(corrupt), facebook), 'Original publication JPEG qualification unavailable.')
 })
 
 Deno.test('actual codec enforces its native resolution ceiling independently of header admission', async () => {

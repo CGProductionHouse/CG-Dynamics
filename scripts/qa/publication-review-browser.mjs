@@ -19,7 +19,7 @@ const fixture = {
   load(id) {
     if (id.replaceAll('\\', '/').endsWith('/src/lib/supabase.ts')) return `
       window.publicationCalls=[];
-      const preview={ok:true,preview:{target:{reviewVersionId:'${reviewId}',clientId:'${clientId}',accountId:'12345',route:'facebook_page'},platform:'facebook',mediaType:'image/png',caption:'Exact synthetic approved caption',assetSha256:'a'.repeat(64),fingerprint:'b'.repeat(64),scheduledAt:'2026-11-17T08:00:00Z'}};
+      const preview={ok:true,preview:{target:{reviewVersionId:'${reviewId}',clientId:'${clientId}',accountId:'12345',route:'facebook_page'},platform:'facebook',mediaType:new URLSearchParams(location.search).get('media')||'image/png',caption:'Exact synthetic approved caption',assetSha256:'a'.repeat(64),fingerprint:'b'.repeat(64),scheduledAt:'2026-11-17T08:00:00Z'}};
       export const supabase={
         storage:{from(){return{async createSignedUrl(){return{data:{signedUrl:'/tests/fixtures/publication-baseline-320.jpg'},error:null}}}}},
         from(){const q={select(){return q},eq(){return q},order(){return Promise.resolve({data:[],error:null})}};return q},
@@ -81,7 +81,7 @@ try {
       assert.equal(await page.evaluate(() => window.publicationCalls.length), 0)
       cases++
     }
-    for (const query of ['state=superseded', 'channel=instagram', 'channel=tiktok', 'channel=linkedin', 'channel=manual', 'media=image/jpeg']) {
+    for (const query of ['state=superseded', 'channel=instagram', 'channel=tiktok', 'channel=linkedin', 'channel=manual', 'media=image/webp']) {
       await page.goto(`${origin}/review?${query}`)
       await page.getByRole('button', { name: 'Publishing status', exact: true }).click()
       await page.getByText('Synthetic exact Page', { exact: true }).waitFor()
@@ -92,6 +92,19 @@ try {
       await page.getByRole('button', { name: 'Keep current authority', exact: true }).click()
       cases++
     }
+    await page.goto(`${origin}/review?media=image/jpeg`)
+    await page.getByRole('button', { name: 'Publishing status', exact: true }).click()
+    await page.getByRole('button', { name: 'Check Facebook readiness', exact: true }).click()
+    await page.getByText('Approved image', { exact: true }).waitFor()
+    assert.equal(await page.getByRole('button', { name: 'Prepare Facebook schedule', exact: true }).isDisabled(), true)
+    await page.evaluate(() => { window.inspectionAllPass = true })
+    await page.getByRole('button', { name: 'Check Facebook readiness', exact: true }).click()
+    await page.getByRole('button', { name: 'Prepare Facebook schedule', exact: true }).click()
+    await page.getByRole('button', { name: 'Confirm this Facebook schedule', exact: true }).click()
+    await page.getByText(/Confirmation recorded/).waitFor()
+    assert.equal(await page.evaluate(() => window.publicationCalls.filter(c => c.body.action === 'confirm').length), 1)
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1))
+    cases++
     await page.goto(`${origin}/review`)
     await page.getByRole('button', { name: 'Publishing status', exact: true }).click()
     await page.getByRole('button', { name: 'Prepare Facebook schedule', exact: true }).click()

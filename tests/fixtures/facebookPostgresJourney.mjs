@@ -1,10 +1,13 @@
 import assert from 'node:assert/strict'
 import { randomUUID } from 'node:crypto'
 import { deflateSync } from 'node:zlib'
+import { readFileSync } from 'node:fs'
 
 // Isolated SQL integration, not a live provider acceptance. No network escapes:
 // native Graph and Storage are explicit synthetic ports; SQL is real PostgreSQL.
-export async function facebookPostgresJourney({ server, sql, q, actor, rpcClient, mode = 'success' }) {
+export async function facebookPostgresJourney({ server, sql, q, actor, rpcClient, mode = 'success', mediaType = 'image/png' }) {
+  assert.ok(['image/png', 'image/jpeg'].includes(mediaType))
+  const filename = mediaType === 'image/jpeg' ? 'approved.jpg' : 'approved.png'
   const modules = await Promise.all(['facebookPublicationRuntime', 'facebookPublicationStaff', 'socialPublicationAuthorizationStore',
     'socialPublishingQueue', 'socialPublicationManagement', 'metaTokenStorage', 'facebookPublicationInspection'].map(name => server.ssrLoadModule(`/supabase/functions/_shared/${name}.ts`)))
   const [runtimeModule, staff, store, queue, management, tokens, inspection] = modules
@@ -23,7 +26,7 @@ export async function facebookPostgresJourney({ server, sql, q, actor, rpcClient
     insert into clients values(${q(ids.client)},true,'{}');
     insert into monthly_deliverables(id,client_id,scheduled_date,microsoft_source_type,microsoft_plan_id,microsoft_bucket_id,microsoft_task_id)
       values(${q(ids.deliverable)},${q(ids.client)},${q(date)},'planner_task',${q(ids.plan)},${q(ids.bucket)},${q(ids.task)});
-    insert into content_review_versions values(${q(ids.review)},${q(ids.deliverable)},${q(ids.client)},'approved',${q(`${ids.deliverable}/approved.png`)},'image/png','Exact approved fixture caption',array['facebook'],${q(due)});
+    insert into content_review_versions values(${q(ids.review)},${q(ids.deliverable)},${q(ids.client)},'approved',${q(`${ids.deliverable}/${filename}`)},${q(mediaType)},'Exact approved fixture caption',array['facebook'],${q(due)});
     insert into meta_client_assets values(${q(ids.mapping)},${q(ids.client)},${q(ids.connection)},'123',true);
     insert into meta_connections values(${q(ids.connection)},'connected');
     insert into meta_connection_tokens values(${q(ids.connection)},${q(encrypted)});
@@ -36,7 +39,7 @@ export async function facebookPostgresJourney({ server, sql, q, actor, rpcClient
   let signed = 0, posts = 0
   // Only fixed table/column identifiers produced by reviewed modules are used.
   const tables = new Set(['profiles', 'clients', 'content_review_versions', 'monthly_deliverables', 'meta_client_assets', 'meta_connections', 'meta_connection_tokens', 'background_jobs'])
-  const image = png()
+  const image = mediaType === 'image/jpeg' ? readFileSync('tests/fixtures/publication-baseline-320.jpg') : png()
   const sb = { from(table) {
     assert.ok(tables.has(table)); const filters = []
     const rows = () => {
@@ -53,7 +56,7 @@ export async function facebookPostgresJourney({ server, sql, q, actor, rpcClient
     return query
   }, storage: { from(bucket) {
     assert.equal(bucket, 'content-review-snapshots')
-    return { async download(path) { assert.equal(path, `${ids.deliverable}/approved.png`); return { data: new Blob([image], { type: 'image/png' }), error: null } },
+    return { async download(path) { assert.equal(path, `${ids.deliverable}/${filename}`); return { data: new Blob([image], { type: mediaType }), error: null } },
       async createSignedUrl(path) { signed++; return { data: { signedUrl: `${config.projectUrl}/storage/v1/object/sign/${bucket}/${path}?token=synthetic` }, error: null } } }
   } }, async rpc(name, args) {
     if (name === 'read_social_publication_schedule_evidence') {
@@ -97,6 +100,7 @@ export async function facebookPostgresJourney({ server, sql, q, actor, rpcClient
     }
     const p = await invoke({ action: 'preview', reviewId: ids.review })
     assert.equal(p.status, 200, JSON.stringify(p)); assert.equal(signed, 0); assert.equal(posts, 0)
+    assert.equal(p.body.preview.mediaType, mediaType)
     assert.equal(json(`select count(*)::int from background_jobs where payload->'intent'->>'reviewVersionId'=${q(ids.review)}`), 0)
     const request = { action: 'confirm', reviewId: ids.review, expectedFingerprint: p.body.preview.fingerprint, confirmPublication: true }
     const confirmation = await invoke(request), repeated = await invoke(request)

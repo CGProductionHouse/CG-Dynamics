@@ -1,6 +1,121 @@
 # Social publishing — 15 November 2026
 
-## 17 November approved read-only release — LIVE, native acceptance pending
+## 17 November continuation — live company discovery/listing verified; original JPEG source increment
+
+Same DRAFT PR991/#220/#236/#269, parent7686ca0c; fresh main b524a9f9 unchanged.
+Latest open PR ownership and #381 checked. No Nolan/staff/Teams/workboard/package/
+strategy/website-leads work taken over. This supersedes the prior current-URL
+safety-stop/discovery-pending checkpoint below; no browser bypass was used.
+
+### Actual company ChatGPT acceptance
+
+Verified existing company Chrome profile CG(cgproductionhouse.com), Google
+identity info@cgproductionhouse.com and company ChatGPT projects. Reused only the
+isolated verification tab, preserving existing sessions/pinned WhatsApp. In the
+installed Dynamics plugin settings clicked ONLY Refresh tools. Both connections
+and permission mode preserved. Visible catalog30read/30write now includes
+get_facebook_post_readiness and its exact read-only description.
+
+Using Try in chat, actual company conversation
+[Facebook Readiness Check](https://chatgpt.com/c/6afc2fd1-7e60-83e9-8022-40499ad9372c)
+resolved Cape Lumber42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa and successfully executed
+get_facebook_post_readiness at17Nov10:44:55.854UTC. Actual returned state:
+available, scope future_approved_facebook_png_reviews, candidates[], has_more:false,
+next_offset:null, canConfirm:false, canPublish:false. Separate names-only MCPv86
+function log at10:44:55.524UTC confirms the tool call; no credentials/raw payload
+were read. Discovery/authentication/candidate listing are VERIFIED. Native
+Page/permissions/media qualification and publication are NOT verified by an empty
+listing. No fake review, assumed grant, source approval, queue or test post.
+
+Signed-in staff /admin/content-reviews showed No content awaiting review.
+Exact Cape Schedule17–30Nov, complete3rows:18Nov F3 a9c5e00f-b53a-4510-a319-aa5db0b3f5e9
+already scheduled (exclude from pilot);23Nov DP4 e48f8935-88a9-488f-9c88-7a1a137c571f
+to_do/unassigned;25Nov video repost c0ac02d5-6fb7-42e5-8616-23c418085792 to_do,
+not photo pilot. Last Microsoft mirror2Nov11:59:52UTC remains held. Opened exact
+[23Nov staff source](https://www.cgdynamics.co.za/admin/client-schedule?id=e48f8935-88a9-488f-9c88-7a1a137c571f&client=42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa&month=2026-11&mode=all)
+and expanded Send final creative for review. Final-media/caption/channels/SAST
+time/client approval fields exist; submit disabled while empty. NO field edits,
+save or submit. Default09:00 is not an approved time. This is the existing
+canonical admission flow, not a new scheduler or permission grant.
+
+### Concrete JPEG compatibility repair — local only
+
+Direct canonical OneDrive Clients/Cape Lumber/A_ClientPortal_Cape_Lumber/Graphic
+Design listing(14children) has dated JPEG+caption pairs28Oct/2/4/9/11/16/18Nov.
+No23Nov-named final there; this is NOT a whole-drive absence claim. Separate
+Graphic Design1.png–7.png are undated/ambiguous and were not relabelled/mapped.
+Search returned zero despite existing dated files: incomplete search indexing,
+direct children are authoritative. One legitimate raw18Nov JPEG fetch failed
+Microsoft403 serviceReadOnly. No retry, credential workaround or file change.
+Actual Cape byte/profile/content/rights acceptance remains unverified.
+
+Before runtime changes, deterministic actual-JPEG regression reproduced
+REVIEWED_PROVIDER_MEDIA_PROOF_REQUIRED at the PNG-only inspector. Meta's current
+[Page Photos reference](https://developers.facebook.com/docs/graph-api/reference/page/photos/?locale=en_US)
+supports JPEG as well as PNG; our narrower baseline profile stays explicit.
+Reused existing approved jpeg-js@0.4.4, with a shared private codec adapter and
+Facebook qualifier. Inspector, preparation and pre-signed-delivery all qualify
+the SAME original bytes/hash/MIME. No conversion/re-encoding/metadata stripping,
+dependency addition or schema edit. Static PNG integrity remains unchanged.
+JPEG allows only bounded baseline JFIF with real strict pixel decode; progressive,
+EXIF/ICC/MPO, trailing payloads, corrupt entropy, spoofed MIME/hash and decoded
+size bombs fail closed. Metadata eligibility does not promise every JPEG qualifies.
+
+MCP candidate listing now includes PNG/JPEG, scope future_approved_facebook_photo_reviews;
+tool description explicitly distinguishes listing from strict image qualification.
+Manager UI and preview parser preserve actual MIME; unsupported WebP/video, other
+platforms/unapproved/superseded reviews retain existing exclusion/status behavior.
+Instagram keeps its public private-adapter API, now sharing the same actual decoder.
+All release flags/exact-account/source/role/Teams/lease/unknown-outcome gates stay.
+Live MCPv86 remains approved source74327024, PNG-only. THIS JPEG delta is source-only;
+do not overwrite/redeploy the already approved private packet or imply its approval
+covers this revision. No source change to staff-authorizer/worker registration,
+OAuth, consent, mappings, permission, Microsoft capture or publication activation.
+
+### Validation and exact next action
+
+95 focused runtime/MCP/provider/manager checks pass. Real isolated PostgreSQL:
+34/34 checks, with inspection before any publishing migration, then Facebook's
+minimal queue+evidence pair; original JPEG passes duplicate confirmation→future
+claim refusal→actual due claim→synthetic native POST→independent verified receipt.
+One POST only. PNG success/stale/lost-response and later-platform role/fencing/
+rollback checks remain green after the other2 migrations. Graph/Storage/SDK
+network are simulated; database/RPC/lease/status logic is actual PostgreSQL.
+Only owned verified network-none QA container used and stopped exit0.
+
+56 actual isolated Chrome cases at375/390/430/1440 pass, all non-loopback requests
+blocked, including JPEG read-only checks/blocked preparation/explicit confirmation,
+staff/client exclusion and stale async/uncertain receipt behavior. Viewed390px
+readiness screenshot: legible check rows and separate queued/blocked state.
+7 native Deno2.9.8 tests pass with unchanged npm import/actual decoder, denied
+net/env/write/run/ffi/sys and read only the synthetic fixture. Node qualification
+also executes shared and Instagram adapters with actual integrity-verified package.
+No mock decoder/proof. Vite test bridge resolves only the pinned Deno npm specifier
+through actual CommonJS package, validating name/version; use installed npm-ci
+package or CG_PUBLICATION_JPEG_PACKAGE for an already qualified task-local copy.
+No shared node_modules edits. Build/emitted ContentReviewCard/ClientSchedule app,
+scoped lint, cached actual MCP/staff/worker Deno checks and diff pass.
+Completed full suite: **4992 total /4961 pass /31 skips /0 failures** (553.6s).
+Generated issue519 test output restored; source self-review finds no blocker to
+this source-only increment, not live release or independent platform acceptance.
+Initial broad run had obsolete fixture env variable; aborted
+that owned test process tree and reran with explicit loopback URL/publishable-key
+fixture. Invalid run is NOT counted as acceptance. No product change to hide it.
+
+Next is actual approved unscheduled source admission through the existing23Nov
+drawer, exact future SAST time, actual original-byte/native Page/grant/duplicate
+evidence and owner-resolved fresh Teams capture at confirmation AND due time.
+Do not infer source/approval/time from an undated file, past publish or default UI.
+No complete live packet exists yet; no request to publish or apply schema now.
+JPEG backend/UI/endpoint release is separate from the already-approved read-only
+PNG packet and requires exact reviewed approval. Four production migrations stay
+unapplied per fresh release readback; no new migration was added. No production
+write, deployment/config, account/OAuth, Microsoft, publication, Vercel or cost.
+Same existing trackers updated at committed revision; Google Control Centre
+reference remains unidentified, no guessed write. Later-platform dependency plan
+and protected rollback remain in the existing sections below, not a second list.
+
+## Earlier 17 November approved read-only release — LIVE, discovery superseded above
 
 CA approved the exact read-only readiness release and inspection flag in this
 chat. Tested source is PR #991 revision `74327024ec8976e3d4747701af1c3234b6228a06`.

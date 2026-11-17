@@ -1,6 +1,6 @@
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { facebookPhotoProvider, verifyFacebookPublishingTarget, type FacebookServerConfig } from './facebookPublishingProvider.ts'
-import { verifyFacebookPhotoMedia } from './facebookPhotoMedia.ts'
+import { verifyFacebookPublicationMedia } from './facebookPublicationMedia.ts'
 import { publicationCandidateReader, type PrivatePublicationPreparationChecks } from './socialPublicationPreparation.ts'
 import { publicationRuntimeSource } from './socialPublicationRuntimeSource.ts'
 import type { SocialProviderBindings } from './socialPublishingQueue.ts'
@@ -62,7 +62,7 @@ export function facebookPublicationRuntime(sb: SupabaseClient, configuration: Fa
   if (release.route !== 'facebook_page') throw new Error('Exact Facebook publication release unavailable.')
   const readCandidate = publicationCandidateReader(sb, { release,
     verifyProvider: target => verifyFacebookPublishingTarget(sb, target, server),
-    verifyMedia: (snapshot, target) => verifyFacebookPhotoMedia(snapshot, target) })
+    verifyMedia: (snapshot, target) => verifyFacebookPublicationMedia(snapshot, target) })
   const provider = facebookPhotoProvider(sb, server)
   const source = publicationRuntimeSource(sb, release, readCandidate), assertTarget = source.assertTarget
   return {

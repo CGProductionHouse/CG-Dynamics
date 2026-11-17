@@ -21,7 +21,13 @@ const server = await createServer({ configFile: false, server: { middlewareMode:
 try {
   const { verifyPublicationJpeg, PUBLICATION_JPEG_DECODE_OPTIONS } = await server.ssrLoadModule('/supabase/functions/_shared/publicationJpeg.ts')
   const runtimeModule = await server.ssrLoadModule('/supabase/functions/_shared/instagramPublicationRuntime.ts')
-  const adapter = {}, imports = { 'npm:jpeg-js@0.4.4': codec, './instagramPublicationRuntime.ts': runtimeModule }
+  const shared = {}
+  vm.runInNewContext(ts.transpileModule(readFileSync('supabase/functions/_shared/publicationJpegCodec.ts', 'utf8'), {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, esModuleInterop: true },
+  }).outputText, { exports: shared, require(id) {
+    assert.equal(id, 'npm:jpeg-js@0.4.4'); return codec
+  } })
+  const adapter = {}, imports = { './publicationJpegCodec.ts': shared, './instagramPublicationRuntime.ts': runtimeModule }
   // Execute the actual adapter against the actual qualified CommonJS package;
   // Vite's ESM runner cannot inline its `require` calls. This is Node acceptance,
   // not a claim of native Deno npm resolution or hosted Edge CPU acceptance.

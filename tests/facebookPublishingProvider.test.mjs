@@ -2,10 +2,11 @@ import assert from 'node:assert/strict'
 import { before, after, test } from 'node:test'
 import { createServer } from 'vite'
 import { createHash, createHmac } from 'node:crypto'
+import { publicationCodecVite } from './fixtures/publicationCodecVite.mjs'
 
 let server, transport, media, credentials, tokens, adapter, executor
 before(async () => {
-  server = await createServer({ logLevel: 'error', optimizeDeps: { noDiscovery: true, include: [] }, server: { middlewareMode: true }, appType: 'custom' })
+  server = await createServer({ plugins: [publicationCodecVite], ssr: { external: ['jpeg-js'] }, logLevel: 'error', optimizeDeps: { noDiscovery: true, include: [] }, server: { middlewareMode: true }, appType: 'custom' })
   transport = await server.ssrLoadModule('/supabase/functions/_shared/facebookPublishingTransport.ts')
   media = await server.ssrLoadModule('/supabase/functions/_shared/socialPublishingMedia.ts')
   credentials = await server.ssrLoadModule('/supabase/functions/_shared/facebookPublishingProvider.ts')

@@ -6,11 +6,12 @@ import { deflateSync } from 'node:zlib'
 import { readFileSync } from 'node:fs'
 import ts from 'typescript'
 import vm from 'node:vm'
+import { publicationCodecVite } from './fixtures/publicationCodecVite.mjs'
 
 let server, runtimeModule, staff, storeModule, queue, tokenModule, inspection, mcpReadiness
 const originalFetch = globalThis.fetch
 before(async () => {
-  server = await createServer({ configFile: false, server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true }, logLevel: 'error' })
+  server = await createServer({ configFile: false, plugins: [publicationCodecVite], ssr: { external: ['jpeg-js'] }, server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true }, logLevel: 'error' })
   runtimeModule = await server.ssrLoadModule('/supabase/functions/_shared/facebookPublicationRuntime.ts')
   staff = await server.ssrLoadModule('/supabase/functions/_shared/facebookPublicationStaff.ts')
   storeModule = await server.ssrLoadModule('/supabase/functions/_shared/socialPublicationAuthorizationStore.ts')
@@ -37,6 +38,27 @@ test('read-only inspection verifies the mapped Page and original image while Tea
   assert.equal(JSON.stringify(report).includes('fixture-user-token'), false)
 })
 after(async () => { try { await server?.close() } finally { globalThis.fetch = originalFetch } })
+
+test('original JPEG follows Facebook inspection, confirmation and worker submission without conversion', async () => {
+  const f = await fixture({ image: readFileSync('tests/fixtures/publication-baseline-320.jpg'), mediaType: 'image/jpeg' })
+  const report = await inspection.facebookPublicationInspector(f.sb, f.config, null)(f.ids.review, f.ids.actor)
+  assert.equal(report.checks.find(c => c.key === 'image').status, 'pass')
+  assert.equal(report.canPublish, false)
+  const preview = await f.invoke({ action: 'preview', reviewId: f.ids.review })
+  assert.equal(preview.status, 200, JSON.stringify(preview))
+  assert.equal(preview.body.preview.mediaType, 'image/jpeg')
+  assert.equal(f.graphCalls.some(c => c[0] !== 'GET'), false)
+  assert.equal(f.calls.some(c => c[0] === 'sign'), false)
+  const confirmation = { action: 'confirm', reviewId: f.ids.review, expectedFingerprint: preview.body.preview.fingerprint, confirmPublication: true }
+  const first = await f.invoke(confirmation)
+  assert.deepEqual(await f.invoke(confirmation), first)
+  const job = f.tables.background_jobs[0]
+  assert.equal(job.payload.intent.mediaType, 'image/jpeg')
+  const dispatch = () => queue.runClaimedSocialPublication({ sb: f.sb, jobId: job.id, key: job.payload.intent.key, worker: 'jpeg-fixture', now: f.due, enabled: true, bindings: f.runtime.workerBindings(job.id) })
+  assert.equal((await dispatch()).publication.state, 'processing')
+  assert.equal((await dispatch()).publication.state, 'posted')
+  assert.equal(f.graphCalls.filter(c => c[0] === 'POST').length, 1)
+})
 function staticPng() {
   function chunk(type, data) {
     const b = Buffer.alloc(data.length + 12); b.writeUInt32BE(data.length); b.write(type, 4); data.copy(b, 8)
@@ -51,9 +73,10 @@ async function fixture(options = {}) {
   const release = { approved: true, clientId: ids.client, connectionId: ids.connection, accountId: '123', route: 'facebook_page' }
   const config = { graphVersion: 'v27.0', appId: '789', appSecret: 'fixture-app-secret', projectUrl: 'https://fixture.supabase.co',
     encryptionKey: Buffer.alloc(32, 3).toString('base64'), keyVersion: 'v1' }
-  const image = staticPng(), date = new Date(Date.parse(due) + 7200_000).toISOString().slice(0, 10)
+  const image = options.image ?? staticPng(), mediaType = options.mediaType ?? 'image/png'
+  const date = new Date(Date.parse(due) + 7200_000).toISOString().slice(0, 10)
   const tables = { profiles: [{ id: ids.actor, role: 'manager', is_active: true }], clients: [{ id: ids.client, active: true }],
-    content_review_versions: [{ id: ids.review, client_id: ids.client, deliverable_id: ids.deliverable, state: 'approved', asset_path: `${ids.deliverable}/approved.png`, media_type: 'image/png', channels: ['facebook'], caption: 'Exact approved caption', scheduled_at: due }],
+    content_review_versions: [{ id: ids.review, client_id: ids.client, deliverable_id: ids.deliverable, state: 'approved', asset_path: `${ids.deliverable}/approved.${mediaType === 'image/jpeg' ? 'jpg' : 'png'}`, media_type: mediaType, channels: ['facebook'], caption: 'Exact approved caption', scheduled_at: due }],
     monthly_deliverables: [{ id: ids.deliverable, client_id: ids.client, scheduled_date: date, production_status: 'not_started', archived_at: null, posted_at: null, microsoft_task_id: 'fixture-task' }],
     meta_client_assets: [{ id: randomUUID(), client_id: ids.client, connection_id: ids.connection, facebook_page_id: '123', is_active: true }],
     meta_connections: [{ id: ids.connection, status: 'connected' }],
@@ -66,7 +89,7 @@ async function fixture(options = {}) {
       return { data: found.length === 1 ? structuredClone(found[0]) : null, error: found.length > 1 ? {} : null }
     } }; return q
   }, storage: { from(bucket) { assert.equal(bucket, 'content-review-snapshots'); return {
-    async download(path) { calls.push(['download', path]); return { data: new Blob([image], { type: 'image/png' }), error: null } },
+    async download(path) { calls.push(['download', path]); return { data: new Blob([image], { type: mediaType }), error: null } },
     async createSignedUrl(path, seconds) { calls.push(['sign', path]); assert.equal(seconds, 300); return { data: { signedUrl: `${config.projectUrl}/storage/v1/object/sign/content-review-snapshots/${path}?token=fixture-signed` }, error: null } },
   } } }, async rpc(name, args) {
     calls.push(['rpc', name, args])

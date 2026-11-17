@@ -230,7 +230,7 @@ const settle = async () => { for (let n = 0; n < 8; n++) await Promise.resolve()
 
 test('actual Facebook confirmation is absent for unapproved, other-platform or unsupported-format reviews', () => {
   for (const change of [{ state: 'rejected' }, { state: 'superseded' }, { state: 'pending' }, { channels: ['instagram'] }, { channels: ['tiktok'] },
-    { channels: ['linkedin'] }, { channels: ['manual'] }, { channels: [] }, { channels: null }, { media_type: 'video/mp4' }, { media_type: 'image/jpeg' }]) {
+    { channels: ['linkedin'] }, { channels: ['manual'] }, { channels: [] }, { channels: null }, { media_type: 'video/mp4' }, { media_type: 'image/webp' }]) {
     let reads = 0
     const c = componentHarness({ prepareStaffPublication: async () => { reads++; return confirmationPreview } }, ids.review, true, change)
     assert.equal(c.text().includes('Prepare Facebook schedule'), false, JSON.stringify(change))
@@ -238,8 +238,8 @@ test('actual Facebook confirmation is absent for unapproved, other-platform or u
   }
 })
 
-test('supported approved Facebook PNG metadata permits the candidate without implying provider access', () => {
-  const review = { id: ids.review, state: 'approved', media_type: 'image/png', channels: ['instagram', 'facebook'] }
+for (const media_type of ['image/png', 'image/jpeg']) test(`supported approved Facebook ${media_type} metadata permits the candidate without implying provider access`, () => {
+  const review = { id: ids.review, state: 'approved', media_type, channels: ['instagram', 'facebook'] }
   assert.equal(frontend.canPrepareFacebookPhotoReview(review), true)
   for (const value of [null, undefined, { ...review, id: 'not-a-review' }, { ...review, channels: null }]) assert.equal(frontend.canPrepareFacebookPhotoReview(value), false)
   const c = componentHarness({ prepareStaffPublication: async () => confirmationPreview }, ids.review, true, review)
@@ -247,7 +247,7 @@ test('supported approved Facebook PNG metadata permits the candidate without imp
 })
 
 test('panel hides new authority for unsupported reviews but preserves status and exact withdrawal', async () => {
-  for (const change of [{ state: 'superseded' }, { channels: ['instagram'] }, { channels: ['tiktok'] }, { media_type: 'image/jpeg' }]) {
+  for (const change of [{ state: 'superseded' }, { channels: ['instagram'] }, { channels: ['tiktok'] }, { media_type: 'image/webp' }]) {
     const f = await fixture(), status = await readStatus(f); let writes = 0
     const panel = componentHarness({ PUBLICATION_CONFIRMATION_VISIBLE: true, getStaffPublicationStatus: async () => status,
       withdrawStaffPublication: async () => { writes++; return { state: 'cancelled', providerMayHaveStarted: false } } }, ids.review, false, change)
@@ -370,7 +370,10 @@ test('browser preview is default-hidden, requests only review ID and refuses for
   supabase.functions.invoke = async (name, options) => { calls.push([name, options]); return { data: previewResponse(), error: null } }
   assert.deepEqual(await frontend.prepareStaffPublication(ids.review), confirmationPreview)
   assert.deepEqual(calls, [['social-publication-authorization', { body: { action: 'preview', reviewId: ids.review } }]])
-  for (const change of [p => { p.target.reviewVersionId = randomUUID() }, p => { p.target.route = 'instagram_login' }, p => { p.mediaType = 'image/jpeg' },
+  const jpeg = previewResponse(); jpeg.preview.mediaType = 'image/jpeg'
+  supabase.functions.invoke = async () => ({ data: jpeg, error: null })
+  assert.deepEqual(await frontend.prepareStaffPublication(ids.review), { ...confirmationPreview, mediaType: 'image/jpeg' })
+  for (const change of [p => { p.target.reviewVersionId = randomUUID() }, p => { p.target.route = 'instagram_login' }, p => { p.mediaType = 'image/webp' },
     p => { p.fingerprint = 'private' }, p => { p.scheduledAt = 'tomorrow' }, p => { p.target.accountId = 'invalid/page' }]) {
     const data = previewResponse(); change(data.preview); supabase.functions.invoke = async () => ({ data, error: null })
     assert.equal(await frontend.prepareStaffPublication(ids.review), null)

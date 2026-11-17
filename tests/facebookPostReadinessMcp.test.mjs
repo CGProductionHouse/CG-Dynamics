@@ -2,10 +2,11 @@ import assert from 'node:assert/strict'
 import { before, after, test } from 'node:test'
 import { createServer } from 'vite'
 import { readFileSync } from 'node:fs'
+import { publicationCodecVite } from './fixtures/publicationCodecVite.mjs'
 
 let server, adapter, policy, catalog
 before(async () => {
-  server = await createServer({ configFile: false, server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true }, logLevel: 'error' })
+  server = await createServer({ configFile: false, plugins: [publicationCodecVite], ssr: { external: ['jpeg-js'] }, server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true }, logLevel: 'error' })
   adapter = await server.ssrLoadModule('/supabase/functions/cg-dynamics-mcp/facebookPostReadiness.ts')
   policy = await server.ssrLoadModule('/supabase/functions/cg-dynamics-mcp/projectContext.ts')
   catalog = await server.ssrLoadModule('/supabase/functions/cg-dynamics-mcp/toolCatalog.ts')
@@ -65,7 +66,20 @@ test('query errors are unavailable, and a genuinely empty candidate page is scop
     const r = await f.read(); assert.equal(r.data_state, 'unavailable'); assert.doesNotMatch(JSON.stringify(r), /PRIVATE/)
   }
   const f = fixture(0), r = await f.read()
-  assert.deepEqual(r.candidates, []); assert.equal(r.scope, 'future_approved_facebook_png_reviews'); assert.equal(r.canPublish, false)
+  assert.deepEqual(r.candidates, []); assert.equal(r.scope, 'future_approved_facebook_photo_reviews'); assert.equal(r.canPublish, false)
+})
+
+test('candidate listing includes original JPEG alongside PNG, excluding WebP and unapproved or scheduled work', async () => {
+  const f = fixture(5)
+  f.tables.content_review_versions[1].media_type = 'image/jpeg'
+  f.tables.content_review_versions[2].media_type = 'image/webp'
+  f.tables.content_review_versions[3].state = 'client_review'
+  f.tables.monthly_deliverables[4].production_status = 'scheduled'
+  const result = await f.read()
+  assert.deepEqual(result.candidates.map(r => r.review_id), [id(1), id(2)])
+  assert.equal(result.scope, 'future_approved_facebook_photo_reviews')
+  assert.equal(result.has_more, false); assert.equal(result.canPublish, false)
+  assert.deepEqual(f.envReads, [])
 })
 test('exact inspection refuses a different client review and stays off without its own read-only gate', async () => {
   const f = fixture(); assert.equal((await f.read({ client_id: client, review_id: id(1) })).code, 'PUBLICATION_INSPECTION_DISABLED')
