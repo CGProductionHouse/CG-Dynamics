@@ -12,13 +12,31 @@ Source merge does not mean staff production browser acceptance or deployment.
 
 ## 16 November — Dulux logo LIVE; exact missing-logo continuation checkpoint
 
-17Nov continuation: Bloem Marble's already selected logo library now enabled,
-fresh DB one active asset/client-fields hash unchanged. Four enabled logos in
-this continuation overall; five remaining source copies still unpublished/private.
-Daisy selection/display label was not saved. Windows control stopped on URL
-verification after Chrome inventory showed WhatsApp; no further UI input. CA
-must keep Dynamics active for remaining steps. Same PR1003; no Vercel/runtime,
-package/provider/strategy/report change or duplicate copies. Receipt linked below.
+17Nov completion SUPERSEDES partial states below: all five remaining Daisy,
+Econofoods, Emmanuel(clean separate original), Mimosa and Vrystaat(master PDF)
+logos published 07:53:08 UTC and exact libraries enabled. Nine selected logos
+enabled overall, including Bloem Marble. Fresh exact source/hash/parent/category
+checks; no repeated copies. Final five used authorised guarded existing-table
+Supabase transaction after Windows URL safety stopped UI input; no bypass.
+Real replay returned identical asset IDs/timestamps, zero duplicates. Four existing
+client logins/downloads/hash/isolation pass; Mimosa own-client acceptance HELD
+because no issued login exists. Client rows/package/header references unchanged,
+RLS/grants unchanged. Brand Hub completion is not a header-alias fix or new mobile
+acceptance. Same draft PR1003, 99 focused tests/build/diff pass; no Vercel/runtime.
+
+Next-client Bat Hill: existing issued login/own logo download/isolation pass;
+routine mapped October Meta sync succeeded, 3 re-observed/7 retained unique posts,
+14 fresh facts: 13 complete/1 NULL. Reviewed report69365380 deliberately published
+08:07:42 UTC via authenticated-admin guarded update; real client reads it latest,
+7 posts/28 current + comparison facts. Older published reports, November draft, client/
+package and all strategy rows unchanged. November Plan remains unpublished:
+canonical guard blocks unquantified formats; recurring social IS already
+confirmed, NULL quantities must not be invented or service reconfirmed. No strategy
+guard bypass or duplicate writer. Latest #731 task lookup404 means scheduler state
+UNVERIFIED. No provider setup/mapping/OAuth, social publishing or migration.
+[Bat Hill receipt](BAT-HILL-CLIENT-READINESS-2026-11-17.md).
+
+Historical 16 November partial states follow; use the current completion receipt first.
 
 CA explicitly authorized exact OneDrive logos for Dulux and other missing-logo
 active clients. Dulux original294093bytes copied/hash-verified, selected through

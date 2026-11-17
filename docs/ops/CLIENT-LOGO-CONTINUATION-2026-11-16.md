@@ -1,5 +1,63 @@
 # Client logo continuation — 16 November 2026
 
+## 17 November completion — all five remaining Brand Hub logos saved
+
+This receipt supersedes the partial states below. Daisy & Co, Econofoods,
+Emmanuel Funerals, Mimosa Mall and Vrystaat Kunstefees each now have one active
+opaque logo asset and an enabled exact-client library. All five were published
+at `2026-11-17T07:53:08.107247Z`. Nine selected logos are enabled overall,
+including the already-completed Dulux, Bat Hill, Bohemia and Bloem Marble.
+
+Fresh canonical client/binding/library/category/file identity, parent, MIME,
+size and reviewed SHA256 checks preceded publication. Vrystaat's PDF was
+independently downloaded again: 109316 bytes and the reviewed SHA256 match.
+No original or staged file was copied again, moved, renamed or overwritten.
+
+The supported Windows browser URL check stopped UI input again. No input or
+alternate browser-control bypass followed that stop. The final five publications
+used the authorised Supabase connection: one exact-source guarded transaction
+in the EXISTING library/asset tables, preserving the deployed publish/enable
+contract. Expected complete client/binding/library/category state was fenced;
+different existing assets or staff changes would refuse the operation. No new
+RPC, schema, grant, permission or store. Repeating the same operation returned
+the same five asset IDs AND publication timestamps, with no duplicate rows.
+This is backend saved-state proof, not an admin-UI acceptance claim.
+
+| Client | Opaque published asset | Original bytes | SHA256 |
+| --- | --- | ---: | --- |
+| Daisy & Co | d2b66001-60f6-44f7-9a95-157397ce6620 | 1910001 | b65f687b9446a23562b77f226742b8f7f99ca22803a8638a0bacf371851cdf45 |
+| Econofoods | 85f068ee-672b-444b-a09a-a0cea52859f4 | 37589 | 7554a5a0c8ee9e1f6afb1452cbb5bb9182d698fb3b0da67c630000dc72ff4ef3 |
+| Emmanuel Funerals | 29ec7f2a-ec04-4b63-aa16-0b2a250e1bcf | 103114 | 03f4779701e3e90adfb2b24322611d6ce5fe859f32dd275092bd05b6f3dd355d |
+| Mimosa Mall | 2bb01e2c-aaad-4665-add4-a60ed8d71f8f | 8132 | c72a43d48697c46849bffe4135323f3cdbb854397a4e9be79e9eade8c5536af5 |
+| Vrystaat Kunstefees | 2e3dbb67-d714-465b-a537-37307a0d81db | 109316 | e02bf2d2fc2da2e685d9930d0b048f8ffa29135dccf220de597a911f66f2f2b3 |
+
+Daisy/Econofoods/Emmanuel/Vrystaat actual issued client login200/exact subject,
+library200/one expected asset, first-party download200/exact bytes+SHA256,
+foreign Novus AND foreign newly-published Mimosa asset404. Client projections
+contain no raw provider identity/path. Mimosa has no issued portal login:
+its exact stored asset/enabled library are verified, own-client acceptance is
+held; no account was created/reset to manufacture proof. All five complete
+client rows/package/header references remain unchanged. Authenticated direct
+SELECT/INSERT/UPDATE remain denied on the three library tables; RLS remains on.
+
+No fresh desktop/mobile acceptance is claimed after the UI safety stop. Brand
+Hub delivery does not fix the separate header-alias/source gaps listed below.
+The client-safe master festival mark does not assert a current programme, and
+Emmanuel's old marketing mockup remains unselected/private.
+
+Bat Hill's next-client reporting/login work progressed separately: October
+refreshed and deliberately published, real client reads verified, unknown-scope
+strategy gate preserved. [Exact readiness receipt](BAT-HILL-CLIENT-READINESS-2026-11-17.md).
+All five own API test sessions closed local-only204; company/browser sessions
+and other-agent work untouched. No Vercel, migration, provider setup, social
+publishing, package or strategy mutation. All 99 focused tests pass, no failures/skips;
+source TypeScript/Vite build with explicit local fixture configuration passes.
+Initial test attempts without fixture env / with the wrong fixture port failed;
+the exact unchanged suite passes with its required 127.0.0.1:1 origin. No assertion
+was changed. Build is local source verification, not a release artifact.
+
+## Historical partial receipts — superseded by the completion above
+
 ## 17 November continuation — Bloem Marble enabled; five publications remain
 
 Fresh current-main/PR1003/#668/#381 and read-only source/DB checks preceded
