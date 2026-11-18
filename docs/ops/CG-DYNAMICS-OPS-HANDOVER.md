@@ -1,3 +1,31 @@
+## 18 November — Ehrlich accepted; Econofoods video-only launch held
+
+Same isolated DRAFT PR1003, mainb524a9f9 unchanged, NO VERCEL. EHPec643c75 exact
+Facebook refreshPASS:3reobserved/7retained posts/6facts,0duplicates/outsidePacific
+October, unavailableNULL/followerssnapshot. Octobere37eb8db published13:12:31UTC;
+Novemberfbd1940ev6 reviewed/published13:14:42UTC,1video3photos4posters. Changed
+ONLY Goldtest evidence plus canonicalprovenance; all otherstaffcopy/8concepts/
+notes preserved. Real login/report/Plan/brandfile pass, foreign403/file404,
+no directforeign/draftrows. Header/sourcehash match, originaldownload verified;
+no duplicate upload. Client/package,7otherreports/4other-monthstrategies unchanged;
+Decemberv2/Januaryv1 remain drafts. Existing#731 author remains sole futurewriter.
+
+Econofoods61acf81b explicitconfirmed5videos, socialmanagementexcluded. No mapped
+social/report, no refresh/setup/fake analytics. Existing Nov/Dec genericdrafts
+remain private/evidence-held and all4strategyhashes unchanged. Six canonical
+Sep–Novruns inspected read-only: Nov5/10 PLANNING, no guideline/videos, unmapped/
+uploadunverified; cancelledSep23 draft has3ideas, not finishedNovemberproduction.
+No source/date/rights/mapping guesses. Issuedlogin/BrandHub/originallogo/isolation
+pass. Actualheader candidates200HTML are NOTimages; exact verified original
+PNGprepared public/client-logos/econofoods.png SOURCEONLY/NOTLIVE. No Vercel.
+
+Both testAPI sessions closedLOCAL-only204; browser/other-agentwork untouched,
+no freshphoneclaim. Fresh98/98scopedtests includingrealSQL andcopyloginchecks,
+build/emittedPNGhash/lint/diffpass. SharedHMRlisteneruntouched. No schemaapply,
+runtime release/provider/OAuth/config/socialpublishing change; priorCGprivacy
+migration freshlyconfirmedUNAPPLIED. CG/BatHillholds retained. NextElcheck7b7d244f.
+[Exact source, fingerprints and protected holds](ECONOFOODS-EHRLICH-CLIENT-READINESS-2026-11-18.md).
+
 ## 17 November — Delta Gas report / Plan / logos accepted; no Vercel
 
 Same DRAFT PR1003 after CG/Daisy checkpointcbcf63c5. Delta06b20bb1 exact existing
