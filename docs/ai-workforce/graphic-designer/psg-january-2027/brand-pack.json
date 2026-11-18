@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "status": "r7-recent-social-refinement-internal-review-not-for-delivery",
+  "status": "r8-circle-correction-hd-internal-review-not-for-delivery",
   "observedAt": "2026-11-18",
   "clientId": "29a28efd-c998-45e2-a57c-4a751e779e66",
   "clientName": "PSG Bloemfontein",
@@ -70,7 +70,9 @@
     ],
     "workingPaletteEvidence": "Existing secondary palette reconciled visually with six actual local Facebook posters; exact Kit token readback remains open.",
     "exactKitPaletteVerified": false,
-    "supersededR6WorkingDesign": "DAHbJ6mIth4"
+    "supersededR6WorkingDesign": "DAHbJ6mIth4",
+    "currentRevision": "R8",
+    "amendedExistingDraftInPlace": true
   },
   "mediaAuthority": "OneDrive Clients/PSG",
   "oneDrive": {
@@ -165,8 +167,9 @@
     "Exact Kit colour-token reconciliation",
     "Relevant queued/approved artwork and bounded social/source coverage limits",
     "January allocation including existing human New Year artwork",
-    "Current native amendment and genuine Canva HD export",
-    "Exact-authorised official working-lane transfer"
+    "Native API text amendment and normal company ChatGPT end-to-end proof",
+    "Exact-authorised official working-lane transfer",
+    "Canva export colour-profile evidence unresolved; no guessed retagging"
   ],
   "supersededR6Verification": {
     "currentVersion": "R6",
@@ -213,7 +216,7 @@
     "actualQueuedApprovalCoverageComplete": false,
     "globalUnusedCertified": false
   },
-  "verification": {
+  "supersededR7Verification": {
     "currentVersion": "R7",
     "declaredLocalLayers": 57,
     "nativeLiveTexts": 19,
@@ -244,5 +247,55 @@
     "whatsappSent": false,
     "normalCompanyChatgptInvocationVerified": false,
     "officialMasterChangedByThisRun": false
+  },
+  "verification": {
+    "currentVersion": "R8",
+    "nativeLiveTexts": 19,
+    "nativeIndependentImageFills": 36,
+    "importantTextLogoFrames": 22,
+    "importantInsetPx": 64,
+    "nativeFrameChecksPassedWithinHalfPixelRounding": true,
+    "savedNotesReadbackVerified": true,
+    "nativeCanvaElementReadbackVerified": true,
+    "nativeApiTextAmendmentVerified": false,
+    "browserLayerDeletionVerified": true,
+    "removedOnly": [
+      "dp02-architectural-arc",
+      "dp02-r7-yellow-arc-tick"
+    ],
+    "allOtherNativeElementsExact": true,
+    "allCaptionNotesExact": true,
+    "pageIdsOrderPreserved": true,
+    "genuineCanvaHdExportVerified": true,
+    "actualCanvaHdPixels": [
+      2160,
+      2700
+    ],
+    "actualCanvaHdFilesInspected": 3,
+    "canvaExportEmbeddedIcc": false,
+    "canvaExportExifColourSpace": 65535,
+    "exportColourAssumedOrRetagged": false,
+    "zipCrcPassed": true,
+    "actualSocialApprovalCoverageComplete": false,
+    "humanFinalCreativeApproval": false,
+    "whatsappSent": false,
+    "officialMasterChangedByThisRun": false,
+    "normalCompanyChatgptInvocationVerified": false
+  },
+  "ownerCompositionCorrection": {
+    "directionUpdateId": "46921972-0850-48b7-961a-b7d16e6f1353",
+    "directionReadbackVerified": true,
+    "directionReviewState": "unreviewed",
+    "observedAt": "2026-11-18",
+    "scope": "PSG January; generalised into reusable skill",
+    "direction": "Reject decorative circle through typography. Every poster needs a distinct concept-led composition; colour swaps and logo moves alone are insufficient.",
+    "implemented": "Only business arc/yellow segment removed from existing current draft; other accepted work preserved.",
+    "creativeApproval": false
+  },
+  "compositionReview": {
+    "DP01": "Inventory photographic flatlay; right-hand title plane, upper-left logo; source-record concept.",
+    "DP02": "Workplace photo and large type; lower-right logo; growth and commercial review concept. Decorative circle and yellow arc removed entirely.",
+    "DP03": "Real person over photographic route; upper-right logo, top headline and lower-left CTA; changed-routine concept.",
+    "Shared": "Brand type/colours only; no shared photograph, repeated person or single repeated page skeleton."
   }
 }

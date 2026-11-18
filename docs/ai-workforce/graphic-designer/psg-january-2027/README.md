@@ -3,7 +3,49 @@
 Owner request16November: continue with PSG, with fresh January concepts.
 Same #948 / draft#956 lane and isolated worktree. No new agent or branch.
 
-## 18 November — actual Facebook audit and current R7 refinement
+## 18 November — current R8: circle correction and genuine Canva HD
+
+Owner rejects the decorative circle through the business heading and requires
+each concept/composition to be fresh. In the user-opened internal browser, updated
+the **existing DAHbRapxiLM** working draft in place; no new Canva copy. Removed
+only `dp02-architectural-arc` and `dp02-r7-yellow-arc-tick`, renamed document/page
+revision labels toR8. Fresh native readback against the preserved R7 snapshot
+proves every other element, photograph, logo, caption and page order identical.
+**19 live texts/36 independent media fills** remain. No official199-page master
+or protected history edited. Saved revision is still an internal draft.
+
+Batch composition review: DP01 uses an inventory flatlay and right title plane,
+with logo upper left; DP02 is workplace/type-led, with logo lower right; DP03 uses
+a real person and route explanation, upper-right logo and lower-left CTA. These
+have different source photos/visual mechanisms. This is recorded human-style
+composition judgement, not an automatic creativity/uniqueness certificate or
+owner approval. Broader rule promoted into the reusable skill: decorative lines
+must clear type; differing colours or logo positions alone do not make a design fresh.
+
+Normal Canva Download PNG **High,2×,all3pages** completed in the internal browser.
+Actual archive CRC, three2160x2700 PNGs/hashes checked; actual full exports and
+whole grid visually inspected. No circle remains through GROW. Files have no ICC
+and EXIF ColourSpace65535; no sRGB certification or guessed retagging. Source
+colour-management evidence remains separate. This resolves the genuine current
+HD-export gap, **not** the unsuccessful connector text-edit or normal company
+ChatGPT end-to-end proof. Browser layer deletion/autosave worked; native API text
+mutation remains unproven.
+
+Private current evidence: `r4/scene-r8.json`, `r4/current-r8-receipt.private.json`,
+`r4/r8-native-saved.private.json`, `r4/DP0x-R8-Canva-HD.png`,
+`r4/PSG-January-R8-actual-Canva-HD-board.jpg`, original export ZIP, and updated
+current-review selector. R7 source/native snapshot/export evidence preserved.
+All22important native text/logo frames retain64px within native rounding;
+all unsigned caption notes remain exact. No send, official transfer, portal-final
+promotion, schedule/publication, deployment, new install or spend. Full-set creative
+approval, exact Kit tokens, queued artwork and January allocation remain open.
+
+Owner's composition/type-clearance direction also recorded and read back as
+append-only exact-client Dynamics update `46921972-0850-48b7-961a-b7d16e6f1353`,
+review state unreviewed. Existing guidev1 and Nolan ownership unchanged; this is
+the only new application-data write, under the standing feedback-recording scope.
+
+## Earlier18 November — Facebook audit and superseded R7 refinement
 
 Correct company Chrome verified; actual local page:
 [PSG Insure Bloemfontein Donald Murray](https://www.facebook.com/psgbloem).

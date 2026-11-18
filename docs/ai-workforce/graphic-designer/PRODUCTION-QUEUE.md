@@ -1,5 +1,16 @@
 # Graphic designer production queue
 
+Current18November override: **PSG R8 saved in place in DAHbRapxiLM.** Owner
+rejects circle through type and requires distinct concepts/compositions. Only
+business circle/yellow tick removed; fresh native diff proves all other elements,
+photos/logos/captions/order exact.19texts/36media; no new design/master edit.
+Actual normal Canva PNG High2x exports: three2160x2700s, CRC/hashes/full images/grid
+checked. No ICC/EXIF65535, no guessed profile. Current native API text edit and
+everyday company ChatGPT remain unproven. Different three-source compositions
+reviewed; no human approval or automatic creativity certificate. Still no send:
+creative approval, Kit tokens, queued artwork/January allocation unresolved.
+Private selector/PSG README/Brand Pack current; R7 superseded; same #948/draft#956.
+
 Current18November: **PSG R7 saved after actual recent Facebook audit.** Correct
 company Chrome/exact local `facebook.com/psgbloem` verified. Six still artworks
 inspected24September–12November, three full-size references retained/compared

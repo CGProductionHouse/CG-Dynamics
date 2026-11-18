@@ -1,4 +1,26 @@
-## 18November — PSG actual social audit; R7 under creative review
+## 18November — PSG R8 circle correction and actual HD exports
+
+Same #948/draft#956 lane. Owner rejects circle through type; requires distinct
+concept-led compositions. User-opened internal Canva browser used to amend
+existing DAHbRapxiLM in place, removing only the circle/yellow arc segment and
+changing revision labels. Fresh native diff: every other element/photo/logo,
+caption and page order exact.19texts/36media,64px important frames within rounding.
+No new Canva design/official199-page master change. Genuine normal Canva PNG
+High2x all3 exported,2160x2700/CRC/hashes/full-image/grid QA complete. No ICC and
+EXIF65535; no sRGB certificate/retagging. Browser deletion/autosave proven; current
+native API text mutation and everyday ChatGPT still unproven. R7 superseded and
+prior sources/evidence preserved. Generalised composition/type-clearance lesson
+in reusable skill. No send/official insert/portal/schedule/publication/deployment,
+new dependency/install/spend or other-agent change. Full creative approval, exact
+Kit tokens, queued artwork and January allocation remain open. R0. Current PSG
+README/Brand Pack/private selector authoritative; Control Centre no guessed write.
+
+One authorised append-only exact-client content-direction record created/read
+back:46921972-0850-48b7-961a-b7d16e6f1353 (unreviewed). Guidev1 unchanged; no other
+application-data write, SQL or migration. This records the owner's correction,
+not artwork approval or a changed production schedule.
+
+## Earlier18November — PSG actual social audit; R7 under creative review
 
 Same #948/draft#956 lane. Correct company Chrome and local Facebook
 `facebook.com/psgbloem` verified; six still artworks24September–12November

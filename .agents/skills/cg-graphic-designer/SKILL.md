@@ -32,6 +32,20 @@ because import, live text records and preview retrieval worked.
 
 ## Before design
 
+Decorative circles, arcs and lines must clear important typography. The owner's
+18November PSG correction rejects a circle running through a heading, even when
+the lettering is technically above it. Intentional real-subject overlap is a
+different device and still requires clear reading in the actual export.
+Review the whole batch with a concept/composition matrix: the evidenced service,
+visual idea, source/crop, type hierarchy, meaningful depth, logo and CTA treatment
+must support each individual message. Renaming a mechanism, swapping colours,
+moving a logo or increasing a layer count does not establish a fresh composition.
+Inspect the actual grid and HD outputs; record creative judgement separately
+from native-element/margin checks. Keep brand consistency without repeating one
+page skeleton. Amend a supported existing draft in place where possible, verify
+the exact native diff, and preserve earlier versions/receipts rather than creating
+another Canva copy for a two-layer correction.
+
 Owner rejection invalidates a candidate's creative/send readiness even when its
 tests, source audit, margins and HD export pass. Record the rejection in the current
 version registry and owning issue before another delivery; do not mistake an approved
