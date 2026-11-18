@@ -1,4 +1,52 @@
-## Latest 17 November — account-only Facebook readiness; exact read-only upgrade prepared
+## 18 November — exact read-only MCP upgrade released; native account test still pending
+
+Continued SAME DRAFT PR991 from tested source ecc8d25662ed2963ecd69977c5ebee94d6f9d421.
+CA's contextual "Please continue" followed the exact read-only release question;
+scope stayed source-only. Fresh GitHub/main/open-PR checks preserved #995,
+#1003/#1004, Nolan, staff, Teams, calendar and package owners.
+
+Immediately before release ALL63 hosted files and complete v86 metadata matched
+the captured reviewed baseline, with no drift. Uploaded the exact prepared
+candidate-final/payload.json ONCE; SHA256
+bbec134a9d84f6adce371021bdcbd10db8e575179078a4c2e96e2390d077ae81.
+MCP is ACTIVE v87, same function ID/custom authentication/import_map=false.
+Fresh readback verifies ALL65 contents exactly:5existing changed,58preserved,
+2reviewed JPEG helpers added. ALL48 other function versions/bundles/auth/entrypoints
+unchanged against this turn's fresh inventory. Anonymous tools/list denied401
+with authentication challenge. Existing linked company_admin context resolves.
+
+NO config/flag/secret/key/auth/permission/account/OAuth/mapping/SQL/migration,
+Microsoft, other-function, publishing/confirmation/worker, Vercel or cost change.
+The original PNG/JPEG account/review inspection code is now hosted; staff admission
+UI, publishers and four candidate migrations remain unreleased/held. Deployment
+does not establish a scheduled item or successful Facebook publication.
+
+Native account-only check was NOT executed: this chat's installed getter snapshot
+still lacks account_only. Browser inventory reported local browser access unavailable.
+The bounded fallback to existing Chrome window stopped at Computer Use's current-URL
+safety enforcement BEFORE navigation/input. UI work ended; no bypass, profile copies,
+credential reads, account/settings change, fresh sign-in or staff-message action.
+Company ChatGPT discovery refresh and real Cape Page access remain unverified.
+
+No runtime code changed in this continuation. Existing source acceptance remains
+5030total/4998pass/32skip/0fail,79focused,35actual isolated SQL,7native codec and
+actual prepared MCP Deno/build/app/lint/diff pass. No repeated full-suite run,
+new browser/phone acceptance or native publication claim. Source self-review,
+not independent native end-to-end acceptance. Private applied-readback.json saved
+beside the existing immutable account-readiness-upgrade packet.
+
+Next: when supported company browser/tool discovery is available, refresh ONLY
+existing Dynamics actions (preserve both links/permissions), then call the SAME
+get_facebook_post_readiness for Cape42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa with
+account_only:true and resolved company_admin. Do not redeployv87 or resetflags.
+Then prepare a genuinely approved unscheduled creative/caption/futuretime/native
+duplicate/Page/grants/media and fresh Teams packet before requesting exact controlled
+pilot authority. Cape18Nov already-scheduled work is excluded. Four production
+migrations and release/worker authority remain separate gates. Google Control Centre
+exact target remains unidentified; no guessed write. Rollback requires exact approval
+to restore capturedv86 source while preserving all config and records.
+
+## Earlier 17 November — account-only Facebook readiness; exact read-only upgrade prepared
 
 Same DRAFT PR991/#220/#236/#269 continues51750a58; main b524a9f9 unchanged.
 Current PRs/issues/active chats checked; preserve #995 shared catalog and the
