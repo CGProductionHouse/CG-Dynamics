@@ -1,3 +1,45 @@
+## 18 November — native Meta pairing audit and Elcheck mapping repair held
+
+Continued SAME PR #991 from b9041fff for CA's paired Facebook/Instagram scheduling
+direction. Main b524a9f9, ownership/active workers checked; other lanes preserved.
+Read-only registry: 63 active clients /47 active Meta mappings /29 both-platform
+IDs /18 Page-only /16 unmapped; 10 mappings lack connection_id. Stored counts
+are not native all-client verification; registry active is not launch inclusion.
+Preserve AV/Red Oak holds and Zooz not-yet-active decision.
+
+Company Chrome native proof found Elcheck's Instagram @elcheck_sa
+(17841459467022319) already connected to its exact mapped Page1299076156631543.
+Dynamics' existing Elcheck row has no Instagram fields. No foreign active row
+owns the ID. Exact private repair changes only those two fields + timestamp;
+identity/baseline/ownership/race guards and idempotent replay; two real isolated
+PG tests pass including the real table's timestamp-only trigger. SQL SHA256
+aa106c507a667aa5b94b0a2c25afc9dd807e68b714f53fa06cd5ce914eb54cd0.
+PENDING exact user approval under AGENTS.md:125, NOT APPLIED. Recheck baseline
+and hash before any apply; no sync/publication follows. Screenshot/SQL/tests in
+private native-acceptance evidence; current Meta client view left open.
+
+Actual CG Dynamics developer app976168728361566 is Development; Facebook and
+both Instagram-route publishing permissions are Standard /Ready to use(0) /
+No App Review requested. Advanced Facebook publishing lists business verification
+and App Review. No setting/request/consent submitted. Standard access is not proof
+that a CA/app-role pilot is impossible, and is not general external-client
+eligibility or actual grant proof. Existing review owner #505 preserved.
+Some native linked Instagram sessions show Login needed; no credentials or
+permissions changed. Bounded native portfolio coverage recorded, not full sweep.
+
+Added paired-channel real-SQL acceptance to existing suite: final 36 tests pass,
+zero skips/failures (265.9s). Actual authority/queue/receipt SQL; synthetic provider
+observations. Two exact-repair fixture tests separately pass, including existing
+timestamp trigger. Scoped lint/diff green. No application runtime change since
+b9041fff's green full/build/native checks; retained as PRIOR, not rerun/inflated.
+Owned network-none QA container stopped after final evidence capture.
+MCP publishing is STILL READ-ONLY: future preview/confirm/status bridge must
+reuse current authorization/queue and separate default-off release. First FB
+native pilot before Instagram activation; no silent automatic cross-posting.
+No production SQL/data, provider/account/secret/permission/content/schedule,
+Microsoft, Edge deployment, Vercel or cost action. Applied pair not replayed;
+held migrations/packets unchanged. Google tracker target unknown.
+
 ## 18 November — company/native acceptance and opt-in Meta publishing consent
 
 SAME DRAFT PR #991 continued from2fe35141; mainb524a9f9/open PR ownership checked.

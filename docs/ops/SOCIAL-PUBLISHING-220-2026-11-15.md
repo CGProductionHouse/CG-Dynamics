@@ -1,5 +1,95 @@
 # Social publishing — 15 November 2026
 
+## 18 November — reuse verified Facebook/Instagram pairs; Elcheck repair prepared
+
+CA requested that linkable client Facebook/Instagram accounts work together for
+scheduling as this lane progresses. Continued SAME PR #991 from b9041fff, with
+main b524a9f9 unchanged, clean initial worktree and current owners checked. Only
+this Codex chat is active; #995/#1003/#1004/Nolan/Teams/calendar lanes preserved.
+No new OAuth system, schedule, queue, provider setting or automatic publication.
+
+Bounded SELECT-only canonical registry inventory: 63 active registry clients,
+47 active Meta mappings, 29 with both Page and Instagram IDs, 18 Page-only and
+16 with no active mapping; 10 mapped rows have no connection_id. Registry active
+is not the launch roster: preserve AV/Red Oak hold and Zooz not-yet-active
+decisions. These are STORED mappings, not fresh native proof for all 29 pairs.
+No token/secret/credential columns or values were read.
+
+Existing company Chrome profile cgproductionhouse.com / Facebook Christie-Ann
+used. Native selectors expose established pairs including Cape, Braize, Bat Hill,
+Local Meat Deli, Dulux, Loraclox and Delta Gas. Do not reconnect/disconnect or
+move working assets merely to make the count look complete. Two portfolio
+previews were bounded: 20/25 visible company assets and 11 design assets;
+third portfolio's Instagram directory also inspected. No full all-client native
+acceptance is claimed. Private native-pair-directory.json records coverage.
+
+Concrete discrepancy: Elcheck's Page1299076156631543 is already connected in
+Meta to @elcheck_sa, Instagram17841459467022319. Verified the Instagram account
+ID and its Connected assets link to that EXACT Page. Existing Dynamics mapping
+27b13118-a207-4436-8cb7-7b0c33e26a47, client7b7d244f-77b4-4b2a-88f0-8ce3f7e1c202,
+has no Instagram ID/username. No other active mapping owns that Instagram ID.
+Existing connection65d8f626 remains; it is not a new account or grant.
+
+Prepared one exact private SQL transaction, elcheck-link.sql, SHA256
+aa106c507a667aa5b94b0a2c25afc9dd807e68b714f53fa06cd5ce914eb54cd0.
+It changes ONLY Elcheck's Instagram ID/username/update timestamp, with exact
+client/Page/connection/baseline/active/ownership checks, a bounded metadata
+table lock, no-op same-tuple replay and atomic stale/conflict refusal. The only
+real non-internal table trigger was inspected: timestamp-only. Two actual
+isolated PostgreSQL tests, including that trigger, pass; unrelated client, ads,
+staff fields and concurrent-edit baselines remain intact. No production apply
+occurred. Exact approval is pending via the existing user-input request;
+AGENTS.md:125 requires explicit CA approval. Do not infer it from silence or the
+general request. Before applying, reread the exact baseline and SQL hash; verify
+only those three fields differ afterwards. No forced sync/publication follows.
+
+Native app976168728361566 (same canonical CG Dynamics app) is in Development.
+pages_manage_posts, instagram_content_publish and the separate
+instagram_business_content_publish show Standard access / Ready to use (0) /
+No App Review requested. Facebook permission Requirements lists no standard
+requirement and Business verification + App Review for Advanced Access.
+This does NOT establish that a CA/app-role controlled pilot is prohibited;
+nor does it establish external-client rollout eligibility or actual token grants.
+No Live switch, advanced request, verification, terms or settings were submitted.
+Existing #505 review records remain authority; do not restart old resolved setup.
+Some already-paired accounts show native Login needed, including Loraclox/Dulux
+and CG's Instagram; native-session recovery is separate from API grant health.
+No password/session/permission replacement attempted.
+
+Added one meaningful real-SQL paired-channel acceptance to the EXISTING queue
+suite: one approved creative with Facebook+Instagram channels has two distinct
+jobs, exact pre-due idempotency, independent Facebook success/Instagram uncertain
+state, no cross-channel receipt promotion and no canonical whole-item posted
+stamp. Due-time re-enqueue is refused, not rearmed. Initial test incorrectly
+expected admission replay after due; corrected that expectation instead of
+weakening the existing future-time guard. Provider observations are synthetic;
+SQL authority, fencing, receipts and duplicate barriers are actual execution.
+Final isolated database suite: 36 tests passed, zero skips/failures/cancellations
+(265.9s), including the new paired case, real approval/dispatch/recovery and role/
+cross-client/lease/secret-table refusal. The two exact-repair tests are a separate
+fixture receipt, not additional platform acceptance. Application runtime is
+unchanged from b9041fff's full 5029pass/32skip/build/native-Deno qualification;
+that prior full/build receipt is retained, not rerun or counted again. Final
+scoped lint/diff pass. Self-review found no blocking test/source issue. The
+task-owned network-none QA container is stopped after receipt capture.
+
+The product target remains one staff/ChatGPT scheduling request with selected
+channels and separate provider results. A Page/Instagram pairing is not a shared
+publishing API or publishing grant. Current MCP is still read-only for publishing;
+preview/confirmation/status actions must reuse the same existing authorization
+core and durable queue, stay separately default-off and be locally/SQL tested
+before a future exact release. Do not claim ChatGPT can submit jobs live yet.
+First exact Facebook pilot remains the priority; Instagram uses its existing
+candidate runtime/credential/container sequence after real route/permission/media
+acceptance. No approval inheritance, implicit cross-posting or duplicate queue.
+
+No production write, provider/account/permission/secret change, content/date/
+approval mutation, Microsoft refresh/write, Edge deployment, Vercel or spend.
+Previously approved Facebook DB pair and immutable release packets untouched;
+two later-platform migrations remain held. Native screenshots and exact repair
+review evidence are private under native-acceptance. Google tracker target is
+still unidentified; no guessed update.
+
 ## 18 November — company/native acceptance and opt-in Meta publishing consent
 
 Continued SAME DRAFT PR #991 from2fe35141; mainb524a9f9 and open ownership

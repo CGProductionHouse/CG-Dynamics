@@ -187,6 +187,41 @@ test('real PostgreSQL: queue, source/role fences, crash recovery, receipts and O
   // Rehearse the two later-platform migrations afterwards, on the same database.
   sql(readFileSync('supabase/migrations/20261115104950_tiktok_business_oauth.sql', 'utf8'))
   sql(readFileSync('supabase/migrations/20261116102019_instagram_publication_steps.sql', 'utf8'))
+  await t.test('one approved Facebook/Instagram creative keeps independent durable jobs, receipts and duplicate fences', () => {
+    const f = fixture({ advance: false })
+    sql(`update content_review_versions set channels=array['facebook','instagram'] where id=${q(f.review)}`)
+    const ig = { ...f.intent, platform: 'instagram', route: 'instagram_facebook_login', accountId: '67890', authorizationId: randomUUID(),
+      key: `social-publish:v1:${JSON.stringify([f.client, f.deliverable, f.review, 'instagram', '67890'])}` }
+    const instagramJob = f.authorize(ig, actor, { mediaProfile: 'instagram_baseline_jpeg_v1' }).jobId
+    assert.notEqual(instagramJob, f.job)
+    assert.equal(f.enqueue(f.intent), f.job); assert.equal(f.enqueue(ig), instagramJob)
+    // Move ONLY synthetic source/confirmation clocks consistently to due time.
+    const due = sql("select to_char(now()-interval '1 minute','YYYY-MM-DD\"T\"HH24:MI:SS.US\"Z\"')")
+    sql(`update content_review_versions set scheduled_at=${q(due)} where id=${q(f.review)}`)
+    for (const [job, intent] of [[f.job, f.intent], [instagramJob, ig]]) {
+      intent.scheduledAt = due
+      sql(`update background_jobs set payload=jsonb_set(payload,'{intent}',${q(JSON.stringify(intent))}::jsonb),
+        publication=jsonb_set(jsonb_set(publication,'{authorization,fingerprint}',to_jsonb(social_publication_fingerprint(${q(JSON.stringify(intent))}))),
+        '{authorization,evidence,intentFingerprint}',to_jsonb(social_publication_fingerprint(${q(JSON.stringify(intent))}))),
+        run_after=${job === f.job ? 'now()' : "'infinity'"} where id=${q(job)}`)
+    }
+    const fbLease = claim(f, 'paired-facebook')
+    assert.equal(jsonSql(`select to_jsonb(begin_social_publication(${q(f.job)},'paired-facebook',${q(fbLease.fence)}))`), true)
+    // SQL receipt storage is actual; these provider observations are synthetic.
+    assert.equal(jsonSql(`select to_jsonb(save_social_publication(${q(f.job)},'paired-facebook',${q(fbLease.fence)},'{"state":"posted","postId":"fixture-facebook-receipt"}'))`), true)
+    assert.equal(jsonSql(`select publication from background_jobs where id=${q(instagramJob)}`).state, 'queued')
+    sql(`update background_jobs set run_after=now() where id=${q(instagramJob)}`)
+    const igLease = claim({ ...f, job: instagramJob }, 'paired-instagram')
+    assert.equal(jsonSql(`select to_jsonb(begin_social_publication(${q(instagramJob)},'paired-instagram',${q(igLease.fence)}))`), true)
+    assert.equal(jsonSql(`select to_jsonb(save_social_publication(${q(instagramJob)},'paired-instagram',${q(igLease.fence)},'{"state":"unknown_outcome","errorCode":"fixture-lost-response"}'))`), true)
+    // Once due, admission refuses another enqueue rather than rearming either
+    // channel. Existing durable receipts remain available for reconciliation.
+    assert.throws(() => f.enqueue(f.intent), /Future publication time required/)
+    assert.throws(() => f.enqueue(ig), /Future publication time required/)
+    assert.deepEqual(jsonSql(`select json_agg(jsonb_build_object('platform',payload->'intent'->>'platform','status',status,'state',publication->>'state') order by payload->'intent'->>'platform') from background_jobs where payload->'intent'->>'reviewVersionId'=${q(f.review)}`),
+      [{ platform: 'facebook', status: 'succeeded', state: 'posted' }, { platform: 'instagram', status: 'failed', state: 'unknown_outcome' }])
+    assert.equal(sql(`select posted_at is null from monthly_deliverables where id=${q(f.deliverable)}`), 't')
+  })
   await t.test('Instagram uses four persisted claims, two distinct mutations and an owner-verified final receipt', async () => {
     const f = instagramFixture(), worker = `ig-flow-${randomUUID()}`, calls = []; let published = false
     const transport = { approvedMediaUrl: async () => 'https://fixture.invalid/approved.jpg', async request(method, path) {
