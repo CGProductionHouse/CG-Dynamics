@@ -808,7 +808,9 @@ async function runJob(
       return await runClaimedSocialPublication({ sb: supabase, jobId: job.id,
         key: job.idempotency_key ?? '', worker, now: new Date().toISOString(),
         enabled: configuration !== null,
-        bindings: configuration ? facebookPublicationRuntime(supabase, configuration).workerBindings(job.id) : undefined })
+        // Preserve the worker's existing JSR client/session. The helpers' ESM
+        // SDK has a separate nominal class identity; adapt only this type edge.
+        bindings: configuration ? facebookPublicationRuntime(supabase as unknown as Parameters<typeof facebookPublicationRuntime>[0], configuration).workerBindings(job.id) : undefined })
     }
     case GOOGLE_ADS_REFRESH_JOB_TYPE: {
       return await runGoogleAdsRefreshJob({

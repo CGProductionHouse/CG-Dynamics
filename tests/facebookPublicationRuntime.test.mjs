@@ -289,6 +289,56 @@ test('concrete read-only preview → exact confirmation → worker submission �
   assert.equal(JSON.stringify(first.body).includes('fixture-'), false)
 })
 
+function actualWorkerDispatch(f, enabled) {
+  const source = readFileSync('supabase/functions/background-worker/index.ts', 'utf8')
+  const ast = ts.createSourceFile('worker.ts', source, ts.ScriptTarget.Latest, true)
+  const runJob = ast.statements.find(n => ts.isFunctionDeclaration(n) && n.name?.text === 'runJob')
+  assert.ok(runJob)
+  const code = ts.transpileModule(`${runJob.getText(ast)};globalThis.dispatch = runJob`, {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText
+  const context = { Deno: { env: { get: key => enabled ? {
+    SOCIAL_PUBLISHING_ENABLED: 'true', SOCIAL_FACEBOOK_PHOTO_ENABLED: 'true',
+    SOCIAL_FACEBOOK_PHOTO_RELEASE: JSON.stringify({ clientId: f.ids.client, connectionId: f.ids.connection, accountId: '123' }),
+    META_GRAPH_VERSION: f.config.graphVersion, META_APP_ID: f.config.appId, META_APP_SECRET: f.config.appSecret,
+    SUPABASE_URL: f.config.projectUrl, META_TOKEN_ENCRYPTION_KEY_B64: f.config.encryptionKey, META_TOKEN_ENCRYPTION_KEY_VERSION: f.config.keyVersion,
+  }[key] : undefined } },
+  Date: class extends Date { constructor(...args) { super(...(args.length ? args : [f.due])) } },
+  SOCIAL_PUBLICATION_JOB: 'social_publish',
+  updateJobProgress: async client => assert.equal(client, f.sb),
+  readFacebookPublicationConfiguration: runtimeModule.readFacebookPublicationConfiguration,
+  facebookPublicationRuntime(client, configuration) {
+    assert.equal(enabled, true); assert.equal(client, f.sb, 'keep the exact worker client and session')
+    return runtimeModule.facebookPublicationRuntime(client, configuration)
+  },
+  runClaimedSocialPublication(input) {
+    assert.equal(input.sb, f.sb); assert.equal(input.enabled, enabled)
+    return queue.runClaimedSocialPublication(input)
+  } }
+  vm.runInNewContext(code, context)
+  return job => context.dispatch(f.sb, { ...job, job_type: 'social_publish', idempotency_key: job.payload.intent.key },
+    f.config.projectUrl, 'fixture-service-only', 'same-client-worker')
+}
+
+test('actual worker keeps the same SDK client through publishing and independent receipt recovery without another POST', async () => {
+  const f = await fixture(), p = await f.invoke({ action: 'preview', reviewId: f.ids.review })
+  await f.invoke({ action: 'confirm', reviewId: f.ids.review, expectedFingerprint: p.body.preview.fingerprint, confirmPublication: true })
+  const job = f.tables.background_jobs[0], dispatch = actualWorkerDispatch(f, true)
+  assert.equal((await dispatch(job)).publication.state, 'processing')
+  assert.equal((await dispatch(job)).publication.state, 'posted')
+  assert.equal(f.graphCalls.filter(c => c[0] === 'POST').length, 1)
+  assert.equal(f.tables.background_jobs.length, 1)
+  assert.equal(f.tables.monthly_deliverables[0].production_status, 'not_started')
+})
+
+test('actual worker with publishing disabled blocks the job without constructing provider bindings or submitting', async () => {
+  const f = await fixture(), p = await f.invoke({ action: 'preview', reviewId: f.ids.review })
+  await f.invoke({ action: 'confirm', reviewId: f.ids.review, expectedFingerprint: p.body.preview.fingerprint, confirmPublication: true })
+  const calls = f.graphCalls.length, result = await actualWorkerDispatch(f, false)(f.tables.background_jobs[0])
+  assert.equal(result.publication.state, 'blocked'); assert.equal(result.publication.errorCode, 'PUBLISHING_DISABLED')
+  assert.equal(f.graphCalls.length, calls)
+  assert.equal(f.graphCalls.filter(c => c[0] === 'POST').length, 0)
+})
+
 test('changed approved caption invalidates preview before atomic authorization; injected client/account/proof fields are rejected', async () => {
   const f = await fixture(), preview = await f.invoke({ action: 'preview', reviewId: f.ids.review })
   f.tables.content_review_versions[0].caption += ' changed'
