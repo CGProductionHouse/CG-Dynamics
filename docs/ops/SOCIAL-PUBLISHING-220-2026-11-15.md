@@ -1,5 +1,45 @@
 # Social publishing — 15 November 2026
 
+## 18 November continuation — live schema prerequisites and cached-action diagnosis
+
+Same DRAFT PR991 at3d0cfc66, mainb524a9f9 unchanged after fetch; clean before edits.
+Browser inventory still returns no browsers/local access unavailable; ended UI
+portion without retrying the known failing Chrome fallback or changing settings.
+
+Authenticated company_admin resolution succeeded through existing Dynamics link.
+One bounded request attempted account_only:true through that installed getter.
+Returned scope was future_approved_facebook_photo_reviews, NOT account-only,
+consistent with the installed cached action schema omitting the new field.
+Cape42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa
+returned candidates:[],has_more:false,next_offset:null at11:39:46UTC.
+This proves live authenticated listing/zero eligible reviews only; it does NOT
+prove native Page permission or account access. No invented review/source IDs,
+credential extraction, permission expansion or API-auth bypass followed.
+
+Read-only production metadata at11:41:40UTC verifies55 required column types,
+all8 prerequisite tables with RLS enabled and service-role SELECT available,
+no candidate queue RPC/index/policy collisions, and no publication column.
+All4 candidate migration versions are ABSENT from actual migration history.
+The current background job type constraint does not permit social_publish.
+Saved reusable single-SELECT metadata check:
+scripts/qa/social-publishing-schema-preflight.sql.
+It reads schema metadata/migration history only, not business rows; no statements
+apply or rehearse a migration on production. Compatible metadata is NOT a full
+migration rehearsal, native/provider acceptance, live queue or publishing grant.
+Existing35 isolated SQL acceptance remains separate; no new full-suite rerun.
+This continuation's production metadata SELECT, npm run build (tsc/Vite7.3.6)
+and git diff --check pass. Only QA SQL and continuity Markdown changed; no new
+runtime/UI/device or independent-review acceptance is claimed.
+
+No runtime, schema, live data, flag/config, accounts/OAuth/mappings/permissions,
+provider publication, Microsoft, other-agent or Vercel action. No redeploy ofv87.
+Existing exact packet/kill-switch/rollback gates remain unchanged. Need supported
+company action discovery refresh before account_only can be tested; approved
+unscheduled immutable creative/caption/futuretime and fresh Teams capture still
+required before an exact controlled post packet can be authorized. Zero eligible
+reviews cannot be fixed by bypassing manager/client approval. Google Control
+Centre target remains unidentified; no guessed tracker write.
+
 ## 18 November — exact read-only MCP upgrade released; native account test still pending
 
 Continued SAME DRAFT PR991 from tested source ecc8d25662ed2963ecd69977c5ebee94d6f9d421.
