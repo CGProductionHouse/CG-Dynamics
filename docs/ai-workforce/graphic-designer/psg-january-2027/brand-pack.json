@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "status": "resumed-r6-internal-creative-review-not-for-delivery",
-  "observedAt": "2026-11-17",
+  "status": "r7-recent-social-refinement-internal-review-not-for-delivery",
+  "observedAt": "2026-11-18",
   "clientId": "29a28efd-c998-45e2-a57c-4a751e779e66",
   "clientName": "PSG Bloemfontein",
   "aliases": [
@@ -17,12 +17,12 @@
     "brandKit": "kAGn0ETkyhE",
     "officialMaster": "DAGHEr8Zu_o",
     "officialPageCountObserved": 199,
-    "workingDesign": "DAHbJ6mIth4",
+    "workingDesign": "DAHbRapxiLM",
     "workbenchOnly": true,
     "workingPageIds": [
-      "PBXM1LXVMGYttMgZ",
-      "PB08tp2KCFs21nmf",
-      "PBFycNH1LcTHcgx6"
+      "PBb4LCfz4M9RCVR3",
+      "PBJXgyr3ShS1fdBQ",
+      "PBJ5cYFb2pH2D1HG"
     ],
     "guideline": "DAHIT-WgoXs",
     "guidelinePages": 99,
@@ -64,10 +64,13 @@
       "#061F33",
       "#46B0D1",
       "#FFFFFF",
-      "#D8E6EB"
+      "#D8E6EB",
+      "#D4055C",
+      "#FFDE21"
     ],
-    "workingPaletteEvidence": "Local reference sample, not an exact Kit colour-token readback",
-    "exactKitPaletteVerified": false
+    "workingPaletteEvidence": "Existing secondary palette reconciled visually with six actual local Facebook posters; exact Kit token readback remains open.",
+    "exactKitPaletteVerified": false,
+    "supersededR6WorkingDesign": "DAHbJ6mIth4"
   },
   "mediaAuthority": "OneDrive Clients/PSG",
   "oneDrive": {
@@ -96,9 +99,9 @@
     "packetObserved": "2026-11-16",
     "mutableValuesLastVerified": "2026-09-10",
     "freshnessVerifiedNow": false,
-    "notesMatchCanonical": false,
+    "notesMatchCanonical": true,
     "currentFooterIncluded": false,
-    "notesMatchMeaning": "Current source notes equal captions; remote note readback unavailable"
+    "notesMatchMeaning": "All three R7 presenter notes read back and exactly match unsigned allocated captions."
   },
   "restrictions": [
     "Personal/commercial insurance advice only from exact local current evidence",
@@ -148,7 +151,7 @@
     "observedAt": "2026-11-17",
     "pausedNow": false,
     "feedback": "This direction is closer—continue refining",
-    "meaning": "Directional feedback on R4 only; no final approval of R6 set"
+    "meaning": "Directional feedback on R4 only; no final approval of R7 set"
   },
   "directionUpdate": {
     "id": "50a63c7b-be68-4444-a842-af23f0ab9ba7",
@@ -157,7 +160,15 @@
     "readbackVerified": true,
     "guideVersionUnchanged": 1
   },
-  "verification": {
+  "currentHolds": [
+    "Full-set creative review",
+    "Exact Kit colour-token reconciliation",
+    "Relevant queued/approved artwork and bounded social/source coverage limits",
+    "January allocation including existing human New Year artwork",
+    "Current native amendment and genuine Canva HD export",
+    "Exact-authorised official working-lane transfer"
+  ],
+  "supersededR6Verification": {
     "currentVersion": "R6",
     "declaredLocalLayers": 49,
     "localSvgLiveTexts": 19,
@@ -189,12 +200,49 @@
     "normalCompanyChatgptInvocationVerified": false,
     "officialMasterChangedByThisRun": false
   },
-  "currentHolds": [
-    "Full-set creative review",
-    "Exact Kit colour-token reconciliation",
-    "Actual social and approval-artwork reuse checks",
-    "January allocation including existing human New Year artwork",
-    "Native Canva editing/notes readback and genuine current HD export",
-    "Exact-authorised official working-lane transfer"
-  ]
+  "recentSocialAudit": {
+    "observedAt": "2026-11-18",
+    "pageUrl": "https://www.facebook.com/psgbloem",
+    "pageName": "PSG Insure Bloemfontein Donald Murray",
+    "actualStillArtworksViewed": 6,
+    "visibleDateWindow": "24 September–12 November",
+    "fullSizeReferencesRetained": 3,
+    "retainedReferenceSourceComparisons": 12,
+    "comparisonReadErrors": 0,
+    "suspectedMatches": 0,
+    "actualQueuedApprovalCoverageComplete": false,
+    "globalUnusedCertified": false
+  },
+  "verification": {
+    "currentVersion": "R7",
+    "declaredLocalLayers": 57,
+    "nativeLiveTexts": 19,
+    "nativeIndependentImageFills": 38,
+    "importantTextLogoFrames": 22,
+    "importantInsetPx": 64,
+    "nativeFrameChecksPassedWithinHalfPixelRounding": true,
+    "actualSavedCanvaPreviewsInspected": 3,
+    "actualCanvaPreviewPixels": [
+      400,
+      500
+    ],
+    "localHdPixels": [
+      2160,
+      2700
+    ],
+    "localHdIccPresent": true,
+    "localHdIsCanvaExport": false,
+    "nativeCanvaElementReadbackVerified": true,
+    "savedNotesReadbackVerified": true,
+    "nativeCanvaAmendmentVerified": false,
+    "nativeAmendmentResult": "INVALID_ARGUMENT; readback unchanged; transaction cancelled",
+    "canvaHdExportVerified": false,
+    "historyPreviewsPerSelectedSource": 199,
+    "actualSocialApprovalCoverageComplete": false,
+    "globalUnusedCertified": false,
+    "humanFinalCreativeApproval": false,
+    "whatsappSent": false,
+    "normalCompanyChatgptInvocationVerified": false,
+    "officialMasterChangedByThisRun": false
+  }
 }

@@ -3,7 +3,61 @@
 Owner request16November: continue with PSG, with fresh January concepts.
 Same #948 / draft#956 lane and isolated worktree. No new agent or branch.
 
-## 17 November resumed — current R6 working set
+## 18 November — actual Facebook audit and current R7 refinement
+
+Correct company Chrome verified; actual local page:
+[PSG Insure Bloemfontein Donald Murray](https://www.facebook.com/psgbloem).
+Six published still artworks visually inspected24September–12November. Three
+full-size references retained privately with hashes and exact locators:
+[12November](https://www.facebook.com/photo/?fbid=1591634229433363),
+[5November](https://www.facebook.com/photo/?fbid=1584028833527236), and
+[14October](https://www.facebook.com/photo/?fbid=1561829035747216).
+The other three inspected artworks are7October,1October and24September; visual
+evidence remains in the browser tool trace. This supersedes the earlier feed
+access gap. It is a bounded audit, not lifetime/video/carousel/approval coverage.
+
+Local execution combines compact bold hierarchy, photo-led tonal separation,
+real foreground cutouts, grain/halftone, cyan/white word emphasis and restrained
+yellow/magenta accents. Bright photographs also occur. Do not reduce this to
+all-navy layouts or copy old photos/headlines/mechanisms. Observed local usage
+is not an exact Brand Kit token certificate.
+
+Three revised working pages saved in **DAHbRapxiLM**,
+[open R7 in Canva](https://www.canva.com/design/DAHbRapxiLM/edit).
+Original three concepts, source photos and allocated unsigned captions retained.
+DP01: conservative photographic tonal lift and restrained accents. DP02: clearer
+photo/type separation, texture and compact hierarchy. DP03: owner-supported
+portrait/route direction retained with small accents. A chair obscured GROW in an
+intermediate local render; moved behind type before import. Actual saved400x500
+Canva previews inspected separately from local renders.
+
+Consolidated `read_design` now opens a native transaction: **19 live texts and38
+independent image fills**. All22important native text/logo frames pass64px within
+0.5px rounding. Presenter notes exactly match all three captions. Raster graphics
+remain raster media, not native vector artwork or a PSD. Temporary `replace_text`
+returned INVALID_ARGUMENT; fresh transaction readback was exactly unchanged and
+the transaction cancelled. **Native reading restored; current native amendment
+not proven.** Local2160x2700s are local, not Canva HD exports.
+
+Four source images compared with three downloaded recent references: zero read
+errors/no suspected matches. Earlier199-page history comparison retained. Three
+additional posts visually inspected only. Current queued/approved WhatsApp artwork
+coverage remains incomplete; no global unused-photo certificate or send clearance.
+
+Private current evidence: `CURRENT-STATUS-PSG-R7-REVIEW.md`,
+`facebook-visual-audit-20261118.json`, `r4/scene-r7.json`,
+`r4/current-r7-receipt.private.json`, `r4/r7-native-verification.private.json`,
+and `r4/PSG-January-R7-actual-Canva-board.jpg`. Guarded HTML9,498,766bytes;
+no raised limit, flattening or public upload host. Visible RGB/alpha preserved
+in lossless payload compaction. Earlier versions and199-page master preserved.
+
+No full-set approval, January allocation, official transfer, portal final,
+WhatsApp send, production data/SQL/deployment or everyday ChatGPT proof.
+Exact Kit tokens, queued artwork, native amendment and Canva HD export remain
+open. Same #948/draft#956 lane, R0 incremental cost. R6 below is superseded;
+R3 remains rejected. No other-agent ownership or production workflow changed.
+
+## 17 November resumed — superseded R6 working set
 
 Owner resumed work and reviewed the single rebuilt R4 proof: **"This direction
 is closer—continue refining."** This is direction feedback, not final artwork or

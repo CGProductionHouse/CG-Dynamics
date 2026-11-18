@@ -1,3 +1,20 @@
+## 18November — PSG actual social audit; R7 under creative review
+
+Same #948/draft#956 lane. Correct company Chrome and local Facebook
+`facebook.com/psgbloem` verified; six still artworks24September–12November
+visually inspected. Three full-size references retained privately, four sources
+compared: no suspected matches/read errors. No lifetime/queued approval coverage
+or global non-use claim. Three refined R7 pages saved in DAHbRapxiLM, actual400x500
+previews inspected. Native read transaction restored:19texts/38media,22important
+64px frames within rounding, three unsigned caption notes exact. Temporary text
+edit INVALID_ARGUMENT; unchanged readback verified, transaction cancelled.
+No current native amendment success/Canva HD proof.199official pages/source media
+preserved. R6 superseded/R3 rejected. Exact tokens, creative approval, queued
+artwork, January allocation, native amendment/export and everyday ChatGPT remain
+open. No send/official insert/portal/schedule/production data/SQL/deployment/new
+service/install/spend or other-agent change. R0. PSG README/Brand Pack/private
+selector current. No guessed Control Centre write.
+
 ## 17November — PSG resumed; local-brand R6 set under creative review
 
 Owner resumed and called one rebuilt R4 direction closer, asking refinement.

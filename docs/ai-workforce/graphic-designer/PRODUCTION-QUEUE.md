@@ -1,5 +1,17 @@
 # Graphic designer production queue
 
+Current18November: **PSG R7 saved after actual recent Facebook audit.** Correct
+company Chrome/exact local `facebook.com/psgbloem` verified. Six still artworks
+inspected24September–12November, three full-size references retained/compared
+against four sources: zero read errors/no suspected matches. Queued/approval and
+broader-history coverage incomplete. Three revised pages in DAHbRapxiLM, actual
+saved400x500 previews inspected. Native19texts/38media,22important64px frames
+within rounding, three exact unsigned caption notes. Temporary text-edit test
+INVALID_ARGUMENT; unchanged readback verified, transaction cancelled. Local HD
+is not Canva HD. No approval/send/official insert/portal/schedule/publication.
+R6 superseded/R3 rejected. Same #948/draft#956, Nolan/Picasso protected, R0.
+PSG README/Brand Pack/private selector current; remaining gates retained.
+
 Owner steering17November2026; same #948 / draft#956 lane, no new agent or branch.
 
 Current17November: **PSG resumed; R6 three-page working set saved** in DAHbJ6mIth4.

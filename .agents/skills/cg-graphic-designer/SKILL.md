@@ -7,6 +7,19 @@ description: Plan, audit, create, amend or review CG Production House poster and
 
 Produce professional, individually art-directed work from exact client evidence. A technically valid render is not creative approval.
 
+Recent-post evidence means the actual artwork on the exact local brand's page,
+with observed dates and locators. Canva Posted/Scheduled labels, report captions
+and national/sibling feeds are not equivalent. On18November PSG's exact page
+`facebook.com/psgbloem` was recovered in company Chrome after public search failed;
+six actual posters showed a broader photo-led/secondary-accent range than the
+earlier navy/cyan-only interpretation. Save bounded visual evidence and coverage
+limits; do not copy its photos, headlines or corner mechanisms into every draft.
+After a tool update, test read and write capabilities separately. Canva's new
+`read_design` restored native layer/notes transactions while `edit_design` still
+returned INVALID_ARGUMENT for the temporary text test. Verify unchanged state,
+cancel the transaction, and do not claim an editable amendment succeeded merely
+because import, live text records and preview retrieval worked.
+
 ## Authority and boundaries
 
 - Resolve the exact client, package, Client Schedule rows, current strategy and approved feedback from CG Dynamics. Never invent a future deliverable ID or promote a draft strategy.
