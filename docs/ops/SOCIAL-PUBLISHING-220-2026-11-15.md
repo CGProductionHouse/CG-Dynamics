@@ -1,5 +1,95 @@
 # Social publishing — 15 November 2026
 
+## 18 November — bounded readiness and preview recovery, source only
+
+Continued SAME DRAFT PR991 from867895cf; mainb524a9f9 and open PR ownership
+checked. Extends the existing read-recovery increment, no new schedule/queue.
+
+Reproduced BOTH additional hangs before changes with actual confirmation-panel
+callbacks: inspect and preview kept "Checking the exact publication" indefinitely.
+Both regressions failed on the displayed state. Reused a private read-only
+deadline helper in the existing socialPublishing lib for status/inspect/preview.
+The8second bound covers SDK/session, transport and error-body JSON parsing;
+a transport ignoring abort still returns unavailable. Original exact-review,
+mapping, caption/hash/time/media, fixed safe error copy and false-authority
+contracts remain. A manual read can recover; late evidence cannot populate it.
+Confirmation/withdrawal mutation handlers are unchanged and do NOT use this
+read-only timeout or acquire an automatic retry.
+
+Current focused management acceptance41pass includes abort-ignoring hangs with
+the real panel callbacks, late results, all3 read modes through the INSTALLED
+Supabase SDK, and a streaming HTTP error body which never completes until after
+the deadline. Fixture HTTP/Graph/Storage remain synthetic, no browser visual/
+phone/native provider acceptance claimed. Full accumulated Node acceptance:
+5038total /5006pass /32skip /0fail (646.5s). Separate35 actual isolated PostgreSQL
+checks pass:34queue/runtime/OAuth plus1actual admission/internal/client-approval
+journey into the same due queue. Owned network-none QA container stopped exit0.
+Local tsc/Vite7.3.6 build, emitted app/status-deadline bundle, scoped lint and
+diff pass. Default-off preparation UI remains tree-shaken/hidden in that build;
+no enabled preparation UI or live browser acceptance is inferred. Only the two
+issue519 test-generated outputs were restored. No runtime edits after full run began.
+Only lib/tests and these existing continuity records change; no migration,
+dependency, role/access, provider or live runtime changes.
+
+Hostedv87/sourceecc8d256, four held migrations/default-off dispatch, Teams hold,
+company action-discovery/native account acceptance and the exact genuine
+approved unscheduled creative/time/native-duplicate/fresh-Teams pilot gates
+remain unchanged. No Vercel/deployment/publication/config/OAuth/accounts/keys/
+SQL/data/mappings/permissions/Microsoft or other-agent work. No repeated browser
+failure loop. Google Control Centre target remains unidentified; no guessed write.
+Source self-review, not independent/native acceptance.
+
+Next approval packet is ONLY Facebook's existing minimal database pair on
+ehtjfntukiwbgptqgbzy, in source order, with original-version history bookkeeping:
+20261115104948_social_publishing_queue.sql SHA256
+00233282015fcfac969421f6429f0c13cdb2421df57dff7141b64e5562076b7b;
+20261116085815_social_publication_preparation_evidence.sql SHA256
+d82380bc84e4ccedc702408e07353c334a4c16c3fa7650faaf21e13b284600e8.
+Queue adds the publication column/indexes, restrictive manager read for NEW
+social jobs and service-only queue/confirmation/receipt RPCs. Capture RPC is
+service-only/read-only over existing complete exact Teams captures; no collector.
+Other two candidates/TikTok/Instagram are excluded. No actual job, content/date/
+approval change, worker/Edge release, flag/schedule/key/account/Microsoft or Vercel
+action. Current35SQL rehearsal includes the Facebook pair alone BEFORE other
+platform migrations. Fresh preflight must match absence/dependencies/ownership;
+stop on drift, failure or uncertain application before retrying. Preserve all
+jobs/approvals/audit/receipts, never destructive schema rollback. Publishing stays
+OFF; this packet cannot itself establish native/posted acceptance.
+Original-version route is now PREPARED/REHEARSED, NOT APPROVED/APPLIED.
+Offline scripts/qa/prepare-facebook-database-release.mjs pins ONLY these two
+source hashes, adds transaction-local3slock/60sstatement budgets and a shared
+advisory lock, rejects existing version/name or wrong-order receipts, and inserts
+each ORIGINAL version/name/source statement receipt in the SAME transaction as
+its DDL. No existing history is edited/deleted. Source bytes are hex-encoded in
+the receipt to preserve their exact text through SQL transport. Current hosted
+history column metadata was read-only checked: required version/name/statements
+types match; other columns are nullable. No credential lookup/network in preparer.
+This exact guarded SQL transaction route avoids MCP apply_migration's unsupported
+version parameter (upstream https://github.com/supabase/mcp/issues/241); application
+requires explicit SQL + original-version receipt approval, not an auto-timestamp
+apply followed by history repair. No broad db push or generated-version deletion.
+
+Two offline packet tests pass, including tampered-source refusal. The actual
+PostgreSQL suite was rerun with THIS generated pair:35pass/0fail, including wrong
+order with no receipt, injected receipt failure rolling back the new RPC, correct
+original versions and replay refusal with no jobs. Earlier same-turn actual
+admission test1pass remains unchanged,36SQLchecks across those final receipts.
+Full5038 suite covers the frozen runtime changes; the2new offline packet checks
+and new SQL rehearsal ran separately after that full run. No later runtime edit.
+Owned QA container stopped exit0 after each run; no other services touched.
+Private immutable packet: social-publishing-991/2026-11-18/facebook-database-pair/
+payload.json and manifest.json. Whole payload SHA256
+2ad6060315430cffd580fdc1cf623f32ebf32d9342913b316e849c8e826cba76.
+Queue guarded query SHA256
+6c17c5b040e54b4232815b55f79ac5999532eac1f3e376ee15bb6a88f5ec6f06;
+capture guarded query SHA256
+c891204d8fca8b63384c0a572a5aa3976df753eb8d262ce951c3aafb22a88eea.
+Compare all payload/source/query hashes and fresh metadata before any approved
+write. After each response (or uncertain response) independently read back
+version/name/exact source statement, RPC/role grants/index/policy, zero social
+jobs and unchanged default-off runtime; never blindly retry. Stop on drift or
+partial failure; retain any earlier committed schema/receipt without deletion.
+
 ## 18 November — stalled publishing-status recovery fixed locally
 
 Continued SAME DRAFT PR991 from9d14aedb; mainb524a9f9/current PR ownership and

@@ -75,11 +75,29 @@ export function projectFacebookInspection(value: unknown, reviewId: string): Sta
     scheduledAt: p.scheduledAt, checkedAt: p.checkedAt, assetSha256: p.assetSha256 as string | null, canConfirm: false, canPublish: false, checks }
 }
 
+/** Bound only read-only operations, including SDK/session and response parsing.
+ * Never use a read deadline to retry or infer the outcome of a mutation.
+ */
+async function readPublication<T>(read: (signal: AbortSignal) => Promise<T>): Promise<T | null> {
+  const controller = new AbortController()
+  let timeout: ReturnType<typeof setTimeout> | undefined
+  try {
+    const deadline = new Promise<null>(resolve => {
+      timeout = setTimeout(() => { resolve(null); controller.abort() }, 8_000)
+    })
+    // Also settles when the SDK/session/transport ignores abort. Late evidence
+    // cannot replace a newer explicit read or become publication authority.
+    const result = await Promise.race([deadline, read(controller.signal)])
+    return controller.signal.aborted ? null : result
+  } catch { return null }
+  finally { if (timeout !== undefined) clearTimeout(timeout) }
+}
+
 export async function inspectStaffPublication(reviewId: string): Promise<{ inspection: StaffFacebookInspection | null; message: string | null }> {
   const unavailable = { inspection: null, message: 'Readiness could not be verified. Publishing stays unchanged; ask an administrator to check the read-only inspection setup.' }
   if (!UUID.test(reviewId)) return unavailable
-  try {
-    const { data, error } = await supabase.functions.invoke('social-publication-authorization', { body: { action: 'inspect', reviewId } })
+  const result = await readPublication(async signal => {
+    const { data, error } = await supabase.functions.invoke('social-publication-authorization', { body: { action: 'inspect', reviewId }, signal })
     if (!error) {
       const inspection = projectFacebookInspection(data, reviewId)
       return inspection ? { inspection, message: null } : unavailable
@@ -92,7 +110,8 @@ export async function inspectStaffPublication(reviewId: string): Promise<{ inspe
       if (record(body) && body.error === 'CURRENT_UNSCHEDULED_REVIEW_REQUIRED') return { inspection: null, message: 'This is not a current approved, unscheduled post. Review its approval and native schedule before continuing.' }
     }
     return unavailable
-  } catch { return unavailable }
+  })
+  return result ?? unavailable
 }
 
 export type PublicationReview = Pick<ContentReview, 'id' | 'state' | 'channels' | 'media_type'>
@@ -135,21 +154,10 @@ export function projectPublicationStatus(value: unknown, reviewId: string): Staf
 
 export async function getStaffPublicationStatus(reviewId: string): Promise<StaffPublicationStatus | null> {
   if (!UUID.test(reviewId)) return null
-  const controller = new AbortController()
-  let timeout: ReturnType<typeof setTimeout> | undefined
-  try {
-    // Bound the whole read, including SDK/session stalls that may not honour
-    // abort. A late receipt cannot replace a newer explicit status refresh.
-    // This deadline never retries or invokes a publication/withdrawal action.
-    const deadline = new Promise<null>(resolve => {
-      timeout = setTimeout(() => { resolve(null); controller.abort() }, 8_000)
-    })
-    const result = await Promise.race([deadline, supabase.functions.invoke('social-publication', {
-      body: { action: 'status', reviewId }, signal: controller.signal,
-    })])
-    return !result || controller.signal.aborted || result.error ? null : projectPublicationStatus(result.data, reviewId)
-  } catch { return null }
-  finally { if (timeout !== undefined) clearTimeout(timeout) }
+  return readPublication(async signal => {
+    const { data, error } = await supabase.functions.invoke('social-publication', { body: { action: 'status', reviewId }, signal })
+    return error ? null : projectPublicationStatus(data, reviewId)
+  })
 }
 
 export async function withdrawStaffPublication(reviewId: string, jobId: string): Promise<{ state: StaffPublication['state']; providerMayHaveStarted: boolean } | null> {
@@ -166,8 +174,8 @@ export async function withdrawStaffPublication(reviewId: string, jobId: string):
 /** No client/account/URL/proof booleans are supplied by the browser. */
 export async function prepareStaffPublication(reviewId: string): Promise<StaffPublicationPreview | null> {
   if (!UUID.test(reviewId)) return null
-  try {
-    const { data, error } = await supabase.functions.invoke('social-publication-authorization', { body: { action: 'preview', reviewId } })
+  return readPublication<StaffPublicationPreview | null>(async signal => {
+    const { data, error } = await supabase.functions.invoke('social-publication-authorization', { body: { action: 'preview', reviewId }, signal })
     const p = data?.preview, t = p?.target
     if (error || data?.ok !== true || !record(p) || !record(t) || t.reviewVersionId !== reviewId || t.route !== 'facebook_page'
       || typeof t.clientId !== 'string' || !UUID.test(t.clientId) || typeof t.accountId !== 'string' || !/^\d+$/.test(t.accountId)
@@ -177,7 +185,7 @@ export async function prepareStaffPublication(reviewId: string): Promise<StaffPu
       || typeof p.scheduledAt !== 'string' || !Number.isFinite(Date.parse(p.scheduledAt))) return null
     return { reviewId, clientId: t.clientId, accountId: t.accountId, platform: 'facebook', caption: p.caption,
       mediaType: p.mediaType as StaffPublicationPreview['mediaType'], assetSha256: p.assetSha256, fingerprint: p.fingerprint, scheduledAt: p.scheduledAt }
-  } catch { return null }
+  })
 }
 
 export async function confirmStaffPublication(preview: StaffPublicationPreview): Promise<{ jobId: string } | null> {

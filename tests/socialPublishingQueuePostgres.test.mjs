@@ -6,6 +6,7 @@ import { randomUUID } from 'node:crypto'
 import { createServer } from 'vite'
 import { facebookPostgresJourney } from './fixtures/facebookPostgresJourney.mjs'
 import { publicationCodecVite } from './fixtures/publicationCodecVite.mjs'
+import { prepareFacebookDatabaseRelease } from '../scripts/qa/prepare-facebook-database-release.mjs'
 
 // Opt-in REAL PostgreSQL. Never use a shared/project database or a network port.
 const container = process.env.CG_SOCIAL_QA_CONTAINER
@@ -161,8 +162,20 @@ test('real PostgreSQL: queue, source/role fences, crash recovery, receipts and O
   await t.test('Facebook inspection works before any publishing migration, without enqueue/sign/publish authority', async () => {
     await facebookPostgresJourney({ server, sql, q, actor, rpcClient, mode: 'inspection-only' })
   })
-  sql(readFileSync('supabase/migrations/20261115104948_social_publishing_queue.sql', 'utf8'))
-  sql(readFileSync('supabase/migrations/20261116085815_social_publication_preparation_evidence.sql', 'utf8'))
+  await t.test('exact Facebook release preserves original history versions, fails wrong order and rolls DDL back with failed receipts', () => {
+    const packet = prepareFacebookDatabaseRelease(), [queue, capture] = packet.migrations
+    sql('create schema supabase_migrations; create table supabase_migrations.schema_migrations(version text primary key,name text,statements text[]);')
+    assert.throws(() => sql(capture.query), /Exact prior Facebook migration receipt required/)
+    assert.equal(sql('select count(*) from supabase_migrations.schema_migrations'), '0')
+    sql(queue.query)
+    assert.throws(() => sql(capture.query.replace('insert into supabase_migrations.schema_migrations', 'select 1/0; insert into supabase_migrations.schema_migrations')), /division by zero/)
+    assert.equal(sql("select count(*) from pg_proc where pronamespace='public'::regnamespace and proname='read_social_publication_schedule_evidence'"), '0')
+    assert.equal(sql('select count(*) from supabase_migrations.schema_migrations'), '1')
+    sql(capture.query)
+    assert.deepEqual(JSON.parse(sql('select json_agg(version order by version) from supabase_migrations.schema_migrations')), packet.migrations.map(m => m.version))
+    assert.throws(() => sql(queue.query), /Migration already recorded/)
+    assert.equal(sql('select count(*) from background_jobs'), '0')
+  })
   for (const mode of ['success', 'stale', 'timeout']) await t.test(`Facebook connected SQL journey: ${mode}`, async () => {
     await facebookPostgresJourney({ server, sql, q, actor, rpcClient, mode })
   })

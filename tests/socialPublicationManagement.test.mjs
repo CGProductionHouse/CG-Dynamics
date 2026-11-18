@@ -266,28 +266,35 @@ test('stalled status read releases the real panel for read-only refresh and igno
   } finally { finishLate({ data: null, error: null }); await settle() }
 })
 
-test('status deadline aborts the installed SDK transport without a second call or mutation', async t => {
+for (const mode of [
+  { action: 'status', method: 'getStaffPublicationStatus', endpoint: 'social-publication' },
+  { action: 'inspect', method: 'inspectStaffPublication', endpoint: 'social-publication-authorization' },
+  { action: 'preview', method: 'prepareStaffPublication', endpoint: 'social-publication-authorization' },
+]) test(`${mode.action} deadline aborts the installed SDK transport without a second call or mutation`, async t => {
   const calls = []
   const client = createClient('https://fixture.invalid', 'local-fixture-only', {
     auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
     global: { fetch: async (input, init) => {
       const url = new URL(input)
       assert.equal(url.origin, 'https://fixture.invalid')
-      assert.equal(url.pathname, '/functions/v1/social-publication')
+      assert.equal(url.pathname, `/functions/v1/${mode.endpoint}`)
       assert.equal(init.method, 'POST')
       const body = JSON.parse(init.body)
-      assert.deepEqual(body, { action: 'status', reviewId: ids.review })
+      assert.deepEqual(body, { action: mode.action, reviewId: ids.review })
       calls.push({ body, signal: init.signal })
       return new Promise((_resolve, reject) => init.signal.addEventListener('abort', () => reject(Error('PRIVATE transport timeout')), { once: true }))
     } },
   })
   supabase.functions.invoke = (name, options) => client.functions.invoke(name, options)
   t.mock.timers.enable({ apis: ['setTimeout'] })
-  const pending = frontend.getStaffPublicationStatus(ids.review)
+  const pending = frontend[mode.method](ids.review)
   await setImmediate()
   assert.equal(calls.length, 1)
   t.mock.timers.tick(8_000)
-  assert.equal(await pending, null)
+  const result = await pending
+  if (mode.action === 'inspect') {
+    assert.equal(result.inspection, null); assert.match(result.message, /Readiness could not be verified/)
+  } else assert.equal(result, null)
   assert.equal(calls[0].signal.aborted, true)
   await setImmediate()
   assert.equal(calls.length, 1)
@@ -404,12 +411,46 @@ const inspectionResponse = () => ({ ok: true, inspection: { contract: 'facebook_
   checks: [{ key: 'account', status: 'pass', code: null }, { key: 'image', status: 'pass', code: null },
     { key: 'teams', status: 'unavailable', code: 'FRESH_TEAMS_EVIDENCE_REQUIRED' }, { key: 'time', status: 'pass', code: null }, { key: 'release', status: 'blocked', code: 'PUBLISHING_DISABLED' }] } })
 
+for (const mode of [
+  { action: 'inspect', method: 'inspectStaffPublication', button: 'Check Facebook readiness', failure: /Readiness could not be verified/, response: inspectionResponse, success: /Synthetic exact Page/ },
+  { action: 'preview', method: 'prepareStaffPublication', button: 'Prepare Facebook schedule', failure: /Scheduling could not be prepared/, response: previewResponse, success: /Approved caption/ },
+]) test(`stalled ${mode.action} releases the actual confirmation panel without writes or late evidence`, async t => {
+  const calls = []; let finishLate
+  const stalled = new Promise(resolve => { finishLate = resolve })
+  supabase.functions.invoke = (name, options) => {
+    calls.push([name, options])
+    return calls.length === 1 ? stalled : Promise.resolve({ data: mode.response(), error: null })
+  }
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  try {
+    const panel = componentHarness({ [mode.method]: frontend[mode.method] }, ids.review, true)
+    panel.click(mode.button); await settle()
+    assert.match(panel.text(), /Checking the exact publication/)
+    t.mock.timers.tick(8_000); await settle()
+    assert.match(panel.text(), mode.failure)
+    assert.doesNotMatch(panel.text(), /Checking the exact publication|Confirm this Facebook schedule/)
+    assert.equal(calls.length, 1); assert.equal(calls[0][1].signal.aborted, true)
+    panel.click(mode.button); await settle()
+    assert.match(panel.text(), mode.success)
+    const late = mode.response()
+    if (mode.action === 'inspect') late.inspection.accountName = 'Late unverified evidence'
+    else late.preview.caption = 'Late unverified evidence'
+    finishLate({ data: late, error: null }); await settle()
+    assert.match(panel.text(), mode.success); assert.doesNotMatch(panel.text(), /Late unverified evidence/)
+    assert.equal(calls.length, 2)
+    assert.ok(calls.every(([name, options]) => name === 'social-publication-authorization' && options.body.action === mode.action && options.body.reviewId === ids.review))
+    panel.unmount(); assert.equal(panel.lateWrites.length, 0)
+  } finally { finishLate({ data: null, error: null }); await settle() }
+})
+
 test('readiness browser adapter is exact-review, rejects authority/foreign/partial reports and never invokes confirmation', async () => {
   const calls = [], response = inspectionResponse()
   supabase.functions.invoke = async (name, options) => { calls.push([name, options]); return { data: response, error: null } }
   const result = await frontend.inspectStaffPublication(ids.review)
   assert.equal(result.message, null); assert.equal(result.inspection.canPublish, false)
-  assert.deepEqual(calls, [['social-publication-authorization', { body: { action: 'inspect', reviewId: ids.review } }]])
+  assert.equal(calls.length, 1); assert.equal(calls[0][0], 'social-publication-authorization')
+  assert.deepEqual(calls[0][1].body, { action: 'inspect', reviewId: ids.review })
+  assert.ok(calls[0][1].signal instanceof AbortSignal)
   for (const change of [p => { p.reviewId = randomUUID() }, p => { p.canPublish = true }, p => { p.canConfirm = true }, p => { p.checks.pop() },
     p => { p.checks[1] = { ...p.checks[0] } }, p => { p.checks[2].code = 'PRIVATE_TOKEN' }, p => { p.assetSha256 = null }, p => { p.accountName = 'bad\nname' }]) {
     const data = inspectionResponse(); change(data.inspection)
@@ -422,6 +463,27 @@ test('inspection failures expose only fixed staff recovery copy', async () => {
   assert.match((await frontend.inspectStaffPublication(ids.review)).message, /single active Facebook Page mapping/)
   supabase.functions.invoke = async () => ({ data: null, error: { context: Response.json({ error: 'PRIVATE token' }, { status: 503 }) } })
   assert.doesNotMatch((await frontend.inspectStaffPublication(ids.review)).message, /PRIVATE token/)
+})
+
+test('inspection deadline also bounds an incomplete HTTP error body and never exposes late diagnostics', async t => {
+  let stream; const calls = []
+  const response = new Response(new ReadableStream({ start(controller) { stream = controller } }), { status: 503 })
+  supabase.functions.invoke = async (name, options) => {
+    calls.push([name, options]); return { data: null, error: { context: response } }
+  }
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  try {
+    const pending = frontend.inspectStaffPublication(ids.review)
+    await setImmediate()
+    t.mock.timers.tick(8_000)
+    const result = await pending
+    assert.equal(result.inspection, null); assert.match(result.message, /Readiness could not be verified/)
+    assert.equal(calls.length, 1); assert.equal(calls[0][1].signal.aborted, true)
+    stream.enqueue(new TextEncoder().encode('{"error":"PRIVATE late credential diagnostic"}')); stream.close(); stream = null
+    await setImmediate()
+    assert.doesNotMatch(result.message, /PRIVATE/)
+    assert.equal(calls.length, 1)
+  } finally { stream?.close(); await setImmediate() }
 })
 
 test('actual read-only UI shows independent source/account checks and cannot prepare while a check is held', async () => {
@@ -448,7 +510,9 @@ test('browser preview is default-hidden, requests only review ID and refuses for
   const calls = []
   supabase.functions.invoke = async (name, options) => { calls.push([name, options]); return { data: previewResponse(), error: null } }
   assert.deepEqual(await frontend.prepareStaffPublication(ids.review), confirmationPreview)
-  assert.deepEqual(calls, [['social-publication-authorization', { body: { action: 'preview', reviewId: ids.review } }]])
+  assert.equal(calls.length, 1); assert.equal(calls[0][0], 'social-publication-authorization')
+  assert.deepEqual(calls[0][1].body, { action: 'preview', reviewId: ids.review })
+  assert.ok(calls[0][1].signal instanceof AbortSignal)
   const jpeg = previewResponse(); jpeg.preview.mediaType = 'image/jpeg'
   supabase.functions.invoke = async () => ({ data: jpeg, error: null })
   assert.deepEqual(await frontend.prepareStaffPublication(ids.review), { ...confirmationPreview, mediaType: 'image/jpeg' })
