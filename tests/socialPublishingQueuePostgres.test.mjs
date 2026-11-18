@@ -60,7 +60,8 @@ before(async () => {
   sql("alter table background_jobs add constraint background_jobs_allowed_type check(job_type in ('meta_sync','report_prep','tiktok_analytics_refresh')); grant all on all tables in schema public to service_role;")
   const legacy = readFileSync('supabase/migrations/20260801170000_backend_acceptance_hardening.sql', 'utf8')
   sql(legacy.slice(legacy.indexOf('create or replace function public.claim_next_background_job('), legacy.indexOf('drop function if exists public.update_background_job_progress(')))
-  server = await createServer({ configFile: false, plugins: [publicationCodecVite], ssr: { external: ['jpeg-js'] }, server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true }, logLevel: 'error' })
+  server = await createServer({ configFile: false, plugins: [publicationCodecVite], ssr: { external: ['jpeg-js'] }, server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true }, logLevel: 'error',
+    define: { 'import.meta.env.VITE_SUPABASE_URL': JSON.stringify('https://fixture.invalid'), 'import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY': JSON.stringify('local-fixture-only') } })
   queue = await server.ssrLoadModule('/supabase/functions/_shared/socialPublishingQueue.ts')
   authorization = await server.ssrLoadModule('/supabase/functions/_shared/socialPublicationAuthorization.ts')
   authorizationStore = await server.ssrLoadModule('/supabase/functions/_shared/socialPublicationAuthorizationStore.ts')

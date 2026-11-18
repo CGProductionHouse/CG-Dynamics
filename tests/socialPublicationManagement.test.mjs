@@ -65,6 +65,7 @@ test('status projects exact canonical scope and only safe receipt fields, never 
   const f = await fixture(), status = await readStatus(f)
   assert.equal(status.reviewId, ids.review); assert.equal(status.clientId, ids.client); assert.equal(status.canAuthorize, false)
   assert.equal(status.items[0].state, 'queued'); assert.equal(status.items[0].authorizationState, 'recorded')
+  assert.equal(status.items[0].confirmationFingerprint, f.row.publication.authorization.fingerprint)
   assert.equal(JSON.stringify(status).includes('PRIVATE'), false); assert.equal(JSON.stringify(status).includes('assetPath'), false)
   const filters = f.calls.find(c => c[1] === 'background_jobs')[2]
   assert.ok(filters.some(([k, v]) => k === 'payload->intent->>clientId' && v === ids.client))
@@ -83,6 +84,44 @@ test('client/staff/inactive roles are rejected before any review/job read', asyn
   for (const change of [{ role: 'client' }, { role: 'staff' }, { is_active: false }]) {
     const f = await fixture(); Object.assign(f.tables.profiles[0], change)
     await assert.rejects(readStatus(f)); assert.deepEqual(f.calls.map(c => c[1]), ['profiles'])
+  }
+})
+
+test('role revocation during the receipt read cannot return private publication evidence', async () => {
+  for (const change of [{ role: 'client' }, { role: 'staff' }, { is_active: false }]) {
+    const f = await fixture(), original = f.sb.from
+    f.sb.from = table => {
+      const query = original(table)
+      if (table === 'background_jobs') {
+        const range = query.range
+        query.range = async (...args) => {
+          const result = await range(...args)
+          f.tables.profiles[0] = { ...f.tables.profiles[0], ...change }
+          return result
+        }
+      }
+      return query
+    }
+    await assert.rejects(readStatus(f), /Active publication manager required/)
+  }
+})
+
+test('review ownership or canonical source drift during status read invalidates the receipt', async () => {
+  for (const table of ['content_review_versions', 'monthly_deliverables']) {
+    const f = await fixture(), original = f.sb.from
+    f.sb.from = name => {
+      const query = original(name)
+      if (name === 'background_jobs') {
+        const range = query.range
+        query.range = async (...args) => {
+          const result = await range(...args)
+          f.tables[table][0] = { ...f.tables[table][0], client_id: randomUUID() }
+          return result
+        }
+      }
+      return query
+    }
+    await assert.rejects(readStatus(f), /Publication source unavailable/)
   }
 })
 
@@ -228,7 +267,7 @@ function componentHarness(io, reviewId, confirmation = false, reviewChanges = {}
   const text = value => value == null || typeof value === 'boolean' ? '' : Array.isArray(value) ? value.map(text).join('') : typeof value === 'object' ? text(value.props?.children) : String(value)
   return { render, text: () => text(render()), confirmationCount: () => nodes(render()).filter(n => typeof n.type === 'function' && n.type.name === 'ContentPublicationConfirmation').length, click(label) {
     const node = nodes(render()).find(n => n.type === 'button' && text(n.props.children) === label)
-    assert.ok(node, `Missing button ${label}`); assert.notEqual(node.props.disabled, true); node.props.onClick()
+    assert.ok(node, `Missing button ${label}`); assert.notEqual(node.props.disabled, true); node.props.onClick(); return node.props.onClick
   }, unmount() { cleanups.forEach(fn => fn?.()); mounted = false }, lateWrites }
 }
 const settle = async () => { for (let n = 0; n < 8; n++) await Promise.resolve() }
@@ -539,12 +578,145 @@ test('browser confirmation supplies no account/media/proof overrides and uncerta
 test('actual confirmation UI requires a second action and clears uncertain confirmation before refreshing receipts', async () => {
   let writes = 0, refreshes = 0
   const c = componentHarness({ prepareStaffPublication: async () => confirmationPreview,
-    confirmStaffPublication: async selected => { writes++; assert.equal(selected, confirmationPreview); return null }, onConfirmed: () => refreshes++ }, ids.review, true)
+    confirmStaffPublication: async selected => { writes++; assert.deepEqual({ ...selected }, confirmationPreview); assert.ok(Object.isFrozen(selected)); return null }, onConfirmed: () => refreshes++ }, ids.review, true)
   c.click('Prepare Facebook schedule'); await settle(); assert.equal(writes, 0)
   assert.match(c.text(), /Approved caption/); assert.match(c.text(), /Facebook Page · 12345/); assert.match(c.text(), /not already scheduled/)
   c.click('Confirm this Facebook schedule'); await settle()
   assert.equal(writes, 1); assert.equal(refreshes, 1); assert.match(c.text(), /job may already exist/)
   assert.equal(c.text().includes('Confirm this Facebook schedule'), false)
+  assert.throws(() => c.click('Prepare Facebook schedule'))
+})
+
+test('stalled confirmation has a bounded uncertain result and never permits a blind second confirmation', async t => {
+  let finishLate, refreshes = 0; const calls = []
+  const stalled = new Promise(resolve => { finishLate = resolve })
+  supabase.functions.invoke = (name, options) => { calls.push([name, options]); return stalled }
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  try {
+    const c = componentHarness({ prepareStaffPublication: async () => confirmationPreview,
+      confirmStaffPublication: frontend.confirmStaffPublication, onConfirmed: () => refreshes++ }, ids.review, true)
+    c.click('Prepare Facebook schedule'); await settle()
+    c.click('Confirm this Facebook schedule'); await settle()
+    t.mock.timers.tick(12_000); await settle()
+    assert.match(c.text(), /Confirmation could not be verified/)
+    assert.doesNotMatch(c.text(), /Checking the exact publication|Confirm this Facebook schedule/)
+    assert.throws(() => c.click('Prepare Facebook schedule'))
+    assert.match(c.text(), /Check confirmation/)
+    assert.equal(calls.length, 1); assert.equal(calls[0][1].body.action, 'confirm')
+    assert.equal(calls[0][1].signal, undefined)
+    assert.equal(refreshes, 1)
+    c.unmount(); finishLate({ data: null, error: null }); await settle()
+    assert.equal(c.lateWrites.length, 0)
+  } finally { finishLate({ data: null, error: null }); await settle() }
+})
+
+test('stalled withdrawal releases the real panel into status recovery without claiming it stopped', async t => {
+  const f = await fixture(), status = await readStatus(f), calls = []; let finishLate
+  const stalled = new Promise(resolve => { finishLate = resolve })
+  supabase.functions.invoke = (name, options) => { calls.push([name, options]); return stalled }
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  try {
+    const c = componentHarness({ getStaffPublicationStatus: async () => status, withdrawStaffPublication: frontend.withdrawStaffPublication }, ids.review)
+    c.click('Publishing status'); await settle(); c.click('Stop queued publishing'); c.click('Confirm withdrawal'); await settle()
+    t.mock.timers.tick(12_000); await settle()
+    assert.match(c.text(), /Withdrawal could not be verified/)
+    assert.doesNotMatch(c.text(), /Queued publishing stopped|Checking publication records|Confirm withdrawal/)
+    assert.equal(calls.length, 1); assert.deepEqual(calls[0][1].body, { action: 'revoke', reviewId: ids.review, jobId: ids.job })
+    assert.equal(calls[0][1].signal, undefined)
+    c.click('Refresh status'); await settle()
+    assert.match(c.text(), /Queued in Dynamics/)
+    finishLate({ data: { ok: true, publication: { jobId: ids.job, authorizationRevoked: true, state: 'cancelled', providerMayHaveStarted: false } }, error: null }); await settle()
+    assert.doesNotMatch(c.text(), /Queued publishing stopped/); assert.equal(calls.length, 1)
+  } finally { finishLate({ data: null, error: null }); await settle() }
+})
+
+test('one lost confirmation is recovered through the exact server-verified fingerprint with no second write', async () => {
+  const f = await fixture(), status = await readStatus(f), calls = []; let refreshes = 0
+  const preview = { ...confirmationPreview, fingerprint: status.items[0].confirmationFingerprint }
+  supabase.functions.invoke = async (name, options) => {
+    calls.push([name, options])
+    if (options.body.action === 'confirm') return { data: null, error: Error('PRIVATE response lost after commit') }
+    assert.equal(options.body.action, 'status')
+    return { data: { ok: true, status }, error: null }
+  }
+  const c = componentHarness({ prepareStaffPublication: async () => preview,
+    confirmStaffPublication: frontend.confirmStaffPublication,
+    reconcileStaffPublicationConfirmation: frontend.reconcileStaffPublicationConfirmation,
+    onConfirmed: () => refreshes++ }, ids.review, true)
+  c.click('Prepare Facebook schedule'); await settle()
+  const sameClick = c.click('Confirm this Facebook schedule'); sameClick(); await settle()
+  assert.match(c.text(), /Confirmation could not be verified/); assert.throws(() => c.click('Prepare Facebook schedule'))
+  c.click('Check confirmation'); await settle()
+  assert.match(c.text(), /Matching confirmation found/); assert.match(c.text(), /not a verified live post/)
+  assert.throws(() => c.click('Prepare Facebook schedule'))
+  assert.deepEqual(calls.map(([, options]) => options.body.action), ['confirm', 'status'])
+  assert.equal(refreshes, 2)
+  sameClick(); await settle()
+  assert.deepEqual(calls.map(([, options]) => options.body.action), ['confirm', 'status'], 'even a stale click handler must not resend after reconciliation')
+})
+
+test('reconciliation requires one exact client/review/account/time/fingerprint with current recorded authority', async () => {
+  const f = await fixture(), status = await readStatus(f), calls = []
+  const preview = { ...confirmationPreview, fingerprint: status.items[0].confirmationFingerprint }
+  let response = { ok: true, status }
+  supabase.functions.invoke = async (name, options) => { calls.push([name, options.body]); return { data: response, error: null } }
+  assert.deepEqual(await frontend.reconcileStaffPublicationConfirmation(preview), { jobId: ids.job })
+  for (const change of [
+    s => { s.clientId = randomUUID() }, s => { s.reviewId = randomUUID() },
+    s => { s.items[0].accountId = '999' }, s => { s.items[0].platform = 'instagram' },
+    s => { s.items[0].confirmationFingerprint = 'c'.repeat(64) }, s => { delete s.items[0].confirmationFingerprint },
+    s => { s.items[0].scheduledAt = '2026-11-17T09:00:00Z' }, s => { s.items[0].authorizationState = 'revoked' },
+    s => { s.items = [] }, s => { s.items.push({ ...s.items[0], jobId: randomUUID() }) },
+  ]) {
+    response = { ok: true, status: structuredClone(status) }; change(response.status)
+    assert.equal(await frontend.reconcileStaffPublicationConfirmation(preview), null)
+  }
+  assert.ok(calls.every(([name, body]) => name === 'social-publication' && body.action === 'status' && body.reviewId === ids.review))
+})
+
+test('unavailable reconciliation remains locked and never sends a new confirmation', async () => {
+  let writes = 0, reads = 0
+  const c = componentHarness({ prepareStaffPublication: async () => confirmationPreview,
+    confirmStaffPublication: async () => { writes++; return null },
+    reconcileStaffPublicationConfirmation: async () => { reads++; return null } }, ids.review, true)
+  c.click('Prepare Facebook schedule'); await settle(); c.click('Confirm this Facebook schedule'); await settle()
+  c.click('Check confirmation'); await settle()
+  assert.match(c.text(), /still unverified/); assert.throws(() => c.click('Prepare Facebook schedule'))
+  c.click('Check confirmation'); await settle()
+  assert.equal(writes, 1); assert.equal(reads, 2)
+})
+
+test('confirmation observation deadline does not cancel or repeat the installed SDK mutation', async t => {
+  const calls = []; let finish
+  const client = createClient('https://fixture.invalid', 'local-fixture-only', {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+    global: { fetch: async (input, options) => {
+      assert.equal(new URL(input).origin, 'https://fixture.invalid')
+      assert.equal(new URL(input).pathname, '/functions/v1/social-publication-authorization')
+      assert.deepEqual(JSON.parse(options.body), { action: 'confirm', reviewId: ids.review, expectedFingerprint: confirmationPreview.fingerprint, confirmPublication: true })
+      calls.push(options)
+      return new Promise(resolve => { finish = resolve })
+    } },
+  })
+  supabase.functions.invoke = (name, options) => client.functions.invoke(name, options)
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  const pending = frontend.confirmStaffPublication(confirmationPreview)
+  await setImmediate(); assert.equal(calls.length, 1)
+  t.mock.timers.tick(12_000); assert.equal(await pending, null)
+  assert.notEqual(calls[0].signal?.aborted, true)
+  finish(Response.json({ ok: true, publication: { jobId: ids.job, authorizationId: ids.authorization, fingerprint: confirmationPreview.fingerprint, status: 'queued', state: 'queued' } }))
+  await setImmediate(); assert.equal(calls.length, 1)
+})
+
+test('late reconciliation cannot write into a different review or call its parent', async () => {
+  let finish, refreshes = 0
+  const pending = new Promise(resolve => { finish = resolve })
+  const c = componentHarness({ prepareStaffPublication: async () => confirmationPreview,
+    confirmStaffPublication: async () => null, reconcileStaffPublicationConfirmation: async () => pending,
+    onConfirmed: () => refreshes++ }, ids.review, true)
+  c.click('Prepare Facebook schedule'); await settle(); c.click('Confirm this Facebook schedule'); await settle()
+  c.click('Check confirmation'); c.unmount(); finish({ jobId: ids.job }); await settle()
+  assert.equal(c.lateWrites.length, 0); assert.equal(refreshes, 1)
 })
 
 test('actual confirmation UI cancellation is zero-write and success does not claim a live post', async () => {

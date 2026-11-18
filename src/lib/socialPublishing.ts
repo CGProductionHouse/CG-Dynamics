@@ -11,6 +11,7 @@ export interface StaffPublication {
   jobId: string; platform: 'facebook' | 'instagram' | 'tiktok' | 'linkedin' | 'youtube'; accountId: string; accountLabel: string
   scheduledAt: string; state: keyof typeof PUBLICATION_STATE_LABELS
   authorizationState: 'recorded' | 'revoked' | 'unconfirmed'; providerMayHaveStarted: boolean; postUrl: string | null; errorCode: string | null
+  confirmationFingerprint: string | null
 }
 export interface StaffPublicationStatus { reviewId: string; clientId: string; items: StaffPublication[]; canAuthorize: false }
 
@@ -138,6 +139,8 @@ export function projectPublicationStatus(value: unknown, reviewId: string): Staf
       || !text(i.accountId) || !text(i.accountLabel) || !text(i.scheduledAt) || !Number.isFinite(Date.parse(i.scheduledAt))
       || typeof i.state !== 'string' || !Object.hasOwn(PUBLICATION_STATE_LABELS, i.state)
       || !['recorded', 'revoked', 'unconfirmed'].includes(String(i.authorizationState)) || typeof i.providerMayHaveStarted !== 'boolean'
+      || (i.confirmationFingerprint !== undefined && i.confirmationFingerprint !== null && (typeof i.confirmationFingerprint !== 'string' || !/^[a-f0-9]{64}$/.test(i.confirmationFingerprint)))
+      || (i.authorizationState === 'unconfirmed' && i.confirmationFingerprint != null)
       || (i.errorCode !== null && (typeof i.errorCode !== 'string' || !/^[A-Z][A-Z0-9_]{0,79}$/.test(i.errorCode)))) return null
     if (i.postUrl !== null) {
       if (i.platform !== 'facebook' || i.state !== 'posted' || !/^\d+$/.test(i.accountId)
@@ -147,6 +150,7 @@ export function projectPublicationStatus(value: unknown, reviewId: string): Staf
     seen.add(i.jobId)
     items.push({ jobId: i.jobId, platform: i.platform as StaffPublication['platform'], accountId: i.accountId, accountLabel: i.accountLabel,
       scheduledAt: i.scheduledAt, state: i.state as StaffPublication['state'], authorizationState: i.authorizationState as StaffPublication['authorizationState'],
+      confirmationFingerprint: typeof i.confirmationFingerprint === 'string' ? i.confirmationFingerprint : null,
       providerMayHaveStarted: i.providerMayHaveStarted, postUrl: i.postUrl as string | null, errorCode: i.errorCode as string | null })
   }
   return { reviewId, clientId: s.clientId, items, canAuthorize: false }
@@ -160,10 +164,24 @@ export async function getStaffPublicationStatus(reviewId: string): Promise<Staff
   })
 }
 
+/** Observe a write once, without cancellation/retry or an assumed failure.
+ * A deadline is an UNKNOWN result; callers must use the existing status reader.
+ */
+async function observePublicationMutation<T>(write: () => Promise<T>): Promise<T | null> {
+  let timeout: ReturnType<typeof setTimeout> | undefined
+  try {
+    const deadline = new Promise<null>(resolve => { timeout = setTimeout(() => resolve(null), 12_000) })
+    return await Promise.race([deadline, write()])
+  } catch { return null }
+  finally { if (timeout !== undefined) clearTimeout(timeout) }
+}
+
 export async function withdrawStaffPublication(reviewId: string, jobId: string): Promise<{ state: StaffPublication['state']; providerMayHaveStarted: boolean } | null> {
   if (!UUID.test(reviewId) || !UUID.test(jobId)) return null
   try {
-    const { data, error } = await supabase.functions.invoke('social-publication', { body: { action: 'revoke', reviewId, jobId } })
+    const result = await observePublicationMutation(() => supabase.functions.invoke('social-publication', { body: { action: 'revoke', reviewId, jobId } }))
+    if (!result) return null
+    const { data, error } = result
     const p = data?.publication
     if (error || data?.ok !== true || !record(p) || p.jobId !== jobId || p.authorizationRevoked !== true
       || typeof p.providerMayHaveStarted !== 'boolean' || typeof p.state !== 'string' || !Object.hasOwn(PUBLICATION_STATE_LABELS, p.state)) return null
@@ -191,8 +209,12 @@ export async function prepareStaffPublication(reviewId: string): Promise<StaffPu
 export async function confirmStaffPublication(preview: StaffPublicationPreview): Promise<{ jobId: string } | null> {
   if (!UUID.test(preview.reviewId) || !/^[a-f0-9]{64}$/.test(preview.fingerprint)) return null
   try {
-    const { data, error } = await supabase.functions.invoke('social-publication-authorization', { body: { action: 'confirm', reviewId: preview.reviewId,
-      expectedFingerprint: preview.fingerprint, confirmPublication: true } })
+    // Observe once; do not abort or retry an authority-creating request. Its
+    // result may commit after the deadline and must be reconciled read-only.
+    const result = await observePublicationMutation(() => supabase.functions.invoke('social-publication-authorization', { body: { action: 'confirm', reviewId: preview.reviewId,
+      expectedFingerprint: preview.fingerprint, confirmPublication: true } }))
+    if (!result) return null
+    const { data, error } = result
     const p = data?.publication
     if (error || data?.ok !== true || !record(p) || typeof p.jobId !== 'string' || !UUID.test(p.jobId)
       || typeof p.authorizationId !== 'string' || !UUID.test(p.authorizationId) || p.fingerprint !== preview.fingerprint
@@ -200,4 +222,17 @@ export async function confirmStaffPublication(preview: StaffPublicationPreview):
       || typeof p.state !== 'string' || !Object.hasOwn(PUBLICATION_STATE_LABELS, p.state)) return null
     return { jobId: p.jobId }
   } catch { return null }
+}
+
+/** Find an existing exact confirmation; never create, approve or retry one.
+ * Older status responses may still display, but cannot prove a matching intent.
+ */
+export async function reconcileStaffPublicationConfirmation(preview: StaffPublicationPreview): Promise<{ jobId: string } | null> {
+  if (!UUID.test(preview.reviewId) || !UUID.test(preview.clientId) || !/^\d+$/.test(preview.accountId)
+    || !/^[a-f0-9]{64}$/.test(preview.fingerprint) || !Number.isFinite(Date.parse(preview.scheduledAt))) return null
+  const status = await getStaffPublicationStatus(preview.reviewId)
+  if (!status || status.clientId !== preview.clientId) return null
+  const matches = status.items.filter(item => item.platform === 'facebook' && item.accountId === preview.accountId
+    && item.confirmationFingerprint === preview.fingerprint && Date.parse(item.scheduledAt) === Date.parse(preview.scheduledAt))
+  return matches.length === 1 && matches[0].authorizationState === 'recorded' ? { jobId: matches[0].jobId } : null
 }

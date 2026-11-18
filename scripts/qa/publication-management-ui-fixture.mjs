@@ -12,6 +12,7 @@ export const PUBLICATION_CONFIRMATION_VISIBLE=false;
 export function canPrepareFacebookPhotoReview(){return false}
 export async function prepareStaffPublication(){throw Error('Creation is disabled in the management-only fixture')}
 export async function confirmStaffPublication(){throw Error('Creation is disabled in the management-only fixture')}
+export async function reconcileStaffPublicationConfirmation(){return null}
 const reviews=${JSON.stringify(reviews)};
 const rows=Object.fromEntries(reviews.map((id,index)=>[id,['queued','processing','posted','unknown_outcome'].map((state,n)=>({jobId:index+'-'+n,platform:'facebook',accountId:'12345',accountLabel:'Synthetic Client '+(index?'B':'A')+' · Facebook Page',scheduledAt:'2026-11-17T08:00:00Z',state,authorizationState:'recorded',providerMayHaveStarted:n>0,postUrl:state==='posted'?'https://www.facebook.com/12345_789':null,errorCode:null}))]));
 export async function getStaffPublicationStatus(reviewId){const mode=window.fixtureMode;const snapshot=structuredClone(rows[reviewId]);if(mode==='slow'&&reviewId===reviews[0])await new Promise(r=>setTimeout(r,1800));if(mode==='unavailable')return null;return{reviewId,clientId:reviewId,items:snapshot,canAuthorize:false}}

@@ -12,7 +12,7 @@ export async function facebookPostgresJourney({ server, sql, q, actor, rpcClient
     'socialPublishingQueue', 'socialPublicationManagement', 'metaTokenStorage', 'facebookPublicationInspection'].map(name => server.ssrLoadModule(`/supabase/functions/_shared/${name}.ts`)))
   const [runtimeModule, staff, store, queue, management, tokens, inspection] = modules
   const ids = Object.fromEntries(['client', 'deliverable', 'review', 'connection', 'mapping', 'sourceJob', 'source', 'run', 'plan', 'bucket', 'task'].map(k => [k, randomUUID()]))
-  const due = new Date(Date.now() + (admitReview ? 60_000 : 20_000)).toISOString(), date = new Date(Date.parse(due) + 7200_000).toISOString().slice(0, 10)
+  const due = new Date(Date.now() + (admitReview ? 60_000 : 40_000)).toISOString(), date = new Date(Date.parse(due) + 7200_000).toISOString().slice(0, 10)
   const config = { graphVersion: 'v27.0', appId: '789', appSecret: 'fixture-only', projectUrl: 'https://fixture.supabase.co',
     encryptionKey: Buffer.alloc(32, 3).toString('base64'), keyVersion: 'v1' }
   const encrypted = await tokens.encryptMetaStoredToken('fixture-user-token', ids.connection, config.encryptionKey, 'v1')
@@ -122,6 +122,36 @@ export async function facebookPostgresJourney({ server, sql, q, actor, rpcClient
     const jobId = confirmation.body.publication.jobId, worker = `facebook-db-${randomUUID()}`
     let status = await management.readPublicationManagementStatus(sb, actor, ids.review)
     assert.equal(status.items.length, 1); assert.equal(status.items[0].state, 'queued'); assert.equal(posts, 0)
+    assert.equal(status.items[0].confirmationFingerprint, p.body.preview.fingerprint)
+    if (mode === 'success' && mediaType === 'image/png' && !admitReview) {
+      const frontend = await server.ssrLoadModule('/src/lib/socialPublishing.ts')
+      const { supabase: browser } = await server.ssrLoadModule('/src/lib/supabase.ts')
+      const descriptor = Object.getOwnPropertyDescriptor(browser, 'functions'), calls = []
+      Object.defineProperty(browser, 'functions', { configurable: true, value: { invoke: async (_name, options) => {
+        calls.push(options.body.action)
+        if (options.body.action === 'confirm') {
+          // Same real atomic SQL confirmation; deliberately lose its response.
+          const saved = await invoke(options.body)
+          assert.equal(saved.status, 200); assert.equal(saved.body.publication.jobId, jobId)
+          return { data: null, error: Error('Synthetic response lost AFTER confirmation committed') }
+        }
+        assert.equal(options.body.action, 'status')
+        return { data: { ok: true, status: await management.readPublicationManagementStatus(sb, actor, ids.review) }, error: null }
+      } } })
+      try {
+        const preview = { reviewId: ids.review, clientId: ids.client, accountId: '123', platform: 'facebook',
+          caption: p.body.preview.caption, mediaType, assetSha256: p.body.preview.assetSha256,
+          fingerprint: p.body.preview.fingerprint, scheduledAt: p.body.preview.scheduledAt }
+        assert.equal(await frontend.confirmStaffPublication(preview), null)
+        assert.deepEqual(await frontend.reconcileStaffPublicationConfirmation(preview), { jobId })
+        assert.deepEqual(calls, ['confirm', 'status'])
+        assert.equal(json(`select count(*)::int from background_jobs where payload->'intent'->>'reviewVersionId'=${q(ids.review)}`), 1)
+        assert.equal(posts, 0)
+      } finally {
+        if (descriptor) Object.defineProperty(browser, 'functions', descriptor)
+        else delete browser.functions
+      }
+    }
     assert.equal(json(`select to_jsonb(claim_next_background_job(${q(worker)}))`)?.id, null, 'future job must not be claimed')
     if (mode === 'stale') sql(`update microsoft_sync_jobs set exported_at=now()-interval '10 minutes',created_at=now()-interval '10 minutes' where id=${q(ids.sourceJob)}`)
     const remaining = Date.parse(due) - Date.now()

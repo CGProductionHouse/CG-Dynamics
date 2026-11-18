@@ -10,6 +10,7 @@ const exact = (v: Record<string, unknown>, keys: string[]) => Object.keys(v).len
 export interface PublicationStatusItem {
   jobId: string; platform: PublishingPlatform; accountId: string; accountLabel: string; scheduledAt: string; state: PublishingState
   authorizationState: 'recorded' | 'revoked' | 'unconfirmed'; providerMayHaveStarted: boolean; postUrl: string | null; errorCode: string | null
+  confirmationFingerprint: string | null
 }
 export interface PublicationManagementStatus {
   reviewId: string; clientId: string; items: PublicationStatusItem[]
@@ -68,10 +69,19 @@ export async function readPublicationManagementStatus(sb: SupabaseClient, actorI
         accountLabel: `${labels[i.platform as PublishingPlatform]} · ${i.accountId}`, scheduledAt: i.scheduledAt,
         state: row.status === 'cancelled' && !started ? 'cancelled' : p.state as PublishingState,
         authorizationState: !a ? 'unconfirmed' : a.revokedAt === null ? 'recorded' : 'revoked',
+        confirmationFingerprint: a ? a.fingerprint as string : null,
         providerMayHaveStarted: started,
         postUrl, errorCode: typeof observation?.errorCode === 'string' && /^[A-Z][A-Z0-9_]{0,79}$/.test(observation.errorCode) ? observation.errorCode : null })
     }
-    if (result.data.length < 100) return { reviewId, clientId: r.client_id, items, canAuthorize: false }
+    if (result.data.length < 100) {
+      const currentReview = await sb.from('content_review_versions').select('id,client_id,deliverable_id').eq('id', reviewId).maybeSingle()
+      const currentSource = await sb.from('monthly_deliverables').select('id').eq('id', r.deliverable_id).eq('client_id', r.client_id).maybeSingle()
+      const currentActor = await sb.from('profiles').select('role,is_active').eq('id', actorId).maybeSingle()
+      if (currentActor.error || currentActor.data?.is_active !== true || !['admin', 'manager'].includes(currentActor.data.role)) throw new Error('Active publication manager required.')
+      if (currentReview.error || currentReview.data?.id !== reviewId || currentReview.data.client_id !== r.client_id
+        || currentReview.data.deliverable_id !== r.deliverable_id || currentSource.error || currentSource.data?.id !== r.deliverable_id) throw new Error('Publication source unavailable.')
+      return { reviewId, clientId: r.client_id, items, canAuthorize: false }
+    }
   }
   throw new Error('Complete publication coverage unavailable.')
 }

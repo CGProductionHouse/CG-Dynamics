@@ -1,3 +1,70 @@
+## 18 November — confirmation recovery and final staff/source fencing (source only)
+
+Continued the same DRAFT PR #991 from ef1655048b61f4cefe568e86cc8d81664c6d4d21;
+main b524a9f9 and ownership checked. No competing scheduler or other-agent work.
+
+Reproduced before editing: a never-settling confirmation left the panel busy;
+a lost confirmation allowed another preparation; a role revoked during status
+pagination still received evidence. A later regression also reproduced a stale
+click handler resending after successful reconciliation. Corrected that latch,
+interrupted the earlier full run, and used a new final run on frozen runtime.
+
+Confirmation and withdrawal now observe one mutation for at most 12 seconds,
+without cancellation, automatic retry or assumed failure. An uncertain result
+may have committed. The confirmation panel retains the captured intent and
+locks preparation for its mounted review, including after success. Its explicit
+Check confirmation action uses the existing bounded read-only status endpoint.
+Only one exact client/review/Facebook Page/time/server-verified fingerprint with
+current recorded authority proves an existing confirmation. Missing old-version
+fingerprints can still display status but cannot prove reconciliation. Neither
+confirmation receipt nor recovery is presented as a verified live post. Failed
+withdrawal observation requires status recovery and never claims it stopped.
+The latch is mounted-form memory, not reload persistence; existing backend
+idempotency and authorization guards remain authoritative after navigation.
+
+The staff-only status reader rechecks review/client/deliverable identity,
+canonical source existence and active admin/manager after all pages, including
+empty results. Drift or partial evidence is unavailable. No new schema/RPC,
+privilege, client DTO or provider call. The fingerprint is existing confirmation
+evidence, not a credential or additional publication authority.
+
+Isolated real PostgreSQL exercised a committed confirmation with a lost browser
+response, actual frontend recovery through the management reader, the same job
+before/after, zero provider calls before due, then one simulated provider POST
+and independently verified receipt. Graph/Storage/accounts/media remain synthetic;
+SQL and installed SDK/component callbacks are actual local execution. No browser
+visual, real role/device, native Page or real publication acceptance is inferred.
+
+Final frozen-runtime suite: 5,049 total / 5,017 pass / 32 optional skips /
+zero failures (700.7s). Separate isolated PostgreSQL: 36 pass, no skips, including
+approval admission, due worker/receipts, authorization/role/lease fences and the
+release-packet rehearsal. Owned network-none QA container stopped, exit 0.
+Final tsc/Vite 7.3.6 build, emitted app/status/read-deadline/mutation-observer
+bundle, cached native Deno 2.9.8 check of social-publication entrypoint, scoped
+lint and diff pass. Default-off preparation UI remains hidden/tree-shaken;
+component behavior was executed with synthetic React callbacks, not a browser.
+The two issue-519 test-generated outputs were restored. No runtime changes after
+the final full suite began. Earlier interrupted suite is NOT acceptance evidence.
+Source self-review found no blocking issue for this increment; not independent
+provider review or permission to merge/deploy/publish the full DRAFT PR.
+Private source hashes and acceptance logs retained under the existing PR991
+artifact root, 2026-11-18/confirmation-recovery.
+
+Production remains the previously verified MCP v87/source ecc8d256 and the exact
+approved database pair already applied once; no replay. The two TikTok Business/
+Instagram migrations remain held. Staff confirmation, worker and this new
+management helper/UI remain unreleased/default off. No production SQL/data,
+Edge/config/key/OAuth/account/mapping/permission, content/date/approval, Microsoft,
+Vercel/deployment or provider publication changes in this increment. Company
+browser access remains unavailable and installed connector discovery omits the
+account-only argument; no repeated transport loop or unsupported invocation.
+
+Next: supported company action refresh plus native exact Page/grants proof;
+select genuinely approved unscheduled content/caption/future time with fresh
+Teams capture and native duplicate review; then prepare one separately approved
+complete worker/UI/live-test packet. Preserve #995/#1003/#1004/Nolan/staff lanes.
+Google Control Centre target remains unidentified; no guessed update.
+
 ## 18 November — exact-approved Facebook database pair APPLIED and verified
 
 CA explicitly approved PR991/bd5d3fc7's two exact Facebook database transactions
