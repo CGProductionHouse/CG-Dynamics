@@ -7,6 +7,8 @@ import ts from 'typescript'
 import vm from 'node:vm'
 import React from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
+import { createClient } from '@supabase/supabase-js'
+import { setImmediate } from 'node:timers/promises'
 
 let server, management, authorization, frontend, supabase, ReviewCard, functionsDescriptor
 before(async () => {
@@ -158,7 +160,10 @@ test('frontend absent backend never becomes empty; withdrawal sends exact review
   const f = await fixture(), status = await readStatus(f), calls = []
   supabase.functions.invoke = async (name, args) => { calls.push([name, args]); return { data: { ok: true, status }, error: null } }
   assert.equal((await frontend.getStaffPublicationStatus(ids.review)).items.length, 1)
-  assert.deepEqual(calls[0], ['social-publication', { body: { action: 'status', reviewId: ids.review } }])
+  assert.equal(calls[0][0], 'social-publication')
+  assert.deepEqual(calls[0][1].body, { action: 'status', reviewId: ids.review })
+  assert.ok(calls[0][1].signal instanceof AbortSignal)
+  assert.equal(calls[0][1].signal.aborted, false)
   supabase.functions.invoke = async () => ({ data: null, error: new Error('Function absent') })
   assert.equal(await frontend.getStaffPublicationStatus(ids.review), null)
   supabase.functions.invoke = async (name, args) => { calls.push([name, args]); return { data: { ok: true, publication: { jobId: ids.job, state: 'cancelled', authorizationRevoked: true, providerMayHaveStarted: false } }, error: null } }
@@ -227,6 +232,80 @@ function componentHarness(io, reviewId, confirmation = false, reviewChanges = {}
   }, unmount() { cleanups.forEach(fn => fn?.()); mounted = false }, lateWrites }
 }
 const settle = async () => { for (let n = 0; n < 8; n++) await Promise.resolve() }
+
+test('stalled status read releases the real panel for read-only refresh and ignores the late receipt', async t => {
+  const f = await fixture(), status = await readStatus(f), calls = []
+  let finishLate
+  const stalled = new Promise(resolve => { finishLate = resolve })
+  supabase.functions.invoke = (name, options) => {
+    calls.push([name, options])
+    return calls.length === 1 ? stalled : Promise.resolve({ data: { ok: true, status }, error: null })
+  }
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  try {
+    const panel = componentHarness({ getStaffPublicationStatus: frontend.getStaffPublicationStatus }, ids.review)
+    panel.click('Publishing status'); await settle()
+    assert.match(panel.text(), /Checking publication records/)
+    t.mock.timers.tick(7_999); await settle()
+    assert.match(panel.text(), /Checking publication records/)
+    t.mock.timers.tick(1); await settle()
+    assert.match(panel.text(), /Publishing status is unavailable/)
+    assert.doesNotMatch(panel.text(), /Checking publication records|No Dynamics publication jobs/)
+    assert.equal(calls.length, 1)
+    assert.equal(calls[0][1].signal.aborted, true)
+    panel.click('Refresh status'); await settle()
+    assert.match(panel.text(), /Queued in Dynamics/)
+    const lateStatus = structuredClone(status)
+    lateStatus.items[0].state = 'unknown_outcome'; lateStatus.items[0].providerMayHaveStarted = true
+    finishLate({ data: { ok: true, status: lateStatus }, error: null }); await settle()
+    assert.match(panel.text(), /Queued in Dynamics/)
+    assert.doesNotMatch(panel.text(), /Needs reconciliation|Publishing status is unavailable/)
+    assert.equal(calls.length, 2)
+    assert.ok(calls.every(([name, options]) => name === 'social-publication' && options.body.action === 'status' && options.body.reviewId === ids.review))
+    panel.unmount(); assert.equal(panel.lateWrites.length, 0)
+  } finally { finishLate({ data: null, error: null }); await settle() }
+})
+
+test('status deadline aborts the installed SDK transport without a second call or mutation', async t => {
+  const calls = []
+  const client = createClient('https://fixture.invalid', 'local-fixture-only', {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+    global: { fetch: async (input, init) => {
+      const url = new URL(input)
+      assert.equal(url.origin, 'https://fixture.invalid')
+      assert.equal(url.pathname, '/functions/v1/social-publication')
+      assert.equal(init.method, 'POST')
+      const body = JSON.parse(init.body)
+      assert.deepEqual(body, { action: 'status', reviewId: ids.review })
+      calls.push({ body, signal: init.signal })
+      return new Promise((_resolve, reject) => init.signal.addEventListener('abort', () => reject(Error('PRIVATE transport timeout')), { once: true }))
+    } },
+  })
+  supabase.functions.invoke = (name, options) => client.functions.invoke(name, options)
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  const pending = frontend.getStaffPublicationStatus(ids.review)
+  await setImmediate()
+  assert.equal(calls.length, 1)
+  t.mock.timers.tick(8_000)
+  assert.equal(await pending, null)
+  assert.equal(calls[0].signal.aborted, true)
+  await setImmediate()
+  assert.equal(calls.length, 1)
+})
+
+test('completed and rejected status reads clear their deadline instead of aborting after completion', async t => {
+  const f = await fixture(), status = await readStatus(f), signals = []
+  t.mock.timers.enable({ apis: ['setTimeout'] })
+  supabase.functions.invoke = async (_name, options) => {
+    signals.push(options.signal)
+    if (signals.length === 2) throw Error('PRIVATE rejected status')
+    return { data: { ok: true, status }, error: null }
+  }
+  assert.equal((await frontend.getStaffPublicationStatus(ids.review)).items.length, 1)
+  assert.equal(await frontend.getStaffPublicationStatus(ids.review), null)
+  t.mock.timers.tick(8_000); await settle()
+  assert.deepEqual(signals.map(signal => signal.aborted), [false, false])
+})
 
 test('actual Facebook confirmation is absent for unapproved, other-platform or unsupported-format reviews', () => {
   for (const change of [{ state: 'rejected' }, { state: 'superseded' }, { state: 'pending' }, { channels: ['instagram'] }, { channels: ['tiktok'] },

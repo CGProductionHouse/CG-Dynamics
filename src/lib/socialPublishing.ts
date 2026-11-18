@@ -135,10 +135,21 @@ export function projectPublicationStatus(value: unknown, reviewId: string): Staf
 
 export async function getStaffPublicationStatus(reviewId: string): Promise<StaffPublicationStatus | null> {
   if (!UUID.test(reviewId)) return null
+  const controller = new AbortController()
+  let timeout: ReturnType<typeof setTimeout> | undefined
   try {
-    const { data, error } = await supabase.functions.invoke('social-publication', { body: { action: 'status', reviewId } })
-    return error ? null : projectPublicationStatus(data, reviewId)
+    // Bound the whole read, including SDK/session stalls that may not honour
+    // abort. A late receipt cannot replace a newer explicit status refresh.
+    // This deadline never retries or invokes a publication/withdrawal action.
+    const deadline = new Promise<null>(resolve => {
+      timeout = setTimeout(() => { resolve(null); controller.abort() }, 8_000)
+    })
+    const result = await Promise.race([deadline, supabase.functions.invoke('social-publication', {
+      body: { action: 'status', reviewId }, signal: controller.signal,
+    })])
+    return !result || controller.signal.aborted || result.error ? null : projectPublicationStatus(result.data, reviewId)
   } catch { return null }
+  finally { if (timeout !== undefined) clearTimeout(timeout) }
 }
 
 export async function withdrawStaffPublication(reviewId: string, jobId: string): Promise<{ state: StaffPublication['state']; providerMayHaveStarted: boolean } | null> {

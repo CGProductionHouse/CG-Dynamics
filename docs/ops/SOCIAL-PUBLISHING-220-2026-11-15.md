@@ -1,5 +1,44 @@
 # Social publishing — 15 November 2026
 
+## 18 November — stalled publishing-status recovery fixed locally
+
+Continued SAME DRAFT PR991 from9d14aedb; mainb524a9f9/current PR ownership and
+active workers checked. #995/#1003/#1004/Nolan/staff/Teams/calendar/package lanes
+remain separate; no duplicate scheduler or shared dependency installation.
+
+Reproduced BEFORE the fix with the actual publication panel's callback harness:
+an SDK read that never settles keeps "Checking publication records" indefinitely,
+with Refresh disabled even after the intended deadline. The new test failed on
+that exact displayed state. getStaffPublicationStatus now bounds the WHOLE
+read to8seconds, including SDK/session work that ignores abort, attempts to abort
+the transport, and returns unavailable rather than an empty/successful status.
+Staff can explicitly refresh the SAME review; late success cannot replace that
+new read. Completed/rejected reads clear their timers. No automatic retry or
+withdrawal/confirmation/queue/provider action was added.
+
+Validation:78affected tests pass, including the actual panel callbacks with a
+never-settling abort-ignoring read, manual refresh and late result, the INSTALLED
+Supabase SDK with abort-aware fixture transport, deadline cleanup, existing
+manager/client isolation, exact withdrawal/confirmation and Facebook runtime
+duplicate/unknown-outcome guards. This is actual-code integration with SYNTHETIC
+Graph/Storage/HTTP, not live publishing or browser visual acceptance. Initial
+broader run failed22tests at setup because the shared node_modules lacks jpeg-js;
+reused existing SHA512-verified pinned0.4.4 task TEMP package through the existing
+fixture switch, then all78passed. No package/lock/shared node_modules change.
+Local tsc/Vite7.3.6 build, emitted ContentReviewCard app/deadline bundle,
+scoped ESLint and diff checks pass. Self-review found no blocker in this narrow
+read-recovery delta; no independent review or live UI acceptance is implied.
+No database code changed, so existing35isolated SQL checks remain a prior separate
+receipt; neither the full5030suite nor DB fixtures were rerun for this narrow read.
+
+This fix is SOURCE ONLY, not deployed to frontend or MCP. Hostedv87/sourceecc8d256,
+four UNAPPLIED migrations, default-off publishing, Teams sync hold and exact pilot
+approval/source/account/permission/freshness gates stay unchanged. No production
+SQL/data/config/OAuth/account/mapping/permission/Microsoft/Vercel/cost action.
+Browser access remains the previously recorded host/tool limitation; no bypass
+or new device claim. Self-review only, not independent/native acceptance.
+Google Control Centre target remains unidentified; no guessed write.
+
 ## 18 November continuation — live schema prerequisites and cached-action diagnosis
 
 Same DRAFT PR991 at3d0cfc66, mainb524a9f9 unchanged after fetch; clean before edits.
