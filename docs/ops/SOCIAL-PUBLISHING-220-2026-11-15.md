@@ -1,5 +1,110 @@
 # Social publishing — 15 November 2026
 
+## 18 November — company/native acceptance and opt-in Meta publishing consent
+
+Continued SAME DRAFT PR #991 from2fe35141; mainb524a9f9 and open ownership
+rechecked. Only this chat is active in the current Codex inventory; staff,
+client-readiness, leads and Nolan PRs remain separate. No competing scheduler.
+
+Existing company Chrome was reachable this turn. Verified the Chrome profile
+cgproductionhouse.com, ChatGPT account info@cgproductionhouse.com, and Meta's
+selected Facebook profile Christie-Ann Groenewald. Cape Lumber Marketing's native
+Page262645554440912 matches the existing Dynamics client42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa
+mapping. Its linked Instagram is @deniscoyne; native portfolio Denis Coyne.
+Meta's Scheduled tab explicitly showed no scheduled posts. The18Nov07:00 post
+was already published and must not be replayed. No content or native settings
+were changed. A transient terms modal disappeared before reinspection; no Accept
+was clicked and no accepted-consent claim is made.
+
+Fresh SELECT-only metadata found Cape's active mapping has connection_id NULL.
+The single stored Meta connection65d8f626-54d7-45fa-ac75-5348eb364540 is connected
+but its recorded grant lacks pages_manage_posts (last connected25Oct). Native
+human Page access does not establish this app's publishing grant or exact token
+binding. No token columns/values, secrets, keys or credentials were inspected.
+The authenticated MCP's15:47:55UTC candidate read returned no eligible approved
+future Facebook photo, has_more:false, canConfirm:false/canPublish:false.
+Do not invent approval, bind the NULL mapping by guess, or reuse a published post.
+Reporting health separately showed Facebook PARTIAL and Instagram PASS; these
+are reporting observations, not publishing authorization.
+
+The existing company Dynamics plugin's Refresh tools action was clicked once;
+its spinner settled and the button re-enabled. This is catalogue refresh only,
+not a verified new schema. An isolated normal-chat acceptance attempt was NOT
+sent: browser transport timed out during composer entry, then Debugger detached.
+Closure of that task-created unsent draft is unverified. No staff/Nolan chat was
+used. Existing sessions and permissions preserved; no browser retry loop.
+Private screenshots: native-acceptance/company-dynamics-refreshed.jpg and
+cape-scheduled-none.jpg. Browser numeric IDs changed during recovery: always
+re-identify the company profile/account rather than reusing a cached number.
+
+Concrete source gap: meta-oauth-start requested only the six reporting scopes,
+so reconnecting through the existing button could not request Page publishing.
+Before the change, four actual-handler regression cases failed. Added a separate
+opt-in to the EXISTING endpoint, not a new OAuth/token system:
+POST query purpose=facebook_photo_publishing&confirm_permission_request=true,
+exactly once each with no additional keys, plus server flag
+SOCIAL_FACEBOOK_PHOTO_CONSENT_ENABLED=true. The gate is DEFAULT OFF and has NOT
+been configured live. Enabled mode rechecks the active admin/manager profile,
+adds ONLY pages_manage_posts and auth_type=rerequest, reuses hashed expiring
+OAuth state, and explicitly returns publishing_ready:false. Disabled, malformed,
+role-revoked or unreadable-profile requests create no state or provider URL.
+Normal Connect Meta retains its exact six scopes and behavior. The existing
+callback records actual granted permissions, not requested permissions; it is
+unchanged, as are encryption/token storage, mappings, approvals and queue.
+
+There is NO new publishing-consent UI button yet and this source change is NOT
+deployed. App Review/Advanced Access, real grant, exact Page tasks/token binding
+and owner consent remain unverified. This opt-in requests permission only; it
+cannot enable confirmation or publishing. Official Meta Page publishing and
+manual Facebook Login documentation were checked; no universal platform grant
+is inferred. Supabase changelog/auth guidance reviewed; existing custom auth and
+SDK dependencies preserved.
+
+Final frozen-runtime suite:5061total/5029pass/32optional skips/0fail/0cancelled
+(596.8s). All10new actual-handler tests pass. tsc/Vite build and emitted
+app-bearing ContentReviewCard bundle, scoped lint/diff and native Deno2.9.8 of
+all FOUR repository entrypoints pass. No native provider publication or phone
+acceptance claimed; scopes/roles/state persistence in OAuth tests are synthetic.
+
+Additional targeted hosted read captured meta-oauth-start ACTIVEv73/5files,
+custom auth/import_map:false. Private release preparation caught TWO native
+failures hidden by repository-only checks: hosted ReturnType SDK annotation
+resolves to incompatible generic types, and hosted meta.ts has a duplicate
+identical availability property. Both initial packets are REJECTED_DO_NOT_RELEASE
+and retained. Final candidate-meta-consent-f9eeb5b7-qualified preserves three
+hosted helpers byte-for-byte, changes only entry and removes only the later
+identical availability:probe.availability from the hosted helper. The entry uses
+the tested explicit SDK annotation (emitted runtime tokens identical to old
+annotation). Actual old/new factPayload expression values match across four
+availability states. Five offline packet guards and native Deno checking of
+the EXACT assembled closure pass. Existing shared helper is otherwise preserved;
+no local helper replacement or SDK upgrade.
+
+This is a SEPARATE, UNAUTHORIZED/UNDEPLOYED five-file one-function packet; no
+flag write is included. Payload SHA256:
+07750f9e57118aab7b51c98a5b70d950e91cab9e1ca8c8ed1203a17014cf8d09.
+Hosted closure0009fcd7b0b82a499a334adf450e43373fa4400e10b93a31493f46729836af2d;
+frozen repository entry SHA256f9eeb5b77f4196b9df1358a8edb9028994d872c5037ec5d0b1abe53a7b0df928.
+Snapshot/source/payload/manifest, rejected native logs, qualification and offline
+preparer/tests remain private under2026-11-18/native-acceptance. Fresh hosted
+version/source/auth/flag review and exact permission/release approval are still
+required; do not treat source qualification as permission to release.
+
+The prior36actual SQL checks remain prior receipts: this increment adds no SQL,
+table, RPC, state model or database migration. Exact three-function runtime
+packet candidate-fdfaf1ea remains immutable and separately held; this OAuth
+change is NOT included in or authorized by that packet. Applied Facebook DB
+pair not replayed; TikTok Business/Instagram migrations remain held. No Supabase
+production SQL/data/Edge/config/key/OAuth/account/mapping/permission/content/
+date/approval change, provider submission, deployment, Vercel or Microsoft write.
+
+Exact next dependency remains provider app eligibility and owner-granted posting
+permission, verified connection binding, then ONE genuinely approved unscheduled
+original/caption/future time with owner-resolved fresh Teams capture and native
+duplicate review. Prepare separate exact releases/consent/mapping/live-test
+approval packets only after prerequisites, never infer them from continue.
+Google Control Centre target remains unidentified; no guessed write.
+
 ## 18 November — native worker SDK boundary repaired; exact runtime packet prepared
 
 Continued SAME DRAFT PR #991, tested source fdfaf1eaa9eb6241eee436563be19859c5ef462a.

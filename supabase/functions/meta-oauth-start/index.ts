@@ -86,6 +86,27 @@ Deno.serve(async (req) => {
   if (auth.error) return auth.error
   if (!auth.userId) return jsonResponse({ ok: false, error: 'Authentication required.' }, 401)
 
+  // Reporting reconnects retain their exact scope list. A future, separately
+  // approved publishing setup must explicitly request the additional permission;
+  // the existing Connect Meta button never opts into this mode.
+  const requestParams = new URL(req.url).searchParams
+  const publishingRequested = requestParams.has('purpose') || requestParams.has('confirm_permission_request')
+  if (publishingRequested) {
+    if (requestParams.get('purpose') !== 'facebook_photo_publishing'
+      || requestParams.get('confirm_permission_request') !== 'true'
+      || requestParams.getAll('purpose').length !== 1 || requestParams.getAll('confirm_permission_request').length !== 1
+      || [...requestParams.keys()].some(key => !['purpose', 'confirm_permission_request'].includes(key))) {
+      return jsonResponse({ ok: false, code: 'META_PUBLISHING_CONSENT_REQUEST_INVALID', error: 'Confirm the exact Facebook publishing permission request.' }, 400)
+    }
+    if (Deno.env.get('SOCIAL_FACEBOOK_PHOTO_CONSENT_ENABLED') !== 'true') {
+      return jsonResponse({ ok: false, code: 'META_PUBLISHING_CONSENT_DISABLED', error: 'Facebook publishing permission setup is not enabled.' }, 409)
+    }
+    const actor = await sb.from('profiles').select('role,is_active').eq('id', auth.userId).maybeSingle()
+    if (actor.error || actor.data?.is_active !== true || !['admin', 'manager'].includes(actor.data.role)) {
+      return jsonResponse({ ok: false, code: 'ACTIVE_MANAGER_REQUIRED', error: 'Active admin or manager access required.' }, 403)
+    }
+  }
+
   const stateBytes = new Uint8Array(32)
   crypto.getRandomValues(stateBytes)
   const state = base64Url(stateBytes)
@@ -110,13 +131,20 @@ Deno.serve(async (req) => {
     redirect_uri: redirectUri,
     response_type: 'code',
     state,
-    scope: SCOPES.join(','),
+    scope: (publishingRequested ? [...SCOPES, 'pages_manage_posts'] : SCOPES).join(','),
   })
+  // Owner consent remains required, including when this permission was declined.
+  // A resulting grant must still pass exact Page/app/token validation separately.
+  if (publishingRequested) params.set('auth_type', 'rerequest')
 
   const url = `https://www.facebook.com/${graphVersion}/dialog/oauth?${params.toString()}`
 
   return jsonResponse({
     ok: true,
     url,
+    ...(publishingRequested ? {
+      consent_purpose: 'facebook_photo_publishing', publishing_ready: false,
+      note: 'Permission request only. Preserve existing asset selections. Owner consent, app eligibility and exact Page verification are still required; publishing remains separately disabled.',
+    } : {}),
   })
 })

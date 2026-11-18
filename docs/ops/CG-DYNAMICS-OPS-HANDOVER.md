@@ -1,3 +1,55 @@
+## 18 November — company/native acceptance and opt-in Meta publishing consent
+
+SAME DRAFT PR #991 continued from2fe35141; mainb524a9f9/open PR ownership checked.
+Company Chrome and ChatGPT info@cgproductionhouse.com verified. Meta's selected
+Facebook profile is Christie-Ann Groenewald. Native Cape Lumber Marketing
+Page262645554440912 matches the existing exact-client mapping; Scheduled shows
+no scheduled posts.18Nov07:00 is already published, excluded from any pilot.
+No native content/settings/terms accepted or changed by this agent.
+
+SELECT-only metadata: active Cape mapping connection_id is NULL; single stored
+connection65d8f626-54d7-45fa-ac75-5348eb364540 lacks pages_manage_posts. No tokens,
+keys/secrets/credential values read. Human browser access/reporting health are
+not publishing grant proof. MCP15:47:55UTC returns no eligible approved future
+Facebook photo; no approval or mapping guessed. Company plugin Refresh tools
+settled, but new action schema acceptance remains unverified. A task-created
+normal-chat draft was NOT sent; browser transport then detached, closure unknown.
+No staff/Nolan chats or existing permissions changed; stop browser retry loops.
+
+Reproduced missing opt-in publishing permission path in actual OAuth handler
+(four red regressions), then added SOURCE-ONLY default-off mode to existing
+meta-oauth-start. Exact confirmed query + separate server consent flag + fresh
+active manager required. Adds only pages_manage_posts/auth_type=rerequest;
+existing six-scope reporting button, callback/encryption, hashed expiring state,
+account mappings/queue unchanged. No new UI button or live flag configuration.
+Response explicitly publishing_ready:false. App eligibility, real consent/grants
+and exact token/Page binding still require verification; no scope=grant claim.
+
+Final frozen-runtime suite5061total/5029pass/32optional skips/0fail(596.8s);
+10new handler regressions pass. Build/app bundle, scoped lint/diff and native
+Deno all4repository entries pass. Source tests use synthetic OAuth/provider
+fixtures; no real grant/publication/phone acceptance. Prior36SQL retained, no new SQL
+changes. Immutable candidate-fdfaf1ea three-function runtime packet unchanged;
+this OAuth source is separate/undeployed/unapproved. No production SQL/data,
+Edge/config/key/OAuth/account/mapping/permission/content/date/approval,
+publishing/deployment/Vercel/Microsoft action. Applied pair not replayed; other
+two migrations held. Existing social work record contains exact evidence and
+next dependency: verified app/owner consent/binding, approved unscheduled asset/
+caption/future time, fresh Teams/native duplicate review, then exact separate
+release/live-test approval. Other owners preserved; Google tracker target unknown.
+
+One extra read-only source capture: meta-oauth-start ACTIVEv73/5files. Exact
+assembled closure exposed hosted-only SDK generic annotation and duplicate
+identical property typecheck failures. Both early packets REJECTED/preserved.
+Final qualified packet changes only entry plus later identical availability
+property removal in meta.ts; other3hosted helpers byte-identical. Existing
+explicit SDK annotation has identical emitted runtime tokens; actual old/new
+factPayload values compared. Five offline guards and EXACT native Deno closure
+pass. Five-file payload SHA07750f9e57118aab7b51c98a5b70d950e91cab9e1ca8c8ed1203a17014cf8d09;
+private native-acceptance/candidate-meta-consent-f9eeb5b7-qualified. No flag write
+in packet. Separately held, requires fresh source/auth/config review and exact
+release/permission approval; do not deploy from continuation. Self-review only.
+
 ## 18 November — native worker SDK boundary repaired; exact runtime packet prepared
 
 Continued SAME DRAFT PR #991, tested source fdfaf1eaa9eb6241eee436563be19859c5ef462a.
