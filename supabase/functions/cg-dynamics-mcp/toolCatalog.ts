@@ -174,6 +174,28 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
     dependency: 'main', canonicalContract: 'existing content_review_versions + monthly_deliverables + meta_client_assets; shared read-only Facebook inspector (#220/#236)',
   },
   {
+    name: 'prepare_facebook_photo_publication', title: 'Preview approved Facebook photo scheduling',
+    description: 'Company-admin only, read-only preparation for one exact approved client review. Reuses the staff scheduling preflight and returns the exact Page, approved caption/image hash, future time and confirmation fingerprint; creates no job and never posts. Separate MCP/staff/dispatch/exact-account release gates must all be enabled. No caller account, caption, media, date, approval or Teams override. Use only when staff asks to schedule this approved content. Show the exact Page, content and SAST time, then confirm only if that exact scheduling was explicitly requested. A preview is not publication or a queue receipt. Missing consent, source, media or access stays blocked.',
+    inputSchema: objectSchema({ client_id: uuid, review_id: uuid }, ['client_id', 'review_id']),
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
+    dependency: 'main', canonicalContract: 'existing photoPublicationStaffHandler + exact-account runtime (#220/#236)',
+  },
+  {
+    name: 'confirm_facebook_photo_publication', title: 'Confirm exact Facebook scheduling preview',
+    description: 'Company-admin only. Use ONLY after an explicit staff scheduling request for this exact approved creative, Page and future time, with the fingerprint returned by prepare_facebook_photo_publication. Atomically records authority in the EXISTING durable queue; never sends a provider post here. It does not approve content or alter captions, dates, accounts or Microsoft. Separate default-off MCP/staff/dispatch/release gates and all current preflight checks apply. Reuse the SAME idempotency_key and fingerprint for identical retries. If a result is uncertain, first read get_social_publication_status for the same client/review; never switch keys, create a replacement or schedule manually. Report queued/blocked/uncertain honestly; a queue receipt is not a verified platform publication.',
+    inputSchema: objectSchema({ client_id: uuid, review_id: uuid, expected_fingerprint: { type: 'string', pattern: '^[a-f0-9]{64}$' },
+      confirm_scheduling: { type: 'boolean', const: true }, idempotency_key: idempotencyKeySchema }, ['client_id', 'review_id', 'expected_fingerprint', 'confirm_scheduling', 'idempotency_key']),
+    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
+    dependency: 'main', canonicalContract: 'existing authorize_social_publication + background_jobs, canonical receipt replay (#220/#236)',
+  },
+  {
+    name: 'get_social_publication_status', title: 'Read exact review publication receipts',
+    description: 'Company-admin only, read-only. Read complete stored Dynamics jobs for one exact client/review with per-channel states, original confirmation fingerprints, safe post links and errors. Available independently of new-submission flags for uncertain-response recovery. A missing/partial/failed read is unavailable, not an empty queue or a failed write. This does NOT inspect native schedules or prove that no manual/native post exists. Queued, processing, verified posted, revoked and unknown outcomes stay distinct. Never replay a provider submission or create a replacement because a receipt is uncertain.',
+    inputSchema: objectSchema({ client_id: uuid, review_id: uuid }, ['client_id', 'review_id']),
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
+    dependency: 'main', canonicalContract: 'existing readPublicationManagementStatus, no publishing or new schema (#220/#236)',
+  },
+  {
     name: 'get_google_ads_audit', title: 'Read exact-client Google Ads audit',
     description: 'Company-admin only. Read canonical stored Google Ads V2 account mapping, sync freshness, campaign daily facts and timestamped observed settings for one exact Dynamics client UUID and explicit account-local date range. A covering account sync with no mapped-campaign daily rows is no_campaign_rows, not available or verified zero activity. No live provider request or mutation. Missing audit surfaces are explicit.',
     inputSchema: objectSchema({ client_id: uuid, start_date: date, end_date: date }, ['client_id', 'start_date', 'end_date']),
@@ -745,6 +767,9 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   ...GUIDELINE_SHARING_TOOLS,
 ] as const
 
-export const CG_DYNAMICS_MCP_SERVER_INSTRUCTIONS =
+const PUBLICATION_SCHEDULING_INSTRUCTIONS =
+  'For an explicit company-admin Facebook photo scheduling request, read get_facebook_post_readiness, then prepare_facebook_photo_publication for the exact approved review. Confirm only the exact Page, approved creative and future SAST time explicitly requested by staff, using its unchanged fingerprint and the same idempotency key. confirm_facebook_photo_publication records a durable queue authorization, not a verified platform post. Never approve content, change a date/account, bypass a disabled gate or silently add Instagram. Read get_social_publication_status after confirmation and whenever a response is uncertain, before retrying or scheduling manually. That status covers stored Dynamics jobs only, not native schedules. Unknown outcomes never authorize another provider submission. '
+
+export const CG_DYNAMICS_MCP_SERVER_INSTRUCTIONS = PUBLICATION_SCHEDULING_INSTRUCTIONS +
   'This connector is shared by the whole CG Production House ChatGPT account. The OAuth connection is the company admin account and is NOT the staff identity. In a fresh Project chat call resolve_project_context once, then pass that exact context object on every later tool call: a staff Project acts as that exact staff member, a client Project is pinned to that exact client, and broader company-admin work must be requested explicitly. Never reuse another Project\'s context, never infer identity from chat history or the connected account, and never fuzzy-match a staff or client name. Read before write when a target is ambiguous. Use only canonical Dynamics actions and RLS. Company-admin monthly strategy work must page through list_monthly_strategy_clients, read each exact get_monthly_strategy_brief, use only its cited approved evidence and confirmed package, and submit only an unpublished draft with its fingerprint/version. Surface blocked clients rather than inventing facts; monthly strategy tools do not approve or publish strategies. In a client Project, workspace updates use record_client_request, create_client_followup_task and record_client_update, pinned to that exact client; an assignee is the target of work, never the caller. Exact-client Content Guideline creation/editing and sharing tools are also available. When staff asks for a client-ready guideline or a link to send the client, use publish_content_guideline and return its client_share_url: this named public review link requires NO login, is distinct from staff guideline_url, and publishes only the saved client-safe snapshot. Use get_content_guideline_share to verify current sharing, and revoke_content_guideline_share when explicitly asked. Do not send /admin/ links to clients or ask staff to publish manually when this action is available. Publication for review is not client approval. Say created, assigned, published or recorded only after the action confirms the saved record. CG Hours actions require an exact staff Project and are draft-only: never submit, approve, reopen, run payroll or claim success without the durable CG Hours time-entry id. Never expose SQL, raw tables, service keys, cross-client fallbacks, or destructive actions.'
 

@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs'
 
 // Isolated SQL integration, not a live provider acceptance. No network escapes:
 // native Graph and Storage are explicit synthetic ports; SQL is real PostgreSQL.
-export async function facebookPostgresJourney({ server, sql, q, actor, rpcClient, mode = 'success', mediaType = 'image/png', admitReview }) {
+export async function facebookPostgresJourney({ server, sql, q, actor, rpcClient, mode = 'success', mediaType = 'image/png', admitReview, mcpBridge = false }) {
   assert.ok(['image/png', 'image/jpeg'].includes(mediaType))
   let filename = mediaType === 'image/jpeg' ? 'approved.jpg' : 'approved.png'
   const modules = await Promise.all(['facebookPublicationRuntime', 'facebookPublicationStaff', 'socialPublicationAuthorizationStore',
@@ -92,7 +92,32 @@ export async function facebookPostgresJourney({ server, sql, q, actor, rpcClient
     const handler = staff.facebookPublicationStaffHandler({ runtime: mode === 'inspection-only' ? null : runtime,
       inspect: inspection.facebookPublicationInspector(sb, config, null),
       authenticate: async () => ({ id: actor, role: 'manager', active: true }), persistence: store.socialPublicationAuthorizationStore(sb) })
-    const invoke = async body => { const response = await handler(new Request('https://fixture.invalid', { method: 'POST', body: JSON.stringify(body) })); return { status: response.status, body: await response.json() } }
+    const mcp = mcpBridge ? await server.ssrLoadModule('/supabase/functions/cg-dynamics-mcp/facebookPublicationActions.ts') : null
+    const environment = { SOCIAL_FACEBOOK_PHOTO_MCP_ENABLED: 'true', SOCIAL_FACEBOOK_PHOTO_CONFIRMATION_ENABLED: 'true', SOCIAL_PUBLISHING_ENABLED: 'true',
+      SOCIAL_FACEBOOK_PHOTO_ENABLED: 'true', SOCIAL_FACEBOOK_PHOTO_RELEASE: JSON.stringify({clientId:ids.client,connectionId:ids.connection,accountId:'123'}),
+      META_GRAPH_VERSION:config.graphVersion,META_APP_ID:config.appId,META_APP_SECRET:config.appSecret,SUPABASE_URL:config.projectUrl,
+      META_TOKEN_ENCRYPTION_KEY_B64:config.encryptionKey,META_TOKEN_ENCRYPTION_KEY_VERSION:config.keyVersion }
+    const callMcp = (action, input = {}) => mcp.facebookPublicationAction(sb, actor, action, {client_id:ids.client,review_id:ids.review,...input}, name=>environment[name])
+    const readStatus = async () => {
+      if (!mcp) return management.readPublicationManagementStatus(sb, actor, ids.review)
+      const result=await callMcp('status');assert.equal(result.data_state,'available',JSON.stringify(result));assert.equal(result.nativeSchedulesChecked,false)
+      return result.status
+    }
+    const invoke = async body => {
+      if (mcp && ['preview','confirm'].includes(body.action)) {
+        const result=await callMcp(body.action,body.action==='confirm'?{expected_fingerprint:body.expectedFingerprint,confirm_scheduling:body.confirmPublication,idempotency_key:'exact-durable-mcp-fixture'}:{})
+        assert.equal(result.canPublish,false)
+        return {status:result.data_state==='available'?200:409,body:result}
+      }
+      const response = await handler(new Request('https://fixture.invalid', { method: 'POST', body: JSON.stringify(body) })); return { status: response.status, body: await response.json() }
+    }
+    if (mcp) {
+      assert.equal((await callMcp('preview',{client_id:randomUUID()})).error,'EXACT_CLIENT_REVIEW_REQUIRED')
+      environment.SOCIAL_FACEBOOK_PHOTO_MCP_ENABLED='false'
+      assert.equal((await callMcp('preview')).error,'PUBLICATION_MCP_DISABLED')
+      environment.SOCIAL_FACEBOOK_PHOTO_MCP_ENABLED='true'
+      assert.equal(json(`select count(*)::int from background_jobs where payload->'intent'->>'reviewVersionId'=${q(ids.review)}`),0)
+    }
     const readiness = await invoke({ action: 'inspect', reviewId: ids.review })
     assert.equal(readiness.status, 200, JSON.stringify(readiness))
     assert.equal(readiness.body.inspection.canConfirm, false); assert.equal(readiness.body.inspection.canPublish, false)
@@ -120,7 +145,7 @@ export async function facebookPostgresJourney({ server, sql, q, actor, rpcClient
     const confirmation = await invoke(request), repeated = await invoke(request)
     assert.equal(confirmation.status, 200, JSON.stringify(confirmation)); assert.deepEqual(repeated, confirmation)
     const jobId = confirmation.body.publication.jobId, worker = `facebook-db-${randomUUID()}`
-    let status = await management.readPublicationManagementStatus(sb, actor, ids.review)
+    let status = await readStatus()
     assert.equal(status.items.length, 1); assert.equal(status.items[0].state, 'queued'); assert.equal(posts, 0)
     assert.equal(status.items[0].confirmationFingerprint, p.body.preview.fingerprint)
     if (mode === 'success' && mediaType === 'image/png' && !admitReview) {
@@ -165,17 +190,17 @@ export async function facebookPostgresJourney({ server, sql, q, actor, rpcClient
     const first = await run()
     if (mode === 'success') {
       assert.equal(first.publication.state, 'processing'); assert.equal(posts, 1)
-      status = await management.readPublicationManagementStatus(sb, actor, ids.review)
+      status = await readStatus()
       assert.equal(status.items[0].state, 'processing'); assert.equal(status.items[0].postUrl, null)
       // Accelerate only the local receipt-poll delay, not the approved schedule.
       sql(`update background_jobs set run_after=now() where id=${q(jobId)}`)
       assert.equal((await run()).publication.state, 'posted'); assert.equal(posts, 1)
-      status = await management.readPublicationManagementStatus(sb, actor, ids.review)
+      status = await readStatus()
       assert.equal(status.items[0].postUrl, 'https://www.facebook.com/123_789')
       assert.equal(json(`select to_jsonb(status) from background_jobs where id=${q(jobId)}`), 'succeeded')
     } else {
       assert.equal(first.publication.state, mode === 'stale' ? 'blocked' : 'unknown_outcome')
-      status = await management.readPublicationManagementStatus(sb, actor, ids.review)
+      status = await readStatus()
       assert.equal(status.items[0].state, first.publication.state)
       assert.equal(status.items[0].errorCode, mode === 'stale' ? 'FRESH_TEAMS_EVIDENCE_REQUIRED' : 'SUBMISSION_OUTCOME_UNVERIFIED')
       assert.equal(status.items[0].providerMayHaveStarted, mode !== 'stale')
@@ -185,10 +210,19 @@ export async function facebookPostgresJourney({ server, sql, q, actor, rpcClient
     assert.equal(json(`select to_jsonb(production_status) from monthly_deliverables where id=${q(ids.deliverable)}`), admitReview ? 'approved' : 'not_started')
     for (const role of ['staff', 'client']) {
       sql(`update profiles set role=${q(role)} where id=${q(actor)}`)
-      try { await assert.rejects(management.readPublicationManagementStatus(sb, actor, ids.review)) }
+      try {
+        await assert.rejects(management.readPublicationManagementStatus(sb, actor, ids.review))
+        if (mcp) assert.equal((await callMcp('status')).error,'ACTIVE_MANAGER_REQUIRED')
+      }
       finally { sql(`update profiles set role='manager' where id=${q(actor)}`) }
     }
     assert.equal(JSON.stringify(status).includes('fixture-user-token'), false)
+    if (mcp) {
+      environment.SOCIAL_FACEBOOK_PHOTO_MCP_ENABLED='false'
+      const recovered=await readStatus()
+      assert.equal(recovered.items[0].jobId,jobId);assert.equal(recovered.items[0].state,status.items[0].state)
+      assert.equal(posts,1)
+    }
   } finally {
     globalThis.fetch = originalFetch
     // Keep a failed integration case from claiming another case's jobs/actor.

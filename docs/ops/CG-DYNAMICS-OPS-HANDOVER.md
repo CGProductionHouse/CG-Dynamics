@@ -1,3 +1,54 @@
+## 18 November — ChatGPT scheduling bridge qualified locally; release held
+
+SAME DRAFT PR #991, continued from0149441d; mainb524a9f9 and current ownership
+checked. No competing scheduler or overlap with #995/#1003/#1004/Nolan/Teams.
+Reproduced missing prepare/confirm/status MCP actions, then added SOURCE-ONLY
+prepare_facebook_photo_publication, confirm_facebook_photo_publication and
+get_social_publication_status. These reuse the existing staff preflight,
+exact-account runtime, atomic authorization RPC, background_jobs and receipt
+reader. Company-admin context plus fresh active manager required; no expansion
+of client/staff Project access. Tool catalogue source63 (32read/31write).
+
+New SOCIAL_FACEBOOK_PHOTO_MCP_ENABLED is default-off, independent of existing
+staff/dispatch/exact-account release gates. Preview creates no job; confirmation
+requires explicit exact scheduling intent, unchanged fingerprint and stable key.
+No caller date/account/media/caption/approval/Teams override. Canonical receipt
+replay rechecks current authority; uncertain committed responses require status
+recovery before retry. Status stays readable with submission gates off and never
+claims native schedules checked. Authorization is not verified publication.
+
+Final full5075total/5043pass/32optional skips/0fail (510.1s); focused93pass;
+real isolated PostgreSQL37pass/0skip (308.9s), including actual MCP adapter ->
+runtime -> atomic queue -> due worker -> independent receipt journey. This uses
+synthetic Graph/Storage responses, not real platform acceptance. One job/one
+simulated provider POST, lost-response recovery, role/client/source fencing and
+paired-channel independence pass. Build + actual app bundle, scoped lint/diff,
+strict native Deno adapter and whole entry checks pass. Seven analysis-only
+type mappings resolve inherited frontend type imports; no product import-map
+change/runtime import masking. Two final nullability assertions were proven
+emitted-token-identical to the fully tested runtime. Owned QA container stopped.
+
+Immutable private mcp-publication-actions/candidate-5793153f-final packet: actual
+hosted MCPv87/65files captured read-only; patch3existing files, preserve62exact,
+add3helpers =68files. Payload SHA256
+5aac9755859e0a54fcdf7b0bbc38e14e2cca0e294230e870ba54302dde4610cf.
+Exact packet native Deno +14action tests +5offline preparation guards pass.
+No new dependency: SDK/JPEG imports are inherited approved closure dependencies.
+Initial partial candidate-5793153f is explicitly REJECTED, never release it.
+Live MCP remains v87, current installed action catalogue unchanged. No release,
+flag/config/key/credential/account/mapping/content/schedule/permission write.
+Company ChatGPT normal-chat/action-refresh acceptance remains unverified.
+
+Applied Facebook migration pair NOT replayed; two later-platform migrations,
+runtime/OAuth packets and Elcheck exact repair approval remain held unchanged.
+Next real pilot needs verified app grant/exact connection binding, an approved
+unscheduled photo/caption/future time, fresh Teams/native duplicate review and
+separate exact runtime/MCP/config release authorization. Do not infer approval
+from continue or claim native readiness from fixtures. No Microsoft, Vercel,
+deployment, provider POST or cost action. Google tracker target still unknown.
+Full source/evidence receipt and precise residual gates are in the existing
+SOCIAL-PUBLISHING-220-2026-11-15.md work record; no second checklist created.
+
 ## 18 November — native Meta pairing audit and Elcheck mapping repair held
 
 Continued SAME PR #991 from b9041fff for CA's paired Facebook/Instagram scheduling

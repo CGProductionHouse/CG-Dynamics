@@ -183,6 +183,9 @@ test('real PostgreSQL: queue, source/role fences, crash recovery, receipts and O
   await t.test('Facebook original JPEG: real durable confirmation, due claim and separate verified receipt', async () => {
     await facebookPostgresJourney({ server, sql, q, actor, rpcClient, mediaType: 'image/jpeg' })
   })
+  await t.test('ChatGPT MCP preview, exact confirmation and status reuse the real SQL queue and one due provider attempt', async () => {
+    await facebookPostgresJourney({ server, sql, q, actor, rpcClient, mcpBridge: true })
+  })
   // Facebook must work with ONLY its queue + captured-source migrations.
   // Rehearse the two later-platform migrations afterwards, on the same database.
   sql(readFileSync('supabase/migrations/20261115104950_tiktok_business_oauth.sql', 'utf8'))

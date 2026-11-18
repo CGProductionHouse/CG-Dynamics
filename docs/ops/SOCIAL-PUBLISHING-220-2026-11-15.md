@@ -1,5 +1,94 @@
 # Social publishing — 15 November 2026
 
+## 18 November — ChatGPT preview, exact confirmation and receipt recovery
+
+Continued SAME DRAFT PR #991 from0149441d; mainb524a9f9/ownership checked;
+other staff/client/leads/Nolan/Teams/calendar lanes preserved. Reproduced the
+missing prepare_facebook_photo_publication action before editing. Added it,
+confirm_facebook_photo_publication and get_social_publication_status to the
+EXISTING MCP router, catalogue and company-admin context. Source catalogue63:
+32read/31write. These are unreleased source actions, not current live tools.
+
+The new facebookPublicationActions.ts adapter reuses photoPublicationStaffHandler,
+facebookPublicationRuntime, socialPublicationAuthorizationStore and
+readPublicationManagementStatus. No duplicate queue, schedule, source authority,
+direct provider submission, schema, scope or dependency. Fresh active manager
+and exact review/client binding precede runtime/media/credential reads. New
+SOCIAL_FACEBOOK_PHOTO_MCP_ENABLED defaults off, then existing staff/dispatch/
+exact-client-account-connection release gates must all pass. Preview returns
+only safe approved content, Page, future time and fingerprint, with zero writes.
+Confirmation requires exact explicit scheduling intent, fingerprint and stable
+idempotency key; generic MCP input-hash/audit plus canonical receipt replay are
+retained. Current role/source/content changes still refuse confirmation/replay.
+No caller account, date, caption, media, approval or Microsoft override.
+
+Status is independently readable when submission flags are off. Per-channel
+stored jobs remain distinct from native schedules and verified platform posts.
+Lost confirmation response or post-commit access loss is unverified/mayHaveCommitted,
+with status-first recovery; never automatically replace/retry a provider POST.
+No credentials, connection IDs, signed media URLs or raw exceptions in output.
+
+Final frozen adapter SHA256
+5793153f3141c05494844c08a169dcca6e3c08806268ced18a99dd4bf26ffd86.
+Full suite5075total/5043pass/32optional skips/0fail/0cancel (510.1s);
+focused93pass/0skip. The first interrupted full run found one stale catalogue
+count60, corrected to63 before the final complete green run; do not count it as
+additional acceptance. Tests cover actual MCP dispatcher key conflicts/cached
+receipt replay and current role, not only helper-shaped mocks.
+
+Real isolated PostgreSQL37pass/0skip/0fail (308.9s), including new actual MCP
+adapter -> real runtime/preflight -> atomic authorization -> existing durable
+queue -> due worker -> independently observed receipt. Runs before either held
+later-platform migration, proving Facebook only needs the approved pair. One
+durable job for repeated confirmation, lost-response read recovery, one due
+simulated Graph POST, independent verified synthetic receipt, gates/role/client/
+approval/source/lease refusals and existing paired-channel independence pass.
+SQL execution is real; canonical fixtures and Graph/Storage transports are
+synthetic. This does NOT establish native grants/publication or real ChatGPT UI.
+Task-owned network-none QA container stopped and suite-generated unrelated
+access-matrix artifacts restored after evidence capture.
+
+Build (tsc +Vite7.3.6), actual emitted app bundle, scoped lint/diff and native
+Deno2.9.8 strict adapter check pass. Whole source and exact packet entry also
+pass with seven analysis-only mappings for inherited type-only frontend edges;
+checker rejects runtime extensionless imports, product import_map unchanged.
+Two late nullability assertions were proven emitted-token-identical to the
+fully tested runtime; private check receipt retained, no executable late edit.
+
+New immutable private packet:
+C:/Users/chris/.codex/artifacts/social-publishing-991/2026-11-18/mcp-publication-actions/candidate-5793153f-final.
+Captured actual live MCPv87/65files read-only; closure SHA256
+8fccb9844e551e6c780fdbe95ce731a37796566ded44d27b862775fbae05d3dc.
+Patch only index.ts/projectContext.ts/toolCatalog.ts; preserve62hosted files
+byte-for-byte; add facebookPublicationActions.ts, facebookPublicationStaff.ts,
+socialPublicationManagement.ts =68files. Existing SDK/jpeg-js imports are
+inherited/approved dependencies, not newly approved packages. verify_jwt=false,
+import_map=false preserved; config_writes empty. Payload SHA256
+5aac9755859e0a54fcdf7b0bbc38e14e2cca0e294230e870ba54302dde4610cf.
+Exact assembled packet native Deno and14action tests pass;5offline guards cover
+source/version/auth/helper drift, duplicate/overwrite/output escape and exact
+owned patch. Hosted-only static ACCESS SDK alias is inspected and preserved;
+arbitrary computed imports refused. Initial partial candidate-5793153f rejected.
+Fresh hosted version/source/auth check required before separately approved release;
+rollback is exact capturedv87 source only after approval, preserving config/data.
+
+No deployment or enablement authorized/performed. Live MCP remainsv87 with
+unchanged tools; new flag unset/false. No production SQL/data/config/secret/
+OAuth/account/mapping/permission/content/date/approval/provider POST/Microsoft/
+Vercel or cost action. Previously approved Facebook DB pair is not replayed;
+held TikTok/Instagram migrations and immutable runtime/OAuth packets untouched.
+Elcheck exact repair approval remains pending, no apply from this continuation.
+Google Control Centre target remains unidentified; no guessed tracker write.
+
+Exact next step remains verified native publishing grant +client/connection/Page
+binding and one approved unscheduled asset/caption/future time, fresh Teams/native
+duplicate inspection, then separate exact runtime/MCP/config release approval.
+Company normal-chat catalogue refresh/preview/confirmation/status acceptance and
+controlled native publication readback are still required. Instagram needs its
+own real permission/media/container path after the first Facebook pilot; existing
+pairing does not confer approval or silent cross-posting. TikTok/LinkedIn/YouTube
+dependencies remain as recorded below; no unsupported readiness claim.
+
 ## 18 November — reuse verified Facebook/Instagram pairs; Elcheck repair prepared
 
 CA requested that linkable client Facebook/Instagram accounts work together for
