@@ -1,3 +1,63 @@
+## 18 November — native worker SDK boundary repaired; exact runtime packet prepared
+
+Continued SAME DRAFT PR #991, tested source fdfaf1eaa9eb6241eee436563be19859c5ef462a.
+Fresh main b524a9f9 / PR ownership checked; other-agent lanes untouched.
+
+A targeted read-only capture verified background-worker ACTIVE v64, 16 hosted
+files, custom auth setting unchanged; inventory49, both social-publication and
+social-publication-authorization ABSENT. No business rows, tokens or credentials
+read. Hosted source closure hash92e77be14cff304b152746e422181fa3c30f5e57241cb55107cc54699d1077ae.
+
+Exact candidate native Deno check reproduced TS2345 before repair: worker JSR
+SupabaseClient and helper ESM SupabaseClient have separate nominal identities.
+Node/Vite tests and the local type bridge had not caught that actual Edge type
+boundary. Reused the existing worker's localized Parameters-based SDK adapter;
+kept the exact client instance/session and all runtime guards. No SDK import,
+role, authorization, scheduling, provider or runtime behavior change. Compiled
+JavaScript token streams before/after are identical (only trivia differs), hash
+ e25582035fcaf8caf24a35050ad835f822503797bbcfcc562eb9d38c5634a387.
+
+Added two actual worker-runJob regressions: exact same SDK client through due
+submission and independent receipt, one synthetic POST only; disabled publishing
+blocks without constructing bindings or contacting the provider. Focused final
+runtime/management suite74pass,0skip,0fail. Build/app-bearing status bundle,
+scoped lint/diff and native Deno2.9.8 all THREE real entrypoints pass. Existing
+prior full5017pass/32skip and36actual SQL checks are retained as PRIOR receipts,
+not rerun or inflated this turn: executable tokens/SQL are unchanged. First
+native check populated its local cache with existing public dependencies; final
+exact-packet check used that cache. No package/lock/shared node_modules edits.
+
+Private immutable candidate-fdfaf1ea uses actual hosted helpers, not local
+replacements. Worker36files: ONLY existing entry modified,15hosted helpers
+preserved byte-for-byte,20publishing helpers added. New staff status/withdrawal
+endpoint9files; staff inspection/preview/confirmation endpoint28files. All use
+existing custom authentication; active manager gates remain. No flag values or
+secrets were read; configuration safety must be freshly verified before release.
+Four offline packet checks pass: exact payload/source hashes, hosted helper
+preservation, version/auth/source/inventory drift refusal, no overwrite or
+checkout/junction escape. Native Deno checks the EXACT assembled source closure,
+not a fixture module declaration. Previous candidate-e564c182 is explicitly
+REJECTED_DO_NOT_RELEASE; its failing log/payloads are preserved, not overwritten.
+
+Final payload SHA256:
+background-worker cf9ac414c547a332147306842115dea23da9ac85563b24f601cfdef0fd755800
+social-publication ec8fa2c145cd7a71ea0b267efdfc785f538c952f19fdf7e38a23cc7facb8cb3e
+social-publication-authorization b774f58462efbb0b19a73f6c0ce4f00b002d0209f528b6ae735aa4ebe583409c
+Source/inventory/manifest/checker/rollback/acceptance evidence retained under
+existing PR991 artifact root,2026-11-18/facebook-runtime-preparation. Status is
+PREPARED_NOT_AUTHORIZED_NOT_DEPLOYED; two new endpoints and worker release still
+need exact separate approval. Do not deploy this from a bare continuation.
+
+No production SQL/data/Edge/config/key/OAuth/account/mapping/permission/content/
+date/approval/Microsoft/Vercel/publication change. Applied DB pair not replayed;
+TikTok Business/Instagram migrations remain held. Browser access still reports
+unavailable; installed tool schema still lacks account_only. One access question
+is pending; no retry loop, credential extraction or unsupported invocation.
+Next remains native Page/grants, approved unscheduled original/caption/future
+time, fresh Teams capture/native duplicate review, then exact reviewed live-test
+packet/approval. Self-review only; no real provider/browser/phone acceptance.
+Google Control Centre target remains unidentified; no guessed write.
+
 ## 18 November — confirmation recovery and final staff/source fencing (source only)
 
 Continued the same DRAFT PR #991 from ef1655048b61f4cefe568e86cc8d81664c6d4d21;
