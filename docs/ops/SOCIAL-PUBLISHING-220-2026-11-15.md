@@ -1,5 +1,63 @@
 # Social publishing — 15 November 2026
 
+## 18 November — exact-approved Facebook database pair APPLIED and verified
+
+CA explicitly approved PR991/bd5d3fc7's two exact Facebook database transactions
+AND their original-version history receipts. Continued same DRAFT PR991; no
+publisher/Edge/frontend/config/account/content/Microsoft/Vercel authority added.
+Fresh main/PR/ownership check retained #995/#1003/#1004/Nolan/staff/calendar lanes.
+
+Fresh read-only preflight matched55 required column types/RLS/service access,
+zero candidate collisions/versions/publication column/social jobs. Existing
+history178rows and533background jobs recorded; queue relation688128bytes.
+Private immutable packet SHA256
+2ad6060315430cffd580fdc1cf623f32ebf32d9342913b316e849c8e826cba76
+still exactly matched the source-pinned offline preparer. Both transactions
+used the EXACT rehearsed original-version route,3slock/60sstatement budgets and
+advisory lock. Applied queue ONCE, independently verified before applying capture
+ONCE, then independently verified both at 2026-11-18T12:51:52.58219+00:00.
+
+LIVE ORIGINAL migration receipts:
+20261115104948 social_publishing_queue, one source statement, SHA256
+00233282015fcfac969421f6429f0c13cdb2421df57dff7141b64e5562076b7b;
+20261116085815 social_publication_preparation_evidence, one source statement,
+SHA256 d82380bc84e4ccedc702408e07353c334a4c16c3fa7650faaf21e13b284600e8.
+History now180rows; digest of ALL178 prior rows unchanged. No history repair,
+generated timestamp, deletion or broad db push. Capture checked the exact first
+receipt before application. Approved guarded query hashes remain6c17c5b0.../
+c891204d...; full hashes/packet are retained in the preceding source receipt.
+
+Verified live nullable publication jsonb column,2new partial indexes, preserved
+all4existing indexes and original background_jobs policy, added ONLY restrictive
+active-manager social-job SELECT policy. RLS stays enabled. Existing8job types
+remain allowed plus social_publish. ALL9new RPCs: SECURITY INVOKER, empty fixed
+search_path, EXECUTE for service_role, denied anon/authenticated/PUBLIC.
+Second apply changed none of the verified queue objects.
+social_publish jobs=0; ALL existing publication column values=NULL.
+Both TikTok Business/Instagram candidate migration versions remain ABSENT.
+No client content, review/approval/date, account/OAuth/mapping/key/provider,
+worker/Edge/cron/flag, Microsoft/Teams or Vercel change or native post.
+
+ALL49 Edge function metadata/version/bundle/auth/entrypoint values unchanged
+against immediate preflight; MCP remainsv87. Security advisories6before/6after,
+NO new findings (not a claim that pre-existing advisories are resolved).
+Private applied-readback.json saved beside the immutable packet. No SQL retried.
+Current readbacks verify schema/ACL/history/data absence, NOT native scheduling/
+publication or real staff/client/phone acceptance. Publishing stays default OFF;
+staff confirmation/publishing bindings/worker/frontend remain unreleased.
+The pending migrations are now ONLY20261115104950TikTok Business and
+20261116102019Instagram steps in this lane; do not replay the applied pair.
+
+Existing source acceptance retained: frozen-runtime5038total/5006pass/32skip,
+2offline packet checks,35rehearsed queue/packet SQL +1admission SQL; build/bundle/
+scoped lint/diff green before approval. No runtime code changed in this release,
+so no repeated full-suite/build. Only these continuity docs change; diff verified.
+Next remains supported company ChatGPT action refresh/native Page+grants proof,
+genuine approved unscheduled asset/caption/futuretime/native duplicates and fresh
+Teams capture, then a complete separately approved worker/UI/live-post packet.
+No account connection, content approval or publication authority inferred from
+schema application. Google Control Centre target unidentified; no guessed write.
+
 ## 18 November — bounded readiness and preview recovery, source only
 
 Continued SAME DRAFT PR991 from867895cf; mainb524a9f9 and open PR ownership
