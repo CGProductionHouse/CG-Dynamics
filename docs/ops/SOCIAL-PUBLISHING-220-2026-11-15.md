@@ -2,8 +2,12 @@
 
 ## 19 November — MCP90 exact-approved release COMPLETE; new company action test pending
 
-CA's latest Please continue directly followed the exact70-file MCP release + one
-setup-link request; treated as go-ahead for only that scope. Fresh livev89 complete
+CA explicitly confirmed at 17:13 SAST on 19 November: "Yes—approve exact MCP
+release and setup link", answering revision323d83da's unchanged70-file packet +
+ONE expiring Facebook link request. This confirms the prior narrow interpretation
+of Please continue; do NOT repeat the completed deployment or ask again for the
+same release/link approval. Installed tools still lack the new setup action and
+a catalogue-refresh action; no OAuth state/link invocation attempted. Fresh livev89 complete
 source closure matched the frozen baseline. ONE deploy; final MCPv90/70files ACTIVE,
 all70hosted file bytes match approved candidate-v2,64preserved/4changed/2added,
 verify_jwt=false/import_map=false preserved. Payload SHA256

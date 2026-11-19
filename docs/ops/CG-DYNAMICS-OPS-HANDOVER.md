@@ -1,8 +1,10 @@
 ## 19 November — exact MCP permission-setup packet LIVE v90; browser acceptance held
 
-CA replied Please continue immediately after the explicit exact70-file MCP release
-and one setup-link request. Treated as go-ahead for ONLY that packet + one link;
-not permission for provider consent, publishing, configuration or other releases.
+At 17:13 SAST on 19 November, CA explicitly confirmed the existing approval request:
+"Yes—approve exact MCP release and setup link" for revision323d83da's unchanged
+70-file packet and ONE expiring Facebook setup link. This confirms the narrow
+authority previously inferred from Please continue; no second deployment is needed.
+No authority for provider consent, publishing, configuration or other releases.
 Executed ONE deploy after fresh v89/68file complete-closure comparison to the
 frozen manifest. MCPv90/70files ACTIVE. Independent hosted readback: ALL70files
 match the frozen payload byte-for-byte,64prior files preserved,4changed,2added;
@@ -22,6 +24,11 @@ profile/session copying or security-setting change. Company refresh, normal-chat
 acceptance and the authorised ONE expiring setup link remain unfinished; NO OAuth
 state/link was generated. Do not describe previous v89 normal-chat acceptance as
 v90/new-action acceptance. Existing signed-in sessions/tabs preserved.
+
+At this explicit-approval continuation, installed tools still expose neither
+start_facebook_permission_setup nor a connector-catalogue refresh action. No
+invocation or OAuth state/link creation attempted; ONE link remains authorised.
+Do not seek repeat release/link approval or work around authentication/discovery.
 
 Private source snapshots, preflight, deploy result, all-file readback, digest-only
 config proof and release receipt: C:/Users/chris/.codex/artifacts/social-publishing-991/
