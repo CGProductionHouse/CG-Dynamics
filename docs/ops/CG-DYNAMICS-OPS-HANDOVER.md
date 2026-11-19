@@ -1,3 +1,25 @@
+## 19 November — exact live-based strategy connector release prepared; NOT DEPLOYED
+
+Same DRAFT PR1003, source overlays from98fded5a. Fresh production MCPv90 contains
+other-agent publishing modules absent/older in this checkout: DO NOT deploy the
+repository function directory. Private exact70-file live-based candidate changes
+only monthlyStrategySeed and monthlyStrategyProposal;68 other files byte-stable,
+including auth/context/catalogue/OneDrive/publishing. Rollback source saved.
+Source manifest +read-only verifier refuse any source/version/auth drift or extras.
+Actual candidate91/91 auth/context/strategy/release tests pass; source suites146
+serial +one additional manifest check=147distinct, final preflight8/8. Local
+TypeScript/Vite build, scopedlint pass; full official EdgeRuntimev1.74.3 bundle
+passes locally. No cloud build, deployment, migration or new strategy write.
+
+Fresh READ ONLY19:41UTC:63client/package,52guide,141strategy hashes unchanged;
+77drafts/16prior live plans protected,18six-client candidates still unapplied.
+Existing company Supabase session read:current14Nov–14Dec cycle44,975/2MEdge
+invocations,2.367/250GBegress;dashboard quota not exceeded,maylag1hour. No Vercel.
+Proposed connector-only release:$0extra;re-read usage andsource immediatelybefore.
+#679 explicit cloud release/budget gate remains pending,NOT implied by push.
+Worker/autopilotv51/flags and all other PR1003 protected gates excluded.
+[Exact packet, hashes, acceptance and rollback](CLIENT-STRATEGY-BACKEND-RELEASE-2026-11-19.md).
+
 ## 19 November — six guide-heading holds fixed locally; 18 zero-write reviews
 
 Same DRAFT PR1003 continuation, no hosted release/Vercel. Fresh13 ready-guide
