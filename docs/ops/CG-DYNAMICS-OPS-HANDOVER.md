@@ -30,9 +30,30 @@ warnings/errors returned by bounded3day queries; this is not a hardware pass.
 Crash dump configuration is already3/minidump with event logging on; no dump
 present. No registry change, diagnostics reboot, scan or stress test performed.
 
-The sampler is on-demand, not a background monitor. No new service/automation, firmware,
-driver, power, pagefile, firewall, credential or production change authorized.
-No heavy task launched during this diagnostic. Whole-system crash scope confirmed.
+The sampler is on-demand, not a background monitor. CA subsequently explicitly
+requested a laptop cooling/stability fix before resuming scheduling. Narrow,
+reversible changes now VERIFIED on the MSI Cyborg: Windows Balanced scheme
+381b4222-f694-41f0-9685-ff5bb260df2e PERFBOOSTMODE changed from2/Aggressive to0/
+Disabled on AC and battery; maximum processor state remains100% for both. Fresh
+powercfg readback after changing MSI Center confirms0/0 still persists. MSI Center
+User Scenario changed from MSI AI Engine to Balanced; UI selection verified.
+No graphics-mode switch, restart, elevation bypass, firmware, driver, pagefile,
+security, credential or production change. CPU boost reduction can slow heavy jobs.
+
+MSI Hardware Monitoring UI first showed CPU56C/GPU50C/fan2651RPM; later showed
+CPU55C/GPU48C/fan2651RPM with25%CPU and64%memory. These are ordinary-load
+observations after mitigation, NOT temperatures at crash time or a stress-test pass.
+At14:29:15 SAST the sampler returned capacity_available:10.54GB free RAM,
+40%commit,41%CPU,36.51GB free system disk. No shared process was killed; no cause
+for resource recovery established. Resume bounded scheduling preparation under the
+single-job/admission rules above; recheck before any heavy work. No claim that the
+underlying whole-machine freeze/restart cause has been identified or eliminated.
+
+Private evidence/rollback: C:/Users/chris/.codex/artifacts/msi-stability/2026-11-19/
+cooling-fix/README.md and power-before.json. A .pow export was denied before changes;
+the original values were retained as text instead. Restore only if requested:
+set PERFBOOSTMODE2 on AC and DC for that scheme and reactivate it; MSI's prior
+scenario was AI Engine. Do not silently restore aggressive boost during scheduling.
 
 ## 19 November — exact-approved MCP and consent backend release is LIVE
 
