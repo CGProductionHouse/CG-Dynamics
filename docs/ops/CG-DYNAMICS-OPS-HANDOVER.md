@@ -1,3 +1,27 @@
+## 19 November — MSI crashes: reduced local workload is mandatory for this lane
+
+CA reports repeated MSI laptop crashes and asks that agents watch machine load.
+Read-only Windows evidence: Cyborg15A13VF/31.7GB RAM; Event41/6008 confirms
+unexpected shutdowns reported at09:44:30 and13:47:29 SAST today. BugcheckCode0,
+PowerButtonTimestamp0, no minidump/MEMORY.DMP, no observed resource-exhaustion2004
+event in the bounded query. These do NOT identify a root cause. Application
+errors/hangs also exist; do not assume they caused the whole-machine shutdowns.
+Post-reboot snapshot:17.4GB RAM free,36.7GB system-drive free,23%CPU,57C NVIDIA
+GPU, AC connected. Not evidence of temperatures or memory pressure at crash time.
+
+For continuing work: ONE heavy local job at a time, Node --test-concurrency=1.
+Never overlap full tests/build/Docker fixtures; no stress test to diagnose this.
+Sample memory/commit/CPU/free disk before and during long owned jobs. Hold new
+heavy work below8GB free RAM, above80%commit, below20GB free system disk or when
+CPU is already above85%. These are conservative workload admission limits, not
+manufacturer limits or a guarantee against crashes. If pressure rises, checkpoint
+and stop only the exact task-owned job; preserve staff/browser/other-agent work.
+Read-only local sampler:
+C:/Users/chris/.codex/artifacts/msi-stability/2026-11-19/Read-WorkCapacity.ps1.
+It is on-demand, not a background monitor. No new service/automation, firmware,
+driver, power, pagefile, firewall, credential or production change authorized.
+No heavy task launched during this diagnostic. Crash symptoms question pending.
+
 ## 19 November — exact-approved MCP and consent backend release is LIVE
 
 CA explicitly approved the two immutable backend packets and ONLY the consent
