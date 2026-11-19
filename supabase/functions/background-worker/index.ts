@@ -6,6 +6,8 @@
 // behalf of the caller and trusts nothing from the request body.
 import { createClient, type SupabaseClient } from 'jsr:@supabase/supabase-js@2'
 import webpush from 'npm:web-push@3.6.7'
+import { SOCIAL_PUBLICATION_JOB, runClaimedSocialPublication } from '../_shared/socialPublishingQueue.ts'
+import { facebookPublicationRuntime, readFacebookPublicationConfiguration } from '../_shared/facebookPublicationRuntime.ts'
 import { dispatchMetaWorker } from '../_shared/metaWorkerDispatch.ts'
 import { currentMetaMonth, previousMetaMonth, currentMonthHasIncrementalWindow } from '../_shared/metaPeriod.ts'
 import { fetchAllRows } from '../_shared/paginatedRows.ts'
@@ -52,6 +54,7 @@ interface JobRow {
   payload: Record<string, unknown>
   requested_by: string | null
   requested_by_name: string | null
+  idempotency_key?: string
 }
 
 interface JobResult extends Record<string, unknown> {
@@ -90,6 +93,10 @@ Deno.serve(async () => {
     if (!job || !job.id) break
     try {
       const result = await runJob(supabase, job as JobRow, url, serviceKey, worker)
+      if (job.job_type === SOCIAL_PUBLICATION_JOB && result.managed === true) {
+        processed.push({ id: job.id, job_type: job.job_type, ok: result.publication !== undefined })
+        continue
+      }
       if (result.waiting === true) {
         const { error: deferError } = await supabase.rpc('defer_background_job', {
           p_id: job.id,
@@ -794,6 +801,17 @@ async function runJob(
   const payload = (job.payload ?? {}) as Record<string, unknown>
 
   switch (job.job_type) {
+    case SOCIAL_PUBLICATION_JOB: {
+      // Source-only candidate. Global flag alone cannot activate publishing:
+      // dedicated photo gate + exact-account server packet are also mandatory.
+      const configuration = readFacebookPublicationConfiguration(name => Deno.env.get(name))
+      return await runClaimedSocialPublication({ sb: supabase, jobId: job.id,
+        key: job.idempotency_key ?? '', worker, now: new Date().toISOString(),
+        enabled: configuration !== null,
+        // Preserve the worker's existing JSR client/session. The helpers' ESM
+        // SDK has a separate nominal class identity; adapt only this type edge.
+        bindings: configuration ? facebookPublicationRuntime(supabase as unknown as Parameters<typeof facebookPublicationRuntime>[0], configuration).workerBindings(job.id) : undefined })
+    }
     case GOOGLE_ADS_REFRESH_JOB_TYPE: {
       return await runGoogleAdsRefreshJob({
         payload, url, serviceKey,

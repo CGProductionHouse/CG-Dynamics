@@ -628,7 +628,8 @@ test('Phase 20g repairs only proven daily unique-viewer sums', () => {
 })
 
 test('Meta OAuth records actual reporting permissions and requires read_insights', () => {
-  assert.match(META_OAUTH_START, /'read_insights'/)
+  assert.match(META_OAUTH_START, /createMetaOAuthRequest/)
+  assert.match(read('../supabase/functions/_shared/metaOAuthRequest.ts'), /'read_insights'/)
   assert.match(META_OAUTH_CALLBACK, /\/me\/permissions/)
   assert.match(META_OAUTH_CALLBACK, /scopes: grantedScopes/)
   assert.match(META_OAUTH_CALLBACK, /status: connectionStatus/)
