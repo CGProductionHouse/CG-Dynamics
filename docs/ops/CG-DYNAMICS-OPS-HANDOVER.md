@@ -1,3 +1,52 @@
+## 19 November, 18:35 SAST — consent and Cape asset access verified; exact binding awaits approval
+
+Owner consent completed: exact setup state used2026-11-19T15:43:17.868Z;
+existing connection65d8f626-54d7-45fa-ac75-5348eb364540 connected at15:43:19.424Z
+with pages_manage_posts plus existing reporting permissions. Metadata-only checks
+confirm ONE stored credential row, encrypted-envelope=true; no credential read.
+Fresh API-backed Load Meta assets in legitimately signed-in company Chrome returns
+Cape Lumber Marketing (Lumber Yard) for Cape's existing Page262645554440912.
+Picker is a current discovery entry, not the existing-linked-page fallback.
+No Save link, reconnect, sync, consent or publishing control was clicked.
+
+Browser recovery: installed Chrome/native-host diagnostics pass. Used the existing
+official chrome/26.1111.71704/scripts/browser-client.mjs setupBrowserRuntime route
+through Node REPL, explicitly selecting extension profile cgproductionhouse.com.
+It successfully reads/navigates/uses the existing company session with known URLs.
+Reuse valid browser/tab handles and returned documentation; never numeric IDs as
+identity. No extension/settings/security change, reinstall, browser restart, debug
+port, profile/session copying or credential extraction. The intermittent Windows
+Computer Use URL-guard root cause is NOT established; its guard was not disabled.
+Existing user OAuth tab and pinned WhatsApp preserved. Verification tab left open.
+
+Cape mapping4441c144-d1c5-46b1-980f-9145280857fc still has connection_id NULL,
+client42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa. Prepared ONLY the exact one-row repair
+in docs/ops/approvals/CAPE-FACEBOOK-CONNECTION-BINDING-2026-11-19.sql. Final packet
+SHA256e46c5af88aac81731f7fd5d94b57a77d8a59c6fd838ffb3955d1ef0308fbc781.
+Changes connection_id to the consented connection plus normal updated_at trigger;
+preserves Page/Instagram/ad identities and every other mapping. Short table lock,
+timeouts, exact consent/fingerprint/grant/token-count checks, one-row and whole-row
+postconditions refuse drift. NOT APPROVED/APPLIED; no production UPDATE executed.
+
+Fifteen actual isolated PostgreSQL checks PASS/no skips. Additional review first
+reproduced mixed legacy/encrypted credential ambiguity, then corrected both total
+and encrypted row counts; initial failing fixture retained, final15green. Fixtures
+do not establish hosted RLS or native CREATE_CONTENT/app/token proof. Private DBs
+dropped/count0; task-owned network-none container stopped/exited0; MSI capacity
+snapshot admitted one job. No new dependency installed; no app/runtime change or
+expensive full/build rerun. Private SQL/test/log/README/screenshot in artifacts/
+social-publishing-991/2026-11-19/cape-binding under C:/Users/chris/.codex.
+
+NEXT: exact CA data-repair approval → fresh drift check + ONE guarded transaction
+→ readback + existing account_only MCP check of live Page tasks/app/token binding.
+That publishing-access check is still held by the NULL mapping; do not bypass it
+or call discovery alone publishing-ready. Keep publication and worker activation
+off; eligible approved future creative/time/Teams/native duplicates and separate
+runtime/controlled-post approval remain. No deployment, SQL migration, grant,
+config/key, other-client/content/approval/date/Microsoft/Vercel change. #991/#220/
+#236/#381 own this lane; other agents and pending holds remain. Google tracker
+exact target still unknown; no guessed write.
+
 ## 19 November, 17:28 SAST — company plugin refreshed; ONE Facebook setup link verified
 
 Recovered supported Computer Use in the EXISTING company Chrome session; verified

@@ -1,5 +1,49 @@
 # Social publishing — 15 November 2026
 
+## 19 November, 18:35 SAST — Cape binding prepared/tested; production application awaits approval
+
+Owner consent is verified: exact OAuth state consumed15:43:17.868Z; existing
+connection65d8f626-54d7-45fa-ac75-5348eb364540 connected15:43:19.424Z and stores
+pages_manage_posts. Metadata-only checks show ONE token row with the encrypted
+envelope; no token values read. Fresh read-only Meta asset discovery in company
+Chrome exposes Cape Lumber Marketing (Lumber Yard), matching existing canonical
+Page262645554440912 and client42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa. Existing
+Instagram/ad identity remains unchanged. No link/save/sync/provider write.
+
+Resolved task browser access through the installed official Chrome browser-client
+setupBrowserRuntime bridge. Read current docs; selected cgproductionhouse.com,
+used exact known site/tab identity, existing authenticated CG Production House
+Admin session, loaded assets and inspected only Cape's selection. Chrome extension
+and native-host diagnostics pass. No permissions/settings/reinstall/restart/debug
+ports/profile copying/credentials. Windows Computer Use URL-guard cause remains
+unproven; not disabled/bypassed. Preserve existing OAuth tab, pinned WhatsApp and
+user sessions; prefer the now-proven browser-client route for this task.
+
+Missing field remains connection_id=NULL on mapping4441c144-d1c5-46b1-980f-9145280857fc.
+Prepared exact approval SQL docs/ops/approvals/CAPE-FACEBOOK-CONNECTION-BINDING-2026-11-19.sql,
+SHA256e46c5af88aac81731f7fd5d94b57a77d8a59c6fd838ffb3955d1ef0308fbc781.
+ONE row/field plus existing normal timestamp trigger; no identity/other-client
+changes. Guards check reviewed row fingerprint/consent revision/current grants,
+single total and encrypted credential count, unambiguous Page and preserved other
+rows. Short mapping lock and timeouts; drift aborts the whole transaction.
+
+Fifteen actual PostgreSQL checks pass/no skips. Review reproduced a mixed
+encrypted/legacy duplicate gap in the initial local candidate before correction;
+both total/encrypted counts now enforced. Initial red fixture is retained; final
+15green. Exact production packet/fingerprint runs on a synthetic credential fixture;
+not native publishing or hosted RLS proof. Private DB count0, owned network-none
+container exited0; no dependencies installed. App/runtime unchanged; no full/build
+reruns. Private artifact README/logs/snapshot/screenshot in2026-11-19/cape-binding.
+
+NOT APPROVED/APPLIED: live mapping still NULL in final readback. Exact CA approval
+is next; afterwards apply only after fresh drift checks and run existing MCP
+account_only for actual Page CREATE_CONTENT/app/token verification. That latter
+proof is not yet available because the inspector correctly refuses NULL mapping.
+Publishing/worker/submission remain off; approved future creative/time and fresh
+Teams/native duplicates plus separate runtime/one-post gates remain. No Vercel,
+deployment/migration/config/key/grant/client-content/date/approval/Microsoft write.
+Existing #991/#220/#236/#381 records retain ownership and other-agent separation.
+
 ## 19 November, 17:28 SAST — company new-action acceptance and ONE setup link complete
 
 Existing company Chrome/ChatGPT identity info@cgproductionhouse.com verified in
