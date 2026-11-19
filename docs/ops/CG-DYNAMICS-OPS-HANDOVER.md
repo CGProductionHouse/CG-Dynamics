@@ -1,3 +1,44 @@
+## 19 November — ChatGPT Facebook permission setup prepared, NOT live
+
+Same DRAFT PR #991; tested source b84fe934. Reproduced the missing accessible
+consent path: installed/live MCP lacks start_facebook_permission_setup and the
+new frontend button remains source-only under #679. Added an explicit company-admin
+setup action using the EXISTING hashed state/callback authority, with fresh active
+manager checks before/after state persistence. Only owner-requested setup returns
+an expiring official Meta URL; reporting scopes stay unchanged and only
+pages_manage_posts is added for the opt-in. No provider grant, mapping, job or
+posting occurs here. Each deliberate OAuth setup has a fresh nonce, not operational
+idempotency; catalogue AND shared Assistant guidance forbid automatic retries.
+
+159 affected checks PASS. Full serial run completed5101total/5068pass/1fail/
+32optional skips; sole failure was the stale63-tool assertion after adding tool64.
+Corrected that expectation and rechecked ALL159affected cases, including exposure,
+auth/context, SDK transport, scopes, state/expiry/privacy and packet guards. No second
+whole-suite run after that test-only correction and guidance-wording clarification;
+do not label the original full run green. Final build/app bundle, scoped lint/diff,
+native Deno local OAuth entry + exact70-file MCP packet PASS. No new UI/device/native
+Facebook consent/publication or installed-new-action acceptance claimed. Previous
+37real PostgreSQL checks remain prior evidence for unchanged SQL/queue/worker.
+
+Fresh read-only hosted source is MCPv89/68files. Prepared candidate-v2 changes only
+4MCPfiles, preserves64hosted files byte-for-byte, adds2helpers;70total. Payload SHA256
+04461b73d8bf6a301f5b0c603892921376f87f7b0ffdedb26fdf2b3c0602830a.
+Private packet: artifacts/social-publishing-991/2026-11-19/mcp-permission-setup/
+under C:/Users/chris/.codex. Earlier candidate is superseded; use candidate-v2 ONLY.
+No config changes or redeploy authorized. Local OAuth-start shared-helper refactor
+is tested but EXCLUDED from this packet: hosted OAuth-startv75 remains untouched.
+Exact CA release approval + immediate hosted-closure drift check required before
+deploying MCP. Owner consent, actual grant/exact Page binding, approved future
+image/caption/time, fresh Teams/native duplicate proof and separate worker/submission/
+account activation remain. Publishing stays OFF; no production state was created.
+
+Mainb524a9f9 unchanged. Inspected #995 Marketing additions in shared MCP index/catalogue;
+do not copy or overwrite them, reconcile at merge and invalidate a packet on hosted
+drift. #1003 has no MCP overlap. Teams/staff/Nolan lanes untouched. One heavy job at
+a time/concurrency1 retained; observed RAM above11GB, MSI sample CPU52C/GPU45C
+around build check. No Vercel, SQL, account/content/permission/secret/Microsoft action.
+Google Control Centre exact target remains unknown; no guessed write.
+
 ## 19 November — MSI crashes: reduced local workload is mandatory for this lane
 
 CA reports repeated MSI laptop crashes and confirms the WHOLE laptop freezes or

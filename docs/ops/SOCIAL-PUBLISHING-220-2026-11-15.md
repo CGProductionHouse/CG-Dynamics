@@ -1,5 +1,58 @@
 # Social publishing — 15 November 2026
 
+## 19 November — explicit ChatGPT Facebook permission setup, SOURCE ONLY
+
+Tested source b84fe934, SAME DRAFT PR #991. Installed tools/live v89 lack a
+publishing-permission setup action, while the new app button is not frontend-live.
+Added start_facebook_permission_setup to the existing connector, company-admin
+only and only with confirm_permission_request:true. Reuses the existing OAuth
+state table and callback; no session copying or alternative token store. The
+authenticated company manager is read before/after one hashed expiring state
+insert. Rejects staff/client Projects, inactive/non-manager profiles, unconfirmed
+or extra inputs, disabled setup and unsafe server configuration. No raw state in
+the generic operational retry log. A deliberate new request has a fresh nonce;
+tool metadata and shared Assistant guidance explicitly forbid automatic retries.
+Only the six reporting scopes plus pages_manage_posts, with owner consent still
+required. Reporting construction is shared in repository source and remains tested.
+
+Validation:159affected checks PASS, actual dispatcher + installed Supabase SDK /
+synthetic PostgREST, context/role/nonce/hash/expiry/privacy/error guards and offline
+packet controls. Full serial run5101total/5068pass/1fail/32skips,1401.5s; sole
+failure was an old tools/list63 expectation. Updated to64 including the new action,
+then rechecked ALL159affected cases. That is a targeted correction, NOT a second
+clean whole-suite run. Review also clarified general retry guidance; no functional
+OAuth/publication logic changed after the full run started. Final build (tsc +
+Vite7.3.6), emitted app bundle, scoped lint/diff and native Deno2.9.8 pass for the
+final local OAuth entrypoint and assembled70-file MCP packet. Established local-only
+Vite/type declarations and --sloppy-imports are checker support, never upload files.
+Initial direct-check dependency/Vite-type failures are preserved and superseded by
+the assembled packet receipt. No product browser/device/native-consent/post or
+installed-new-action acceptance this increment. Prior10React/phone-viewport and
+37real PG receipts remain prior evidence for unchanged UI/SQL/worker.
+
+Read-only fresh MCPv89 source snapshot:68files, auth settings unchanged. Immutable
+candidate-v2 changes4existing MCPfiles (index, context, catalogue, retry wording),
+preserves64hosted files byte-for-byte, adds2helpers;70total. SHA256:
+04461b73d8bf6a301f5b0c603892921376f87f7b0ffdedb26fdf2b3c0602830a.
+Private manifest/payload/readback/qualification in C:/Users/chris/.codex/artifacts/
+social-publishing-991/2026-11-19/mcp-permission-setup. Earlier candidate is superseded,
+not authorized. The local OAuth-start refactor is NOT in this release packet;
+hosted OAuth-startv75 remains unchanged. No flag/config/key change is requested.
+Exact CA MCP release approval and fresh full-source drift verification remain
+required. A future explicit setup invocation creates only an expiring login state;
+no actual invocation, consent, connection, mapping, queue or post occurred here.
+
+Next: approved MCP release → refresh company action catalogue → explicit owner
+setup request/consent → exact grant/Page binding and real approved future photo →
+fresh Teams/native duplicate proof → separate worker/submission/account activation
+packet → one controlled publication/independent native receipt. Previously applied
+Facebook DB pair is NOT replayed; TikTok/Instagram migrations and worker/staff
+runtime packet remain held. No Vercel, production SQL/data/content/account/secret/
+permission/Microsoft or provider POST. Mainb524a9f9 unchanged; inspected #995 shared
+MCP Marketing additions without copying/changing that lane; reconcile before merge,
+reject hosted drift. #1003 has no MCP overlap. Single-job MSI safeguards retained;
+no other apps killed. Google tracker target unidentified; no guessed update.
+
 ## 19 November — TWO exact-approved backend packets live; dispatch still off
 
 CA approved only the reviewed MCP scheduling actions + OAuth permission-setup
