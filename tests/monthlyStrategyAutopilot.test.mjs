@@ -86,6 +86,48 @@ function calendarSourceFixture() {
   return db
 }
 
+test('actual preparation and workspace admit the six reviewed heading variants without a strategy write', async () => {
+  const packet = JSON.parse(read('../docs/ops/client-readiness/2026-11-19-strategy-guide-heading-candidates.json'))
+  const slugs = ['hino-trucks', 'jenkor', 'peyper-bonds', 'supa-quick-bfn', 'toyota-bloemfontein', 'wiseride']
+  for (const [index, client] of packet.clients.entries()) {
+    const db = fixture()
+    const metadata = JSON.parse(read(`../artifacts/client-strategy-dossiers/issue-513/runtime-guides/${slugs[index]}.meta.json`))
+    assert.equal(metadata.client_id, client.client_id)
+    db.tables.clients = [{ id: client.client_id, name: client.client_name, active: true, package_settings: client.package_settings }]
+    db.tables.client_guides = [{ ...metadata, id: metadata.guide_id, guide_markdown: read(`../artifacts/client-strategy-dossiers/issue-513/runtime-guides/${slugs[index]}.md`) }]
+    const workspace = await loadMonthlyStrategyWorkspace(db, client.client_id, '2027-01-01', '2026-11-19')
+    assert.deepEqual(workspace.blockers, [], client.client_name)
+    assert.equal(workspace.prepared.evidence.filter(row => row.authority === 'client_guide').length, 4)
+    assert.equal(workspace.prepared.seedContext.sources.client_guide_id, metadata.guide_id)
+    assert.equal(db.calls.length, 0)
+    assert.equal(db.jobUpserts.length, 0)
+    assert.equal(db.tables.monthly_client_strategies.length, 0)
+  }
+})
+
+test('new heading recognition never admits an unready or foreign guide', async () => {
+  for (const kind of ['unready', 'foreign']) {
+    const db = fixture()
+    db.tables.client_guides = [{ id: 'guide-other', client_id: kind === 'foreign' ? 'other-client' : 'client-a',
+      runtime_readiness: kind === 'unready' ? 'needs_review' : 'ready', version: 1,
+      guide_markdown: '## Video / Reels\n- A real workshop process demonstration.' }]
+    const workspace = await loadMonthlyStrategyWorkspace(db, 'client-a', '2027-01-01', '2026-11-19')
+    assert.ok(workspace.blockers.includes('EXACT_STRATEGY_EVIDENCE_UNAVAILABLE'), kind)
+    assert.equal(workspace.prepared.evidence.filter(row => row.authority === 'client_guide').length, 0)
+    assert.equal(db.calls.length, 0)
+  }
+})
+
+test('a source change inside a legacy heading still fences the exact workspace fingerprint', async () => {
+  const db = fixture()
+  db.tables.client_guides[0].guide_markdown = '## Video / Reels\n- A real workshop process demonstration.'
+  const before = await loadMonthlyStrategyWorkspace(db, 'client-a', '2027-01-01', '2026-11-19')
+  db.tables.client_guides[0].guide_markdown += '\n- A different customer question for a future review.'
+  const after = await loadMonthlyStrategyWorkspace(db, 'client-a', '2027-01-01', '2026-11-19')
+  assert.notEqual(after.evidenceFingerprint, before.evidenceFingerprint)
+  assert.equal(db.calls.length, 0)
+})
+
 test('real preparation and connector source fence survive unordered calendar and deliverable reads', async () => {
   const db = calendarSourceFixture()
   const first = await loadMonthlyStrategyWorkspace(db, 'client-a', '2026-11-01', '2026-10-16')

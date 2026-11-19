@@ -1,0 +1,2199 @@
+{
+  "version": 1,
+  "purpose": "Immutable editorial acceptance receipt; canonical live strategies remain in monthly_client_strategies. Not an authoring store or apply script.",
+  "checked_at": "2026-11-19T16:54:10.084302+00:00",
+  "authority": "CA explicitly requested correcting the live Delta plan and all previously handed-off client plans on 19 November 2026.",
+  "reviewed_clients": [
+    {
+      "client_id": "fd16ebae-a50b-4920-afe0-94c2631f8f06",
+      "client_name": "All Around PVC",
+      "published": true,
+      "november_client_rows": 1,
+      "december_client_rows": 0
+    },
+    {
+      "client_id": "32bd9db3-5339-4404-825b-5a615cadec6a",
+      "client_name": "Bat Hill Royale",
+      "published": false,
+      "november_client_rows": 0,
+      "december_client_rows": 0
+    },
+    {
+      "client_id": "89e0ad6d-e08c-4a75-8b8e-abea71af581c",
+      "client_name": "Bloem Marble & Granite",
+      "published": true,
+      "november_client_rows": 1,
+      "december_client_rows": 0
+    },
+    {
+      "client_id": "5dfdf4bd-9d94-4cc6-9dee-0e480a2234cb",
+      "client_name": "Bohemia Quick Stop",
+      "published": true,
+      "november_client_rows": 1,
+      "december_client_rows": 0
+    },
+    {
+      "client_id": "8e448cf9-1534-4ba1-89a4-93e4c8b83d2f",
+      "client_name": "Bouwer & Coetzee Attorneys",
+      "published": true,
+      "november_client_rows": 1,
+      "december_client_rows": 0
+    },
+    {
+      "client_id": "6b67a2df-e2ab-418b-bcee-03aef5963d37",
+      "client_name": "Braize",
+      "published": true,
+      "november_client_rows": 1,
+      "december_client_rows": 0
+    },
+    {
+      "client_id": "afb62c53-d6d3-4ef8-9393-def88ed899d8",
+      "client_name": "C&L Innovations",
+      "published": true,
+      "november_client_rows": 1,
+      "december_client_rows": 0
+    },
+    {
+      "client_id": "42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa",
+      "client_name": "Cape Lumber",
+      "published": true,
+      "november_client_rows": 1,
+      "december_client_rows": 1
+    },
+    {
+      "client_id": "079df21e-783a-4648-b3fa-0acae6e68867",
+      "client_name": "Case Bloemfontein",
+      "published": true,
+      "november_client_rows": 1,
+      "december_client_rows": 0
+    },
+    {
+      "client_id": "6b313cac-283e-48c4-9df6-ba43af2f7353",
+      "client_name": "Central Canvas",
+      "published": true,
+      "november_client_rows": 1,
+      "december_client_rows": 0
+    },
+    {
+      "client_id": "c27d2185-08e4-4c49-be48-2572564ceecf",
+      "client_name": "CG Production House",
+      "published": false,
+      "november_client_rows": 0,
+      "december_client_rows": 0
+    },
+    {
+      "client_id": "3404f726-a693-4b2d-8c13-c9d3dfd17bbc",
+      "client_name": "Daisy & Co",
+      "published": true,
+      "november_client_rows": 1,
+      "december_client_rows": 0
+    },
+    {
+      "client_id": "06b20bb1-ed4a-4aa1-9f48-8c6cb0531aba",
+      "client_name": "Delta Gas",
+      "published": true,
+      "november_client_rows": 1,
+      "december_client_rows": 0
+    },
+    {
+      "client_id": "2aed8a31-bd53-4ad1-a3dc-432865adfb3d",
+      "client_name": "Dulux Paint & Paper Bloemfontein",
+      "published": true,
+      "november_client_rows": 1,
+      "december_client_rows": 0
+    },
+    {
+      "client_id": "61acf81b-1011-404e-9fae-2e209be65fca",
+      "client_name": "Econofoods",
+      "published": false,
+      "november_client_rows": 0,
+      "december_client_rows": 0
+    },
+    {
+      "client_id": "ec643c75-51f5-4839-829f-3f5b7f48829a",
+      "client_name": "Ehrlich Park Butchery",
+      "published": true,
+      "november_client_rows": 1,
+      "december_client_rows": 0
+    },
+    {
+      "client_id": "7b47afb0-fa55-4916-85f6-09c57e5905b9",
+      "client_name": "Madison Wear",
+      "published": true,
+      "november_client_rows": 1,
+      "december_client_rows": 0
+    },
+    {
+      "client_id": "4236a60a-990f-484f-8d19-13d2f92fbe3b",
+      "client_name": "Novus Steel",
+      "published": true,
+      "november_client_rows": 1,
+      "december_client_rows": 0
+    }
+  ],
+  "preserved": {
+    "client_rows": 18,
+    "october_published_reports": 17,
+    "other_month_strategies": 35,
+    "immutable_amend_approve_publish_events": 48,
+    "package_changes": 0,
+    "schedule_changes": 0,
+    "provider_changes": 0,
+    "migrations": 0,
+    "vercel_operations": 0
+  },
+  "runtime_readback": {
+    "delta_actual_login": 200,
+    "delta_actual_client_strategy_rpc": 200,
+    "delta_own_api_session_local_logout": 204,
+    "client_role_contexts": 18,
+    "foreign_report_rows": 0,
+    "deployed_overview_line_breaks": true,
+    "deployed_plan_line_breaks": true,
+    "physical_iphone_checked": false
+  },
+  "rows": [
+    {
+      "client_id": "6b67a2df-e2ab-418b-bcee-03aef5963d37",
+      "client_name": "Braize",
+      "strategy_id": "bf51b539-d782-4dcb-a69d-e6f5193398b6",
+      "strategy_month": "2026-11-01",
+      "before_version": 7,
+      "version": 8,
+      "before_row_hash": "b1cd1f13bdb1a1ee20cd777bfdba529f",
+      "row_hash": "128ab59cddf6f74177f0536b76b1d8a3",
+      "published_at": "2026-11-19T16:49:40.937529+00:00",
+      "confirmed_package": {
+        "professional_videos_per_month": null,
+        "photo_posts_per_month": 4,
+        "design_posters_per_month": 4,
+        "reels_per_month": null,
+        "animated_posters_per_month": null
+      },
+      "client_hash": "ee096f2c533c516e1625ff2ae055880f",
+      "guide_id": "e6d152bf-b540-4dd8-bfff-0a475c3e4e3d",
+      "guide_hash": "7807bf14ea8484dd93fd890761d1d90e",
+      "source_report_ids": [
+        "6a0e27bf-9622-47bc-90b8-74ea42a6c459"
+      ],
+      "source_report_hashes": [
+        "9510d6af779e3e91341b204574bea3aa"
+      ],
+      "seed_context_preserved": true,
+      "previous_published_snapshot_retained_until_publish": true,
+      "immutable_revision_events": [
+        "amended",
+        "approved",
+        "published"
+      ],
+      "client_role_readback": true,
+      "internal_notes_private": true,
+      "published_strategy_data": {
+        "version": 1,
+        "actionPlan": {
+          "reels": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "design_poster": {
+            "items": [
+              "Brief the bar role.\n\nAsk about the task, place and timing.",
+              "Brief the promoter role.\n\nAsk what brand conversation the organiser wants to create.",
+              "Which role does your event need?\n\nMake bar support and promotional work easy to distinguish.",
+              "Send the event brief.\n\nA simple role, task, place and timing checklist."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "photo_content": {
+            "items": [
+              "Behind the bar.\n\nShow the guest-service task and the person doing it.",
+              "The brand conversation.\n\nShow a promoter interaction and its purpose.",
+              "Before guests arrive.\n\nFocus on a preparation or hand-off detail.",
+              "Meet the role.\n\nUse a staff-role portrait to explain the work an organiser can ask about."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "animated_poster": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "professional_video": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "campaign_recommendation": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          }
+        },
+        "topContent": {
+          "autoCaption": "Bartenders give your guests expertly made drinks, faster service, and one less thing for you to manage. www.braize.co.za promotions@braize.co.za #BraizePromotions #BartendingStaff #EventService #HospitalityProfessionals #WeHitDifferent",
+          "contentType": "",
+          "whyItWorked": [],
+          "autoImageUrl": null,
+          "autoPlatform": "facebook",
+          "coverImageUrl": "",
+          "autoMetricLabel": null,
+          "autoMetricValue": null,
+          "whatThisTellsUs": ""
+        },
+        "goldStandard": {
+          "mustAvoid": "Energetic, capable and polished.\n\nKeep the focus on the work people do and the organiser’s event need.",
+          "objective": "Turn event interest into clear staffing conversations with Braize.\n\nHelp organisers recognise whether they need bar support or promotional people, then send a useful event brief.",
+          "coreMessage": "The right conversation starts with the role.\n\nShow the people at work and help organisers explain what their event needs.",
+          "testAndChange": "September’s promoter post was shared 21 times on Facebook.\n\nBuild on that sharing interest with clear role stories and compare the questions coming from bar-service and promoter content.",
+          "successSignals": "Event enquiries naming the role, task, location and date.\n\nOrganisers asking about bar or promotional support.\n\nUseful briefs the team can follow up.",
+          "pillarsAndHooks": "BAR SUPPORT\nThe guest-service role in action.\n\nPROMOTIONAL PEOPLE\nThe brand conversation on the floor.\n\nTHE EVENT BRIEF\nRole, task, place and timing.",
+          "audienceAndIntent": "Event organisers, venues and brand teams.\n\nPeople planning a guest-service or promotional role for a specific event.",
+          "nextMonthGamePlan": "START\nIntroduce the bar-support photo and its matching brief poster.\n\nBUILD\nFollow with the promoter story, then preparation and people details.\n\nCLOSE\nClose with the organiser checklist and briefing template.",
+          "channelIntegration": "Use the existing social presence to connect real people with clearly explained roles.\n\nLead enquiries to a direct event-brief conversation with Braize.",
+          "formatsAndRationale": "4 photos — bar support, promotion, preparation and a role portrait.\n\n4 posters — bar brief, promoter brief, organiser checklist and event template."
+        },
+        "clientDirection": [],
+        "strategyDrivers": [],
+        "calendarSelections": [
+          {
+            "use": false,
+            "date": null,
+            "note": "",
+            "title": "Festive & Black Friday build-up"
+          },
+          {
+            "use": false,
+            "date": "2026-11-27",
+            "note": "",
+            "title": "Black Friday"
+          }
+        ],
+        "clientRequestNotes": "",
+        "strategyGoingForward": "1. SHOW THE ROLE\nMake bar support and promotional work easy to tell apart.\n\n2. SHOW THE PEOPLE\nBring each role to life through real work moments.\n\n3. GET THE BRIEF\nInvite the organiser to share the event’s task, place and timing.",
+        "clientActionsRequired": [
+          "Choose the roles and people to feature.",
+          "Share the event-brief questions that help the team respond."
+        ]
+      }
+    },
+    {
+      "client_id": "2aed8a31-bd53-4ad1-a3dc-432865adfb3d",
+      "client_name": "Dulux Paint & Paper Bloemfontein",
+      "strategy_id": "9167ebff-3731-42b7-89b1-c3a9d54ca78c",
+      "strategy_month": "2026-11-01",
+      "before_version": 6,
+      "version": 7,
+      "before_row_hash": "9e58fd43fc293a1867a3da168cdb7076",
+      "row_hash": "389778c7815c57e2a4a52eef95e88126",
+      "published_at": "2026-11-19T16:47:40.33412+00:00",
+      "confirmed_package": {
+        "professional_videos_per_month": 2,
+        "photo_posts_per_month": 4,
+        "design_posters_per_month": 4,
+        "reels_per_month": null,
+        "animated_posters_per_month": null
+      },
+      "client_hash": "2896314c44ac20457305c394c73707e7",
+      "guide_id": "8410d079-0ac2-44ec-9579-a7efb4fb74d5",
+      "guide_hash": "70bc27c5a14b9a49ccb531ac55d619bb",
+      "source_report_ids": [
+        "b7a7c8f8-0ac8-4f33-a787-4f15e2475e5e"
+      ],
+      "source_report_hashes": [
+        "db9eadf5748b8b4fa935ba3f99fe7ee7"
+      ],
+      "seed_context_preserved": true,
+      "previous_published_snapshot_retained_until_publish": true,
+      "immutable_revision_events": [
+        "amended",
+        "approved",
+        "published"
+      ],
+      "client_role_readback": true,
+      "internal_notes_private": true,
+      "published_strategy_data": {
+        "version": 1,
+        "actionPlan": {
+          "reels": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "design_poster": {
+            "items": [
+              "Bring your room photo.\n\nStart with the light and look you have in mind.",
+              "What are you painting?\n\nHelp customers describe the surface.",
+              "A good place to start.\n\nTurn a preparation question into a store conversation.",
+              "Let’s talk colour.\n\nInvite customers to discuss the colour or finish they are considering."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "photo_content": {
+            "items": [
+              "The room in context.\n\nShow the light and space behind a colour choice.",
+              "Colour up close.\n\nFeature the chosen colour in an interior setting.",
+              "Before the brush.\n\nShow a surface detail that starts a preparation conversation.",
+              "The finish detail.\n\nGive the featured finish a close, clear visual."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "animated_poster": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "professional_video": {
+            "items": [
+              "Same swatch, different light.\n\nShow a physical colour swatch in two lighting conditions.",
+              "Start with the surface.\n\nLet a store team member explain one useful preparation question."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "campaign_recommendation": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          }
+        },
+        "topContent": {
+          "autoCaption": "Colour decisions? Leave those to us. 🎨 You bring the space, the idea, or even the “I have no clue where to start” moment, and we’ll help you find the colour that makes it work. It’s what we do best. 051 430 3699 www.dulux.co.za #DuluxBloemfontein #LetsColour #ColourExperts #PaintInspiration #Bloemfontein",
+          "contentType": "",
+          "whyItWorked": [],
+          "autoImageUrl": null,
+          "autoPlatform": "facebook",
+          "coverImageUrl": "",
+          "autoMetricLabel": null,
+          "autoMetricValue": null,
+          "whatThisTellsUs": ""
+        },
+        "goldStandard": {
+          "mustAvoid": "Helpful, clear and encouraging.\n\nUse one room or surface question at a time, with real colour and product references.",
+          "objective": "Help Bloemfontein shoppers take the next step with their painting project.\n\nTurn room inspiration into a useful colour, surface or preparation conversation at Dulux Paint & Paper.",
+          "coreMessage": "Start with your room.\n\nBring the light, the surface and the look you have in mind into one helpful store conversation.",
+          "testAndChange": "October’s content recorded 148 Facebook engagements and 170 Instagram interactions.\n\nBuild on that interest with two useful openings: choosing a colour in real light, and preparing the surface.",
+          "successSignals": "Customers bringing room photos or surface questions.\n\nEnquiries about a featured colour or finish.\n\nStore feedback on which explanations help customers choose.",
+          "pillarsAndHooks": "COLOUR IN CONTEXT\nSee a swatch in different light.\n\nSTART WITH THE SURFACE\nMake the preparation question simple.\n\nTHE FINISH\nShow the look in a real room.",
+          "audienceAndIntent": "Homeowners planning a room refresh.\n\nCustomers working out where to start with a surface or paint finish.",
+          "nextMonthGamePlan": "START\nOpen with the colour-in-light video, room photo and colour-choice poster.\n\nBUILD\nFollow with the preparation video, surface photos and practical question cards.\n\nCLOSE\nClose with the finish detail and a store invitation; use customer questions to shape December.",
+          "channelIntegration": "Facebook and Instagram carry the room, colour and preparation stories.\n\nGuide customers to the Bloemfontein store for the next conversation.",
+          "formatsAndRationale": "2 videos — colour in different light and a preparation conversation.\n\n4 photos — room, colour, surface and finish.\n\n4 posters — simple questions that help customers begin."
+        },
+        "clientDirection": [],
+        "strategyDrivers": [],
+        "calendarSelections": [
+          {
+            "use": false,
+            "date": null,
+            "note": "",
+            "title": "Festive & Black Friday build-up"
+          },
+          {
+            "use": false,
+            "date": "2026-11-27",
+            "note": "",
+            "title": "Black Friday"
+          }
+        ],
+        "clientRequestNotes": "",
+        "strategyGoingForward": "1. INSPIRE THE PROJECT\nStart with a room and the look the customer wants.\n\n2. HELP THEM CHOOSE\nShow how light, surface and preparation inform the conversation.\n\n3. MAKE THE NEXT STEP SIMPLE\nInvite a room photo or surface question at the Bloemfontein store.",
+        "clientActionsRequired": [
+          "Choose the colour and products to feature.",
+          "Share the preparation questions customers ask most."
+        ]
+      }
+    },
+    {
+      "client_id": "42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa",
+      "client_name": "Cape Lumber",
+      "strategy_id": "c4daf0e5-9f1e-4d1c-bb2c-74b9b09ecfaa",
+      "strategy_month": "2026-11-01",
+      "before_version": 10,
+      "version": 11,
+      "before_row_hash": "4a863c47c96e51c5a5efbda0655657c2",
+      "row_hash": "7a3c2106b932c32e9ec8ed34d67822f4",
+      "published_at": "2026-11-19T16:53:30.79126+00:00",
+      "confirmed_package": {
+        "professional_videos_per_month": 0,
+        "photo_posts_per_month": 3,
+        "design_posters_per_month": 4,
+        "reels_per_month": null,
+        "animated_posters_per_month": null
+      },
+      "client_hash": "78a01d0fe37dc5105e7a9a0a16f140ee",
+      "guide_id": "9023fc27-f39b-4526-a1cf-6a1be676a306",
+      "guide_hash": "8200fd3352e67a1ad298bee08b95344c",
+      "source_report_ids": [
+        "93d58684-7913-4c57-9d4e-b2168e2a9a03"
+      ],
+      "source_report_hashes": [
+        "196061a2d67cad7877627c52e5e12ffe"
+      ],
+      "seed_context_preserved": true,
+      "previous_published_snapshot_retained_until_publish": true,
+      "immutable_revision_events": [
+        "amended",
+        "approved",
+        "published"
+      ],
+      "client_role_readback": true,
+      "internal_notes_private": true,
+      "published_strategy_data": {
+        "version": 1,
+        "actionPlan": {
+          "reels": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "design_poster": {
+            "items": [
+              "Send your material list.\n\nAsk for product, size, quantity and project context.",
+              "Plan the logistics conversation.\n\nInvite the buyer’s location and collection or delivery requirement.",
+              "Start with the decking requirement.\n\nAsk about the material and the job it will supply.",
+              "Make the board enquiry clear.\n\nInvite the product reference and intended application."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "photo_content": {
+            "items": [
+              "The material behind the job.\n\nShow a real load and the supply requirement it represents.",
+              "A closer decking or timber detail.\n\nConnect the visible product with the buyer’s application.",
+              "Board or insulation in focus.\n\nMake one product and its intended use easy to discuss."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "animated_poster": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "professional_video": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "campaign_recommendation": {
+            "items": [
+              "Connect search to enquiry.\n\nReview timber, decking and board search relevance alongside the product page and quote route."
+            ],
+            "notes": "",
+            "enabled": true
+          }
+        },
+        "topContent": {
+          "autoCaption": "A serious load needs a supplier that understands bulk project demand. +27 71 353 4261 info@capelumbermarketing.co.za #CapeLumberMarketing #BulkTimberSA #WoodForBuilders #CapeConstructionSupply #ConstructionMaterialsSA",
+          "contentType": "",
+          "whyItWorked": [],
+          "autoImageUrl": null,
+          "autoPlatform": "facebook",
+          "coverImageUrl": "",
+          "autoMetricLabel": null,
+          "autoMetricValue": null,
+          "whatThisTellsUs": ""
+        },
+        "goldStandard": {
+          "mustAvoid": "Confident, practical and supply-focused.\n\nKeep the material and the buyer’s project at the centre.",
+          "objective": "Turn interest in timber and building materials into clear quote enquiries for Cape Lumber.\n\nShow the product, connect it with the job, and invite a usable material list.",
+          "coreMessage": "Send the material list. Let’s talk supply.\n\nMake it easy to explain the product, sizes and quantities behind the project.",
+          "testAndChange": "October’s decking-species post received 41 Facebook shares.\n\nBuild on that interest with clear material detail and a direct quote-list prompt.",
+          "successSignals": "Quote enquiries with a product, size and quantity.\n\nCustomers asking about a featured material.\n\nFeedback on which questions help the supply team respond.",
+          "pillarsAndHooks": "THE MATERIAL\nA useful product detail.\n\nTHE APPLICATION\nThe job it is intended for.\n\nTHE LIST\nSizes, quantities and project context.",
+          "audienceAndIntent": "Builders, contractors, joiners and project buyers.\n\nPeople arranging timber, decking, board or insulation supply for a specific job.",
+          "nextMonthGamePlan": "START\nStart with a material-load photo and the “send your list” poster.\n\nBUILD\nFollow with decking and board details, supported by their enquiry cards.\n\nCLOSE\nClose with the logistics prompt and use buyer questions to shape December.",
+          "channelIntegration": "Use the existing social channels for product stories and quote prompts.\n\nThe Google Ads review focuses on connecting relevant searches with a clear product or enquiry page.",
+          "formatsAndRationale": "3 photos — material load, decking or timber, and board or insulation.\n\n4 posters — material list, logistics, decking and board enquiries.\n\nGoogle Ads — review search relevance and the enquiry journey."
+        },
+        "clientDirection": [],
+        "strategyDrivers": [],
+        "calendarSelections": [
+          {
+            "use": false,
+            "date": null,
+            "note": "",
+            "title": "Festive & Black Friday build-up"
+          },
+          {
+            "use": false,
+            "date": "2026-11-27",
+            "note": "",
+            "title": "Black Friday"
+          }
+        ],
+        "clientRequestNotes": "",
+        "strategyGoingForward": "1. SHOW THE MATERIAL\nMake the product and its visible detail easy to recognise.\n\n2. CONNECT IT TO THE JOB\nHelp the buyer describe the application.\n\n3. INVITE THE LIST\nAsk for the product, size and quantity needed for a quote.",
+        "clientActionsRequired": [
+          "Choose the materials to feature.",
+          "Share the information the team needs for a clear quote enquiry."
+        ]
+      }
+    },
+    {
+      "client_id": "06b20bb1-ed4a-4aa1-9f48-8c6cb0531aba",
+      "client_name": "Delta Gas",
+      "strategy_id": "37e3b7a1-b792-4da2-ae3d-9477357e841a",
+      "strategy_month": "2026-11-01",
+      "before_version": 7,
+      "version": 8,
+      "before_row_hash": "35c0bb17968c316eae4dd81bb98ef017",
+      "row_hash": "e74660cd2e8add2f9445cd05e8a3074e",
+      "published_at": "2026-11-19T16:41:47.449996+00:00",
+      "confirmed_package": {
+        "professional_videos_per_month": 1,
+        "photo_posts_per_month": 3,
+        "design_posters_per_month": 3,
+        "reels_per_month": null,
+        "animated_posters_per_month": null
+      },
+      "client_hash": "03b004f1c561a584fa9ea986a3c59d2c",
+      "guide_id": "961ada38-4cca-440d-94f8-0dcf501168f8",
+      "guide_hash": "e8f79ad9a49e29003dcfc14cebbd4504",
+      "source_report_ids": [
+        "95714ed3-2027-404f-8666-e226db5c9ac5"
+      ],
+      "source_report_hashes": [
+        "cd93b249f61c7e10c137ca12de894a5a"
+      ],
+      "seed_context_preserved": true,
+      "previous_published_snapshot_retained_until_publish": true,
+      "immutable_revision_events": [
+        "approved",
+        "published",
+        "amended"
+      ],
+      "client_role_readback": true,
+      "internal_notes_private": true,
+      "published_strategy_data": {
+        "version": 1,
+        "actionPlan": {
+          "reels": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "design_poster": {
+            "items": [
+              "Planning a weekend braai?\n\nEncourage customers to discuss their LPG requirements ahead of the weekend.",
+              "Bring the details.\n\nA simple cylinder-photo and intended-use checklist makes it easy to ask a useful question.",
+              "Let’s talk LPG.\n\nInvite local businesses to discuss their needs, with Delta’s phone number and address clearly shown."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "photo_content": {
+            "items": [
+              "Your cylinder, your question.\n\nA close-up of a cylinder label introduces the details customers can bring to the Delta team.",
+              "Meet the Delta team.\n\nIntroduce the people customers speak to at the counter.",
+              "Ready for the braai?\n\nUse a real LPG or appliance image to start a conversation about summer cooking."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "animated_poster": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "professional_video": {
+            "items": [
+              "Know your cylinder.\n\nA Delta team member introduces the markings customers can bring when asking about LPG. Finish with a clear invitation to call or visit."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "campaign_recommendation": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          }
+        },
+        "topContent": {
+          "autoCaption": "Swap your empty cylinder quickly and keep your home supplied without the wait. 36 General Dan Pienaar Dr, Dan Pienaar, Bloemfontein 079 559 3734 deltagasbloem@gmail.com deltagasbloem.co.za #DeltaGas #CylinderExchange #LPGGas #GasSupply #Bloemfontein",
+          "contentType": "",
+          "whyItWorked": [],
+          "autoImageUrl": null,
+          "autoPlatform": "facebook",
+          "coverImageUrl": "",
+          "autoMetricLabel": null,
+          "autoMetricValue": null,
+          "whatThisTellsUs": ""
+        },
+        "goldStandard": {
+          "mustAvoid": "Keep the tone practical, friendly and local.\n\nUse real Delta people and products. Feature a promotion when Delta has approved the offer.",
+          "objective": "Make Delta Gas the first local call for LPG and gas-appliance enquiries in Bloemfontein.\n\nBuild on October’s interest in the Delta team with useful content that starts a conversation.",
+          "coreMessage": "LPG and gas appliances, with local people to help you take the next step.\n\nDelta Gas — your ORYX agent in Bloemfontein and surrounds.",
+          "testAndChange": "October’s real-team post attracted 24 shares. Keep that personal, local approach.\n\nTry two openings next: “Planning a braai?” and “What do you need gas for?” Ask which prompts lead to useful customer conversations.",
+          "successSignals": "More conversations about a clear LPG or appliance need.\n\nCustomers mentioning a post when they call or visit.\n\nUseful questions we can answer in the next round of content.",
+          "pillarsAndHooks": "KNOW YOUR CYLINDER\nOne useful question customers can take to the Delta team.\n\nMEET DELTA\nFriendly faces and real products at the counter.\n\nPLAN THE BRAAI\nTurn a familiar summer occasion into a reason to get in touch.",
+          "audienceAndIntent": "Bloemfontein households planning everyday meals and summer braais.\n\nLocal businesses looking for help with an LPG requirement.",
+          "nextMonthGamePlan": "START\nIntroduce the cylinder-question video and a friendly team photo.\n\nBUILD\nFollow with product and cooking photos, plus two practical planning posters.\n\nCLOSE\nUse the business-enquiry poster to invite a conversation. Review customer feedback and carry the strongest ideas into December.",
+          "channelIntegration": "Facebook starts the local conversation.\n\nInstagram brings the people, products and ideas to life visually.\n\nBoth lead to one simple step: call Delta or visit the Dan Pienaar counter.",
+          "formatsAndRationale": "1 video — answer a practical cylinder question.\n\n3 photo posts — show the product details, the Delta team and a summer cooking occasion.\n\n3 posters — make planning and contacting Delta easy."
+        },
+        "clientDirection": [],
+        "strategyDrivers": [],
+        "calendarSelections": [
+          {
+            "use": false,
+            "date": null,
+            "note": "",
+            "title": "Festive & Black Friday build-up"
+          },
+          {
+            "use": false,
+            "date": "2026-11-27",
+            "note": "",
+            "title": "Black Friday"
+          }
+        ],
+        "clientRequestNotes": "",
+        "strategyGoingForward": "1. GET ATTENTION\nConnect with everyday cooking, a weekend braai and local business LPG needs.\n\n2. BUILD CONFIDENCE\nShow Delta’s people, products and practical help as the ORYX agent for Bloemfontein and surrounds.\n\n3. START A CONVERSATION\nMake the next step easy: call 079 559 3734 or visit 36 General Dan Pienaar Drive.",
+        "clientActionsRequired": [
+          "Choose a Delta team member to feature in the video.",
+          "Share the LPG and appliance questions customers ask most.",
+          "Let us know December’s trading arrangements for the next plan."
+        ]
+      }
+    },
+    {
+      "client_id": "89e0ad6d-e08c-4a75-8b8e-abea71af581c",
+      "client_name": "Bloem Marble & Granite",
+      "strategy_id": "f1d93793-228e-4078-99ce-61ce4c7ef04c",
+      "strategy_month": "2026-11-01",
+      "before_version": 5,
+      "version": 6,
+      "before_row_hash": "be75686e1f4f80962dc545558a966143",
+      "row_hash": "2cde2b0185ef9d6524e6bdb7a8970154",
+      "published_at": "2026-11-19T16:49:40.937529+00:00",
+      "confirmed_package": {
+        "professional_videos_per_month": 2,
+        "photo_posts_per_month": null,
+        "design_posters_per_month": 4,
+        "reels_per_month": null,
+        "animated_posters_per_month": null
+      },
+      "client_hash": "7f4d68eab3289f06e82e01640525a795",
+      "guide_id": "ca8e7042-2fc9-4670-9d75-a3fce3a373f2",
+      "guide_hash": "bc810bb6bd12b44ffea2bdb7bb1a530b",
+      "source_report_ids": [
+        "47152dc2-f491-40e8-b421-4c5147c814c8"
+      ],
+      "source_report_hashes": [
+        "b36d5dfa9c0eb5cc3cdbe8bcc1079bf3"
+      ],
+      "seed_context_preserved": true,
+      "previous_published_snapshot_retained_until_publish": true,
+      "immutable_revision_events": [
+        "amended",
+        "approved",
+        "published"
+      ],
+      "client_role_readback": true,
+      "internal_notes_private": true,
+      "published_strategy_data": {
+        "version": 1,
+        "actionPlan": {
+          "reels": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "design_poster": {
+            "items": [
+              "Your kitchen starts with a plan.\n\nInvite the layout and intended surface into the conversation.",
+              "A vanity that belongs in the room.\n\nAsk about dimensions, colours and the surrounding space.",
+              "Stone at work.\n\nUse a commercial table or custom application to introduce a project question.",
+              "Bring your plans.\n\nMake drawings, measurements and material references a simple enquiry checklist."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "photo_content": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "animated_poster": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "professional_video": {
+            "items": [
+              "From material to room.\n\nConnect a chosen stone reference with its kitchen or vanity application.",
+              "A closer look at the work.\n\nShow a workshop step or edge detail and the decision behind it."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "campaign_recommendation": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          }
+        },
+        "topContent": {
+          "autoCaption": "A boardroom table should set the tone before anyone takes a seat. 8 Tannery Road, Hamilton, Bloemfontein, 9301 087 940 7711 info@bmgk.co.za bloemmg.co.za #BloemMarbleAndGranite #BoardroomTable #MarbleTable #CustomStonework #BloemfonteinBusiness",
+          "contentType": "",
+          "whyItWorked": [],
+          "autoImageUrl": null,
+          "autoPlatform": "facebook",
+          "coverImageUrl": "",
+          "autoMetricLabel": null,
+          "autoMetricValue": null,
+          "whatThisTellsUs": ""
+        },
+        "goldStandard": {
+          "mustAvoid": "Warm, knowledgeable and precise.\n\nUse the real material and project detail to express the quality of the work.",
+          "objective": "Bring the next kitchen, vanity or custom-stone project into a conversation with Bloem Marble & Granite.\n\nConnect the beauty of the surface with the practical choices behind it.",
+          "coreMessage": "See the stone in the space.\n\nShow the material, the detail and the workmanship, then invite the customer to bring their plans.",
+          "testAndChange": "Kitchen, vanity and boardroom examples already give your content a clear project focus.\n\nBuild on those applications with material close-ups and a simple “bring your plans” invitation.",
+          "successSignals": "Customers sharing plans, dimensions or material preferences.\n\nEnquiries about a featured kitchen, vanity or custom application.\n\nUseful questions to carry into the next plan.",
+          "pillarsAndHooks": "THE ROOM\nA kitchen, vanity or commercial setting.\n\nTHE MATERIAL\nColour, pattern and edge detail.\n\nTHE PROJECT\nPlans and measurements that start the conversation.",
+          "audienceAndIntent": "Homeowners choosing a kitchen or bathroom surface.\n\nDesigners, builders and project teams preparing a custom-stone brief.",
+          "nextMonthGamePlan": "START\nStart with the kitchen-plans poster and the material-to-project video.\n\nBUILD\nFollow with vanity and commercial-use posters, plus the workshop-detail video.\n\nCLOSE\nClose with a simple project checklist and invite the customer’s plans.",
+          "channelIntegration": "Facebook and Instagram connect the material story to the finished space.\n\nInvite plans and project enquiries through the Bloem Marble & Granite team.",
+          "formatsAndRationale": "2 videos — material-to-project and workshop detail.\n\n4 posters — kitchen, vanity, commercial application and project preparation."
+        },
+        "clientDirection": [],
+        "strategyDrivers": [],
+        "calendarSelections": [
+          {
+            "use": false,
+            "date": null,
+            "note": "",
+            "title": "Festive & Black Friday build-up"
+          },
+          {
+            "use": false,
+            "date": "2026-11-27",
+            "note": "",
+            "title": "Black Friday"
+          }
+        ],
+        "clientRequestNotes": "",
+        "strategyGoingForward": "1. SHOW THE POSSIBILITY\nStart with a space the customer can picture.\n\n2. SHOW THE CRAFT\nBring the material and fabrication detail closer.\n\n3. START THE PROJECT\nInvite plans, measurements and a material conversation.",
+        "clientActionsRequired": [
+          "Choose a project and material detail to feature.",
+          "Share the customer questions that usually come before a quote."
+        ]
+      }
+    },
+    {
+      "client_id": "4236a60a-990f-484f-8d19-13d2f92fbe3b",
+      "client_name": "Novus Steel",
+      "strategy_id": "3770aac3-3e20-4bf2-900e-2bc092206c05",
+      "strategy_month": "2026-11-01",
+      "before_version": 5,
+      "version": 6,
+      "before_row_hash": "ba3978fc4721a1a563b7fd5065ebdce3",
+      "row_hash": "1f527e5a6877622aee941c528b174cc6",
+      "published_at": "2026-11-19T16:47:40.33412+00:00",
+      "confirmed_package": {
+        "professional_videos_per_month": 1,
+        "photo_posts_per_month": 4,
+        "design_posters_per_month": 4,
+        "reels_per_month": null,
+        "animated_posters_per_month": null
+      },
+      "client_hash": "adb60a0e5618deea177dc1f310808384",
+      "guide_id": "b79a3705-18e9-4594-9981-2fdfffda57d1",
+      "guide_hash": "9d6cd98ead34b2fa8eef8d90cd78c4e1",
+      "source_report_ids": [
+        "940f3153-f49b-42f0-89c6-89b671e95b59"
+      ],
+      "source_report_hashes": [
+        "b4234caa56ba5483c908ee5878dab633"
+      ],
+      "seed_context_preserved": true,
+      "previous_published_snapshot_retained_until_publish": true,
+      "immutable_revision_events": [
+        "amended",
+        "approved",
+        "published"
+      ],
+      "client_role_readback": true,
+      "internal_notes_private": true,
+      "published_strategy_data": {
+        "version": 1,
+        "actionPlan": {
+          "reels": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "design_poster": {
+            "items": [
+              "Bring the brief.\n\nAsk what structure or application the customer needs.",
+              "From drawing to fabrication.\n\nExplain how a clear project drawing starts the conversation.",
+              "The site question.\n\nInvite the customer to discuss placement or erection requirements.",
+              "Steel for the job.\n\nIntroduce a steel-support application with a clear project enquiry."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "photo_content": {
+            "items": [
+              "Taking shape.\n\nShow a structure and explain its purpose.",
+              "Inside the workshop.\n\nFocus on one component and the job it belongs to.",
+              "Steel on site.\n\nShow an erection or placement detail in its project context.",
+              "Built for the application.\n\nFeature a steel-support or industrial structure and the need behind it."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "animated_poster": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "professional_video": {
+            "items": [
+              "From drawing to steel.\n\nFollow the drawing-to-fabrication stages of a real Novus job."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "campaign_recommendation": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          }
+        },
+        "topContent": {
+          "autoCaption": "Good steelwork comes together one section at a time. Fabrication and installation work hand in hand to keep the structure moving forward. 082 413 6692 info@novussteel.co.za #NovusSteel #SteelConstruction #SteelFabrication #StructuralSteel #OnSiteInstallation",
+          "contentType": "",
+          "whyItWorked": [],
+          "autoImageUrl": null,
+          "autoPlatform": "facebook",
+          "coverImageUrl": "",
+          "autoMetricLabel": null,
+          "autoMetricValue": null,
+          "whatThisTellsUs": ""
+        },
+        "goldStandard": {
+          "mustAvoid": "Practical, capable and straightforward.\n\nLet the work, the people and the visible project detail carry the story.",
+          "objective": "Bring the next steel project to Novus.\n\nShow how the team takes a requirement from drawing to fabrication and site, then invite a project conversation.",
+          "coreMessage": "Show the job taking shape.\n\nMake Novus’s workshop and site capabilities easy to understand, one practical project example at a time.",
+          "testAndChange": "Your project and workshop content gives customers a concrete way to see what Novus does.\n\nBuild on that with a drawing-to-site story, and compare it with a close-up of one useful fabrication detail.",
+          "successSignals": "Project enquiries that name a structure, application or fabrication need.\n\nCustomers sharing drawings or asking about the next project step.",
+          "pillarsAndHooks": "FROM DRAWING TO STEEL\nHow a component takes shape.\n\nON SITE\nThe work that brings a structure together.\n\nBUILT FOR THE JOB\nSteel applications explained through a real project.",
+          "audienceAndIntent": "Builders and commercial, industrial, farm and solar-project teams.\n\nPeople choosing who to speak to about fabrication, steel structures or erection.",
+          "nextMonthGamePlan": "START\nOpen with a real structure and the project-brief poster.\n\nBUILD\nFollow the drawing-to-fabrication video with workshop and site detail.\n\nCLOSE\nClose with the steel-application story and invite drawings or a project brief.",
+          "channelIntegration": "Use the existing social channels to connect workshop detail with the wider project story.\n\nLead enquiries to 082 413 6692 or info@novussteel.co.za.",
+          "formatsAndRationale": "1 video — follow a project from drawing to fabrication.\n\n4 photos — structure, workshop, site and a steel application.\n\n4 posters — turn each theme into an easy project-enquiry prompt."
+        },
+        "clientDirection": [],
+        "strategyDrivers": [],
+        "calendarSelections": [
+          {
+            "use": false,
+            "date": null,
+            "note": "",
+            "title": "Festive & Black Friday build-up"
+          },
+          {
+            "use": false,
+            "date": "2026-11-27",
+            "note": "",
+            "title": "Black Friday"
+          }
+        ],
+        "clientRequestNotes": "",
+        "strategyGoingForward": "1. SHOW THE JOB\nStart with the structure and what it will be used for.\n\n2. SHOW THE PROCESS\nConnect drawing, workshop and site through one clear story.\n\n3. INVITE THE BRIEF\nAsk the customer to share the project requirement with Novus.",
+        "clientActionsRequired": [
+          "Choose one project we can feature from drawing to workshop or site.",
+          "Share the project questions the team is hearing most."
+        ]
+      }
+    },
+    {
+      "client_id": "5dfdf4bd-9d94-4cc6-9dee-0e480a2234cb",
+      "client_name": "Bohemia Quick Stop",
+      "strategy_id": "2e95fa11-1f6a-4e48-b0a8-925c6f9ecfb7",
+      "strategy_month": "2026-11-01",
+      "before_version": 5,
+      "version": 6,
+      "before_row_hash": "341ad8200ad0a17998fa4d8e96de43b7",
+      "row_hash": "1f947ff638e63d63999c6593519ceb3e",
+      "published_at": "2026-11-19T16:49:40.937529+00:00",
+      "confirmed_package": {
+        "professional_videos_per_month": null,
+        "photo_posts_per_month": null,
+        "design_posters_per_month": 2,
+        "reels_per_month": null,
+        "animated_posters_per_month": null
+      },
+      "client_hash": "458de9d22d5be24a6ad44dfd151985ab",
+      "guide_id": "9ed5b6e6-957e-4d69-8aa4-2354b3995387",
+      "guide_hash": "469adb6d038b47c5ea5b9971a75c29de",
+      "source_report_ids": [
+        "cb037352-d1ef-4e6d-8aa1-acd5e2f0ccbc"
+      ],
+      "source_report_hashes": [
+        "6eab2faa498b5c85b5cb7a65c40dd177"
+      ],
+      "seed_context_preserved": true,
+      "previous_published_snapshot_retained_until_publish": true,
+      "immutable_revision_events": [
+        "amended",
+        "approved",
+        "published"
+      ],
+      "client_role_readback": true,
+      "internal_notes_private": true,
+      "published_strategy_data": {
+        "version": 1,
+        "actionPlan": {
+          "reels": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "design_poster": {
+            "items": [
+              "On your Reddersburg Road route.\n\nMake the forecourt and fuel-stop location easy to recognise.",
+              "A break at the deli.\n\nFeature a client-selected deli item with a simple invitation to stop."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "photo_content": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "animated_poster": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "professional_video": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "campaign_recommendation": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          }
+        },
+        "topContent": {
+          "autoCaption": "From early starts to long hauls, Bohemia Quick Stop is an easy place to pull in, sort yourself out and carry on. Reddersburg Road, Bloemfontein Shaun: 072 493 7007 Ryno: 073 242 5753 bohemiaagri1@gmail.com #BohemiaQuickStop #MoreThanFuel #OneStopConvenience #BloemfonteinServices #LocalAndReliable",
+          "contentType": "",
+          "whyItWorked": [],
+          "autoImageUrl": null,
+          "autoPlatform": "facebook",
+          "coverImageUrl": "",
+          "autoMetricLabel": null,
+          "autoMetricValue": null,
+          "whatThisTellsUs": ""
+        },
+        "goldStandard": {
+          "mustAvoid": "Friendly, local and concise.\n\nOne reason to stop and one clear location cue per poster.",
+          "objective": "Give travellers two clear reasons to remember Bohemia Quick Stop on Reddersburg Road.\n\nMake the fuel stop easy to recognise and the deli part of the journey.",
+          "coreMessage": "A familiar stop on your route.\n\nKeep the fuel and deli messages clear, local and easy to remember.",
+          "testAndChange": "Keep the recognisable route and forecourt cues from your earlier content.\n\nUse one poster for the fuel stop and the other for the deli, then listen for route and menu questions.",
+          "successSignals": "Questions about the location and deli.\n\nCustomers mentioning a poster when they stop.\n\nFeedback on which route cue people remember.",
+          "pillarsAndHooks": "ON YOUR ROUTE\nRecognise the Reddersburg Road stop.\n\nTIME FOR A BREAK\nGive the deli its own clear invitation.",
+          "audienceAndIntent": "Drivers and travellers using the Reddersburg Road route.\n\nPeople looking for a fuel stop and a deli break along the way.",
+          "nextMonthGamePlan": "START\nIntroduce the forecourt and Reddersburg Road location.\n\nBUILD\nGive the deli its own poster with a client-selected item.\n\nCLOSE\nGather customer feedback to shape the December travel message.",
+          "channelIntegration": "Use Facebook to keep the two stop reminders easy to recognise and share.\n\nLead customers to Bohemia Quick Stop on Reddersburg Road.",
+          "formatsAndRationale": "2 posters — one route-and-fuel reminder and one deli invitation."
+        },
+        "clientDirection": [],
+        "strategyDrivers": [],
+        "calendarSelections": [
+          {
+            "use": false,
+            "date": null,
+            "note": "",
+            "title": "Festive & Black Friday build-up"
+          },
+          {
+            "use": false,
+            "date": "2026-11-27",
+            "note": "",
+            "title": "Black Friday"
+          }
+        ],
+        "clientRequestNotes": "",
+        "strategyGoingForward": "1. BE RECOGNISABLE\nShow the forecourt and its place on the route.\n\n2. GIVE A REASON TO STOP\nLet the fuel and deli messages each have a clear role.\n\n3. KEEP IT MEMORABLE\nRepeat the location and an easy invitation to pull in.",
+        "clientActionsRequired": [
+          "Choose the deli item to feature.",
+          "Share December trading arrangements when ready."
+        ]
+      }
+    },
+    {
+      "client_id": "7b47afb0-fa55-4916-85f6-09c57e5905b9",
+      "client_name": "Madison Wear",
+      "strategy_id": "27b22206-16ec-4e60-9e62-89186a10a710",
+      "strategy_month": "2026-11-01",
+      "before_version": 5,
+      "version": 6,
+      "before_row_hash": "83034057b75465506a88b2ec93d5d2a8",
+      "row_hash": "ae012e5061e7b2b5c9ff2c690b674415",
+      "published_at": "2026-11-19T16:47:40.33412+00:00",
+      "confirmed_package": {
+        "professional_videos_per_month": 2,
+        "photo_posts_per_month": 8,
+        "design_posters_per_month": 8,
+        "reels_per_month": null,
+        "animated_posters_per_month": null
+      },
+      "client_hash": "8b35d9fbb74fb2d0f5dfddc5bf3274e1",
+      "guide_id": "6874b9e1-9cf0-4d7d-b8a5-c2580575778b",
+      "guide_hash": "b32ec60180940e0985130ef98445e60f",
+      "source_report_ids": [
+        "f313a7ed-7794-4806-8989-be57c82e63f5"
+      ],
+      "source_report_hashes": [
+        "cada3e36940ff797a21337b10437159c"
+      ],
+      "seed_context_preserved": true,
+      "previous_published_snapshot_retained_until_publish": true,
+      "immutable_revision_events": [
+        "amended",
+        "approved",
+        "published"
+      ],
+      "client_role_readback": true,
+      "internal_notes_private": true,
+      "published_strategy_data": {
+        "version": 1,
+        "actionPlan": {
+          "reels": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "design_poster": {
+            "items": [
+              "Start with the outfit.\n\nGive shoppers one practical pairing idea.",
+              "Ask about this look.\n\nInvite an in-store conversation about the first outfit.",
+              "Notice the detail.\n\nExplain one visible feature of the garment.",
+              "Find your next piece.\n\nHelp shoppers name the item they want to see.",
+              "Finish with the footwear.\n\nShow why this shoe-and-trouser pairing works visually.",
+              "Which pair would you choose?\n\nInvite a footwear question at the store.",
+              "Dress for the occasion.\n\nConnect the second outfit to a recognisable wearing moment.",
+              "See it at Madisons.\n\nClose with a clear Loch Logan store invitation."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "photo_content": {
+            "items": [
+              "The whole outfit.\n\nShow the first look from head to toe.",
+              "A second angle.\n\nMake the garment pairing easy to see.",
+              "The detail that catches your eye.\n\nGive a visible garment feature its own moment.",
+              "Back to the look.\n\nShow that detail as part of the outfit.",
+              "The footwear pairing.\n\nPlace the shoes with the trousers they complement.",
+              "A closer look at the shoe.\n\nHighlight its visible design.",
+              "Another occasion.\n\nIntroduce a second outfit with a different wearing moment.",
+              "The finishing detail.\n\nFocus on the garment or accessory that completes the second look."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "animated_poster": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "professional_video": {
+            "items": [
+              "Put the look together.\n\nShow how the garments work as a complete outfit.",
+              "Start with the shoes.\n\nBuild a footwear pairing around the trousers and occasion."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "campaign_recommendation": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          }
+        },
+        "topContent": {
+          "autoCaption": "An easy Dickies graphic tee for casual days, weekends and laid-back outfits that still need a strong brand feel. Loch Logan Waterfront, Shop 2F, Second Floor, Bloemfontein 064 929 9324 sales@madisonswear.co.za. #MadisonsMenswear #MensFashionSA #MensClothingSA #BloemfonteinShopping #ShopMadisons",
+          "contentType": "",
+          "whyItWorked": [],
+          "autoImageUrl": null,
+          "autoPlatform": "facebook",
+          "coverImageUrl": "",
+          "autoMetricLabel": null,
+          "autoMetricValue": null,
+          "whatThisTellsUs": ""
+        },
+        "goldStandard": {
+          "mustAvoid": "Confident, clean and easy to read.\n\nLet the actual outfit and visible details do the talking.",
+          "objective": "Help shoppers picture their next outfit at Madisons Menswear.\n\nMake clothing and footwear choices feel simple, then bring the conversation into the Loch Logan store.",
+          "coreMessage": "See the outfit. Notice the detail. Find your pairing.\n\nMake each look easy to picture on a real person and easy to ask about in store.",
+          "testAndChange": "Continue the outfit, footwear and product-detail stories already present in your content.\n\nCompare a complete-look opening with a close-up detail, then ask the store team which pieces shoppers mention.",
+          "successSignals": "Questions about a featured garment, shoe or pairing.\n\nShoppers mentioning a look in store.\n\nFeedback from the team about what people want to try.",
+          "pillarsAndHooks": "THE COMPLETE LOOK\nMake the pairing easy to picture.\n\nTHE DETAIL\nGive one garment a reason to be noticed.\n\nTHE FINISHING TOUCH\nShow how the footwear completes the outfit.",
+          "audienceAndIntent": "Men choosing an everyday outfit or dressing for an occasion.\n\nGift buyers looking for a useful starting point.",
+          "nextMonthGamePlan": "START\nIntroduce the first complete look with the styling video and matching photos.\n\nBUILD\nMove into garment detail and footwear, supported by the second video.\n\nCLOSE\nClose with a second occasion-led look and a clear invitation to visit.",
+          "channelIntegration": "Use the existing social channels to connect the outfit videos, photos and styling prompts.\n\nBring enquiries to the Loch Logan Waterfront store or 064 929 9324.",
+          "formatsAndRationale": "2 videos — outfit styling and a footwear pairing.\n\n8 photos — four pairs covering the look, detail, shoes and a second occasion.\n\n8 posters — one styling idea and one store-enquiry prompt for each pair."
+        },
+        "clientDirection": [],
+        "strategyDrivers": [],
+        "calendarSelections": [
+          {
+            "use": false,
+            "date": null,
+            "note": "",
+            "title": "Festive & Black Friday build-up"
+          },
+          {
+            "use": false,
+            "date": "2026-11-27",
+            "note": "",
+            "title": "Black Friday"
+          }
+        ],
+        "clientRequestNotes": "",
+        "strategyGoingForward": "1. MAKE IT RELATABLE\nStart with an outfit for an everyday moment or occasion.\n\n2. MAKE THE CHOICE EASY\nShow the garment details and footwear pairing.\n\n3. BRING IT IN STORE\nInvite shoppers to ask about the featured look at Loch Logan.",
+        "clientActionsRequired": [
+          "Choose the outfits and shoes to feature this month.",
+          "Share the occasions and product questions coming up in store."
+        ]
+      }
+    },
+    {
+      "client_id": "3404f726-a693-4b2d-8c13-c9d3dfd17bbc",
+      "client_name": "Daisy & Co",
+      "strategy_id": "8c4cebe1-fb51-4114-bbfb-601b696b0a24",
+      "strategy_month": "2026-11-01",
+      "before_version": 5,
+      "version": 6,
+      "before_row_hash": "bf8dea6f09d33d917be78e74788f9bbb",
+      "row_hash": "7e86f2f9e7ffcc4e9decc6b64585d8eb",
+      "published_at": "2026-11-19T16:52:01.999906+00:00",
+      "confirmed_package": {
+        "professional_videos_per_month": 1,
+        "photo_posts_per_month": 3,
+        "design_posters_per_month": 3,
+        "reels_per_month": null,
+        "animated_posters_per_month": null
+      },
+      "client_hash": "8e6cce1283c62ff6e7ec608c2a827d96",
+      "guide_id": "112489fb-7362-4d1a-b045-6439a8ad03ce",
+      "guide_hash": "89a09f1fc13b952f0b0e7c606b711a1c",
+      "source_report_ids": [
+        "117e47ed-3d75-4e18-a283-f589f2f34395"
+      ],
+      "source_report_hashes": [
+        "7e5ec1d1a42a9ccfaaf3015f24fa6ff3"
+      ],
+      "seed_context_preserved": true,
+      "previous_published_snapshot_retained_until_publish": true,
+      "immutable_revision_events": [
+        "amended",
+        "approved",
+        "published"
+      ],
+      "client_role_readback": true,
+      "internal_notes_private": true,
+      "published_strategy_data": {
+        "version": 1,
+        "actionPlan": {
+          "reels": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "design_poster": {
+            "items": [
+              "For the playful friend.\n\nConnect the matching gift with a recognisable recipient.",
+              "For their new corner.\n\nMake the matching homeware piece a personal giving idea.",
+              "A small thank-you.\n\nPair the counter treat with a simple reason to say thanks."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "photo_content": {
+            "items": [
+              "A little personality.\n\nBring the detail of a playful gift, such as patterned socks, closer.",
+              "For their new corner.\n\nGive a ceramic or homeware detail a clear visual.",
+              "A counter treat.\n\nShow the item selected for a small thank-you."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "animated_poster": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "professional_video": {
+            "items": [
+              "Thought of you.\n\nFollow a shopper noticing three items and imagining who would enjoy them."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "campaign_recommendation": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          }
+        },
+        "topContent": {
+          "autoCaption": "Feeling like you need something special for the weekend…. We have everything you need…. DAISY & CO Preller Square Shopping Centre",
+          "contentType": "",
+          "whyItWorked": [],
+          "autoImageUrl": null,
+          "autoPlatform": "facebook",
+          "coverImageUrl": "",
+          "autoMetricLabel": null,
+          "autoMetricValue": null,
+          "whatThisTellsUs": ""
+        },
+        "goldStandard": {
+          "mustAvoid": "Warm, cheerful and personal.\n\nKeep the product visible and the giving moment easy to recognise.",
+          "objective": "Make Daisy & Co the place people think of when a small gift feels personal.\n\nConnect a real item with the person or occasion it would suit.",
+          "coreMessage": "“I saw this and thought of you.”\n\nShow the moment a lovely item becomes a considered choice for someone.",
+          "testAndChange": "September’s weekend-shopping post received 13 reactions and three shares on Facebook.\n\nContinue the warm shopping feel, pairing product detail with a recognisable recipient or occasion.",
+          "successSignals": "People sharing a gift idea with someone.\n\nQuestions about the featured item.\n\nCustomers mentioning a recipient or occasion in store.",
+          "pillarsAndHooks": "THE PLAYFUL FRIEND\nA gift with personality.\n\nTHEIR NEW CORNER\nA thoughtful homeware choice.\n\nA SMALL THANK-YOU\nA simple treat for someone who helped.",
+          "audienceAndIntent": "Shoppers choosing a personal gift, a host thank-you or a thoughtful treat.\n\nPeople drawn to a distinctive homeware detail.",
+          "nextMonthGamePlan": "START\nStart with the playful-gift photo and recipient-led poster.\n\nBUILD\nIntroduce the homeware pair and the “thought of you” video.\n\nCLOSE\nClose with the counter-treat pair and use shopper feedback to shape December.",
+          "channelIntegration": "Use Facebook to connect the product photos, occasion posters and story video.\n\nMake the in-store choice feel personal and approachable.",
+          "formatsAndRationale": "1 video — a “thought of you” shopping story.\n\n3 photos — playful gift, homeware and counter treat.\n\n3 posters — the matching recipient or occasion."
+        },
+        "clientDirection": [],
+        "strategyDrivers": [],
+        "calendarSelections": [
+          {
+            "use": false,
+            "date": null,
+            "note": "",
+            "title": "Festive & Black Friday build-up"
+          },
+          {
+            "use": false,
+            "date": "2026-11-27",
+            "note": "",
+            "title": "Black Friday"
+          }
+        ],
+        "clientRequestNotes": "",
+        "strategyGoingForward": "1. CATCH THE EYE\nShow the detail that makes the item interesting.\n\n2. MAKE IT PERSONAL\nConnect it with someone the shopper knows.\n\n3. INVITE THE VISIT\nHelp them take the next step towards choosing a gift.",
+        "clientActionsRequired": [
+          "Choose the three items to feature.",
+          "Share the gift occasions shoppers are asking about."
+        ]
+      }
+    },
+    {
+      "client_id": "079df21e-783a-4648-b3fa-0acae6e68867",
+      "client_name": "Case Bloemfontein",
+      "strategy_id": "ea1dd4d6-89ec-4f51-8abc-f12889120f3f",
+      "strategy_month": "2026-11-01",
+      "before_version": 6,
+      "version": 7,
+      "before_row_hash": "6faaa3308c6029054b773dad5eb7e8e3",
+      "row_hash": "16f2fafc4b4235e1efa5757889f31079",
+      "published_at": "2026-11-19T16:52:01.999906+00:00",
+      "confirmed_package": {
+        "professional_videos_per_month": 2,
+        "photo_posts_per_month": null,
+        "design_posters_per_month": 12,
+        "reels_per_month": null,
+        "animated_posters_per_month": null
+      },
+      "client_hash": "1268b7fa723b2dedaf2d738a35d68fa0",
+      "guide_id": "a40fa439-9b54-4cbd-ac12-c871ccedc21a",
+      "guide_hash": "3d01fafb3178bc778488ec21c2b165dc",
+      "source_report_ids": [
+        "994b048e-1957-4c32-89b4-0612dd31897b"
+      ],
+      "source_report_hashes": [
+        "52a65358c0cd52a48d0f2bad137cec1b"
+      ],
+      "seed_context_preserved": true,
+      "previous_published_snapshot_retained_until_publish": true,
+      "immutable_revision_events": [
+        "amended",
+        "approved",
+        "published"
+      ],
+      "client_role_readback": true,
+      "internal_notes_private": true,
+      "published_strategy_data": {
+        "version": 1,
+        "actionPlan": {
+          "reels": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "design_poster": {
+            "items": [
+              "What job must it handle?\n\nStart with the farmer’s task.",
+              "One feature, one purpose.\n\nConnect a visible implement detail to its application.",
+              "Plan the next field task.\n\nInvite a machinery conversation about the job ahead.",
+              "Start with the model.\n\nMake the machine reference the first enquiry detail.",
+              "Find the identifying detail.\n\nShow where the machine’s own markings start the conversation.",
+              "Ask the local team.\n\nUse a practical machinery question from CASE Bloemfontein.",
+              "Bring the part reference.\n\nAsk for the model, serial and component details.",
+              "A closer look at the part.\n\nGive one component a clear visual and purpose.",
+              "Make the parts enquiry clear.\n\nHelp the operator describe what is needed.",
+              "Husqvarna after-sales.\n\nGive that enquiry its own clearly labelled route.",
+              "Know your Husqvarna model.\n\nMake the product reference part of the first question.",
+              "Speak to Bloemfontein.\n\nSeparate machinery, parts and Husqvarna contact needs."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "photo_content": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "animated_poster": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "professional_video": {
+            "items": [
+              "The job before the badge.\n\nShow a machine’s application and one feature that supports the task.",
+              "Which part are we talking about?\n\nUse the parts counter to explain a clear machine-and-component enquiry."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "campaign_recommendation": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          }
+        },
+        "topContent": {
+          "autoCaption": "Contact us for your ground-engaging parts at the best prices. #CaseIH #PlantingSeason #FarmMachinery #AgricultureSA #CaseBloemfontein",
+          "contentType": "",
+          "whyItWorked": [],
+          "autoImageUrl": null,
+          "autoPlatform": "facebook",
+          "coverImageUrl": "",
+          "autoMetricLabel": null,
+          "autoMetricValue": null,
+          "whatThisTellsUs": ""
+        },
+        "goldStandard": {
+          "mustAvoid": "Practical, knowledgeable and local.\n\nKeep machinery, parts and Husqvarna stories clearly identified.",
+          "objective": "Make CASE Bloemfontein the clear next conversation for machinery and parts questions.\n\nConnect practical machine stories with the job the farmer needs to do.",
+          "coreMessage": "Start with the job. Show the machine. Speak to the Bloemfontein team.\n\nMake each piece useful to the person choosing equipment or asking about a part.",
+          "testAndChange": "October recorded 26,151 Facebook views and 892 engagements.\n\nBuild on the interest in machinery stories with job-led explanations, model details and a clear parts-counter invitation.",
+          "successSignals": "Machinery enquiries that describe a job.\n\nParts questions with a model or component reference.\n\nUseful conversations reaching the correct Bloemfontein team.",
+          "pillarsAndHooks": "THE JOB\nWhat the machine needs to handle.\n\nTHE MACHINE\nOne visible feature at a time.\n\nTHE PART\nA clear model and component enquiry.\n\nTHE LOCAL TEAM\nA practical Bloemfontein contact.",
+          "audienceAndIntent": "Farmers comparing machinery for a specific task.\n\nOperators identifying a part.\n\nOwners starting a Husqvarna after-sales enquiry.",
+          "nextMonthGamePlan": "START\nIntroduce the job-first machine video and the machinery posters.\n\nBUILD\nFollow with model identification, the parts-counter video and parts prompts.\n\nCLOSE\nClose with the separately labelled after-sales stories and branch-contact card.",
+          "channelIntegration": "Facebook and Instagram carry the machine and parts stories.\n\nUse a clear CASE Bloemfontein enquiry route, with Husqvarna content given its own label.",
+          "formatsAndRationale": "2 videos — a machine application and a parts-counter explanation.\n\n12 posters — four groups of three covering applications, machine identity, parts and after-sales contact."
+        },
+        "clientDirection": [],
+        "strategyDrivers": [],
+        "calendarSelections": [
+          {
+            "use": false,
+            "date": null,
+            "note": "",
+            "title": "Festive & Black Friday build-up"
+          },
+          {
+            "use": false,
+            "date": "2026-11-27",
+            "note": "",
+            "title": "Black Friday"
+          }
+        ],
+        "clientRequestNotes": "",
+        "strategyGoingForward": "1. START WITH THE FARMER’S JOB\nMake the application recognisable.\n\n2. SHOW THE USEFUL DETAIL\nBring the machine or part reference into focus.\n\n3. CONNECT WITH THE TEAM\nMake the next Bloemfontein enquiry easy.",
+        "clientActionsRequired": [
+          "Choose the machinery and parts topics to feature.",
+          "Review the model names and branch service wording."
+        ]
+      }
+    },
+    {
+      "client_id": "6b313cac-283e-48c4-9df6-ba43af2f7353",
+      "client_name": "Central Canvas",
+      "strategy_id": "382e6063-242a-4030-9454-22b90952561a",
+      "strategy_month": "2026-11-01",
+      "before_version": 5,
+      "version": 6,
+      "before_row_hash": "a9dede0b5dd1d83ab70f584dae9b9b6e",
+      "row_hash": "24af60f03ca52445e7a7ea45d024b3c5",
+      "published_at": "2026-11-19T16:52:01.999906+00:00",
+      "confirmed_package": {
+        "professional_videos_per_month": 1,
+        "photo_posts_per_month": 4,
+        "design_posters_per_month": 3,
+        "reels_per_month": null,
+        "animated_posters_per_month": null
+      },
+      "client_hash": "a9d2c64069b10e913b7947b964c26176",
+      "guide_id": "87234fba-85b2-434e-9f30-73a04c467ae6",
+      "guide_hash": "b24e87d26e65134b2878ef8a95ecd98f",
+      "source_report_ids": [
+        "5bca0f00-e6e0-4b49-becd-d6010164a9c5"
+      ],
+      "source_report_hashes": [
+        "f0323f33a38f92a8bd67100fdad6e36d"
+      ],
+      "seed_context_preserved": true,
+      "previous_published_snapshot_retained_until_publish": true,
+      "immutable_revision_events": [
+        "amended",
+        "approved",
+        "published"
+      ],
+      "client_role_readback": true,
+      "internal_notes_private": true,
+      "published_strategy_data": {
+        "version": 1,
+        "actionPlan": {
+          "reels": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "design_poster": {
+            "items": [
+              "Tell us about the vehicle and load.\n\nMake the tarp enquiry specific.",
+              "Start with a repair photo.\n\nAsk customers to show and describe the damage.",
+              "What needs covering or securing?\n\nInvite the application and measurements."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "photo_content": {
+            "items": [
+              "A tarp at work.\n\nShow the vehicle and load behind the application.",
+              "The repair detail.\n\nBring the area being assessed closer.",
+              "Cover or cargo net.\n\nShow the product in its intended setting.",
+              "The people behind it.\n\nConnect a team member with a real workshop step."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "animated_poster": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "professional_video": {
+            "items": [
+              "Inside the workshop.\n\nLet a team member explain one tarp or repair step."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "campaign_recommendation": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          }
+        },
+        "topContent": {
+          "autoCaption": "A milestone like this gave us a good reason to put the tools down for a moment and enjoy the day with the people who support us. 051 435 4955/6 sales@centralcanvas.co.za www.centralcanvas.co.za #CentralCanvas #20Years #Bloemfontein #MadeForSA #CanvasSolutions",
+          "contentType": "",
+          "whyItWorked": [],
+          "autoImageUrl": null,
+          "autoPlatform": "facebook",
+          "coverImageUrl": "",
+          "autoMetricLabel": null,
+          "autoMetricValue": null,
+          "whatThisTellsUs": ""
+        },
+        "goldStandard": {
+          "mustAvoid": "Practical, personable and confident.\n\nUse the real product and workshop story to make each question clear.",
+          "objective": "Bring more job-specific conversations to Central Canvas.\n\nShow the people, products and workshop detail behind tarps, repairs, covers and cargo nets.",
+          "coreMessage": "Show us what needs covering, repairing or securing.\n\nMake the real job and the people behind it the centre of the story.",
+          "testAndChange": "October’s workshop post received 23 reactions and six shares on Facebook.\n\nKeep the people-and-process approach, and connect it with a clear product or repair question.",
+          "successSignals": "Enquiries naming the product, vehicle or application.\n\nRepair questions with a photo or damage description.\n\nCustomers sharing dimensions and the job they need done.",
+          "pillarsAndHooks": "THE APPLICATION\nWhat needs covering or securing.\n\nTHE WORKSHOP\nThe detail behind the job.\n\nTHE PEOPLE\nThe team making it happen.",
+          "audienceAndIntent": "Truck operators and buyers planning a tarp or repair.\n\nCustomers looking at a pool-cover or cargo-net application.",
+          "nextMonthGamePlan": "START\nStart with the truck-tarp photo and vehicle-and-load poster.\n\nBUILD\nFollow the workshop video with a repair detail and repair-enquiry card.\n\nCLOSE\nClose with the cover-or-net example, team photo and application checklist.",
+          "channelIntegration": "Use Facebook to connect the workshop story, product examples and enquiry cards.\n\nGive each application its own simple conversation starter.",
+          "formatsAndRationale": "1 video — a team-led workshop explanation.\n\n4 photos — tarp application, repair detail, cover or net, and team.\n\n3 posters — vehicle, repair and application enquiries."
+        },
+        "clientDirection": [],
+        "strategyDrivers": [],
+        "calendarSelections": [
+          {
+            "use": false,
+            "date": null,
+            "note": "",
+            "title": "Festive & Black Friday build-up"
+          },
+          {
+            "use": false,
+            "date": "2026-11-27",
+            "note": "",
+            "title": "Black Friday"
+          }
+        ],
+        "clientRequestNotes": "",
+        "strategyGoingForward": "1. SHOW THE JOB\nStart with what the customer needs covered or repaired.\n\n2. SHOW THE WORK\nBring the workshop and people into the story.\n\n3. GET THE DETAILS\nInvite the application, measurements or repair photos.",
+        "clientActionsRequired": [
+          "Choose the tarp, repair and cover-or-net examples.",
+          "Share the job details the team needs at first contact."
+        ]
+      }
+    },
+    {
+      "client_id": "8e448cf9-1534-4ba1-89a4-93e4c8b83d2f",
+      "client_name": "Bouwer & Coetzee Attorneys",
+      "strategy_id": "a0e52b08-1f49-4f8b-8bec-920a7e060fcb",
+      "strategy_month": "2026-11-01",
+      "before_version": 6,
+      "version": 7,
+      "before_row_hash": "9277afac57feb23786823c0c9107833e",
+      "row_hash": "4bc14eb6ec77a1cfc879f114d9f482b6",
+      "published_at": "2026-11-19T16:49:40.937529+00:00",
+      "confirmed_package": {
+        "professional_videos_per_month": 1,
+        "photo_posts_per_month": null,
+        "design_posters_per_month": 7,
+        "reels_per_month": null,
+        "animated_posters_per_month": null
+      },
+      "client_hash": "99f7ad83ca2b7c960e54607407049742",
+      "guide_id": "5fc53cc8-d8a4-46f2-93f0-805a88465b80",
+      "guide_hash": "62b23ed3b2979295644daf7eb9ba22b2",
+      "source_report_ids": [
+        "5db2b6d2-1c81-498d-ad77-529490f2c013"
+      ],
+      "source_report_hashes": [
+        "e0edde6c9483f547bd9ebc6762bf294f"
+      ],
+      "seed_context_preserved": true,
+      "previous_published_snapshot_retained_until_publish": true,
+      "immutable_revision_events": [
+        "amended",
+        "approved",
+        "published"
+      ],
+      "client_role_readback": true,
+      "internal_notes_private": true,
+      "published_strategy_data": {
+        "version": 1,
+        "actionPlan": {
+          "reels": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "design_poster": {
+            "items": [
+              "Where are you in the transfer?\n\nHelp buyers and sellers describe their stage.",
+              "Buying or selling?\n\nGive each person a clear first-contact question.",
+              "Bring the transaction context.\n\nInvite a private conversation about the property matter.",
+              "A Bloemfontein correspondent brief.\n\nAsk fellow practitioners which Deeds Office task they need to discuss.",
+              "Make the brief clear.\n\nIntroduce the information that starts a correspondent enquiry.",
+              "Start the antenuptial conversation.\n\nInvite a private discussion with the firm.",
+              "Let’s discuss your next step.\n\nMake direct, private contact easy."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "photo_content": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "animated_poster": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "professional_video": {
+            "items": [
+              "Your first transfer conversation.\n\nIntroduce the questions a buyer or seller can bring to the firm."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "campaign_recommendation": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          }
+        },
+        "topContent": {
+          "autoCaption": "Whatever life puts on the table, having the right legal guidance makes the next step easier. 8 Louw Wepener, Dan Pienaar, Bloemfontein 083 266 5507 #BouwerCoetzeeAttorneys #LegalServices #BloemfonteinAttorney #LegalSupport #LegalAdviceSouthAfrica",
+          "contentType": "",
+          "whyItWorked": [],
+          "autoImageUrl": null,
+          "autoPlatform": "facebook",
+          "coverImageUrl": "",
+          "autoMetricLabel": null,
+          "autoMetricValue": null,
+          "whatThisTellsUs": ""
+        },
+        "goldStandard": {
+          "mustAvoid": "Calm, approachable and professional.\n\nMake the first step clear and keep personal matters in a private consultation.",
+          "objective": "Make it easy for the right enquiry to reach Bouwer & Coetzee Attorneys.\n\nLead with property transfers, correspondent work and notarial questions, each with a clear route to a private conversation.",
+          "coreMessage": "A clear first question makes the next conversation easier.\n\nShow people where to begin and help them speak to the firm about their matter.",
+          "testAndChange": "September’s broad-guidance post received 11 Facebook shares.\n\nKeep that approachable tone and make the next content more specific to transfers, correspondent briefs and notarial enquiries.",
+          "successSignals": "Enquiries that identify the service and the first question.\n\nTransfer, correspondent and notarial conversations reaching the firm.\n\nFeedback from the attorney on the questions people bring.",
+          "pillarsAndHooks": "PROPERTY TRANSFERS\nBuying, selling and the next step.\n\nCORRESPONDENT SUPPORT\nA clear Bloemfontein Deeds Office brief.\n\nNOTARIAL CONVERSATIONS\nStart the discussion privately.",
+          "audienceAndIntent": "Property buyers and sellers preparing their next transfer step.\n\nAttorneys needing Bloemfontein correspondent assistance.\n\nPeople starting an antenuptial or notarial discussion.",
+          "nextMonthGamePlan": "START\nStart with buying, selling and transfer-stage posters.\n\nBUILD\nAdd the first-meeting video and the two correspondent-brief posters.\n\nCLOSE\nClose with the antenuptial discussion and private-contact invitation.",
+          "channelIntegration": "Use the existing social presence to introduce each service clearly.\n\nGive property clients and fellow practitioners their own enquiry prompts.",
+          "formatsAndRationale": "1 video — the first property-transfer conversation.\n\n7 posters — three transfer prompts, two correspondent prompts, one antenuptial prompt and one contact invitation."
+        },
+        "clientDirection": [],
+        "strategyDrivers": [],
+        "calendarSelections": [
+          {
+            "use": false,
+            "date": null,
+            "note": "",
+            "title": "Festive & Black Friday build-up"
+          },
+          {
+            "use": false,
+            "date": "2026-11-27",
+            "note": "",
+            "title": "Black Friday"
+          }
+        ],
+        "clientRequestNotes": "",
+        "strategyGoingForward": "1. HELP PEOPLE RECOGNISE THEIR NEED\nSeparate property, correspondent and notarial questions.\n\n2. MAKE THE FIRST STEP CLEAR\nShow what to bring to the first conversation.\n\n3. INVITE PRIVATE CONTACT\nGuide the enquiry to the firm with a calm, direct invitation.",
+        "clientActionsRequired": [
+          "Choose the attorney-led question for the video.",
+          "Review the service wording before the content is released."
+        ]
+      }
+    },
+    {
+      "client_id": "ec643c75-51f5-4839-829f-3f5b7f48829a",
+      "client_name": "Ehrlich Park Butchery",
+      "strategy_id": "fbd1940e-8b28-47e9-99be-b2907f7aa5ae",
+      "strategy_month": "2026-11-01",
+      "before_version": 6,
+      "version": 7,
+      "before_row_hash": "646cccdb31cbd01e42d3f198d5b10304",
+      "row_hash": "bb4d3ea65fd5e810c4e42815fbaa175d",
+      "published_at": "2026-11-19T16:52:01.999906+00:00",
+      "confirmed_package": {
+        "professional_videos_per_month": 1,
+        "photo_posts_per_month": 3,
+        "design_posters_per_month": 4,
+        "reels_per_month": null,
+        "animated_posters_per_month": null
+      },
+      "client_hash": "170d94fb23108059a78a7beed0e0b259",
+      "guide_id": "8361e5f1-2e15-403a-91b1-2536d4b97830",
+      "guide_hash": "4b374dfdec330f8f26c5f729db1645c9",
+      "source_report_ids": [
+        "e37eb8db-49d7-4e60-b8cc-ebfd8ff4f20f"
+      ],
+      "source_report_hashes": [
+        "fcea025041abb61c2fb2c8775e8eb4d1"
+      ],
+      "seed_context_preserved": true,
+      "previous_published_snapshot_retained_until_publish": true,
+      "immutable_revision_events": [
+        "amended",
+        "approved",
+        "published"
+      ],
+      "client_role_readback": true,
+      "internal_notes_private": true,
+      "published_strategy_data": {
+        "version": 1,
+        "actionPlan": {
+          "reels": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "design_poster": {
+            "items": [
+              "What are you cooking?\n\nInvite the meal plan into the counter conversation.",
+              "How many around the braai?\n\nStart with the guest count and cooking plan.",
+              "What’s for supper?\n\nMake a weeknight meal question easy to bring to the butcher.",
+              "Your Friday food plan.\n\nInvite customers to discuss the weekend’s meals."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "photo_content": {
+            "items": [
+              "At the counter.\n\nShow a selected product and the meal it starts a conversation about.",
+              "A little help choosing.\n\nShow the team assisting at the counter.",
+              "From counter to table.\n\nConnect a meal or braai image with the cooking occasion."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "animated_poster": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "professional_video": {
+            "items": [
+              "Ask the Butcher.\n\nLet a team member answer one practical meal-and-headcount question."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "campaign_recommendation": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          }
+        },
+        "topContent": {
+          "autoCaption": "Heritage Day plans usually mean good company, good food and something on the braai. Pop in at Ehrlich Park Butchery and get sorted before the celebrations begin. 051 434 2761 / 051 434 2001 WhatsApp: +27 78 057 4485 #EhrlichParkButchery #HeritageDay #Bloemfontein #BraaiDay #ProudlySouthAfrican",
+          "contentType": "",
+          "whyItWorked": [],
+          "autoImageUrl": null,
+          "autoPlatform": "facebook",
+          "coverImageUrl": "",
+          "autoMetricLabel": null,
+          "autoMetricValue": null,
+          "whatThisTellsUs": ""
+        },
+        "goldStandard": {
+          "mustAvoid": "Warm, down-to-earth and helpful.\n\nLet the product, the meal and the people carry the story.",
+          "objective": "Make Ehrlich part of the customer’s next meal plan.\n\nBring practical butcher knowledge, real counter moments and local braai occasions into one useful story.",
+          "coreMessage": "What are you cooking, and for how many?\n\nStart with the meal and let the Ehrlich team help with the next question.",
+          "testAndChange": "October’s wors post received 52 reactions and 20 shares. The counter-shopping post received 49 reactions and 13 shares.\n\nKeep the real food and counter moments, and add a clear meal-planning question.",
+          "successSignals": "Questions about a meal, cut or number of people.\n\nCustomers saving or sharing a useful shopping prompt.\n\nCounter feedback about the content people mention.",
+          "pillarsAndHooks": "THE MEAL\nStart with what is being cooked.\n\nTHE COUNTER\nShow the team helping someone choose.\n\nTHE BRAAI\nMake the occasion feel familiar and local.",
+          "audienceAndIntent": "Local shoppers planning supper, a weekend braai or a family meal.\n\nPeople who want help choosing for their cooking plan and number of guests.",
+          "nextMonthGamePlan": "START\nStart with the meal-question poster and counter-product photo.\n\nBUILD\nAdd the “Ask the Butcher” video, service photo and braai checklist.\n\nCLOSE\nClose with the meal photo, supper and Friday prompts, then use customer questions for December.",
+          "channelIntegration": "Use Facebook for practical meal-planning stories and local conversation.\n\nGive each post an easy question to bring to the counter.",
+          "formatsAndRationale": "1 video — “Ask the Butcher”.\n\n3 photos — counter product, service and meal or braai.\n\n4 posters — meal choice, braai plan, weeknight supper and Friday shopping."
+        },
+        "clientDirection": [],
+        "strategyDrivers": [],
+        "calendarSelections": [
+          {
+            "use": false,
+            "date": null,
+            "note": "",
+            "title": "Festive & Black Friday build-up"
+          },
+          {
+            "use": false,
+            "date": "2026-11-27",
+            "note": "",
+            "title": "Black Friday"
+          }
+        ],
+        "clientRequestNotes": "",
+        "strategyGoingForward": "1. START WITH THE MEAL\nAsk what the customer is planning.\n\n2. BRING IN THE BUTCHER\nShow the product and the practical help at the counter.\n\n3. MAKE THE VISIT EASY\nInvite the cooking plan and number of people.",
+        "clientActionsRequired": [
+          "Choose the product and meal question for the video.",
+          "Share the questions shoppers are bringing to the counter."
+        ]
+      }
+    },
+    {
+      "client_id": "42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa",
+      "client_name": "Cape Lumber",
+      "strategy_id": "50088b8b-ac9d-446b-a353-7b346aeac1b3",
+      "strategy_month": "2026-12-01",
+      "before_version": 7,
+      "version": 8,
+      "before_row_hash": "3769f8840734b0d0e2c4fab0fac43bf1",
+      "row_hash": "d9f77235d768a024fe050d611cebea26",
+      "published_at": "2026-11-19T16:53:30.79126+00:00",
+      "confirmed_package": {
+        "professional_videos_per_month": 0,
+        "photo_posts_per_month": 3,
+        "design_posters_per_month": 4,
+        "reels_per_month": null,
+        "animated_posters_per_month": null
+      },
+      "client_hash": "78a01d0fe37dc5105e7a9a0a16f140ee",
+      "guide_id": "9023fc27-f39b-4526-a1cf-6a1be676a306",
+      "guide_hash": "8200fd3352e67a1ad298bee08b95344c",
+      "source_report_ids": [
+        "93d58684-7913-4c57-9d4e-b2168e2a9a03"
+      ],
+      "source_report_hashes": [
+        "196061a2d67cad7877627c52e5e12ffe"
+      ],
+      "seed_context_preserved": true,
+      "previous_published_snapshot_retained_until_publish": true,
+      "immutable_revision_events": [
+        "amended",
+        "approved",
+        "published"
+      ],
+      "client_role_readback": true,
+      "internal_notes_private": true,
+      "published_strategy_data": {
+        "version": 1,
+        "actionPlan": {
+          "reels": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "design_poster": {
+            "items": [
+              "Your next project list.\n\nBring the product, size and quantity together.",
+              "Which dimensions matter?\n\nHelp buyers describe the timber or decking requirement.",
+              "Add the logistics details.\n\nAsk for the project location and collection or delivery needs.",
+              "Ready to discuss the quote?\n\nClose with a clear material-list enquiry."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "photo_content": {
+            "items": [
+              "Start with the material.\n\nShow a timber or decking detail that helps the buyer identify the product.",
+              "The board question.\n\nConnect a board or insulation product with its intended application.",
+              "The list becomes a load.\n\nUse a material-load image to prompt quantities and project context."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "animated_poster": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "professional_video": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "campaign_recommendation": {
+            "items": [
+              "Make the enquiry route clear.\n\nReview the fit between relevant material searches, product information and the quote-list invitation."
+            ],
+            "notes": "",
+            "enabled": true
+          }
+        },
+        "topContent": {
+          "autoCaption": "A serious load needs a supplier that understands bulk project demand. +27 71 353 4261 info@capelumbermarketing.co.za #CapeLumberMarketing #BulkTimberSA #WoodForBuilders #CapeConstructionSupply #ConstructionMaterialsSA",
+          "contentType": "",
+          "whyItWorked": [],
+          "autoImageUrl": null,
+          "autoPlatform": "facebook",
+          "coverImageUrl": "",
+          "autoMetricLabel": null,
+          "autoMetricValue": null,
+          "whatThisTellsUs": ""
+        },
+        "goldStandard": {
+          "mustAvoid": "Clear, organised and commercially practical.\n\nHelp buyers prepare a useful enquiry one step at a time.",
+          "objective": "Help project buyers organise their December material enquiries and prepare the next project list.\n\nMake each supply conversation clearer from the first message.",
+          "coreMessage": "Get the list together.\n\nBring the product, sizes, quantities and project location into one clear supply enquiry.",
+          "testAndChange": "October’s decking content attracted 41 Facebook shares.\n\nCarry that product interest into a December checklist story: the material, the dimensions and the list to send.",
+          "successSignals": "Enquiries arriving with clearer product references and quantities.\n\nCustomers sharing the next project’s material list.\n\nSupply-team feedback on the details buyers find helpful.",
+          "pillarsAndHooks": "IDENTIFY THE PRODUCT\nStart with the material reference.\n\nSIZE THE REQUIREMENT\nDescribe dimensions and quantities.\n\nPREPARE THE NEXT JOB\nKeep the list and project context together.",
+          "audienceAndIntent": "Trade and project buyers working through a timber, decking or board list.\n\nCustomers preparing material requirements for their next job.",
+          "nextMonthGamePlan": "START\nOpen with the timber-detail photo and project-list checklist.\n\nBUILD\nFollow with the board photo and dimensions prompt.\n\nCLOSE\nClose with the material-load photo, logistics and quote-preparation cards; gather questions for January.",
+          "channelIntegration": "Pair the social product stories with a simple material-list invitation.\n\nThe Google Ads review follows the same search-to-product-to-enquiry journey.",
+          "formatsAndRationale": "3 photos — timber detail, board or insulation, and material load.\n\n4 posters — project list, dimensions, logistics and quote preparation.\n\nGoogle Ads — review the path from relevant search to material enquiry."
+        },
+        "clientDirection": [],
+        "strategyDrivers": [],
+        "calendarSelections": [
+          {
+            "use": false,
+            "date": null,
+            "note": "",
+            "title": "Festive season"
+          },
+          {
+            "use": false,
+            "date": "2026-12-16",
+            "note": "",
+            "title": "Day of Reconciliation"
+          },
+          {
+            "use": false,
+            "date": "2026-12-25",
+            "note": "",
+            "title": "Christmas Day"
+          },
+          {
+            "use": false,
+            "date": "2026-12-26",
+            "note": "",
+            "title": "Day of Goodwill"
+          }
+        ],
+        "clientRequestNotes": "",
+        "strategyGoingForward": "1. GET THE LIST TOGETHER\nHelp buyers name the materials for the next job.\n\n2. MAKE THE REQUIREMENT CLEAR\nBring dimensions and quantities into the conversation.\n\n3. SEND THE PROJECT DETAILS\nGive the team the list and location to discuss the supply requirement.",
+        "clientActionsRequired": [
+          "Choose the December product references.",
+          "Share trading arrangements and the quote information customers should prepare."
+        ]
+      }
+    },
+    {
+      "client_id": "afb62c53-d6d3-4ef8-9393-def88ed899d8",
+      "client_name": "C&L Innovations",
+      "strategy_id": "b7caa2c0-7fe4-49d8-b4e5-55232c3639c5",
+      "strategy_month": "2026-11-01",
+      "before_version": 5,
+      "version": 6,
+      "before_row_hash": "b7af1822b890fb948e0d1015c0f33695",
+      "row_hash": "995b7341e7f73b95e4ff42c92ba71110",
+      "published_at": "2026-11-19T16:52:01.999906+00:00",
+      "confirmed_package": {
+        "professional_videos_per_month": null,
+        "photo_posts_per_month": 2,
+        "design_posters_per_month": 2,
+        "reels_per_month": null,
+        "animated_posters_per_month": null
+      },
+      "client_hash": "d76fcbb4c8c3f7a61b1a0093a8a6fdb4",
+      "guide_id": "b7c3a72c-3c16-49f1-b97d-872b402be137",
+      "guide_hash": "829b5a58936884b2a54f3ff657e3d0dd",
+      "source_report_ids": [
+        "52e5f18a-ddc9-46b5-a997-d52931eb564a"
+      ],
+      "source_report_hashes": [
+        "cd5fff41b2cf449a102a595e8c346599"
+      ],
+      "seed_context_preserved": true,
+      "previous_published_snapshot_retained_until_publish": true,
+      "immutable_revision_events": [
+        "amended",
+        "approved",
+        "published"
+      ],
+      "client_role_readback": true,
+      "internal_notes_private": true,
+      "published_strategy_data": {
+        "version": 1,
+        "actionPlan": {
+          "reels": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "design_poster": {
+            "items": [
+              "Picture it in your room.\n\nAsk about the space around the piece and how it will be used.",
+              "Let’s talk about this piece.\n\nInvite the buyer to name the item and share their room needs."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "photo_content": {
+            "items": [
+              "See the whole piece.\n\nShow one piece clearly enough to appreciate its proportions.",
+              "The detail worth noticing.\n\nBring the same piece’s grain, edge or joinery closer."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "animated_poster": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "professional_video": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "campaign_recommendation": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          }
+        },
+        "topContent": {
+          "autoCaption": "Every mark left by the workshop is a promise kept in your home. Lize: +27 79 497 1741 Chris: +27 82 553 0356 #CLInnovations #Woodworking #HandcraftedFurniture #LiveEdge #MadeByHand #SolidWood",
+          "contentType": "",
+          "whyItWorked": [],
+          "autoImageUrl": null,
+          "autoPlatform": "facebook",
+          "coverImageUrl": "",
+          "autoMetricLabel": null,
+          "autoMetricValue": null,
+          "whatThisTellsUs": ""
+        },
+        "goldStandard": {
+          "mustAvoid": "Human, specific and quietly confident.\n\nLet the piece and its visible workmanship set the tone.",
+          "objective": "Help the right buyer picture a C&L piece in their own room.\n\nUse the whole piece and a close detail to turn interest into a furniture conversation.",
+          "coreMessage": "See the piece. Notice the detail. Picture it at home.\n\nGive the furniture room to tell its own story.",
+          "testAndChange": "Keep the workshop character already present in your content.\n\nPair a full view of one piece with a close detail, then listen for questions about the item and the space it would fit.",
+          "successSignals": "Enquiries naming the pictured piece.\n\nCustomers sharing room measurements or asking about a detail.\n\nConversations about how the furniture would work in their space.",
+          "pillarsAndHooks": "THE WHOLE PIECE\nProportions and presence.\n\nTHE CLOSE DETAIL\nGrain, edge or joinery.\n\nTHE ROOM\nHow the customer imagines using it.",
+          "audienceAndIntent": "People choosing a distinctive piece for a dining or living space.\n\nBuyers thinking about scale, character and how furniture fits the room.",
+          "nextMonthGamePlan": "START\nStart with the full-piece photo and a room-fit poster.\n\nBUILD\nBring the detail closer in the second photo and its enquiry poster.\n\nCLOSE\nUse the questions received to choose the next furniture story.",
+          "channelIntegration": "Use the existing social presence for a connected two-part furniture story.\n\nMake direct product enquiries easy through Chris or Lize.",
+          "formatsAndRationale": "2 photos — the whole piece and one close detail.\n\n2 posters — room fit and a piece-specific enquiry."
+        },
+        "clientDirection": [],
+        "strategyDrivers": [],
+        "calendarSelections": [
+          {
+            "use": false,
+            "date": null,
+            "note": "",
+            "title": "Festive & Black Friday build-up"
+          },
+          {
+            "use": false,
+            "date": "2026-11-27",
+            "note": "",
+            "title": "Black Friday"
+          }
+        ],
+        "clientRequestNotes": "",
+        "strategyGoingForward": "1. SHOW THE PIECE\nGive buyers a clear sense of its proportions.\n\n2. BRING THE DETAIL CLOSER\nFocus on the grain, edge or joinery that makes it interesting.\n\n3. PICTURE THE ROOM\nInvite a conversation about the customer’s space.",
+        "clientActionsRequired": [
+          "Choose the piece to feature.",
+          "Share the buyer questions that help start a useful furniture enquiry."
+        ]
+      }
+    },
+    {
+      "client_id": "fd16ebae-a50b-4920-afe0-94c2631f8f06",
+      "client_name": "All Around PVC",
+      "strategy_id": "b8c90019-008f-44b0-a7a3-1d1b5b67a9ac",
+      "strategy_month": "2026-11-01",
+      "before_version": 6,
+      "version": 7,
+      "before_row_hash": "cceda6e3b4b5fa850019150ffb782ae2",
+      "row_hash": "f0d111afdf51f4ee147e3d36f89e9357",
+      "published_at": "2026-11-19T16:47:40.33412+00:00",
+      "confirmed_package": {
+        "professional_videos_per_month": 1,
+        "photo_posts_per_month": 3,
+        "design_posters_per_month": 3,
+        "reels_per_month": null,
+        "animated_posters_per_month": null
+      },
+      "client_hash": "cc9347ac3024141ee0a84352e7d269c0",
+      "guide_id": "110e136a-bd5c-4fd7-86b1-6fb8178218ef",
+      "guide_hash": "eaab0dc919a82c4c7d9fe2784330a396",
+      "source_report_ids": [
+        "5598a192-ce42-47e5-bf94-9631e7863839"
+      ],
+      "source_report_hashes": [
+        "67d19f60b9b5071044bc15e169fbcf1e"
+      ],
+      "seed_context_preserved": true,
+      "previous_published_snapshot_retained_until_publish": true,
+      "immutable_revision_events": [
+        "amended",
+        "approved",
+        "published"
+      ],
+      "client_role_readback": true,
+      "internal_notes_private": true,
+      "published_strategy_data": {
+        "version": 1,
+        "actionPlan": {
+          "reels": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "design_poster": {
+            "items": [
+              "Start with the floor.\n\nAsk about the room, its size and how it is used.",
+              "Choose the ceiling finish.\n\nMake finish and size the starting questions.",
+              "Plan the wall.\n\nInvite the customer to describe the setting and look they want."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "photo_content": {
+            "items": [
+              "SPC in the room.\n\nShow the floor in an everyday setting.",
+              "Look at the ceiling.\n\nGive the PVC finish a clear visual.",
+              "A wall with character.\n\nShow a wall-panel application in context."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "animated_poster": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          },
+          "professional_video": {
+            "items": [
+              "Could SPC suit your room?\n\nShow the flooring detail and wider room, then invite a product conversation."
+            ],
+            "notes": "",
+            "enabled": true
+          },
+          "campaign_recommendation": {
+            "items": [],
+            "notes": "",
+            "enabled": false
+          }
+        },
+        "topContent": {
+          "autoCaption": null,
+          "contentType": "",
+          "whyItWorked": [],
+          "autoImageUrl": null,
+          "autoPlatform": "facebook",
+          "coverImageUrl": "",
+          "autoMetricLabel": null,
+          "autoMetricValue": null,
+          "whatThisTellsUs": ""
+        },
+        "goldStandard": {
+          "mustAvoid": "Straightforward, visual and useful.\n\nExplain one product choice in plain language.",
+          "objective": "Help renovators choose the next surface to explore with All Around PVC.\n\nShow ceilings, SPC flooring and wall panels in context, then turn the interest into a product conversation.",
+          "coreMessage": "Start with the room. See the material. Ask the right product question.\n\nMake each surface easy to imagine in its intended setting.",
+          "testAndChange": "October’s posts recorded 68 Facebook engagements and 27 Instagram interactions.\n\nKeep the three product stories clear and compare which room-focused questions customers respond to.",
+          "successSignals": "Enquiries naming a product and intended room.\n\nCustomers sharing room sizes or asking about a finish.\n\nFollow-up feedback on which product explanation was useful.",
+          "pillarsAndHooks": "UNDERFOOT\nSPC flooring in an everyday room.\n\nLOOK UP\nPVC ceiling finish and size.\n\nTHE FEATURE WALL\nWall panels in context.",
+          "audienceAndIntent": "Homeowners and renovators choosing a finish for a real room.\n\nBuyers comparing the appearance and application of ceilings, flooring or wall panels.",
+          "nextMonthGamePlan": "START\nStart with SPC flooring: one video, one photo and one poster.\n\nBUILD\nMove to the ceiling photo and a finish-and-size poster.\n\nCLOSE\nClose with the wall-panel pair, then use customer questions to guide December.",
+          "channelIntegration": "Facebook and Instagram carry distinct flooring, ceiling and wall-panel stories.\n\nEach leads to a conversation about the customer’s room and material needs.",
+          "formatsAndRationale": "1 video — an SPC-flooring application.\n\n3 photos — flooring, ceiling and wall panel.\n\n3 posters — one useful enquiry prompt for each surface."
+        },
+        "clientDirection": [],
+        "strategyDrivers": [],
+        "calendarSelections": [
+          {
+            "use": false,
+            "date": null,
+            "note": "",
+            "title": "Festive & Black Friday build-up"
+          },
+          {
+            "use": false,
+            "date": "2026-11-27",
+            "note": "",
+            "title": "Black Friday"
+          }
+        ],
+        "clientRequestNotes": "",
+        "strategyGoingForward": "1. SHOW THE ROOM\nGive each material a setting people recognise.\n\n2. EXPLAIN THE CHOICE\nFocus on the finish, size or intended application.\n\n3. START THE ENQUIRY\nInvite the customer to share the room and product they have in mind.",
+        "clientActionsRequired": [
+          "Choose a product reference for each of the three surfaces.",
+          "Share the room and product questions customers bring to you."
+        ]
+      }
+    }
+  ]
+}

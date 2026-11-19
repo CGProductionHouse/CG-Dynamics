@@ -1,3 +1,181 @@
+## 19 November — exact live-based strategy connector release prepared; NOT DEPLOYED
+
+Same DRAFT PR1003, source overlays from98fded5a. Fresh production MCPv90 contains
+other-agent publishing modules absent/older in this checkout: DO NOT deploy the
+repository function directory. Private exact70-file live-based candidate changes
+only monthlyStrategySeed and monthlyStrategyProposal;68 other files byte-stable,
+including auth/context/catalogue/OneDrive/publishing. Rollback source saved.
+Source manifest +read-only verifier refuse any source/version/auth drift or extras.
+Actual candidate91/91 auth/context/strategy/release tests pass; source suites146
+serial +one additional manifest check=147distinct, final preflight8/8. Local
+TypeScript/Vite build, scopedlint pass; full official EdgeRuntimev1.74.3 bundle
+passes locally. No cloud build, deployment, migration or new strategy write.
+
+Fresh READ ONLY19:41UTC:63client/package,52guide,141strategy hashes unchanged;
+77drafts/16prior live plans protected,18six-client candidates still unapplied.
+Existing company Supabase session read:current14Nov–14Dec cycle44,975/2MEdge
+invocations,2.367/250GBegress;dashboard quota not exceeded,maylag1hour. No Vercel.
+Proposed connector-only release:$0extra;re-read usage andsource immediatelybefore.
+#679 explicit cloud release/budget gate remains pending,NOT implied by push.
+Worker/autopilotv51/flags and all other PR1003 protected gates excluded.
+[Exact packet, hashes, acceptance and rollback](CLIENT-STRATEGY-BACKEND-RELEASE-2026-11-19.md).
+
+## 19 November — six guide-heading holds fixed locally; 18 zero-write reviews
+
+Same DRAFT PR1003 continuation, no hosted release/Vercel. Fresh13 ready-guide
+holds reproduced. Local monthlyStrategySeed exact-heading fallback recovers four
+topics each for Hino, Jenkor, Peyper Bonds, Supa Quick BFN, Toyota and WiseRide.
+52frozen sources unchanged;25 prior evidence selections identical,6 recovered,
+21 without automatic topics. Nested unsafe-section, UUID and caption-rule guards
+retained/tightened. Real preparation/workspace exact-source tests pass.
+
+18 distinct Nov–Jan candidates reviewed locally:12 exact existing drafts plus
+6missing January targets, NOT SAVED/APPROVED/PUBLISHED. Current77 reviewed drafts
+and16 live plans stay protected. Fresh read-only63client/52guide/141strategy
+hashes all unchanged. No source-review or canonical data writes. Live32-client
+holds remain until reviewed release/source admission; no whole-guide fallback.
+Seven audit/container guides remain evidence-held;Elcheck/JFJ/Neshora/VCS have no
+guide row. Preserve Neshora#546 scope/evidence; no new research lane.
+
+165distinct focused checks pass (164serial +new exact-source readback test);
+build/scopedlint/diff pass. No collision with checked #991/#995/#1004 paths.
+No other-agent/provider/package/permission/worker/schedule/website change.
+All earlier unapplied/undeployed PR1003 gates remain; source fixes NOT LIVE.
+[Source review, exact monthly candidates and next guarded action](CLIENT-STRATEGY-SOURCE-REVIEW-2026-11-19.md).
+
+## 19 November — full-fleet positive strategy continuation; no Vercel
+
+CA continued ALL-client positive strategy setup. Same isolated DRAFT PR1003.
+63 active clients /189 Nov–Jan targets read. 77 eligible private drafts at31
+clients deliberately reviewed/saved/read back; 16 earlier corrected published
+plans remain byte-stable. 96 targets at32 clients retain exact source/scope holds
+(15 no confirmed monthly scope,4 missing client evidence,13 ready-guide admission
+gaps); no generic substitute or guard bypass. Full inventory and receipts below.
+
+One Cape January draft created;78 existing canonical authenticated amendment
+events across77 strategies (one final SecuriForce wording correction). Staff
+notes/generation history preserved. 63 client/package,52 guide and64 untouched
+strategy hashes stable. Actual READ ONLY client-role acceptance46contexts/
+138month reads/46foreign denials/0draft exposure. No new approval/publication,
+media/schedule claim, package/provider/config or other-agent change.
+
+151/151 serial scoped tests, local production source build, lint/diff pass.
+Paragraph-collapse proposal merge fix and future-author prompt regression are
+SOURCE ONLY/UNDEPLOYED. No Vercel; prior privacy migration/late-finish Meta fix/
+prepared logo release holds remain. Single existing #731 hourly task continues;
+latest durable task receipt7016325824, lane claim7016468108. No second task.
+Google Control Centre destination still unverified; no guessed tracker update.
+[Full verified draft and evidence-hold receipt](ALL-CLIENT-POSITIVE-STRATEGY-CONTINUATION-2026-11-19.md).
+
+## 19 November — live client strategies corrected after CA editorial rejection
+
+CA rejected Delta's live internal/long-form copy and explicitly requested fixing all
+previous client handoffs. Prior structural/API acceptance is NOT editorial approval.
+16 canonical published plans across 15 clients deliberately amended, independently
+read back, reviewed/approved/published using existing guarded RPCs: all 15 November
+plans plus Cape December. 48 immutable revision events; no ad-hoc strategy writes.
+Each has a concise goal, positive supported reflection, three-stage direction,
+spaced content ideas and clear next actions. Production caveats retained privately.
+
+All 18 exact client-role RPC contexts pass, no foreign reports; Delta actual login/RPC200,
+own API session local-only logout204. 18 client/package rows, 17 October reports and
+35 other-month strategies unchanged. Bat Hill, CG and Econofoods private holds remain
+private; no invented package, result, stock, ROI, date or publication. Same #731 author
+must follow the new editorial standard; no replacement task/configuration.
+
+Same isolated DRAFT PR1003; 39 focused tests, local build, scoped lint and diff pass.
+No Vercel, migration, runtime/provider/credential/schedule/
+package/social-publication change or other-agent work. Native phone not claimed.
+[Exact receipt and future-author writing contract](CLIENT-STRATEGY-EDITORIAL-CORRECTION-2026-11-19.md).
+
+## 18 November — Ehrlich accepted; Econofoods video-only launch held
+
+Same isolated DRAFT PR1003, mainb524a9f9 unchanged, NO VERCEL. EHPec643c75 exact
+Facebook refreshPASS:3reobserved/7retained posts/6facts,0duplicates/outsidePacific
+October, unavailableNULL/followerssnapshot. Octobere37eb8db published13:12:31UTC;
+Novemberfbd1940ev6 reviewed/published13:14:42UTC,1video3photos4posters. Changed
+ONLY Goldtest evidence plus canonicalprovenance; all otherstaffcopy/8concepts/
+notes preserved. Real login/report/Plan/brandfile pass, foreign403/file404,
+no directforeign/draftrows. Header/sourcehash match, originaldownload verified;
+no duplicate upload. Client/package,7otherreports/4other-monthstrategies unchanged;
+Decemberv2/Januaryv1 remain drafts. Existing#731 author remains sole futurewriter.
+
+Econofoods61acf81b explicitconfirmed5videos, socialmanagementexcluded. No mapped
+social/report, no refresh/setup/fake analytics. Existing Nov/Dec genericdrafts
+remain private/evidence-held and all4strategyhashes unchanged. Six canonical
+Sep–Novruns inspected read-only: Nov5/10 PLANNING, no guideline/videos, unmapped/
+uploadunverified; cancelledSep23 draft has3ideas, not finishedNovemberproduction.
+No source/date/rights/mapping guesses. Issuedlogin/BrandHub/originallogo/isolation
+pass. Actualheader candidates200HTML are NOTimages; exact verified original
+PNGprepared public/client-logos/econofoods.png SOURCEONLY/NOTLIVE. No Vercel.
+
+Both testAPI sessions closedLOCAL-only204; browser/other-agentwork untouched,
+no freshphoneclaim. Fresh98/98scopedtests includingrealSQL andcopyloginchecks,
+build/emittedPNGhash/lint/diffpass. SharedHMRlisteneruntouched. No schemaapply,
+runtime release/provider/OAuth/config/socialpublishing change; priorCGprivacy
+migration freshlyconfirmedUNAPPLIED. CG/BatHillholds retained. NextElcheck7b7d244f.
+[Exact source, fingerprints and protected holds](ECONOFOODS-EHRLICH-CLIENT-READINESS-2026-11-18.md).
+
+## 17 November — Delta Gas report / Plan / logos accepted; no Vercel
+
+Same DRAFT PR1003 after CG/Daisy checkpointcbcf63c5. Delta06b20bb1 exact existing
+FB/IG refresh PASS,23reobserved/24retained posts,14freshfacts (10complete/1validzero/
+3unavailable),0duplicates/outsidePacificOctober. October95714ed3 published15:39:21UTC;
+November37e3b7a1v7 reviewed/published15:42:10UTC, exact1video3photos3posters.
+Only Goldobjective/test/success staleOctoberreview wording updated; remaining
+staff copy/all7concepts/notes preserved. Historical branch/stock/safety claims not
+promoted. Real issuedlogin/report/Plan/header/original pass, foreign403/file404,
+0foreign/draft directrows; ownAPI session closedLOCAL-only204. Actual client
+strategy source gates pass. No freshphone/browser claim or other-agent edits.
+
+Client/package,7otherreports(3olderpublished),4other-month strategies unchanged.
+Decemberv2/Januaryv1 remaindrafts. No newdates, provider/OAuth/config/mapping,
+socialpublishing or logo uploads; existing header/original respectivehashes match.
+Ads unmapped/TikTok unconnected stay unavailable, notzero/packageexclusions.
+Same testedruntime92+112tests/build/lint; docs-onlycontinuation/diffpass. CGPlan
+privacy migration remainsUNAPPLIED and CGBrandHub stale binding remainsheld.
+Next exactEconofoods61acf81b, identity-onlyread; do not repeat earlierDulux.
+[Delta exact receipt](DELTA-GAS-CLIENT-READINESS-2026-11-17.md).
+
+## 17 November — CG / Daisy social and logo checks; CG Plan privacy hold
+
+Same isolated DRAFT PR1003, no Vercel. CGc27d2185 Octoberd9b2bb8a published
+15:03:56UTC; Daisy3404f726 October117e47ed published15:04:00UTC. Routine exact
+mapped Meta refreshes PASS; CG33posts/14facts, Daisy4reobserved/6retained/6facts.
+FB unavailable metrics remainNULL, followers snapshots, no audience/ROI inflation.
+CGFB/IG and DaisyFB automatic November checkpoints succeeded15:14/15:19UTC;
+FB remains verified_partial. CGTikTok October5video nativecohort refreshed; later
+token expiry handled by ONE existing November-only refresh15:26:46UTC. Readback
+PASS/fresh/refreshPending=false,2current-month-selected videos; no OAuth/config.
+
+Daisy November8c4cebe1v5 reviewed/published15:07:18UTC, exact1video3photos3posters.
+Changed only unsupported reach-ranking wording in Gold successSignals; other
+staff content/concepts/notes retained. Real login/report/Plan200, foreign403/
+file404, noforeign/draft reportrows. Actual source quality gates pass; ownAPI
+sessions closed LOCAL-only204, browser/other-agent tabs untouched. No freshphone
+claim. DaisyJanuaryv1/Decemberv3 and CGDecemberv2 remaindraft; #731 writer reused.
+
+CGNovembere62a6569v6 stays byte-identical DRAFT: pure projection read reproduced
+unused internal calendar meetings. Real client still sees0strategyrows. Source
+privacy migration20261117150038 + regression/disposablePostgres acceptance now
+prepared, UNAPPLIED. Exact boolean-true calendar entries only; all10Goldfields/
+privileges/source/published snapshots preserved. Separate authorised backend
+review/apply and fresh semantic review required before CGPlan publication.
+
+Both live header logo hashes match verified artwork. Daisy original download/
+source hash and isolation pass; no duplicate upload. CGheader matches exact
+OneDriveWhiteTransparent original found read-only via existingportalparent.
+CGBrandHub disabled/empty and canonical internalfolder binding404remainheld;
+no remap/copy/share/enablement. Existing Case header candidate stillNOTLIVE.
+
+Final15:27:53UTC: client/packages,14otherreports(8olderpublished),8protected
+strategies unchanged; November-onlyTikTok recovery did not change published
+October. Fresh92report/strategy/library/privacy(includingrealSQL)+112TikTok
+tests pass,0fail/skip; localbuild/scopedlint/diffpass. No migration/runtime release,
+provider setup, social publishing or other-agent edits. Next exactDeltaGas06b20bb1.
+Full hashes, actual states and later guarded migration runbook:
+[CG / Daisy receipt](CGPH-DAISY-CLIENT-READINESS-2026-11-17.md).
+
 ## 16 November — authorised brand panel merge reconciliation (#984)
 
 Owner requested #984 into main before #999 into the existing PR910 branch.
@@ -9,6 +187,153 @@ Local brandRules/videoPipeline checks pass 31/31; production build verification
 and exact merge receipt are recorded in PR #984. Git deployment remains OFF.
 No Vercel operation, production data write, new tracker or #910-base resolution.
 Source merge does not mean staff production browser acceptance or deployment.
+
+## 17 November — Case / Central Canvas report and Plan accepted; no Vercel
+
+Same isolated DRAFT PR1003. Case079df21e October994b048e published14:17:00UTC,
+Novemberea1dd4d6v6 published14:20:35UTC, confirmed2videos12posters. Central
+Canvas6b313cac October5bca0f00 published14:26:05UTC, November382e6063v5 published
+14:27:52UTC,1video4photos3posters. Routine exact-mapped refreshes PASS; Case
+19reobserved/20retained posts/14facts, Central8posts/6facts. Missinguniqueviewers
+stayNULL, follower counts snapshots, no inferred enquiries/sales/CG authorship.
+
+Narrow audited editorial corrections: Case objective staleOctober-unavailable
+sentence + testfield; Central testfield only. Replaced September figures outside
+the23Sept report cutoff with exact October observations. Other staff text/concepts
+preserved; manual existing review/approve/explicit-publish, no second author.
+Real issued logins/report/Plan200; exactscope/tenGoldfields, foreign403/files404,
+directreports0foreign/0draft. Both temporaryAPI sessions closed LOCAL-only204.
+Repository's actual client quality/visibility gates pass on published projections.
+No new browser/phone acceptance; other agent's company tabs untouched.
+
+Client/package rows,13other reports(including6olderpublished),6other-month
+strategies byte-stable; Novemberreports/Decemberstrategies remain drafts. Source
+approved Case PDF original download/hash pass. Liveheader missing (URL200HTML is
+NOT image success); faithful Bloemfontein-only PNG prepared locally from original
+PDF, NOT deployed. Central existingheader/original hashes pass, no upload needed.
+
+Latest#731author6950439539 genuinely added HMHIJanuaryv1, taskreported enabled,
+C&Loverride acknowledged resolved. New Case/Central report+Nov receipts unlock
+fresh author checks; no duplicated task/model/config. Bat Hill scope still pending.
+Next exactCGPHc27d2185: READ-ONLY Novembere62a6569v6 evidence-held;4videos8photos/
+4posters. No sync/login/publish yet; following Daisy/Delta only identity-listed.
+83focused serial tests pass after using exact synthetic localhost test fixture;
+no assertion/config change. LocalTS/Vitebuild/scopedlint/emittedPNGhash/diff pass.
+[Exact receipt, hashes and remaining gates](CASE-CENTRAL-CLIENT-READINESS-2026-11-17.md).
+
+## 17 November — Bouwer/Braize/C&L current report and Plan accepted
+
+Same isolated draft PR1003, no Vercel or runtime release. Existing exact-mapped
+October refreshes passed. Bouwer5db2b6d2 report published10:40:53UTC and November
+a0e52b08v6 published10:42:59UTC, scope1video7posters. Braize6a0e27bf report
+published10:50:28UTC and Novemberbf51b539v7 published10:52:35UTC, scope4photos/
+4posters. C&L52e5f18a report published10:58:21UTC and Novemberb7caa2c0v5
+published11:00:44UTC, scope2photos2posters. Existing authenticated manual
+review/approve/explicit-publish; no auto-publication or new strategy author.
+
+C&L legacy1video/4DP discrepancy is resolved by exact CA#504comment5796095876
+named2photo/2poster override and applied receipt5796786851; current package is
+already correct. NO package/template write, no inferred video; do not keep
+re-asking this resolved question or generalise it to Cape's separate later hold.
+
+Real issued logins/report/posts/facts/NovemberPlan200, ten Gold fields and exact
+scopes; real foreign report/calendar403/file404, zero foreign/draft direct rows.
+Own original logos and existing static header bytes pass; no upload/reference
+change. Braize's legacy username belongs to exact ACTIVE Braize; inactive
+namesake untouched. All three API sessions closed local-only204, browser work
+untouched. No new desktop/mobile acceptance. Calendars200/empty, no fake dates.
+
+Final11:06:58UTC readback: all3client/package rows,21other reports(including10
+olderpublished),10other-month strategies byte-stable. Bouwer/C&L full staff Plan
+text preserved; Braize removed only Photo04prefix, retaining all other content.
+Braize TikTok empty October video selection is not zero overall October activity;
+native partial profile/cohort semantics preserved. Unavailable metrics stayNULL.
+
+Ordinary#731author6944856327 reports task enabled and genuinely saved/read back
+BloemMarble January65c76b5bv1 while protecting Novv5published/Decv2draft. Same
+author/task, no duplicated scheduler/config. Bouwer/Braize January remain gaps;
+C&L Decv3/Janv1 drafts unchanged. Bat Hill question still pending. Next exact
+client Case Bloemfontein079df21e: fresh read-only package2videos12posters,
+Novemberea1dd4d6v5 blocked EXACT_STRATEGY_EVIDENCE_UNAVAILABLE; not yet accepted.
+Skip already-accepted Cape Lumber rather than replaying its release/package work.
+[Full exact-client receipts and hashes](CLIENT-READINESS-BOUWER-BRAIZE-CL-2026-11-17.md).
+
+## 17 November — client rollout continued; manual Meta status fix SOURCE ONLY
+
+Bat Hill existing issued login reverified200/exact client, October latest,
+calendar safe reads200/empty and real foreign403. Its November strategy remains
+held at the canonical unknown-quantity guard. CA was asked flexible-vs-fixed
+allowance only; recurring social is already confirmed. No inferred quota.
+
+Bloem Marble October47152dc2 published09:12:58UTC, Novemberf1d93793v5 explicitly
+approved/published09:16:52UTC; actual client108posts/28facts/ten Gold fields/
+2videos4posters and original logo download/isolation pass. Outer manual refresh
+falsely failed AFTER all14facts persisted: independent platform runs FBpartial/
+IGsuccess prove fresh stored facts. Prepared narrow existing-meta-sync deadline
+completion guard; no deploy or fake receipt rewrite. Actual-handler regression
+red2/green6; skipped/throwing passes remain failed. Shared workers untouched.
+
+Bohemia Octobercb037352 published09:21:42UTC, November2e95fa11v5 explicitly
+approved/published09:23:56UTC; routine Meta refresh PASS/2reobserved/3retained,
+actual client12facts/ten Gold fields/2posters and original logo/isolation pass.
+Both November amendments refreshed provenance only: complete staff content
+byte-stable; package/client, six older reports and six other-month drafts stable.
+Current November reports remain drafts; no fake schedule dates or future publish.
+Bloem Vascular is confirmed once-off/non-social/no login; not auto-enabled.
+
+Research status correction: newer ordinary-author#731comment6942360216 reports
+the existing hourly task ENABLED/current run in_progress. Earlier404 receipt is
+historical, not the current best evidence. No duplicate task/model or Microsoft
+probe. Next exact recurring-social client Bouwer & Coetzee8e448cf9 has1video/
+7posters; only identity/package read so far. Same draft PR1003,112focused tests,
+scoped lint/cached actual Deno/TS+Vite/diff pass. No Vercel, runtime release,
+migration, provider setup, social publishing or other-agent tree change.
+[Exact current receipt](CLIENT-READINESS-CONTINUATION-2026-11-17.md).
+
+## 16 November — Dulux logo LIVE; exact missing-logo continuation checkpoint
+
+17Nov completion SUPERSEDES partial states below: all five remaining Daisy,
+Econofoods, Emmanuel(clean separate original), Mimosa and Vrystaat(master PDF)
+logos published 07:53:08 UTC and exact libraries enabled. Nine selected logos
+enabled overall, including Bloem Marble. Fresh exact source/hash/parent/category
+checks; no repeated copies. Final five used authorised guarded existing-table
+Supabase transaction after Windows URL safety stopped UI input; no bypass.
+Real replay returned identical asset IDs/timestamps, zero duplicates. Four existing
+client logins/downloads/hash/isolation pass; Mimosa own-client acceptance HELD
+because no issued login exists. Client rows/package/header references unchanged,
+RLS/grants unchanged. Brand Hub completion is not a header-alias fix or new mobile
+acceptance. Same draft PR1003, 99 focused tests/build/diff pass; no Vercel/runtime.
+
+Next-client Bat Hill: existing issued login/own logo download/isolation pass;
+routine mapped October Meta sync succeeded, 3 re-observed/7 retained unique posts,
+14 fresh facts: 13 complete/1 NULL. Reviewed report69365380 deliberately published
+08:07:42 UTC via authenticated-admin guarded update; real client reads it latest,
+7 posts/28 current + comparison facts. Older published reports, November draft, client/
+package and all strategy rows unchanged. November Plan remains unpublished:
+canonical guard blocks unquantified formats; recurring social IS already
+confirmed, NULL quantities must not be invented or service reconfirmed. No strategy
+guard bypass or duplicate writer. Latest #731 task lookup404 means scheduler state
+UNVERIFIED. No provider setup/mapping/OAuth, social publishing or migration.
+[Bat Hill receipt](BAT-HILL-CLIENT-READINESS-2026-11-17.md).
+
+Historical 16 November partial states follow; use the current completion receipt first.
+
+CA explicitly authorized exact OneDrive logos for Dulux and other missing-logo
+active clients. Dulux original294093bytes copied/hash-verified, selected through
+existing admin workflow and library enabled. Real client list/access/download200,
+source SHA256 match/foreign404; live header and BrandHub verified. Header now uses
+the existing deployed Bloemfontein variant through a logo_url-only guarded update;
+package and every other client field preserved. No frontend release/Vercel.
+
+Bat Hill and Bohemia logos published/enabled; Bloem Marble logo published but
+library disabled; five other verified originals safely copied only. Browser
+control then stopped on Windows URL-verification failure. No uncertain write
+replayed or alternate automation bypass. Exact states, source holds and resume
+path: [Client logo continuation](CLIENT-LOGO-CONTINUATION-2026-11-16.md).
+Bat Hill next-client brief remains draft/blocked for missing fixed monthly scope;
+#516 already confirms recurring social and NULL quantities must remain NULL.
+Other agent tabs/worktrees, providers, package truth, #679/#1001 release holds
+unchanged. No new migrations, shares/permissions, runtime release or secrets.
 
 ## 16 November — Dulux current report/November Plan LIVE; BrandHub remains private
 

@@ -1,0 +1,300 @@
+{
+  "kind": "READ-ONLY source-admission and zero-write strategy review receipt",
+  "date": "2026-11-19",
+  "read_checks": 13,
+  "guide_heading_fixes": 6,
+  "local_candidates": 18,
+  "canonical_writes": 0,
+  "source_review_writes": 0,
+  "protected_reviewed_drafts": 77,
+  "protected_published": 16,
+  "live_held_clients": 32,
+  "live_held_targets": 96,
+  "live_release_status": "No release; existing source gate remains closed",
+  "production_hashes": {
+    "before_at": "2026-11-19T18:24:25.166349+00:00",
+    "after_at": "2026-11-19T18:32:26.035404+00:00",
+    "client_rows": 63,
+    "guide_rows": 52,
+    "strategy_rows": 141,
+    "drift": []
+  },
+  "missing_ready_guides": [
+    {
+      "id": "7b7d244f-77b4-4b2a-88f0-8ce3f7e1c202",
+      "name": "Elcheck",
+      "guides": null
+    },
+    {
+      "id": "aece5a86-c962-4234-a1fe-7904c20f03ff",
+      "name": "JFJ Electrical",
+      "guides": null
+    },
+    {
+      "id": "3c20fae1-8e91-41d5-98eb-1c331600e6e3",
+      "name": "Neshora Oxygen",
+      "guides": null
+    },
+    {
+      "id": "bbd1629e-79fb-4c41-b1e4-88a1f160bd34",
+      "name": "VCS Cleaning Solutions",
+      "guides": null
+    }
+  ],
+  "still_evidence_held": [
+    {
+      "client_id": "61acf81b-1011-404e-9fae-2e209be65fca",
+      "client_name": "Econofoods",
+      "guide": {
+        "id": "ea910524-c3fe-4c89-8d2a-c7b14815f464",
+        "version": 1,
+        "truncated": false
+      },
+      "reason": "Migration audit or insufficiently structured guide; no safe automatic topic admission. Use the existing governed client-intelligence review, not a broad whole-guide fallback."
+    },
+    {
+      "client_id": "b6052710-417d-4b3b-8348-0f126bfea671",
+      "client_name": "Germoparts",
+      "guide": {
+        "id": "247d841d-9028-4eae-b121-0cf7ce43407b",
+        "version": 1,
+        "truncated": false
+      },
+      "reason": "Migration audit or insufficiently structured guide; no safe automatic topic admission. Use the existing governed client-intelligence review, not a broad whole-guide fallback."
+    },
+    {
+      "client_id": "816c7f59-d56c-46a3-ba15-f76971d83769",
+      "client_name": "Human Auto",
+      "guide": {
+        "id": "11c4c954-aaa7-41e2-bf24-2a30eac2b5ce",
+        "version": 1,
+        "truncated": false
+      },
+      "reason": "Migration audit or insufficiently structured guide; no safe automatic topic admission. Use the existing governed client-intelligence review, not a broad whole-guide fallback."
+    },
+    {
+      "client_id": "29a28efd-c998-45e2-a57c-4a751e779e66",
+      "client_name": "PSG Bloemfontein",
+      "guide": {
+        "id": "558399fe-251b-42f1-af71-cb9c02c27f9c",
+        "version": 1,
+        "truncated": false
+      },
+      "reason": "Migration audit or insufficiently structured guide; no safe automatic topic admission. Use the existing governed client-intelligence review, not a broad whole-guide fallback."
+    },
+    {
+      "client_id": "4f6106de-c437-404e-8cef-fbe848de0665",
+      "client_name": "RC-Polypipe",
+      "guide": {
+        "id": "dc022004-517b-4761-a118-6eb9404b5477",
+        "version": 1,
+        "truncated": false
+      },
+      "reason": "Migration audit or insufficiently structured guide; no safe automatic topic admission. Use the existing governed client-intelligence review, not a broad whole-guide fallback."
+    },
+    {
+      "client_id": "cdb11a82-339e-4b46-9b09-bde1a23efeaf",
+      "client_name": "Red Oak",
+      "guide": {
+        "id": "55c8774b-c8a1-4e15-8f35-538de5234580",
+        "version": 1,
+        "truncated": false
+      },
+      "reason": "Migration audit or insufficiently structured guide; no safe automatic topic admission. Use the existing governed client-intelligence review, not a broad whole-guide fallback."
+    },
+    {
+      "client_id": "a36ba938-e9dc-4ecf-bb67-4853608b1c01",
+      "client_name": "TBS Brokers",
+      "guide": {
+        "id": "c6f04664-a1ec-4182-ab3f-172442629523",
+        "version": 1,
+        "truncated": false
+      },
+      "reason": "Migration audit or insufficiently structured guide; no safe automatic topic admission. Use the existing governed client-intelligence review, not a broad whole-guide fallback."
+    }
+  ],
+  "live_guides": [
+    {
+      "client_id": "61acf81b-1011-404e-9fae-2e209be65fca",
+      "client_name": "Econofoods",
+      "guide_id": "ea910524-c3fe-4c89-8d2a-c7b14815f464",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "row_hash": "147a7dd2e602066a371b35805370f601",
+      "live_content_sha256": "d42b54bba4bed77c292a7c1daf3ebba7ad6d41184ade0e88cd6a8d62ebb925e8",
+      "frozen_content_sha256": "9a0a55fb97f8c58f907f63ca76c505030710fc1028d5748129e4976794f77333",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/ECONOFOODS-CHATGPT-PROJECT-MIGRATION-AUDIT-2026-09-08.md",
+      "source_revision": "6164d78d39628b25a6166ad42a4be6c9426a53ed",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "source_text_matches_ignoring_line_ending_and_trailing_space": true
+    },
+    {
+      "client_id": "b6052710-417d-4b3b-8348-0f126bfea671",
+      "client_name": "Germoparts",
+      "guide_id": "247d841d-9028-4eae-b121-0cf7ce43407b",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "row_hash": "7678724c73a9967437b50ac9e7bf26e1",
+      "live_content_sha256": "df778329b357f52d0aeeee5b3c3f5ccf3405956802cfa7676f022980e5c57abf",
+      "frozen_content_sha256": "23b2a8007e11b3917d991f6bcb6be23cf8b427248261779b6e0040d465e5c33b",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/GERMOPARTS-CHATGPT-PROJECT-MIGRATION-AUDIT-2026-09-08.md",
+      "source_revision": "e808404571ba985201f8e639bd1c50434d5ba25e",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "source_text_matches_ignoring_line_ending_and_trailing_space": true
+    },
+    {
+      "client_id": "1007e58b-3fea-4515-88b7-ddaa85763de6",
+      "client_name": "Hino Trucks",
+      "guide_id": "b80d3ca3-9bd7-43bc-822c-53a94be1ab68",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "row_hash": "3988a229845933527272f009717cfee8",
+      "live_content_sha256": "445df379e933f295e2bd949ca08b75ef08b9aa0695f3e5d616c948ee006d5701",
+      "frozen_content_sha256": "09d804c5c0cb0b7e8ba712e3788ec801ef752eb6bce227cdf6216002d41e0c7f",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/HINO-TRUCKS-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "57411cca291031ce8dc40f23d7227016a915dc3b",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "source_text_matches_ignoring_line_ending_and_trailing_space": true
+    },
+    {
+      "client_id": "816c7f59-d56c-46a3-ba15-f76971d83769",
+      "client_name": "Human Auto",
+      "guide_id": "11c4c954-aaa7-41e2-bf24-2a30eac2b5ce",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "row_hash": "827d92cea845c1b15167933ddd61f29f",
+      "live_content_sha256": "a3f9f318eca9f0dd5c941e4c2a22ffb3bf76778d4fd766af0aa04cb78a396ea0",
+      "frozen_content_sha256": "f39d7355ed4fa53efe029116947105bb01b807d1c64f8a98c03ce6a799eae863",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/HUMAN-AUTO-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "08e30839d533852a655b36e7b9c9fadb724e8ee8",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "source_text_matches_ignoring_line_ending_and_trailing_space": true
+    },
+    {
+      "client_id": "a5eab798-3e00-44cc-947e-463386fdac39",
+      "client_name": "Jenkor",
+      "guide_id": "fe7be999-7e24-4cbf-85d3-b7b9c1a64611",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "row_hash": "9c7aac2abe2cb9866696c51e3a95fa7e",
+      "live_content_sha256": "3fb06fefc182f0d146de60b631b6bd530fb171c9b0a53000fba21557b5ed781e",
+      "frozen_content_sha256": "3d2eb915b1c8552913de710f26474edf97f8d9ee25f0834ef7aaed65f388e0e4",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/JENKOR-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "28105226a83716865f9af6a6adca7a3ce7186cb3",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "source_text_matches_ignoring_line_ending_and_trailing_space": true
+    },
+    {
+      "client_id": "a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b",
+      "client_name": "Peyper Bonds",
+      "guide_id": "cd03b3c1-79bc-4ce8-9ff5-8de1bcbb5de7",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "row_hash": "b89da172b6339c54f4d122e5a79ea63a",
+      "live_content_sha256": "4e202648a06d208a3512e7738f4b96226831424cf3b903f0eef253bb6c770c37",
+      "frozen_content_sha256": "1c53cd3763060daf4acfe84bdd815f15ec18c3ece7e8d873b965228877c20079",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/PEYPER-BONDS-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "bbf466cecbdef846a9370352caf59960d0116f60",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "source_text_matches_ignoring_line_ending_and_trailing_space": true
+    },
+    {
+      "client_id": "29a28efd-c998-45e2-a57c-4a751e779e66",
+      "client_name": "PSG Bloemfontein",
+      "guide_id": "558399fe-251b-42f1-af71-cb9c02c27f9c",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "row_hash": "32f662841a4a4e6060a6f82ee1963732",
+      "live_content_sha256": "4cd3bf782c17afd10dbe59b1d88920bfd010a4d3dc7db9546fcb6b5c7f66a122",
+      "frozen_content_sha256": "6df31267343a11ec57dfb4fa34dceffe6ae3aa3289ec52bd085b4f4d201e395b",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/PSG-BLOEMFONTEIN-CHATGPT-PROJECT-MIGRATION-AUDIT-2026-09-08.md",
+      "source_revision": "322b28b6f63ec222517d3cb4190e4abfda4ac843",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "source_text_matches_ignoring_line_ending_and_trailing_space": true
+    },
+    {
+      "client_id": "4f6106de-c437-404e-8cef-fbe848de0665",
+      "client_name": "RC-Polypipe",
+      "guide_id": "dc022004-517b-4761-a118-6eb9404b5477",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "row_hash": "7e1e9d678c05aee4655628f9d0923870",
+      "live_content_sha256": "696f7f0b6a9c7e4822eb4ee5d70aac37bcc0294eac9252c49269cb62c756e881",
+      "frozen_content_sha256": "696f7f0b6a9c7e4822eb4ee5d70aac37bcc0294eac9252c49269cb62c756e881",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/RC-POLYPIPE-CHATGPT-PROJECT-MIGRATION-AUDIT-2026-09-08.md",
+      "source_revision": "16473b409df988723f8b134ae4c0703492517497",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "source_text_matches_ignoring_line_ending_and_trailing_space": true
+    },
+    {
+      "client_id": "cdb11a82-339e-4b46-9b09-bde1a23efeaf",
+      "client_name": "Red Oak",
+      "guide_id": "55c8774b-c8a1-4e15-8f35-538de5234580",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "row_hash": "fe114f25f3d027f11198d3258082a0a4",
+      "live_content_sha256": "14844a75c5da198a91388c6f7f3ad3437fa4d7711c0371ed3d4eb29ecaa811d5",
+      "frozen_content_sha256": "925d4e5c12ea724936f282b3562634535ceda04d824839103567a042aaafec89",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/RED-OAK-CHATGPT-PROJECT-MIGRATION-AUDIT-2026-09-08.md",
+      "source_revision": "aaca2bffb70bf41e92968cd5275b300dbad1ef10",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "source_text_matches_ignoring_line_ending_and_trailing_space": true
+    },
+    {
+      "client_id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+      "client_name": "Supa Quick BFN",
+      "guide_id": "59416761-98d2-4f92-abb5-aef04adada83",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "row_hash": "ed0617f604a793c01048472a33202d9a",
+      "live_content_sha256": "77135a1fafa79ee84fa9d07359482c42bcc41ef5ac0aa0214ddbec11ca262bae",
+      "frozen_content_sha256": "d75cccae30df8201ac8cfaa90547d31503d59c17cea97b2f3a34c102c0c0cf48",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/SUPA-QUICK-BFN-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "97ec81d5302289c1968605221a3a82f473a0d495",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "source_text_matches_ignoring_line_ending_and_trailing_space": true
+    },
+    {
+      "client_id": "a36ba938-e9dc-4ecf-bb67-4853608b1c01",
+      "client_name": "TBS Brokers",
+      "guide_id": "c6f04664-a1ec-4182-ab3f-172442629523",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "row_hash": "1a336d3e740ca6aa8c8d040de1e34b87",
+      "live_content_sha256": "3476481ebf106ed0ab2d9bf2f60f0a546a26a959ef78a04b8f3ba7d09a16c4da",
+      "frozen_content_sha256": "48459a66a3b3080402b32e5d5f0dad835aa81a602ed6db2ec5ab8ecc6177790c",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/TBS-BROKERS-CHATGPT-PROJECT-MIGRATION-AUDIT-2026-09-08.md",
+      "source_revision": "21c872945c4607b856caefccd53580c09d86e694",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "source_text_matches_ignoring_line_ending_and_trailing_space": true
+    },
+    {
+      "client_id": "e2ad6d57-5b06-46e1-b75b-b67f017d57f1",
+      "client_name": "Toyota Bloemfontein",
+      "guide_id": "4e6b75d9-9a2b-4bd6-8376-b75bca646ecd",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "row_hash": "ac93333e5ed436329d7e2c3fe7268c39",
+      "live_content_sha256": "de37d893ddceef85496c212c6c3bc6d035ae08dd95678d3c2bca0e81dbcc79f9",
+      "frozen_content_sha256": "8a5b1d28e29a8ea5ca5dbf41193ff08f8260aefd1d38428f9eb896ef8f966230",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/TOYOTA-BLOEMFONTEIN-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "a2aa56af7cdc8c4a9c2ffb1a4dfeac18f6dca9ea",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "source_text_matches_ignoring_line_ending_and_trailing_space": true
+    },
+    {
+      "client_id": "504113ee-fba9-4993-807e-a86066615212",
+      "client_name": "WiseRide",
+      "guide_id": "653c6c4e-c8a7-4413-bb4c-19d83fdc50a0",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "row_hash": "4bab28d2206b88842c45bf69c9f907bb",
+      "live_content_sha256": "99980bd39256543c9c98a8ef82d673a9a0a2d0c761c5248bf6a0e87d25273433",
+      "frozen_content_sha256": "19f0783d4cd680d396a2155ddf14551e5a4091dc6a2756511e2fd8b6fb31e5d3",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/WISERIDE-CLIENT-INTELLIGENCE-2026-09.md",
+      "source_revision": "16204a8d3d16bf44a59085321d1483821e99fab9",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "source_text_matches_ignoring_line_ending_and_trailing_space": true
+    }
+  ]
+}

@@ -28,6 +28,62 @@ function target() {
     published_version: null, version: 1, strategy_data: strategy }
 }
 
+test('proposal merge preserves paragraph breaks in authored strategy and titled concepts', () => {
+  const spaced = structuredClone(proposal)
+  spaced.goldStandard.objective = 'Make the next project enquiry clear.\n\nShow the application and invite a useful conversation.'
+  spaced.actionPlan.professional_video = ['Show the job.\n\nExplain one visible project step and invite the customer to share their brief.']
+  const merged = mergeMonthlyStrategyProposal(target(), spaced)
+  assert.equal(merged.state, 'applied')
+  assert.equal(merged.strategyData.goldStandard.objective, spaced.goldStandard.objective)
+  assert.deepEqual(merged.strategyData.actionPlan.professional_video.items, spaced.actionPlan.professional_video)
+})
+
+test('paragraph normalization bounds empty lines without flattening the reading structure', () => {
+  const spaced = structuredClone(proposal)
+  spaced.goldStandard.objective = '  Explain the project need.\r\n \r\n\r\n\r\nInvite a clear enquiry.  '
+  const merged = mergeMonthlyStrategyProposal(target(), spaced)
+  assert.equal(merged.strategyData.goldStandard.objective, 'Explain the project need.\n\nInvite a clear enquiry.')
+})
+
+test('strategy prompt asks for positive supported reflection and readable beginning, middle and end', () => {
+  const prompt = buildMonthlyStrategyPrompt({ clientId, clientName: 'Fixture Workshop', strategyMonth,
+    draft: target().strategy_data, evidence: [] })
+  assert.match(prompt.system, /positive.*reflection/i)
+  assert.match(prompt.system, /beginning, middle and end/i)
+  assert.match(prompt.system, /blank lines/i)
+  assert.match(prompt.system, /not.*sales.*ROI/i)
+})
+
+test('spaced system-authored copy can refresh, while a staff word change still wins', () => {
+  const original = structuredClone(proposal)
+  original.goldStandard.objective = 'Explain the actual project.\n\nInvite a useful conversation.'
+  original.actionPlan.professional_video = ['Show the job.\n\nExplain the visible decision.']
+  const row = target()
+  row.strategy_data.goldStandard.objective = original.goldStandard.objective
+  row.strategy_data.actionPlan.professional_video.items = structuredClone(original.actionPlan.professional_video)
+  const previous = { proposedGoldStandard: original.goldStandard, proposedActionPlan: original.actionPlan }
+  const refreshed = mergeMonthlyStrategyProposal(row, proposal, previous)
+  assert.equal(refreshed.strategyData.goldStandard.objective, proposal.goldStandard.objective)
+  assert.deepEqual(refreshed.strategyData.actionPlan.professional_video.items, proposal.actionPlan.professional_video)
+
+  row.strategy_data.goldStandard.objective += ' Staff selected a different audience.'
+  row.strategy_data.actionPlan.professional_video.items[0] += ' Staff chose the workshop.'
+  const protectedCopy = mergeMonthlyStrategyProposal(row, proposal, previous)
+  assert.equal(protectedCopy.strategyData.goldStandard.objective, row.strategy_data.goldStandard.objective)
+  assert.deepEqual(protectedCopy.strategyData.actionPlan.professional_video.items, row.strategy_data.actionPlan.professional_video.items)
+  assert.ok(protectedCopy.conflicts.includes('goldStandard.objective'))
+  assert.ok(protectedCopy.conflicts.includes('actionPlan.professional_video.items'))
+})
+
+test('paragraphs retain the existing cleaned-character concept limit', () => {
+  const spaced = structuredClone(proposal)
+  spaced.actionPlan.professional_video = [`${'A'.repeat(149)}.\n\n${'B'.repeat(149)}`]
+  assert.equal(spaced.actionPlan.professional_video[0].replace(/\s+/g, ' ').length, 300)
+  const merged = mergeMonthlyStrategyProposal(target(), spaced)
+  assert.equal(merged.state, 'applied')
+  assert.deepEqual(merged.strategyData.actionPlan.professional_video.items, spaced.actionPlan.professional_video)
+})
+
 test('fills only empty exact-client strategy fields and confirmed formats', () => {
   const row = target()
   const before = structuredClone(row)

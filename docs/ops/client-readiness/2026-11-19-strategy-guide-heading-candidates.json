@@ -1,0 +1,3011 @@
+{
+  "kind": "ZERO-WRITE editorial QA candidates; not a canonical strategy store or apply manifest",
+  "date": "2026-11-19",
+  "current_live_reviewed_drafts": 77,
+  "current_live_protected_published": 16,
+  "canonical_writes": 0,
+  "source_review_writes": 0,
+  "approvals": 0,
+  "publications": 0,
+  "selected_clients": 6,
+  "candidate_rows": 18,
+  "existing_rows": 12,
+  "new_row_candidates": 6,
+  "runtime_release_required": true,
+  "rows": [
+    {
+      "client_id": "1007e58b-3fea-4515-88b7-ddaa85763de6",
+      "client_name": "Hino Trucks",
+      "strategy_month": "2026-11-01",
+      "canonical_state": "blocked",
+      "canonical_blockers": [
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ],
+      "existing_strategy_id": "96afeb58-0a01-493e-bb64-2fdb2b91fc6a",
+      "expected_version": 1,
+      "expected_row_hash": "99393e15696bcd92a97fc929aa7c261b",
+      "current_brief_fingerprint": "8b7603c7264867059af374890146aa49b5da62d38c0219a4281ed68f468a1dd2",
+      "guide_id": "b80d3ca3-9bd7-43bc-822c-53a94be1ab68",
+      "guide_hash": "3988a229845933527272f009717cfee8",
+      "client_hash": "fd4bf4f627f546f94f9546647651bf2f",
+      "confirmed_scope": {
+        "professional_video": 2,
+        "reels": null,
+        "photo_content": null,
+        "design_poster": null,
+        "animated_poster": null,
+        "campaign_recommendation": null
+      },
+      "source_ids": {
+        "previous_monthly_strategy_id": null,
+        "previous_report_id": null,
+        "client_package_id": "f9ecd2e7-fa2d-47c8-a7d3-444cf47e20a2",
+        "deliverable_ids": [],
+        "client_calendar_event_ids": [],
+        "approved_client_context_update_ids": [],
+        "client_guide_id": "b80d3ca3-9bd7-43bc-822c-53a94be1ab68",
+        "marketing_library_skill_card_ids": [],
+        "marketing_library_cards": [],
+        "package_verification_confirmed_at": "2026-09-23T14:23:38.012856+00:00",
+        "package_verification_actor_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee",
+        "package_source_references": [
+          "client_package:f9ecd2e7-fa2d-47c8-a7d3-444cf47e20a2 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:7978d77a-7b6b-40a8-b977-7bbddb2f463b (Video 1; 1/month)",
+          "package_template:9502effd-403d-4c24-81fc-7889d98c8523 (Video 2; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "source_windows": {
+        "previous_report_period_end": null,
+        "previous_strategy_month": null,
+        "client_calendar_events": [],
+        "incorporated_context_updates": [],
+        "confirmed_package_scope": {
+          "professional_video": 2,
+          "reels": null,
+          "photo_content": null,
+          "design_poster": null,
+          "animated_poster": null,
+          "campaign_recommendation": null
+        }
+      },
+      "candidate_data": {
+        "version": 1,
+        "clientDirection": [],
+        "clientRequestNotes": "",
+        "topContent": {
+          "autoCaption": null,
+          "autoPlatform": null,
+          "autoMetricLabel": null,
+          "autoMetricValue": null,
+          "autoImageUrl": null,
+          "coverImageUrl": "",
+          "contentType": "",
+          "whyItWorked": [],
+          "whatThisTellsUs": ""
+        },
+        "strategyDrivers": [
+          "Use Hino Bloemfontein as the normal local customer-facing identity",
+          "The current CFAO page title includes Hino Bloemfontein (Oranje). Treat Oranje as source/locator history, not the default creative name",
+          "Keep Hino Trucks separate from Toyota Bloemfontein",
+          "Hino South Africa/global material is manufacturer context, not proof of local Hino Bloemfontein stock, services or offers",
+          "rooted in real dealership, sales, workshop, parts or truck situations",
+          "short and visually driven, normally around 30–40 seconds when the brief calls for a fun reel"
+        ],
+        "strategyGoingForward": "1. Open with the actual truck walk-around.\n\n2. Follow with a Sales, Workshop and Parts conversation.\n\n3. Invite the load, route and intended-use question.",
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "The working-vehicle question.\n\nUse an actual truck to show the details a business buyer wants to discuss.",
+              "Three departments, one operator question.\n\nLet Sales, Workshop and Parts explain their distinct roles."
+            ],
+            "notes": ""
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "design_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        },
+        "clientActionsRequired": [
+          "Choose the actual trucks and department spokespeople to feature.",
+          "Review each application or ownership explanation with the local team."
+        ],
+        "calendarSelections": [
+          {
+            "eventId": "2026-11-theme-festive-black-friday-build-up",
+            "title": "Festive & Black Friday build-up",
+            "date": null,
+            "use": false,
+            "note": ""
+          },
+          {
+            "eventId": "2026-11-27-black-friday",
+            "title": "Black Friday",
+            "date": "2026-11-27",
+            "use": false,
+            "note": ""
+          }
+        ],
+        "goldStandard": {
+          "objective": "Help November buyers explain the job a truck must do.\n\nConnect an actual walk-around with the people who can discuss the application.",
+          "audienceAndIntent": "Local truck operators and business owners planning a working vehicle or ownership question.\n\nPeople who want to discuss the task with Hino Bloemfontein.",
+          "coreMessage": "The job comes before the truck question.\n\nShow a real detail and invite the operator’s own brief.",
+          "formatsAndRationale": "2 videos — The working-vehicle question; Three departments, one operator question.",
+          "testAndChange": "Your truck walk-arounds and department stories give the business a practical human face.\n\nBuild on those real details with a clear operator question.\n\nUse the questions people bring to the team to choose the next useful explanation.",
+          "pillarsAndHooks": "THE JOB\nDescribe the work.\n\nTHE TRUCK\nSee the actual example.\n\nTHE TEAM\nAsk the local department.",
+          "mustAvoid": "Confident, clear and grounded in the actual truck.\n\nLet the team’s personality support the practical point.",
+          "channelIntegration": "Use Hino Bloemfontein’s own existing channels and department enquiry routes.\n\nConnect each truck or ownership question with the appropriate local team.",
+          "successSignals": "Enquiries describing the intended job or vehicle.\n\nOperators asking a specific service or parts question.",
+          "nextMonthGamePlan": "START\nOpen with the actual truck walk-around.\n\nBUILD\nFollow with a Sales, Workshop and Parts conversation.\n\nCLOSE\nInvite the load, route and intended-use question."
+        }
+      },
+      "write_status": "NOT_SAVED_NOT_APPROVED_NOT_PUBLISHED",
+      "required_next_step": "After reviewed runtime release, re-read canonical exact-month brief, require source admission and unchanged row/package/guide, then use the existing draft tool. Never replay this artifact as an apply manifest."
+    },
+    {
+      "client_id": "1007e58b-3fea-4515-88b7-ddaa85763de6",
+      "client_name": "Hino Trucks",
+      "strategy_month": "2026-12-01",
+      "canonical_state": "blocked",
+      "canonical_blockers": [
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ],
+      "existing_strategy_id": "cbfec7e9-172f-4e41-892c-c10a6a48b502",
+      "expected_version": 1,
+      "expected_row_hash": "23710e1de5328521f8282abb73d98e34",
+      "current_brief_fingerprint": "937565fa0380e6abf1abc789d8ebd2f6a075b6057828262471cd9375534c9fd8",
+      "guide_id": "b80d3ca3-9bd7-43bc-822c-53a94be1ab68",
+      "guide_hash": "3988a229845933527272f009717cfee8",
+      "client_hash": "fd4bf4f627f546f94f9546647651bf2f",
+      "confirmed_scope": {
+        "professional_video": 2,
+        "reels": null,
+        "photo_content": null,
+        "design_poster": null,
+        "animated_poster": null,
+        "campaign_recommendation": null
+      },
+      "source_ids": {
+        "previous_monthly_strategy_id": null,
+        "previous_report_id": null,
+        "client_package_id": "f9ecd2e7-fa2d-47c8-a7d3-444cf47e20a2",
+        "deliverable_ids": [],
+        "client_calendar_event_ids": [],
+        "approved_client_context_update_ids": [],
+        "client_guide_id": "b80d3ca3-9bd7-43bc-822c-53a94be1ab68",
+        "marketing_library_skill_card_ids": [],
+        "marketing_library_cards": [],
+        "package_verification_confirmed_at": "2026-09-23T14:23:38.012856+00:00",
+        "package_verification_actor_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee",
+        "package_source_references": [
+          "client_package:f9ecd2e7-fa2d-47c8-a7d3-444cf47e20a2 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:7978d77a-7b6b-40a8-b977-7bbddb2f463b (Video 1; 1/month)",
+          "package_template:9502effd-403d-4c24-81fc-7889d98c8523 (Video 2; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "source_windows": {
+        "previous_report_period_end": null,
+        "previous_strategy_month": null,
+        "client_calendar_events": [],
+        "incorporated_context_updates": [],
+        "confirmed_package_scope": {
+          "professional_video": 2,
+          "reels": null,
+          "photo_content": null,
+          "design_poster": null,
+          "animated_poster": null,
+          "campaign_recommendation": null
+        }
+      },
+      "candidate_data": {
+        "version": 1,
+        "clientDirection": [],
+        "clientRequestNotes": "",
+        "topContent": {
+          "autoCaption": null,
+          "autoPlatform": null,
+          "autoMetricLabel": null,
+          "autoMetricValue": null,
+          "autoImageUrl": null,
+          "coverImageUrl": "",
+          "contentType": "",
+          "whyItWorked": [],
+          "whatThisTellsUs": ""
+        },
+        "strategyDrivers": [],
+        "strategyGoingForward": "1. Start with a genuine operator question.\n\n2. Follow with the ownership handover story.\n\n3. Use the responses to choose the next practical explanation.",
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "What do you want to ask about the truck?\n\nA team member explains how to raise an ownership question for the actual vehicle.",
+              "From sales conversation to ownership question.\n\nShow how the operator can identify the relevant department."
+            ],
+            "notes": ""
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "design_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        },
+        "clientActionsRequired": [
+          "Choose the actual trucks and department spokespeople to feature.",
+          "Review each application or ownership explanation with the local team."
+        ],
+        "calendarSelections": [
+          {
+            "eventId": "2026-12-theme-festive-season",
+            "title": "Festive season",
+            "date": null,
+            "use": false,
+            "note": ""
+          },
+          {
+            "eventId": "2026-12-16-day-of-reconciliation",
+            "title": "Day of Reconciliation",
+            "date": "2026-12-16",
+            "use": false,
+            "note": ""
+          },
+          {
+            "eventId": "2026-12-25-christmas-day",
+            "title": "Christmas Day",
+            "date": "2026-12-25",
+            "use": false,
+            "note": ""
+          },
+          {
+            "eventId": "2026-12-26-day-of-goodwill",
+            "title": "Day of Goodwill",
+            "date": "2026-12-26",
+            "use": false,
+            "note": ""
+          }
+        ],
+        "goldStandard": {
+          "objective": "Help owners prepare a useful care or ownership conversation in December.\n\nBring the actual vehicle and everyday operating question into focus.",
+          "audienceAndIntent": "Local truck operators and business owners planning a working vehicle or ownership question.\n\nPeople who want to discuss the task with Hino Bloemfontein.",
+          "coreMessage": "One ownership question at a time.\n\nLet the real truck and the team explain the next conversation.",
+          "formatsAndRationale": "2 videos — What do you want to ask about the truck?; From sales conversation to ownership question.",
+          "testAndChange": "Your truck walk-arounds and department stories give the business a practical human face.\n\nBuild on those real details with a clear operator question.\n\nUse the questions people bring to the team to choose the next useful explanation.",
+          "pillarsAndHooks": "THE OWNER\nHear the practical question.\n\nTHE VEHICLE\nIdentify the actual example.\n\nTHE FOLLOW-UP\nSpeak to the relevant team.",
+          "mustAvoid": "Confident, clear and grounded in the actual truck.\n\nLet the team’s personality support the practical point.",
+          "channelIntegration": "Use Hino Bloemfontein’s own existing channels and department enquiry routes.\n\nConnect each truck or ownership question with the appropriate local team.",
+          "successSignals": "Enquiries describing the intended job or vehicle.\n\nOperators asking a specific service or parts question.",
+          "nextMonthGamePlan": "START\nStart with a genuine operator question.\n\nBUILD\nFollow with the ownership handover story.\n\nCLOSE\nUse the responses to choose the next practical explanation."
+        }
+      },
+      "write_status": "NOT_SAVED_NOT_APPROVED_NOT_PUBLISHED",
+      "required_next_step": "After reviewed runtime release, re-read canonical exact-month brief, require source admission and unchanged row/package/guide, then use the existing draft tool. Never replay this artifact as an apply manifest."
+    },
+    {
+      "client_id": "1007e58b-3fea-4515-88b7-ddaa85763de6",
+      "client_name": "Hino Trucks",
+      "strategy_month": "2027-01-01",
+      "canonical_state": "blocked",
+      "canonical_blockers": [
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ],
+      "existing_strategy_id": null,
+      "expected_version": null,
+      "expected_row_hash": null,
+      "current_brief_fingerprint": "8a462afce55a698064fd0137598a5c8e7b9e82b717bb22d17cbe5fccaa65de6a",
+      "guide_id": "b80d3ca3-9bd7-43bc-822c-53a94be1ab68",
+      "guide_hash": "3988a229845933527272f009717cfee8",
+      "client_hash": "fd4bf4f627f546f94f9546647651bf2f",
+      "confirmed_scope": {
+        "professional_video": 2,
+        "reels": null,
+        "photo_content": null,
+        "design_poster": null,
+        "animated_poster": null,
+        "campaign_recommendation": null
+      },
+      "source_ids": {
+        "previous_monthly_strategy_id": null,
+        "previous_report_id": null,
+        "client_package_id": "f9ecd2e7-fa2d-47c8-a7d3-444cf47e20a2",
+        "deliverable_ids": [],
+        "client_calendar_event_ids": [],
+        "approved_client_context_update_ids": [],
+        "client_guide_id": "b80d3ca3-9bd7-43bc-822c-53a94be1ab68",
+        "marketing_library_skill_card_ids": [],
+        "marketing_library_cards": [],
+        "package_verification_confirmed_at": "2026-09-23T14:23:38.012856+00:00",
+        "package_verification_actor_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee",
+        "package_source_references": [
+          "client_package:f9ecd2e7-fa2d-47c8-a7d3-444cf47e20a2 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:7978d77a-7b6b-40a8-b977-7bbddb2f463b (Video 1; 1/month)",
+          "package_template:9502effd-403d-4c24-81fc-7889d98c8523 (Video 2; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "source_windows": {
+        "previous_report_period_end": null,
+        "previous_strategy_month": null,
+        "client_calendar_events": [],
+        "incorporated_context_updates": [],
+        "confirmed_package_scope": {
+          "professional_video": 2,
+          "reels": null,
+          "photo_content": null,
+          "design_poster": null,
+          "animated_poster": null,
+          "campaign_recommendation": null
+        }
+      },
+      "candidate_data": {
+        "version": 1,
+        "clientDirection": [],
+        "clientRequestNotes": "",
+        "topContent": {
+          "autoCaption": null,
+          "autoPlatform": null,
+          "autoMetricLabel": null,
+          "autoMetricValue": null,
+          "autoImageUrl": null,
+          "coverImageUrl": "",
+          "contentType": "",
+          "whyItWorked": [],
+          "whatThisTellsUs": ""
+        },
+        "strategyDrivers": [],
+        "strategyGoingForward": "1. Open with a vehicle-identification explanation.\n\n2. Follow with a business-task briefing film.\n\n3. Close by inviting specific vehicle and work details.",
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "Identify the vehicle for the enquiry.\n\nShow the reference information an operator can bring to a parts conversation.",
+              "Describe the business task.\n\nA local team member turns load, route and intended use into a clear application brief."
+            ],
+            "notes": ""
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "design_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        },
+        "clientActionsRequired": [
+          "Choose the actual trucks and department spokespeople to feature.",
+          "Review each application or ownership explanation with the local team."
+        ],
+        "calendarSelections": [],
+        "goldStandard": {
+          "objective": "Make January truck and parts enquiries easier to describe.\n\nHelp operators identify the vehicle and the work behind the request.",
+          "audienceAndIntent": "Local truck operators and business owners planning a working vehicle or ownership question.\n\nPeople who want to discuss the task with Hino Bloemfontein.",
+          "coreMessage": "Which truck, and what work?\n\nBring the identifying details into the conversation.",
+          "formatsAndRationale": "2 videos — Identify the vehicle for the enquiry; Describe the business task.",
+          "testAndChange": "Your truck walk-arounds and department stories give the business a practical human face.\n\nBuild on those real details with a clear operator question.\n\nUse the questions people bring to the team to choose the next useful explanation.",
+          "pillarsAndHooks": "IDENTIFY\nName the vehicle.\n\nDESCRIBE\nExplain the task.\n\nDISCUSS\nAsk the application or parts question.",
+          "mustAvoid": "Confident, clear and grounded in the actual truck.\n\nLet the team’s personality support the practical point.",
+          "channelIntegration": "Use Hino Bloemfontein’s own existing channels and department enquiry routes.\n\nConnect each truck or ownership question with the appropriate local team.",
+          "successSignals": "Enquiries describing the intended job or vehicle.\n\nOperators asking a specific service or parts question.",
+          "nextMonthGamePlan": "START\nOpen with a vehicle-identification explanation.\n\nBUILD\nFollow with a business-task briefing film.\n\nCLOSE\nClose by inviting specific vehicle and work details."
+        }
+      },
+      "write_status": "NOT_SAVED_NOT_APPROVED_NOT_PUBLISHED",
+      "required_next_step": "After reviewed runtime release, re-read canonical exact-month brief, require source admission and unchanged row/package/guide, then use the existing draft tool. Never replay this artifact as an apply manifest."
+    },
+    {
+      "client_id": "a5eab798-3e00-44cc-947e-463386fdac39",
+      "client_name": "Jenkor",
+      "strategy_month": "2026-11-01",
+      "canonical_state": "blocked",
+      "canonical_blockers": [
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ],
+      "existing_strategy_id": "9c109788-cba9-4d39-8cf0-521e4cb02b70",
+      "expected_version": 1,
+      "expected_row_hash": "a0ac75cc492186f0826136f1123988ef",
+      "current_brief_fingerprint": "722664e3e0dbbfacba29e3345b70f6076f4ab2f5e6900e91a9562bc40e9d9730",
+      "guide_id": "fe7be999-7e24-4cbf-85d3-b7b9c1a64611",
+      "guide_hash": "9c7aac2abe2cb9866696c51e3a95fa7e",
+      "client_hash": "4206eb0721598b3e7952fd29277512d1",
+      "confirmed_scope": {
+        "professional_video": 1,
+        "reels": null,
+        "photo_content": null,
+        "design_poster": 3,
+        "animated_poster": null,
+        "campaign_recommendation": null
+      },
+      "source_ids": {
+        "previous_monthly_strategy_id": null,
+        "previous_report_id": null,
+        "client_package_id": "4e05ce5c-8b5c-47c5-8cb9-bc55efababc9",
+        "deliverable_ids": [],
+        "client_calendar_event_ids": [],
+        "approved_client_context_update_ids": [],
+        "client_guide_id": "fe7be999-7e24-4cbf-85d3-b7b9c1a64611",
+        "marketing_library_skill_card_ids": [],
+        "marketing_library_cards": [],
+        "package_verification_confirmed_at": "2026-09-23T14:24:16.563937+00:00",
+        "package_verification_actor_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee",
+        "package_source_references": [
+          "client_package:4e05ce5c-8b5c-47c5-8cb9-bc55efababc9 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:b5b585d1-4bf8-40cc-b9d7-59cd414cee90 (Video 1; 1/month)",
+          "package_template:8fec65ae-b3d8-4d27-9fa7-de5db320df64 (DP1; 1/month)",
+          "package_template:edd85c0c-4adc-4393-a381-f6b7a077d1d6 (DP2; 1/month)",
+          "package_template:5b406d10-61f5-40e9-a00b-97f4b53d330d (DP3; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "source_windows": {
+        "previous_report_period_end": null,
+        "previous_strategy_month": null,
+        "client_calendar_events": [],
+        "incorporated_context_updates": [],
+        "confirmed_package_scope": {
+          "professional_video": 1,
+          "reels": null,
+          "photo_content": null,
+          "design_poster": 3,
+          "animated_poster": null,
+          "campaign_recommendation": null
+        }
+      },
+      "candidate_data": {
+        "version": 1,
+        "clientDirection": [],
+        "clientRequestNotes": "",
+        "topContent": {
+          "autoCaption": null,
+          "autoPlatform": null,
+          "autoMetricLabel": null,
+          "autoMetricValue": null,
+          "autoImageUrl": null,
+          "coverImageUrl": "",
+          "contentType": "",
+          "whyItWorked": [],
+          "whatThisTellsUs": ""
+        },
+        "strategyDrivers": [
+          "21 Lekkerwater Road, Sunnydale, Fish Hoek",
+          "21 Lekkerwater Rd, Capri, Cape Town, 7975",
+          "explicit current client / CG Production House correction",
+          "current official Jenkor website",
+          "exact current authoritative social/listing/supplier evidence where relevant",
+          "current Jenkor Dynamics intelligence / this Guide"
+        ],
+        "strategyGoingForward": "1. Open with the yard and material comparison.\n\n2. Use three posters to separate product, application and quote details.\n\n3. Invite a specific project enquiry.",
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "From yard to project question.\n\nShow actual brick, block and paving samples and the information a buyer can discuss."
+            ],
+            "notes": ""
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "Which material?\n\nName the brick, block or paving question.",
+              "What is the intended use?\n\nDescribe the project and the material detail.",
+              "Prepare the quotation enquiry.\n\nBring product, quantities and site information."
+            ],
+            "notes": ""
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        },
+        "clientActionsRequired": [
+          "Choose the real materials and yard activity to feature.",
+          "Share the information the team needs for a project quotation."
+        ],
+        "calendarSelections": [
+          {
+            "eventId": "2026-11-theme-festive-black-friday-build-up",
+            "title": "Festive & Black Friday build-up",
+            "date": null,
+            "use": false,
+            "note": ""
+          },
+          {
+            "eventId": "2026-11-27-black-friday",
+            "title": "Black Friday",
+            "date": "2026-11-27",
+            "use": false,
+            "note": ""
+          }
+        ],
+        "goldStandard": {
+          "objective": "Help November buyers compare materials through a real project use.\n\nMake the brick, block or paving question clear before the quotation conversation.",
+          "audienceAndIntent": "Builders, contractors and homeowners choosing materials for a real project.\n\nPeople preparing a product or order enquiry with Jenkor Brick Sales.",
+          "coreMessage": "Which material is the project asking for?\n\nShow the actual sample and the job it is being considered for.",
+          "formatsAndRationale": "1 video — From yard to project question.\n\n3 posters — Which material?; What is the intended use?; Prepare the quotation enquiry.",
+          "testAndChange": "Your yard, product and loading stories make the work tangible.\n\nBuild on those details by helping the customer describe the project.\n\nUse the questions people bring to the team to choose the next useful explanation.",
+          "pillarsAndHooks": "THE MATERIAL\nSee the real sample.\n\nTHE PROJECT\nExplain the use.\n\nTHE ENQUIRY\nBring the quantities and question.",
+          "mustAvoid": "Practical, specific and easy to follow.\n\nUse the real material and the buyer’s task as the hook.",
+          "channelIntegration": "Connect Jenkor’s existing channels with its own quote and order-enquiry routes.\n\nKeep product names and project questions consistent.",
+          "successSignals": "Enquiries naming the material and project use.\n\nCustomers sharing quantities, a site location and the detail they need to discuss.",
+          "nextMonthGamePlan": "START\nOpen with the yard and material comparison.\n\nBUILD\nUse three posters to separate product, application and quote details.\n\nCLOSE\nInvite a specific project enquiry."
+        }
+      },
+      "write_status": "NOT_SAVED_NOT_APPROVED_NOT_PUBLISHED",
+      "required_next_step": "After reviewed runtime release, re-read canonical exact-month brief, require source admission and unchanged row/package/guide, then use the existing draft tool. Never replay this artifact as an apply manifest."
+    },
+    {
+      "client_id": "a5eab798-3e00-44cc-947e-463386fdac39",
+      "client_name": "Jenkor",
+      "strategy_month": "2026-12-01",
+      "canonical_state": "blocked",
+      "canonical_blockers": [
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ],
+      "existing_strategy_id": "550db1a7-38dd-46a2-b442-f7ffd05c1733",
+      "expected_version": 1,
+      "expected_row_hash": "aff24cd9b418e43a4750fdcd3859b2e7",
+      "current_brief_fingerprint": "1c3afe676ab25a1d46b6f7c4bf95c9ab68e20d70780108f29f0d14384229f34b",
+      "guide_id": "fe7be999-7e24-4cbf-85d3-b7b9c1a64611",
+      "guide_hash": "9c7aac2abe2cb9866696c51e3a95fa7e",
+      "client_hash": "4206eb0721598b3e7952fd29277512d1",
+      "confirmed_scope": {
+        "professional_video": 1,
+        "reels": null,
+        "photo_content": null,
+        "design_poster": 3,
+        "animated_poster": null,
+        "campaign_recommendation": null
+      },
+      "source_ids": {
+        "previous_monthly_strategy_id": null,
+        "previous_report_id": null,
+        "client_package_id": "4e05ce5c-8b5c-47c5-8cb9-bc55efababc9",
+        "deliverable_ids": [],
+        "client_calendar_event_ids": [],
+        "approved_client_context_update_ids": [],
+        "client_guide_id": "fe7be999-7e24-4cbf-85d3-b7b9c1a64611",
+        "marketing_library_skill_card_ids": [],
+        "marketing_library_cards": [],
+        "package_verification_confirmed_at": "2026-09-23T14:24:16.563937+00:00",
+        "package_verification_actor_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee",
+        "package_source_references": [
+          "client_package:4e05ce5c-8b5c-47c5-8cb9-bc55efababc9 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:b5b585d1-4bf8-40cc-b9d7-59cd414cee90 (Video 1; 1/month)",
+          "package_template:8fec65ae-b3d8-4d27-9fa7-de5db320df64 (DP1; 1/month)",
+          "package_template:edd85c0c-4adc-4393-a381-f6b7a077d1d6 (DP2; 1/month)",
+          "package_template:5b406d10-61f5-40e9-a00b-97f4b53d330d (DP3; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "source_windows": {
+        "previous_report_period_end": null,
+        "previous_strategy_month": null,
+        "client_calendar_events": [],
+        "incorporated_context_updates": [],
+        "confirmed_package_scope": {
+          "professional_video": 1,
+          "reels": null,
+          "photo_content": null,
+          "design_poster": 3,
+          "animated_poster": null,
+          "campaign_recommendation": null
+        }
+      },
+      "candidate_data": {
+        "version": 1,
+        "clientDirection": [],
+        "clientRequestNotes": "",
+        "topContent": {
+          "autoCaption": null,
+          "autoPlatform": null,
+          "autoMetricLabel": null,
+          "autoMetricValue": null,
+          "autoImageUrl": null,
+          "coverImageUrl": "",
+          "contentType": "",
+          "whyItWorked": [],
+          "whatThisTellsUs": ""
+        },
+        "strategyDrivers": [],
+        "strategyGoingForward": "1. Start with the real order-preparation film.\n\n2. Explain the list and site information in companion cards.\n\n3. Close with a clear quote or logistics question.",
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "Preparing the materials conversation.\n\nFollow genuine yard or loading activity and explain the order details to discuss."
+            ],
+            "notes": ""
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "What is on the list?\n\nIdentify the actual products and quantities.",
+              "Which site is it for?\n\nBring the location and practical access question privately.",
+              "What needs discussing?\n\nRaise the order or delivery question with Jenkor."
+            ],
+            "notes": ""
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        },
+        "clientActionsRequired": [
+          "Choose the real materials and yard activity to feature.",
+          "Share the information the team needs for a project quotation."
+        ],
+        "calendarSelections": [
+          {
+            "eventId": "2026-12-theme-festive-season",
+            "title": "Festive season",
+            "date": null,
+            "use": false,
+            "note": ""
+          },
+          {
+            "eventId": "2026-12-16-day-of-reconciliation",
+            "title": "Day of Reconciliation",
+            "date": "2026-12-16",
+            "use": false,
+            "note": ""
+          },
+          {
+            "eventId": "2026-12-25-christmas-day",
+            "title": "Christmas Day",
+            "date": "2026-12-25",
+            "use": false,
+            "note": ""
+          },
+          {
+            "eventId": "2026-12-26-day-of-goodwill",
+            "title": "Day of Goodwill",
+            "date": "2026-12-26",
+            "use": false,
+            "note": ""
+          }
+        ],
+        "goldStandard": {
+          "objective": "Make December bulk-order enquiries easier to prepare.\n\nUse real loading and yard activity to explain the handover from product list to order discussion.",
+          "audienceAndIntent": "Builders, contractors and homeowners choosing materials for a real project.\n\nPeople preparing a product or order enquiry with Jenkor Brick Sales.",
+          "coreMessage": "A useful order starts with clear details.\n\nConnect the materials list with the actual site question.",
+          "formatsAndRationale": "1 video — Preparing the materials conversation.\n\n3 posters — What is on the list?; Which site is it for?; What needs discussing?",
+          "testAndChange": "Your yard, product and loading stories make the work tangible.\n\nBuild on those details by helping the customer describe the project.\n\nUse the questions people bring to the team to choose the next useful explanation.",
+          "pillarsAndHooks": "THE LIST\nIdentify the products.\n\nTHE SITE\nDescribe the location.\n\nTHE HANDOVER\nDiscuss the order details.",
+          "mustAvoid": "Practical, specific and easy to follow.\n\nUse the real material and the buyer’s task as the hook.",
+          "channelIntegration": "Connect Jenkor’s existing channels with its own quote and order-enquiry routes.\n\nKeep product names and project questions consistent.",
+          "successSignals": "Enquiries naming the material and project use.\n\nCustomers sharing quantities, a site location and the detail they need to discuss.",
+          "nextMonthGamePlan": "START\nStart with the real order-preparation film.\n\nBUILD\nExplain the list and site information in companion cards.\n\nCLOSE\nClose with a clear quote or logistics question."
+        }
+      },
+      "write_status": "NOT_SAVED_NOT_APPROVED_NOT_PUBLISHED",
+      "required_next_step": "After reviewed runtime release, re-read canonical exact-month brief, require source admission and unchanged row/package/guide, then use the existing draft tool. Never replay this artifact as an apply manifest."
+    },
+    {
+      "client_id": "a5eab798-3e00-44cc-947e-463386fdac39",
+      "client_name": "Jenkor",
+      "strategy_month": "2027-01-01",
+      "canonical_state": "blocked",
+      "canonical_blockers": [
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ],
+      "existing_strategy_id": null,
+      "expected_version": null,
+      "expected_row_hash": null,
+      "current_brief_fingerprint": "44b0c487fd14231f2c3f27f4af2f14288013e23014f72257fd58a6e61433ba55",
+      "guide_id": "fe7be999-7e24-4cbf-85d3-b7b9c1a64611",
+      "guide_hash": "9c7aac2abe2cb9866696c51e3a95fa7e",
+      "client_hash": "4206eb0721598b3e7952fd29277512d1",
+      "confirmed_scope": {
+        "professional_video": 1,
+        "reels": null,
+        "photo_content": null,
+        "design_poster": 3,
+        "animated_poster": null,
+        "campaign_recommendation": null
+      },
+      "source_ids": {
+        "previous_monthly_strategy_id": null,
+        "previous_report_id": null,
+        "client_package_id": "4e05ce5c-8b5c-47c5-8cb9-bc55efababc9",
+        "deliverable_ids": [],
+        "client_calendar_event_ids": [],
+        "approved_client_context_update_ids": [],
+        "client_guide_id": "fe7be999-7e24-4cbf-85d3-b7b9c1a64611",
+        "marketing_library_skill_card_ids": [],
+        "marketing_library_cards": [],
+        "package_verification_confirmed_at": "2026-09-23T14:24:16.563937+00:00",
+        "package_verification_actor_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee",
+        "package_source_references": [
+          "client_package:4e05ce5c-8b5c-47c5-8cb9-bc55efababc9 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:b5b585d1-4bf8-40cc-b9d7-59cd414cee90 (Video 1; 1/month)",
+          "package_template:8fec65ae-b3d8-4d27-9fa7-de5db320df64 (DP1; 1/month)",
+          "package_template:edd85c0c-4adc-4393-a381-f6b7a077d1d6 (DP2; 1/month)",
+          "package_template:5b406d10-61f5-40e9-a00b-97f4b53d330d (DP3; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "source_windows": {
+        "previous_report_period_end": null,
+        "previous_strategy_month": null,
+        "client_calendar_events": [],
+        "incorporated_context_updates": [],
+        "confirmed_package_scope": {
+          "professional_video": 1,
+          "reels": null,
+          "photo_content": null,
+          "design_poster": 3,
+          "animated_poster": null,
+          "campaign_recommendation": null
+        }
+      },
+      "candidate_data": {
+        "version": 1,
+        "clientDirection": [],
+        "clientRequestNotes": "",
+        "topContent": {
+          "autoCaption": null,
+          "autoPlatform": null,
+          "autoMetricLabel": null,
+          "autoMetricValue": null,
+          "autoImageUrl": null,
+          "coverImageUrl": "",
+          "contentType": "",
+          "whyItWorked": [],
+          "whatThisTellsUs": ""
+        },
+        "strategyDrivers": [],
+        "strategyGoingForward": "1. Open with actual paving samples and patterns.\n\n2. Use three posters to separate the look, application and project brief.\n\n3. Invite the reference and measurements into the enquiry.",
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "A pattern in real materials.\n\nCompare actual paving samples and a clear project-reference question."
+            ],
+            "notes": ""
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "Which pattern interests you?\n\nBring a reference image or the actual sample.",
+              "Where will it be used?\n\nDescribe the intended area and application.",
+              "Prepare the project question.\n\nShare the reference and approximate measurements."
+            ],
+            "notes": ""
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        },
+        "clientActionsRequired": [
+          "Choose the real materials and yard activity to feature.",
+          "Share the information the team needs for a project quotation."
+        ],
+        "calendarSelections": [],
+        "goldStandard": {
+          "objective": "Help January project planners describe the paving or landscaping look they want.\n\nConnect actual samples and patterns with a useful product enquiry.",
+          "audienceAndIntent": "Builders, contractors and homeowners choosing materials for a real project.\n\nPeople preparing a product or order enquiry with Jenkor Brick Sales.",
+          "coreMessage": "Picture the pattern, then discuss the material.\n\nMake the project reference specific.",
+          "formatsAndRationale": "1 video — A pattern in real materials.\n\n3 posters — Which pattern interests you?; Where will it be used?; Prepare the project question.",
+          "testAndChange": "Your yard, product and loading stories make the work tangible.\n\nBuild on those details by helping the customer describe the project.\n\nUse the questions people bring to the team to choose the next useful explanation.",
+          "pillarsAndHooks": "THE LOOK\nChoose a real reference.\n\nTHE SAMPLE\nSee the material detail.\n\nTHE QUESTION\nDiscuss the intended application.",
+          "mustAvoid": "Practical, specific and easy to follow.\n\nUse the real material and the buyer’s task as the hook.",
+          "channelIntegration": "Connect Jenkor’s existing channels with its own quote and order-enquiry routes.\n\nKeep product names and project questions consistent.",
+          "successSignals": "Enquiries naming the material and project use.\n\nCustomers sharing quantities, a site location and the detail they need to discuss.",
+          "nextMonthGamePlan": "START\nOpen with actual paving samples and patterns.\n\nBUILD\nUse three posters to separate the look, application and project brief.\n\nCLOSE\nInvite the reference and measurements into the enquiry."
+        }
+      },
+      "write_status": "NOT_SAVED_NOT_APPROVED_NOT_PUBLISHED",
+      "required_next_step": "After reviewed runtime release, re-read canonical exact-month brief, require source admission and unchanged row/package/guide, then use the existing draft tool. Never replay this artifact as an apply manifest."
+    },
+    {
+      "client_id": "a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b",
+      "client_name": "Peyper Bonds",
+      "strategy_month": "2026-11-01",
+      "canonical_state": "blocked",
+      "canonical_blockers": [
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ],
+      "existing_strategy_id": "c18a9a68-d5a1-4289-bf69-8985135b4020",
+      "expected_version": 4,
+      "expected_row_hash": "5aa10828b1449b6cf288b2acfb74a2d4",
+      "current_brief_fingerprint": "1e2b0325ae8fde2a54ca15a9e3fa28c32dbacd569f8821bbafc32074fa665cc8",
+      "guide_id": "cd03b3c1-79bc-4ce8-9ff5-8de1bcbb5de7",
+      "guide_hash": "b89da172b6339c54f4d122e5a79ea63a",
+      "client_hash": "ca43d5887c9b7bea6619c0c87a5cd61d",
+      "confirmed_scope": {
+        "professional_video": 1,
+        "reels": null,
+        "photo_content": 3,
+        "design_poster": 3,
+        "animated_poster": null,
+        "campaign_recommendation": null
+      },
+      "source_ids": {
+        "previous_monthly_strategy_id": null,
+        "previous_report_id": "a2c5735e-69ab-4572-8234-662c1f2adffb",
+        "client_package_id": "c8a87ca5-179d-4068-9528-09a4c0fba868",
+        "deliverable_ids": [],
+        "client_calendar_event_ids": [],
+        "approved_client_context_update_ids": [],
+        "client_guide_id": "cd03b3c1-79bc-4ce8-9ff5-8de1bcbb5de7",
+        "marketing_library_skill_card_ids": [],
+        "marketing_library_cards": [],
+        "package_verification_confirmed_at": "2026-09-23T14:25:23.899664+00:00",
+        "package_verification_actor_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee",
+        "package_source_references": [
+          "client_package:c8a87ca5-179d-4068-9528-09a4c0fba868 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:77c6ae3a-2b45-4965-b48c-37e04346697d (Video 1; 1/month)",
+          "package_template:0694a51d-4711-465e-b5e5-ba3177e3997f (F1; 1/month)",
+          "package_template:ae75604f-ebd0-4168-a89b-70fe9235bdbd (F2; 1/month)",
+          "package_template:2a48fdaa-2478-481f-8b2f-611bb9609f1c (F3; 1/month)",
+          "package_template:a19bd288-5748-4b36-815d-8c51234893c9 (DP1; 1/month)",
+          "package_template:c42b5cdf-357f-4c25-83b6-38c834aaadff (DP2; 1/month)",
+          "package_template:c16bea84-e261-49de-9d6e-06adce9316a9 (DP3; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "source_windows": {
+        "previous_report_period_end": "2026-09-23",
+        "previous_strategy_month": null,
+        "client_calendar_events": [],
+        "incorporated_context_updates": [],
+        "confirmed_package_scope": {
+          "professional_video": 1,
+          "reels": null,
+          "photo_content": 3,
+          "design_poster": 3,
+          "animated_poster": null,
+          "campaign_recommendation": null
+        }
+      },
+      "candidate_data": {
+        "version": 1,
+        "clientDirection": [],
+        "clientRequestNotes": "",
+        "topContent": {
+          "autoCaption": "Behind every application is a real person who deserves clear answers and personal support. albert@peyperbonds.co.za hennie@peyperbonds.co.za ria@peyperbonds.co.za magdel@peyperbonds.co.za #PeyperBonds #RealPeopleRealService #HomeLoanSupport #FinanceMadeSimple #BondExperts",
+          "autoPlatform": "facebook",
+          "autoMetricLabel": null,
+          "autoMetricValue": null,
+          "autoImageUrl": null,
+          "coverImageUrl": "",
+          "contentType": "",
+          "whyItWorked": [],
+          "whatThisTellsUs": ""
+        },
+        "strategyDrivers": [],
+        "strategyGoingForward": "1. Open with the buyer-preparation explainer.\n\n2. Use three photos to make the people and process approachable.\n\n3. Close with stage, document and role questions.",
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "Before the application conversation.\n\nA team member explains how to describe the buyer’s stage and document question."
+            ],
+            "notes": ""
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "A conversation with the team.\n\nShow the person behind the explanation.",
+              "The document question.\n\nUse fictional demonstration papers.",
+              "The process discussion.\n\nMake a genuine staff conversation visible."
+            ],
+            "notes": ""
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "Where are you in the journey?\n\nTell the team which step you want to discuss.",
+              "Which document question?\n\nAsk about your own preparation privately.",
+              "Who does what?\n\nIntroduce the originator, bank and other parties clearly."
+            ],
+            "notes": ""
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        },
+        "clientActionsRequired": [
+          "Choose the buyer question and team spokesperson.",
+          "Review the process wording and demonstration materials before public use."
+        ],
+        "calendarSelections": [
+          {
+            "eventId": "2026-11-theme-festive-black-friday-build-up",
+            "title": "Festive & Black Friday build-up",
+            "date": null,
+            "use": false,
+            "note": ""
+          },
+          {
+            "eventId": "2026-11-27-black-friday",
+            "title": "Black Friday",
+            "date": "2026-11-27",
+            "use": false,
+            "note": ""
+          }
+        ],
+        "goldStandard": {
+          "objective": "Give first-time buyers a clear beginning to a property-finance conversation.\n\nHelp them identify the stage, documents and question they want to discuss.",
+          "audienceAndIntent": "Prospective home buyers preparing a property-finance conversation.\n\nPeople seeking clarity about documents, the process or an actual lender offer.",
+          "coreMessage": "Know the first question to ask.\n\nPreparation makes the conversation more useful.",
+          "formatsAndRationale": "1 video — Before the application conversation.\n\n3 photos — A conversation with the team; The document question; The process discussion.\n\n3 posters — Where are you in the journey?; Which document question?; Who does what?",
+          "testAndChange": "Your buyer-preparation and personal-service stories give customers a useful place to begin.\n\nKeep the next explanation focused on one step in their own journey.\n\nUse the questions people bring to the team to choose the next useful explanation.",
+          "pillarsAndHooks": "THE STAGE\nWhere are you in the journey?\n\nTHE DOCUMENTS\nWhat needs discussing?\n\nTHE PEOPLE\nWho handles which step?",
+          "mustAvoid": "Approachable, composed and clear.\n\nExplain the process in everyday language and invite individual questions privately.",
+          "channelIntegration": "Use Peyper Bonds’ own channels and enquiry route.\n\nKeep the originator’s role clear when explaining how the bank and other parties are involved.",
+          "successSignals": "Enquiries naming the stage or document question.\n\nBuyers asking for help understanding an actual process step or lender offer.",
+          "nextMonthGamePlan": "START\nOpen with the buyer-preparation explainer.\n\nBUILD\nUse three photos to make the people and process approachable.\n\nCLOSE\nClose with stage, document and role questions."
+        }
+      },
+      "write_status": "NOT_SAVED_NOT_APPROVED_NOT_PUBLISHED",
+      "required_next_step": "After reviewed runtime release, re-read canonical exact-month brief, require source admission and unchanged row/package/guide, then use the existing draft tool. Never replay this artifact as an apply manifest."
+    },
+    {
+      "client_id": "a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b",
+      "client_name": "Peyper Bonds",
+      "strategy_month": "2026-12-01",
+      "canonical_state": "blocked",
+      "canonical_blockers": [
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ],
+      "existing_strategy_id": "4a7e5020-e98a-41e5-8fc9-4bb7a5c5288d",
+      "expected_version": 2,
+      "expected_row_hash": "f14b1c5b144d5d474bc0f88d9a0cccfa",
+      "current_brief_fingerprint": "9cbb2d6e72f1b7553b6e8244bf29730fcd1fb1d25c2e7f05f6ae7f346daa63c7",
+      "guide_id": "cd03b3c1-79bc-4ce8-9ff5-8de1bcbb5de7",
+      "guide_hash": "b89da172b6339c54f4d122e5a79ea63a",
+      "client_hash": "ca43d5887c9b7bea6619c0c87a5cd61d",
+      "confirmed_scope": {
+        "professional_video": 1,
+        "reels": null,
+        "photo_content": 3,
+        "design_poster": 3,
+        "animated_poster": null,
+        "campaign_recommendation": null
+      },
+      "source_ids": {
+        "previous_monthly_strategy_id": null,
+        "previous_report_id": "a2c5735e-69ab-4572-8234-662c1f2adffb",
+        "client_package_id": "c8a87ca5-179d-4068-9528-09a4c0fba868",
+        "deliverable_ids": [],
+        "client_calendar_event_ids": [],
+        "approved_client_context_update_ids": [],
+        "client_guide_id": "cd03b3c1-79bc-4ce8-9ff5-8de1bcbb5de7",
+        "marketing_library_skill_card_ids": [],
+        "marketing_library_cards": [],
+        "package_verification_confirmed_at": "2026-09-23T14:25:23.899664+00:00",
+        "package_verification_actor_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee",
+        "package_source_references": [
+          "client_package:c8a87ca5-179d-4068-9528-09a4c0fba868 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:77c6ae3a-2b45-4965-b48c-37e04346697d (Video 1; 1/month)",
+          "package_template:0694a51d-4711-465e-b5e5-ba3177e3997f (F1; 1/month)",
+          "package_template:ae75604f-ebd0-4168-a89b-70fe9235bdbd (F2; 1/month)",
+          "package_template:2a48fdaa-2478-481f-8b2f-611bb9609f1c (F3; 1/month)",
+          "package_template:a19bd288-5748-4b36-815d-8c51234893c9 (DP1; 1/month)",
+          "package_template:c42b5cdf-357f-4c25-83b6-38c834aaadff (DP2; 1/month)",
+          "package_template:c16bea84-e261-49de-9d6e-06adce9316a9 (DP3; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "source_windows": {
+        "previous_report_period_end": "2026-09-23",
+        "previous_strategy_month": null,
+        "client_calendar_events": [],
+        "incorporated_context_updates": [],
+        "confirmed_package_scope": {
+          "professional_video": 1,
+          "reels": null,
+          "photo_content": 3,
+          "design_poster": 3,
+          "animated_poster": null,
+          "campaign_recommendation": null
+        }
+      },
+      "candidate_data": {
+        "version": 1,
+        "clientDirection": [],
+        "clientRequestNotes": "",
+        "topContent": {
+          "autoCaption": "Behind every application is a real person who deserves clear answers and personal support. albert@peyperbonds.co.za hennie@peyperbonds.co.za ria@peyperbonds.co.za magdel@peyperbonds.co.za #PeyperBonds #RealPeopleRealService #HomeLoanSupport #FinanceMadeSimple #BondExperts",
+          "autoPlatform": "facebook",
+          "autoMetricLabel": null,
+          "autoMetricValue": null,
+          "autoImageUrl": null,
+          "coverImageUrl": "",
+          "contentType": "",
+          "whyItWorked": [],
+          "whatThisTellsUs": ""
+        },
+        "strategyDrivers": [],
+        "strategyGoingForward": "1. Start with the after-offer process explainer.\n\n2. Show the discussion and document examples.\n\n3. Close with three clear next-conversation prompts.",
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "After the offer: questions to raise.\n\nExplain the process conversation and the distinct roles involved."
+            ],
+            "notes": ""
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "The stage discussion.\n\nShow a staff-led explanation.",
+              "An illustrative process note.\n\nUse fictional details to make the sequence visible.",
+              "The personal-service moment.\n\nShow the person available for the enquiry."
+            ],
+            "notes": ""
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "What stage are you at?\n\nDescribe the current point privately.",
+              "Which party handles the question?\n\nKeep the originator, lender and attorneys distinct.",
+              "What do you need to understand?\n\nBring one clear next-step question."
+            ],
+            "notes": ""
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        },
+        "clientActionsRequired": [
+          "Choose the buyer question and team spokesperson.",
+          "Review the process wording and demonstration materials before public use."
+        ],
+        "calendarSelections": [
+          {
+            "eventId": "2026-12-theme-festive-season",
+            "title": "Festive season",
+            "date": null,
+            "use": false,
+            "note": ""
+          },
+          {
+            "eventId": "2026-12-16-day-of-reconciliation",
+            "title": "Day of Reconciliation",
+            "date": "2026-12-16",
+            "use": false,
+            "note": ""
+          },
+          {
+            "eventId": "2026-12-25-christmas-day",
+            "title": "Christmas Day",
+            "date": "2026-12-25",
+            "use": false,
+            "note": ""
+          },
+          {
+            "eventId": "2026-12-26-day-of-goodwill",
+            "title": "Day of Goodwill",
+            "date": "2026-12-26",
+            "use": false,
+            "note": ""
+          }
+        ],
+        "goldStandard": {
+          "objective": "Help buyers understand what to ask after an offer to purchase.\n\nMake the next process conversation clear while keeping each party’s role distinct.",
+          "audienceAndIntent": "Prospective home buyers preparing a property-finance conversation.\n\nPeople seeking clarity about documents, the process or an actual lender offer.",
+          "coreMessage": "What is the next step for your own matter?\n\nTurn the stage you are at into a specific question.",
+          "formatsAndRationale": "1 video — After the offer: questions to raise.\n\n3 photos — The stage discussion; An illustrative process note; The personal-service moment.\n\n3 posters — What stage are you at?; Which party handles the question?; What do you need to understand?",
+          "testAndChange": "Your buyer-preparation and personal-service stories give customers a useful place to begin.\n\nKeep the next explanation focused on one step in their own journey.\n\nUse the questions people bring to the team to choose the next useful explanation.",
+          "pillarsAndHooks": "THE STAGE\nIdentify the current point.\n\nTHE HANDOVER\nKnow the relevant party.\n\nTHE QUESTION\nAsk what you need to understand.",
+          "mustAvoid": "Approachable, composed and clear.\n\nExplain the process in everyday language and invite individual questions privately.",
+          "channelIntegration": "Use Peyper Bonds’ own channels and enquiry route.\n\nKeep the originator’s role clear when explaining how the bank and other parties are involved.",
+          "successSignals": "Enquiries naming the stage or document question.\n\nBuyers asking for help understanding an actual process step or lender offer.",
+          "nextMonthGamePlan": "START\nStart with the after-offer process explainer.\n\nBUILD\nShow the discussion and document examples.\n\nCLOSE\nClose with three clear next-conversation prompts."
+        }
+      },
+      "write_status": "NOT_SAVED_NOT_APPROVED_NOT_PUBLISHED",
+      "required_next_step": "After reviewed runtime release, re-read canonical exact-month brief, require source admission and unchanged row/package/guide, then use the existing draft tool. Never replay this artifact as an apply manifest."
+    },
+    {
+      "client_id": "a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b",
+      "client_name": "Peyper Bonds",
+      "strategy_month": "2027-01-01",
+      "canonical_state": "blocked",
+      "canonical_blockers": [
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ],
+      "existing_strategy_id": null,
+      "expected_version": null,
+      "expected_row_hash": null,
+      "current_brief_fingerprint": "ee7f68849cee685cbc531edd86c7f68b9aa81c2f46e74c199b7a667e0723e060",
+      "guide_id": "cd03b3c1-79bc-4ce8-9ff5-8de1bcbb5de7",
+      "guide_hash": "b89da172b6339c54f4d122e5a79ea63a",
+      "client_hash": "ca43d5887c9b7bea6619c0c87a5cd61d",
+      "confirmed_scope": {
+        "professional_video": 1,
+        "reels": null,
+        "photo_content": 3,
+        "design_poster": 3,
+        "animated_poster": null,
+        "campaign_recommendation": null
+      },
+      "source_ids": {
+        "previous_monthly_strategy_id": null,
+        "previous_report_id": "a2c5735e-69ab-4572-8234-662c1f2adffb",
+        "client_package_id": "c8a87ca5-179d-4068-9528-09a4c0fba868",
+        "deliverable_ids": [],
+        "client_calendar_event_ids": [],
+        "approved_client_context_update_ids": [],
+        "client_guide_id": "cd03b3c1-79bc-4ce8-9ff5-8de1bcbb5de7",
+        "marketing_library_skill_card_ids": [],
+        "marketing_library_cards": [],
+        "package_verification_confirmed_at": "2026-09-23T14:25:23.899664+00:00",
+        "package_verification_actor_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee",
+        "package_source_references": [
+          "client_package:c8a87ca5-179d-4068-9528-09a4c0fba868 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:77c6ae3a-2b45-4965-b48c-37e04346697d (Video 1; 1/month)",
+          "package_template:0694a51d-4711-465e-b5e5-ba3177e3997f (F1; 1/month)",
+          "package_template:ae75604f-ebd0-4168-a89b-70fe9235bdbd (F2; 1/month)",
+          "package_template:2a48fdaa-2478-481f-8b2f-611bb9609f1c (F3; 1/month)",
+          "package_template:a19bd288-5748-4b36-815d-8c51234893c9 (DP1; 1/month)",
+          "package_template:c42b5cdf-357f-4c25-83b6-38c834aaadff (DP2; 1/month)",
+          "package_template:c16bea84-e261-49de-9d6e-06adce9316a9 (DP3; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "source_windows": {
+        "previous_report_period_end": "2026-09-23",
+        "previous_strategy_month": null,
+        "client_calendar_events": [],
+        "incorporated_context_updates": [],
+        "confirmed_package_scope": {
+          "professional_video": 1,
+          "reels": null,
+          "photo_content": 3,
+          "design_poster": 3,
+          "animated_poster": null,
+          "campaign_recommendation": null
+        }
+      },
+      "candidate_data": {
+        "version": 1,
+        "clientDirection": [],
+        "clientRequestNotes": "",
+        "topContent": {
+          "autoCaption": null,
+          "autoPlatform": null,
+          "autoMetricLabel": null,
+          "autoMetricValue": null,
+          "autoImageUrl": null,
+          "coverImageUrl": "",
+          "contentType": "",
+          "whyItWorked": [],
+          "whatThisTellsUs": ""
+        },
+        "strategyDrivers": [],
+        "strategyGoingForward": "1. Open with an illustrative offer-comparison conversation.\n\n2. Use three photos to make the terms and team discussion approachable.\n\n3. Close with offer, term and individual-question prompts.",
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "Questions for an offer comparison.\n\nUse fictional documents to explain how a buyer can identify terms they want to discuss."
+            ],
+            "notes": ""
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "The offer documents.\n\nUse clearly fictional examples.",
+              "The detail to discuss.\n\nHighlight an illustrative term without a quoted rate.",
+              "The team conversation.\n\nShow a genuine staff explanation."
+            ],
+            "notes": ""
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "Which offers are you comparing?\n\nBring the actual lender documents privately.",
+              "Which term needs explaining?\n\nName the detail you want to understand.",
+              "What is your individual question?\n\nDiscuss your own situation with the team."
+            ],
+            "notes": ""
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        },
+        "clientActionsRequired": [
+          "Choose the buyer question and team spokesperson.",
+          "Review the process wording and demonstration materials before public use."
+        ],
+        "calendarSelections": [],
+        "goldStandard": {
+          "objective": "Help January buyers prepare questions about their actual lender offers.\n\nMake the terms they want to understand the starting point for discussion.",
+          "audienceAndIntent": "Prospective home buyers preparing a property-finance conversation.\n\nPeople seeking clarity about documents, the process or an actual lender offer.",
+          "coreMessage": "Bring the offer and the question.\n\nA useful comparison begins with the actual documents.",
+          "formatsAndRationale": "1 video — Questions for an offer comparison.\n\n3 photos — The offer documents; The detail to discuss; The team conversation.\n\n3 posters — Which offers are you comparing?; Which term needs explaining?; What is your individual question?",
+          "testAndChange": "Your buyer-preparation and personal-service stories give customers a useful place to begin.\n\nKeep the next explanation focused on one step in their own journey.\n\nUse the questions people bring to the team to choose the next useful explanation.",
+          "pillarsAndHooks": "THE OFFERS\nUse the actual documents.\n\nTHE TERMS\nIdentify what needs explaining.\n\nTHE DISCUSSION\nAsk about your own situation.",
+          "mustAvoid": "Approachable, composed and clear.\n\nExplain the process in everyday language and invite individual questions privately.",
+          "channelIntegration": "Use Peyper Bonds’ own channels and enquiry route.\n\nKeep the originator’s role clear when explaining how the bank and other parties are involved.",
+          "successSignals": "Enquiries naming the stage or document question.\n\nBuyers asking for help understanding an actual process step or lender offer.",
+          "nextMonthGamePlan": "START\nOpen with an illustrative offer-comparison conversation.\n\nBUILD\nUse three photos to make the terms and team discussion approachable.\n\nCLOSE\nClose with offer, term and individual-question prompts."
+        }
+      },
+      "write_status": "NOT_SAVED_NOT_APPROVED_NOT_PUBLISHED",
+      "required_next_step": "After reviewed runtime release, re-read canonical exact-month brief, require source admission and unchanged row/package/guide, then use the existing draft tool. Never replay this artifact as an apply manifest."
+    },
+    {
+      "client_id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+      "client_name": "Supa Quick BFN",
+      "strategy_month": "2026-11-01",
+      "canonical_state": "blocked",
+      "canonical_blockers": [
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ],
+      "existing_strategy_id": "eba11003-11bd-429d-8004-635ceb21b928",
+      "expected_version": 5,
+      "expected_row_hash": "b704983d6e2db35dd6a2cf5757bd715d",
+      "current_brief_fingerprint": "1187a0eaf39e228df9a2b6db37bd03f02c310d91df03e04bab8c5834c9433dec",
+      "guide_id": "59416761-98d2-4f92-abb5-aef04adada83",
+      "guide_hash": "ed0617f604a793c01048472a33202d9a",
+      "client_hash": "d559adbc66644c3a22300686210691dc",
+      "confirmed_scope": {
+        "professional_video": 1,
+        "reels": null,
+        "photo_content": null,
+        "design_poster": 3,
+        "animated_poster": null,
+        "campaign_recommendation": null
+      },
+      "source_ids": {
+        "previous_monthly_strategy_id": null,
+        "previous_report_id": "67ecfade-ce9d-44a3-b536-6a6f96f0a067",
+        "client_package_id": "5b15c7e9-49b4-403e-9bca-70d43801a868",
+        "deliverable_ids": [],
+        "client_calendar_event_ids": [],
+        "approved_client_context_update_ids": [],
+        "client_guide_id": "59416761-98d2-4f92-abb5-aef04adada83",
+        "marketing_library_skill_card_ids": [],
+        "marketing_library_cards": [],
+        "package_verification_confirmed_at": "2026-09-23T14:26:33.968888+00:00",
+        "package_verification_actor_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee",
+        "package_source_references": [
+          "client_package:5b15c7e9-49b4-403e-9bca-70d43801a868 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:612f76a0-c7dc-4c2f-9bce-83b0a68e841e (Video 1; 1/month)",
+          "package_template:de8d488c-5db7-4ad5-9526-4fc594671111 (DP1; 1/month)",
+          "package_template:5bfe6323-afb7-43d1-a57b-25150c4d60e3 (DP2; 1/month)",
+          "package_template:6b41c899-9bd0-441e-9dbe-d4ebf7049f62 (DP3; 1/month)",
+          "package_template:611279dc-9409-470d-aaad-0169bfde3dec (DP4; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "source_windows": {
+        "previous_report_period_end": "2026-09-23",
+        "previous_strategy_month": null,
+        "client_calendar_events": [],
+        "incorporated_context_updates": [],
+        "confirmed_package_scope": {
+          "professional_video": 1,
+          "reels": null,
+          "photo_content": null,
+          "design_poster": 3,
+          "animated_poster": null,
+          "campaign_recommendation": null
+        }
+      },
+      "candidate_data": {
+        "version": 1,
+        "clientDirection": [],
+        "clientRequestNotes": "",
+        "topContent": {
+          "autoCaption": "Proper alignment keeps your vehicle tracking straight and protects your tyres from premature wear. +27 51 101 0944 sq@wisemangroup.co.za wisemangroup.co.za #SupaQuickExperts #WheelAlignment #TyreCare #Bloemfontein #VehicleMaintenance",
+          "autoPlatform": "facebook",
+          "autoMetricLabel": null,
+          "autoMetricValue": null,
+          "autoImageUrl": null,
+          "coverImageUrl": "",
+          "contentType": "",
+          "whyItWorked": [],
+          "whatThisTellsUs": ""
+        },
+        "strategyDrivers": [],
+        "strategyGoingForward": "1. Open with the real workshop explanation.\n\n2. Use three posters for vehicle, concern and branch details.\n\n3. Invite a specific BFN enquiry.",
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "A useful workshop question.\n\nLet the team explain what vehicle and driver details help the first conversation."
+            ],
+            "notes": ""
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "Which vehicle?\n\nBring make, model and relevant details.",
+              "What do you notice?\n\nDescribe the concern in your own words.",
+              "Which BFN branch?\n\nConfirm the location for your enquiry."
+            ],
+            "notes": ""
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        },
+        "clientActionsRequired": [
+          "Choose the actual BFN branch and workshop example.",
+          "Share the vehicle information the team needs for the enquiry."
+        ],
+        "calendarSelections": [
+          {
+            "eventId": "2026-11-theme-festive-black-friday-build-up",
+            "title": "Festive & Black Friday build-up",
+            "date": null,
+            "use": false,
+            "note": ""
+          },
+          {
+            "eventId": "2026-11-27-black-friday",
+            "title": "Black Friday",
+            "date": "2026-11-27",
+            "use": false,
+            "note": ""
+          }
+        ],
+        "goldStandard": {
+          "objective": "Help Bloemfontein drivers describe a tyre or wheel concern clearly.\n\nConnect the actual vehicle with the appropriate BFN branch conversation.",
+          "audienceAndIntent": "Bloemfontein drivers with a tyre, wheel or workshop question.\n\nPeople who need to describe their own vehicle and identify the relevant BFN branch.",
+          "coreMessage": "Tell the team what you notice.\n\nStart with the vehicle and the driving situation.",
+          "formatsAndRationale": "1 video — A useful workshop question.\n\n3 posters — Which vehicle?; What do you notice?; Which BFN branch?",
+          "testAndChange": "Your workshop and driver-question stories give us a practical foundation.\n\nConnect the visible process with the question a driver wants to ask.\n\nUse the questions people bring to the team to choose the next useful explanation.",
+          "pillarsAndHooks": "THE VEHICLE\nIdentify it.\n\nTHE CONCERN\nDescribe what you notice.\n\nTHE BRANCH\nAsk the appropriate local team.",
+          "mustAvoid": "Helpful, direct and human.\n\nKeep the actual vehicle and Bloemfontein branch at the centre.",
+          "channelIntegration": "Use the BFN client’s own channels and branch-specific enquiry information.\n\nMatch the service question to the branch featured.",
+          "successSignals": "Enquiries identifying the vehicle, the concern and the branch.\n\nUseful driver descriptions reaching the team.",
+          "nextMonthGamePlan": "START\nOpen with the real workshop explanation.\n\nBUILD\nUse three posters for vehicle, concern and branch details.\n\nCLOSE\nInvite a specific BFN enquiry."
+        }
+      },
+      "write_status": "NOT_SAVED_NOT_APPROVED_NOT_PUBLISHED",
+      "required_next_step": "After reviewed runtime release, re-read canonical exact-month brief, require source admission and unchanged row/package/guide, then use the existing draft tool. Never replay this artifact as an apply manifest."
+    },
+    {
+      "client_id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+      "client_name": "Supa Quick BFN",
+      "strategy_month": "2026-12-01",
+      "canonical_state": "blocked",
+      "canonical_blockers": [
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ],
+      "existing_strategy_id": "923fa705-8f16-4f5b-92d1-e6677ab11a69",
+      "expected_version": 2,
+      "expected_row_hash": "fc43dd3a8506b9bf21a923c7aebcc074",
+      "current_brief_fingerprint": "d2c9b431f2eda34e9b3be0d9952219eeb7109bb1e8465ea6ef543037c1132824",
+      "guide_id": "59416761-98d2-4f92-abb5-aef04adada83",
+      "guide_hash": "ed0617f604a793c01048472a33202d9a",
+      "client_hash": "d559adbc66644c3a22300686210691dc",
+      "confirmed_scope": {
+        "professional_video": 1,
+        "reels": null,
+        "photo_content": null,
+        "design_poster": 3,
+        "animated_poster": null,
+        "campaign_recommendation": null
+      },
+      "source_ids": {
+        "previous_monthly_strategy_id": null,
+        "previous_report_id": "67ecfade-ce9d-44a3-b536-6a6f96f0a067",
+        "client_package_id": "5b15c7e9-49b4-403e-9bca-70d43801a868",
+        "deliverable_ids": [],
+        "client_calendar_event_ids": [],
+        "approved_client_context_update_ids": [],
+        "client_guide_id": "59416761-98d2-4f92-abb5-aef04adada83",
+        "marketing_library_skill_card_ids": [],
+        "marketing_library_cards": [],
+        "package_verification_confirmed_at": "2026-09-23T14:26:33.968888+00:00",
+        "package_verification_actor_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee",
+        "package_source_references": [
+          "client_package:5b15c7e9-49b4-403e-9bca-70d43801a868 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:612f76a0-c7dc-4c2f-9bce-83b0a68e841e (Video 1; 1/month)",
+          "package_template:de8d488c-5db7-4ad5-9526-4fc594671111 (DP1; 1/month)",
+          "package_template:5bfe6323-afb7-43d1-a57b-25150c4d60e3 (DP2; 1/month)",
+          "package_template:6b41c899-9bd0-441e-9dbe-d4ebf7049f62 (DP3; 1/month)",
+          "package_template:611279dc-9409-470d-aaad-0169bfde3dec (DP4; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "source_windows": {
+        "previous_report_period_end": "2026-09-23",
+        "previous_strategy_month": null,
+        "client_calendar_events": [],
+        "incorporated_context_updates": [],
+        "confirmed_package_scope": {
+          "professional_video": 1,
+          "reels": null,
+          "photo_content": null,
+          "design_poster": 3,
+          "animated_poster": null,
+          "campaign_recommendation": null
+        }
+      },
+      "candidate_data": {
+        "version": 1,
+        "clientDirection": [],
+        "clientRequestNotes": "",
+        "topContent": {
+          "autoCaption": "Proper alignment keeps your vehicle tracking straight and protects your tyres from premature wear. +27 51 101 0944 sq@wisemangroup.co.za wisemangroup.co.za #SupaQuickExperts #WheelAlignment #TyreCare #Bloemfontein #VehicleMaintenance",
+          "autoPlatform": "facebook",
+          "autoMetricLabel": null,
+          "autoMetricValue": null,
+          "autoImageUrl": null,
+          "coverImageUrl": "",
+          "contentType": "",
+          "whyItWorked": [],
+          "whatThisTellsUs": ""
+        },
+        "strategyDrivers": [],
+        "strategyGoingForward": "1. Start with the driver-description video.\n\n2. Follow with intended-use and observation prompts.\n\n3. Close with the relevant branch-assessment conversation.",
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "Before the drive: describe the question.\n\nA real team member explains how to raise a tyre or workshop concern."
+            ],
+            "notes": ""
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "What driving are you planning?\n\nGive the team the intended-use context.",
+              "When do you notice the concern?\n\nDescribe the conditions in your own words.",
+              "Discuss an assessment.\n\nIdentify the vehicle and confirm the appropriate BFN branch."
+            ],
+            "notes": ""
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        },
+        "clientActionsRequired": [
+          "Choose the actual BFN branch and workshop example.",
+          "Share the vehicle information the team needs for the enquiry."
+        ],
+        "calendarSelections": [
+          {
+            "eventId": "2026-12-theme-festive-season",
+            "title": "Festive season",
+            "date": null,
+            "use": false,
+            "note": ""
+          },
+          {
+            "eventId": "2026-12-16-day-of-reconciliation",
+            "title": "Day of Reconciliation",
+            "date": "2026-12-16",
+            "use": false,
+            "note": ""
+          },
+          {
+            "eventId": "2026-12-25-christmas-day",
+            "title": "Christmas Day",
+            "date": "2026-12-25",
+            "use": false,
+            "note": ""
+          },
+          {
+            "eventId": "2026-12-26-day-of-goodwill",
+            "title": "Day of Goodwill",
+            "date": "2026-12-26",
+            "use": false,
+            "note": ""
+          }
+        ],
+        "goldStandard": {
+          "objective": "Help December drivers prepare a clear pre-trip workshop question.\n\nUse the actual vehicle and what the driver notices as the starting point.",
+          "audienceAndIntent": "Bloemfontein drivers with a tyre, wheel or workshop question.\n\nPeople who need to describe their own vehicle and identify the relevant BFN branch.",
+          "coreMessage": "What would you like the team to assess?\n\nBring the vehicle’s actual question into the conversation.",
+          "formatsAndRationale": "1 video — Before the drive: describe the question.\n\n3 posters — What driving are you planning?; When do you notice the concern?; Discuss an assessment.",
+          "testAndChange": "Your workshop and driver-question stories give us a practical foundation.\n\nConnect the visible process with the question a driver wants to ask.\n\nUse the questions people bring to the team to choose the next useful explanation.",
+          "pillarsAndHooks": "THE USE\nExplain the intended driving.\n\nTHE OBSERVATION\nDescribe the concern.\n\nTHE DISCUSSION\nAsk the branch about the next step.",
+          "mustAvoid": "Helpful, direct and human.\n\nKeep the actual vehicle and Bloemfontein branch at the centre.",
+          "channelIntegration": "Use the BFN client’s own channels and branch-specific enquiry information.\n\nMatch the service question to the branch featured.",
+          "successSignals": "Enquiries identifying the vehicle, the concern and the branch.\n\nUseful driver descriptions reaching the team.",
+          "nextMonthGamePlan": "START\nStart with the driver-description video.\n\nBUILD\nFollow with intended-use and observation prompts.\n\nCLOSE\nClose with the relevant branch-assessment conversation."
+        }
+      },
+      "write_status": "NOT_SAVED_NOT_APPROVED_NOT_PUBLISHED",
+      "required_next_step": "After reviewed runtime release, re-read canonical exact-month brief, require source admission and unchanged row/package/guide, then use the existing draft tool. Never replay this artifact as an apply manifest."
+    },
+    {
+      "client_id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+      "client_name": "Supa Quick BFN",
+      "strategy_month": "2027-01-01",
+      "canonical_state": "blocked",
+      "canonical_blockers": [
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ],
+      "existing_strategy_id": null,
+      "expected_version": null,
+      "expected_row_hash": null,
+      "current_brief_fingerprint": "da5756e32119d52811207837a166cfbff829a56cbc9ab20152e694f41bcbef13",
+      "guide_id": "59416761-98d2-4f92-abb5-aef04adada83",
+      "guide_hash": "ed0617f604a793c01048472a33202d9a",
+      "client_hash": "d559adbc66644c3a22300686210691dc",
+      "confirmed_scope": {
+        "professional_video": 1,
+        "reels": null,
+        "photo_content": null,
+        "design_poster": 3,
+        "animated_poster": null,
+        "campaign_recommendation": null
+      },
+      "source_ids": {
+        "previous_monthly_strategy_id": null,
+        "previous_report_id": "67ecfade-ce9d-44a3-b536-6a6f96f0a067",
+        "client_package_id": "5b15c7e9-49b4-403e-9bca-70d43801a868",
+        "deliverable_ids": [],
+        "client_calendar_event_ids": [],
+        "approved_client_context_update_ids": [],
+        "client_guide_id": "59416761-98d2-4f92-abb5-aef04adada83",
+        "marketing_library_skill_card_ids": [],
+        "marketing_library_cards": [],
+        "package_verification_confirmed_at": "2026-09-23T14:26:33.968888+00:00",
+        "package_verification_actor_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee",
+        "package_source_references": [
+          "client_package:5b15c7e9-49b4-403e-9bca-70d43801a868 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:612f76a0-c7dc-4c2f-9bce-83b0a68e841e (Video 1; 1/month)",
+          "package_template:de8d488c-5db7-4ad5-9526-4fc594671111 (DP1; 1/month)",
+          "package_template:5bfe6323-afb7-43d1-a57b-25150c4d60e3 (DP2; 1/month)",
+          "package_template:6b41c899-9bd0-441e-9dbe-d4ebf7049f62 (DP3; 1/month)",
+          "package_template:611279dc-9409-470d-aaad-0169bfde3dec (DP4; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "source_windows": {
+        "previous_report_period_end": "2026-09-23",
+        "previous_strategy_month": null,
+        "client_calendar_events": [],
+        "incorporated_context_updates": [],
+        "confirmed_package_scope": {
+          "professional_video": 1,
+          "reels": null,
+          "photo_content": null,
+          "design_poster": 3,
+          "animated_poster": null,
+          "campaign_recommendation": null
+        }
+      },
+      "candidate_data": {
+        "version": 1,
+        "clientDirection": [],
+        "clientRequestNotes": "",
+        "topContent": {
+          "autoCaption": null,
+          "autoPlatform": null,
+          "autoMetricLabel": null,
+          "autoMetricValue": null,
+          "autoImageUrl": null,
+          "coverImageUrl": "",
+          "contentType": "",
+          "whyItWorked": [],
+          "whatThisTellsUs": ""
+        },
+        "strategyDrivers": [],
+        "strategyGoingForward": "1. Open with the real alignment-versus-balancing explanation.\n\n2. Use three cards to separate the processes and driver enquiry.\n\n3. Close with the vehicle-specific discussion.",
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "Two workshop conversations.\n\nShow real alignment and balancing process details while a team member explains the distinction."
+            ],
+            "notes": ""
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "Ask about alignment.\n\nDiscuss the process with the team.",
+              "Ask about balancing.\n\nMake the question specific to what you notice.",
+              "Bring the vehicle context.\n\nConfirm the actual vehicle, concern and BFN branch."
+            ],
+            "notes": ""
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        },
+        "clientActionsRequired": [
+          "Choose the actual BFN branch and workshop example.",
+          "Share the vehicle information the team needs for the enquiry."
+        ],
+        "calendarSelections": [],
+        "goldStandard": {
+          "objective": "Make January’s alignment and balancing conversation easier to understand.\n\nUse real workshop process to show why these are distinct questions.",
+          "audienceAndIntent": "Bloemfontein drivers with a tyre, wheel or workshop question.\n\nPeople who need to describe their own vehicle and identify the relevant BFN branch.",
+          "coreMessage": "Which workshop question are you asking?\n\nA visible process makes the conversation clearer.",
+          "formatsAndRationale": "1 video — Two workshop conversations.\n\n3 posters — Ask about alignment; Ask about balancing; Bring the vehicle context.",
+          "testAndChange": "Your workshop and driver-question stories give us a practical foundation.\n\nConnect the visible process with the question a driver wants to ask.\n\nUse the questions people bring to the team to choose the next useful explanation.",
+          "pillarsAndHooks": "THE PROCESS\nSee the actual work.\n\nTHE DISTINCTION\nUnderstand the question.\n\nTHE VEHICLE\nDiscuss your own case.",
+          "mustAvoid": "Helpful, direct and human.\n\nKeep the actual vehicle and Bloemfontein branch at the centre.",
+          "channelIntegration": "Use the BFN client’s own channels and branch-specific enquiry information.\n\nMatch the service question to the branch featured.",
+          "successSignals": "Enquiries identifying the vehicle, the concern and the branch.\n\nUseful driver descriptions reaching the team.",
+          "nextMonthGamePlan": "START\nOpen with the real alignment-versus-balancing explanation.\n\nBUILD\nUse three cards to separate the processes and driver enquiry.\n\nCLOSE\nClose with the vehicle-specific discussion."
+        }
+      },
+      "write_status": "NOT_SAVED_NOT_APPROVED_NOT_PUBLISHED",
+      "required_next_step": "After reviewed runtime release, re-read canonical exact-month brief, require source admission and unchanged row/package/guide, then use the existing draft tool. Never replay this artifact as an apply manifest."
+    },
+    {
+      "client_id": "e2ad6d57-5b06-46e1-b75b-b67f017d57f1",
+      "client_name": "Toyota Bloemfontein",
+      "strategy_month": "2026-11-01",
+      "canonical_state": "blocked",
+      "canonical_blockers": [
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ],
+      "existing_strategy_id": "3d6a689d-828a-43ca-a79e-facf80cb5402",
+      "expected_version": 1,
+      "expected_row_hash": "a28f33a602c271aa4c43166531b6da70",
+      "current_brief_fingerprint": "b08f2b797672a34e5471102c3b196bd0765de8bbb18d2286b1aafa0390540ca3",
+      "guide_id": "4e6b75d9-9a2b-4bd6-8376-b75bca646ecd",
+      "guide_hash": "ac93333e5ed436329d7e2c3fe7268c39",
+      "client_hash": "eec3da26f15227d4c221641bf0d8b680",
+      "confirmed_scope": {
+        "professional_video": 4,
+        "reels": null,
+        "photo_content": null,
+        "design_poster": null,
+        "animated_poster": null,
+        "campaign_recommendation": null
+      },
+      "source_ids": {
+        "previous_monthly_strategy_id": null,
+        "previous_report_id": null,
+        "client_package_id": "c3cb4d60-bd41-4f30-bbed-757c18c780d3",
+        "deliverable_ids": [],
+        "client_calendar_event_ids": [
+          "bac214b8-5fa2-4e9b-824a-bdcbf628b5be"
+        ],
+        "approved_client_context_update_ids": [],
+        "client_guide_id": "4e6b75d9-9a2b-4bd6-8376-b75bca646ecd",
+        "marketing_library_skill_card_ids": [],
+        "marketing_library_cards": [],
+        "package_verification_confirmed_at": "2026-09-23T14:27:21.977046+00:00",
+        "package_verification_actor_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee",
+        "package_source_references": [
+          "client_package:c3cb4d60-bd41-4f30-bbed-757c18c780d3 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:8bd9130c-2ff6-4735-b695-95a920da9a20 (Video 1; 1/month)",
+          "package_template:89d5879a-1711-4abf-8d11-a2aa6b7e1445 (Video 2; 1/month)",
+          "package_template:d107b70e-0a8e-4fdf-97d0-d8d9bf566076 (Video 3; 1/month)",
+          "package_template:a061b1e1-aff9-48b5-a358-739af65e37de (Video 4; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "source_windows": {
+        "previous_report_period_end": null,
+        "previous_strategy_month": null,
+        "client_calendar_events": [
+          {
+            "id": "bac214b8-5fa2-4e9b-824a-bdcbf628b5be",
+            "start_at": "2026-11-05T07:30:00+00:00",
+            "event_type": "content_run"
+          }
+        ],
+        "incorporated_context_updates": [],
+        "confirmed_package_scope": {
+          "professional_video": 4,
+          "reels": null,
+          "photo_content": null,
+          "design_poster": null,
+          "animated_poster": null,
+          "campaign_recommendation": null
+        }
+      },
+      "candidate_data": {
+        "version": 1,
+        "clientDirection": [],
+        "clientRequestNotes": "",
+        "topContent": {
+          "autoCaption": null,
+          "autoPlatform": null,
+          "autoMetricLabel": null,
+          "autoMetricValue": null,
+          "autoImageUrl": null,
+          "coverImageUrl": "",
+          "contentType": "",
+          "whyItWorked": [],
+          "whatThisTellsUs": ""
+        },
+        "strategyDrivers": [
+          "Use Toyota Bloemfontein as the client-facing name",
+          "Current public dealer label: CFAO Mobility Toyota Bloemfontein",
+          "Oranje Toyota Bloemfontein / Oranje Toyota are historical aliases only. Never rename the CG client to them",
+          "Do not use OranjeToyota as the normal local identity hashtag",
+          "Never merge local dealer facts with Toyota South Africa or another Toyota/CFAO dealer",
+          "new-vehicle sales/new stock route"
+        ],
+        "strategyGoingForward": "1. Introduce the sales team and an actual vehicle detail.\n\n2. Follow with a human workshop story.\n\n3. Close with a practical parts-enquiry film.",
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "The person behind the shortlist.\n\nA sales-team member explains one buyer question.",
+              "The detail worth a closer look.\n\nShow an actual vehicle feature with its purpose explained.",
+              "A real workshop moment.\n\nLet natural staff humour lead into a service point.",
+              "The parts question.\n\nShow what vehicle information helps the enquiry."
+            ],
+            "notes": ""
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "design_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        },
+        "clientActionsRequired": [
+          "Choose the actual vehicles, staff and department stories.",
+          "Review each vehicle detail and the relevant enquiry route."
+        ],
+        "calendarSelections": [
+          {
+            "eventId": "2026-11-theme-festive-black-friday-build-up",
+            "title": "Festive & Black Friday build-up",
+            "date": null,
+            "use": false,
+            "note": ""
+          },
+          {
+            "eventId": "2026-11-27-black-friday",
+            "title": "Black Friday",
+            "date": "2026-11-27",
+            "use": false,
+            "note": ""
+          }
+        ],
+        "goldStandard": {
+          "objective": "Make November’s dealership stories useful through genuine team personality.\n\nGive each film a clear vehicle or ownership question.",
+          "audienceAndIntent": "Local buyers and Toyota owners with a vehicle, service or parts question.\n\nPeople choosing the next conversation with Toyota Bloemfontein.",
+          "coreMessage": "Meet the people behind the vehicle conversation.\n\nLet real personality and practical detail work together.",
+          "formatsAndRationale": "4 videos — The person behind the shortlist; The detail worth a closer look; A real workshop moment; The parts question.",
+          "testAndChange": "Your team personality and workshop stories show the people behind the dealership.\n\nBuild on that with a useful vehicle or ownership question in each film.\n\nUse the questions people bring to the team to choose the next useful explanation.",
+          "pillarsAndHooks": "THE TEAM\nShow the person.\n\nTHE VEHICLE\nSee the actual detail.\n\nTHE NEXT STEP\nAsk the relevant department.",
+          "mustAvoid": "Human, specific and confidently local.\n\nLet genuine staff personality add to the practical point.",
+          "channelIntegration": "Use Toyota Bloemfontein’s own existing channels and department enquiry routes.\n\nConnect each film with the relevant local team.",
+          "successSignals": "Enquiries identifying a vehicle need or ownership question.\n\nCustomers finding the appropriate sales, workshop or parts conversation.",
+          "nextMonthGamePlan": "START\nIntroduce the sales team and an actual vehicle detail.\n\nBUILD\nFollow with a human workshop story.\n\nCLOSE\nClose with a practical parts-enquiry film."
+        }
+      },
+      "write_status": "NOT_SAVED_NOT_APPROVED_NOT_PUBLISHED",
+      "required_next_step": "After reviewed runtime release, re-read canonical exact-month brief, require source admission and unchanged row/package/guide, then use the existing draft tool. Never replay this artifact as an apply manifest."
+    },
+    {
+      "client_id": "e2ad6d57-5b06-46e1-b75b-b67f017d57f1",
+      "client_name": "Toyota Bloemfontein",
+      "strategy_month": "2026-12-01",
+      "canonical_state": "blocked",
+      "canonical_blockers": [
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ],
+      "existing_strategy_id": "603cab28-bb5f-44d6-9cad-cd2b618f918b",
+      "expected_version": 1,
+      "expected_row_hash": "12976192c39bbe5f555d8c880f1ffc2f",
+      "current_brief_fingerprint": "db8046a9c8a5615057bacb10655fbac0bd6a23662ac13c734033440ea528c33f",
+      "guide_id": "4e6b75d9-9a2b-4bd6-8376-b75bca646ecd",
+      "guide_hash": "ac93333e5ed436329d7e2c3fe7268c39",
+      "client_hash": "eec3da26f15227d4c221641bf0d8b680",
+      "confirmed_scope": {
+        "professional_video": 4,
+        "reels": null,
+        "photo_content": null,
+        "design_poster": null,
+        "animated_poster": null,
+        "campaign_recommendation": null
+      },
+      "source_ids": {
+        "previous_monthly_strategy_id": null,
+        "previous_report_id": null,
+        "client_package_id": "c3cb4d60-bd41-4f30-bbed-757c18c780d3",
+        "deliverable_ids": [],
+        "client_calendar_event_ids": [],
+        "approved_client_context_update_ids": [],
+        "client_guide_id": "4e6b75d9-9a2b-4bd6-8376-b75bca646ecd",
+        "marketing_library_skill_card_ids": [],
+        "marketing_library_cards": [],
+        "package_verification_confirmed_at": "2026-09-23T14:27:21.977046+00:00",
+        "package_verification_actor_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee",
+        "package_source_references": [
+          "client_package:c3cb4d60-bd41-4f30-bbed-757c18c780d3 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:8bd9130c-2ff6-4735-b695-95a920da9a20 (Video 1; 1/month)",
+          "package_template:89d5879a-1711-4abf-8d11-a2aa6b7e1445 (Video 2; 1/month)",
+          "package_template:d107b70e-0a8e-4fdf-97d0-d8d9bf566076 (Video 3; 1/month)",
+          "package_template:a061b1e1-aff9-48b5-a358-739af65e37de (Video 4; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "source_windows": {
+        "previous_report_period_end": null,
+        "previous_strategy_month": null,
+        "client_calendar_events": [],
+        "incorporated_context_updates": [],
+        "confirmed_package_scope": {
+          "professional_video": 4,
+          "reels": null,
+          "photo_content": null,
+          "design_poster": null,
+          "animated_poster": null,
+          "campaign_recommendation": null
+        }
+      },
+      "candidate_data": {
+        "version": 1,
+        "clientDirection": [],
+        "clientRequestNotes": "",
+        "topContent": {
+          "autoCaption": null,
+          "autoPlatform": null,
+          "autoMetricLabel": null,
+          "autoMetricValue": null,
+          "autoImageUrl": null,
+          "coverImageUrl": "",
+          "contentType": "",
+          "whyItWorked": [],
+          "whatThisTellsUs": ""
+        },
+        "strategyDrivers": [],
+        "strategyGoingForward": "1. Open with the buyer’s intended-use question.\n\n2. Follow with the shortlist and workshop stories.\n\n3. Close with a clear parts-request explanation.",
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "What must the vehicle do?\n\nA sales-team member discusses how to describe the intended use.",
+              "How do you build the shortlist?\n\nUse actual vehicles to show the buyer questions to consider.",
+              "An owner’s workshop question.\n\nA team member explains how to raise a service enquiry.",
+              "Preparing a parts request.\n\nShow the identifying vehicle information useful to the parts team."
+            ],
+            "notes": ""
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "design_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        },
+        "clientActionsRequired": [
+          "Choose the actual vehicles, staff and department stories.",
+          "Review each vehicle detail and the relevant enquiry route."
+        ],
+        "calendarSelections": [
+          {
+            "eventId": "2026-12-theme-festive-season",
+            "title": "Festive season",
+            "date": null,
+            "use": false,
+            "note": ""
+          },
+          {
+            "eventId": "2026-12-16-day-of-reconciliation",
+            "title": "Day of Reconciliation",
+            "date": "2026-12-16",
+            "use": false,
+            "note": ""
+          },
+          {
+            "eventId": "2026-12-25-christmas-day",
+            "title": "Christmas Day",
+            "date": "2026-12-25",
+            "use": false,
+            "note": ""
+          },
+          {
+            "eventId": "2026-12-26-day-of-goodwill",
+            "title": "Day of Goodwill",
+            "date": "2026-12-26",
+            "use": false,
+            "note": ""
+          }
+        ],
+        "goldStandard": {
+          "objective": "Help December customers describe what they want from a dealership conversation.\n\nSeparate a vehicle shortlist, an ownership question and a parts request.",
+          "audienceAndIntent": "Local buyers and Toyota owners with a vehicle, service or parts question.\n\nPeople choosing the next conversation with Toyota Bloemfontein.",
+          "coreMessage": "Bring the question, meet the team.\n\nMake each department story useful to the customer.",
+          "formatsAndRationale": "4 videos — What must the vehicle do?; How do you build the shortlist?; An owner’s workshop question; Preparing a parts request.",
+          "testAndChange": "Your team personality and workshop stories show the people behind the dealership.\n\nBuild on that with a useful vehicle or ownership question in each film.\n\nUse the questions people bring to the team to choose the next useful explanation.",
+          "pillarsAndHooks": "THE USE\nDescribe what the vehicle must do.\n\nTHE OWNER\nAsk the practical question.\n\nTHE DEPARTMENT\nFind the relevant conversation.",
+          "mustAvoid": "Human, specific and confidently local.\n\nLet genuine staff personality add to the practical point.",
+          "channelIntegration": "Use Toyota Bloemfontein’s own existing channels and department enquiry routes.\n\nConnect each film with the relevant local team.",
+          "successSignals": "Enquiries identifying a vehicle need or ownership question.\n\nCustomers finding the appropriate sales, workshop or parts conversation.",
+          "nextMonthGamePlan": "START\nOpen with the buyer’s intended-use question.\n\nBUILD\nFollow with the shortlist and workshop stories.\n\nCLOSE\nClose with a clear parts-request explanation."
+        }
+      },
+      "write_status": "NOT_SAVED_NOT_APPROVED_NOT_PUBLISHED",
+      "required_next_step": "After reviewed runtime release, re-read canonical exact-month brief, require source admission and unchanged row/package/guide, then use the existing draft tool. Never replay this artifact as an apply manifest."
+    },
+    {
+      "client_id": "e2ad6d57-5b06-46e1-b75b-b67f017d57f1",
+      "client_name": "Toyota Bloemfontein",
+      "strategy_month": "2027-01-01",
+      "canonical_state": "blocked",
+      "canonical_blockers": [
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ],
+      "existing_strategy_id": null,
+      "expected_version": null,
+      "expected_row_hash": null,
+      "current_brief_fingerprint": "9408c65016e92066e56505d6e6135d346c5bc5929f873a97040de916d60b31a0",
+      "guide_id": "4e6b75d9-9a2b-4bd6-8376-b75bca646ecd",
+      "guide_hash": "ac93333e5ed436329d7e2c3fe7268c39",
+      "client_hash": "eec3da26f15227d4c221641bf0d8b680",
+      "confirmed_scope": {
+        "professional_video": 4,
+        "reels": null,
+        "photo_content": null,
+        "design_poster": null,
+        "animated_poster": null,
+        "campaign_recommendation": null
+      },
+      "source_ids": {
+        "previous_monthly_strategy_id": null,
+        "previous_report_id": null,
+        "client_package_id": "c3cb4d60-bd41-4f30-bbed-757c18c780d3",
+        "deliverable_ids": [],
+        "client_calendar_event_ids": [],
+        "approved_client_context_update_ids": [],
+        "client_guide_id": "4e6b75d9-9a2b-4bd6-8376-b75bca646ecd",
+        "marketing_library_skill_card_ids": [],
+        "marketing_library_cards": [],
+        "package_verification_confirmed_at": "2026-09-23T14:27:21.977046+00:00",
+        "package_verification_actor_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee",
+        "package_source_references": [
+          "client_package:c3cb4d60-bd41-4f30-bbed-757c18c780d3 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:8bd9130c-2ff6-4735-b695-95a920da9a20 (Video 1; 1/month)",
+          "package_template:89d5879a-1711-4abf-8d11-a2aa6b7e1445 (Video 2; 1/month)",
+          "package_template:d107b70e-0a8e-4fdf-97d0-d8d9bf566076 (Video 3; 1/month)",
+          "package_template:a061b1e1-aff9-48b5-a358-739af65e37de (Video 4; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "source_windows": {
+        "previous_report_period_end": null,
+        "previous_strategy_month": null,
+        "client_calendar_events": [],
+        "incorporated_context_updates": [],
+        "confirmed_package_scope": {
+          "professional_video": 4,
+          "reels": null,
+          "photo_content": null,
+          "design_poster": null,
+          "animated_poster": null,
+          "campaign_recommendation": null
+        }
+      },
+      "candidate_data": {
+        "version": 1,
+        "clientDirection": [],
+        "clientRequestNotes": "",
+        "topContent": {
+          "autoCaption": null,
+          "autoPlatform": null,
+          "autoMetricLabel": null,
+          "autoMetricValue": null,
+          "autoImageUrl": null,
+          "coverImageUrl": "",
+          "contentType": "",
+          "whyItWorked": [],
+          "whatThisTellsUs": ""
+        },
+        "strategyDrivers": [],
+        "strategyGoingForward": "1. Start with the new-or-pre-owned buying conversation.\n\n2. Follow with an ownership question and workshop-booking explanation.\n\n3. Close with the exact-vehicle parts enquiry.",
+        "actionPlan": {
+          "professional_video": {
+            "enabled": true,
+            "items": [
+              "New or pre-owned: what are you comparing?\n\nLet a team member explain the customer’s own selection question.",
+              "One ownership question.\n\nMake a practical vehicle-use conversation approachable.",
+              "Preparing a service enquiry.\n\nExplain the vehicle details and intended booking question.",
+              "Which vehicle needs the part?\n\nShow how to identify the actual vehicle for the parts conversation."
+            ],
+            "notes": ""
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "design_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        },
+        "clientActionsRequired": [
+          "Choose the actual vehicles, staff and department stories.",
+          "Review each vehicle detail and the relevant enquiry route."
+        ],
+        "calendarSelections": [],
+        "goldStandard": {
+          "objective": "Make January’s four dealership conversations easy to navigate.\n\nHelp customers identify whether they need sales, ownership, workshop or parts support.",
+          "audienceAndIntent": "Local buyers and Toyota owners with a vehicle, service or parts question.\n\nPeople choosing the next conversation with Toyota Bloemfontein.",
+          "coreMessage": "Find the conversation that fits your question.\n\nUse the actual vehicle and intended next step.",
+          "formatsAndRationale": "4 videos — New or pre-owned: what are you comparing?; One ownership question; Preparing a service enquiry; Which vehicle needs the part?",
+          "testAndChange": "Your team personality and workshop stories show the people behind the dealership.\n\nBuild on that with a useful vehicle or ownership question in each film.\n\nUse the questions people bring to the team to choose the next useful explanation.",
+          "pillarsAndHooks": "THE CHOICE\nExplain the buying question.\n\nTHE OWNERSHIP\nName what you want to know.\n\nTHE SUPPORT\nReach the appropriate team.",
+          "mustAvoid": "Human, specific and confidently local.\n\nLet genuine staff personality add to the practical point.",
+          "channelIntegration": "Use Toyota Bloemfontein’s own existing channels and department enquiry routes.\n\nConnect each film with the relevant local team.",
+          "successSignals": "Enquiries identifying a vehicle need or ownership question.\n\nCustomers finding the appropriate sales, workshop or parts conversation.",
+          "nextMonthGamePlan": "START\nStart with the new-or-pre-owned buying conversation.\n\nBUILD\nFollow with an ownership question and workshop-booking explanation.\n\nCLOSE\nClose with the exact-vehicle parts enquiry."
+        }
+      },
+      "write_status": "NOT_SAVED_NOT_APPROVED_NOT_PUBLISHED",
+      "required_next_step": "After reviewed runtime release, re-read canonical exact-month brief, require source admission and unchanged row/package/guide, then use the existing draft tool. Never replay this artifact as an apply manifest."
+    },
+    {
+      "client_id": "504113ee-fba9-4993-807e-a86066615212",
+      "client_name": "WiseRide",
+      "strategy_month": "2026-11-01",
+      "canonical_state": "blocked",
+      "canonical_blockers": [
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ],
+      "existing_strategy_id": "5b4537b6-5ba0-4a0a-a134-eed76552fef6",
+      "expected_version": 1,
+      "expected_row_hash": "54f2bfebbbd9f3800d63a145864191da",
+      "current_brief_fingerprint": "00d1c2044f570dcd4373f474ddd5afe8e0a8fc04dabc3716de1779c12b710945",
+      "guide_id": "653c6c4e-c8a7-4413-bb4c-19d83fdc50a0",
+      "guide_hash": "4bab28d2206b88842c45bf69c9f907bb",
+      "client_hash": "ce129a008c90e2f35b83a078c6902a28",
+      "confirmed_scope": {
+        "professional_video": null,
+        "reels": null,
+        "photo_content": 2,
+        "design_poster": 2,
+        "animated_poster": null,
+        "campaign_recommendation": null
+      },
+      "source_ids": {
+        "previous_monthly_strategy_id": null,
+        "previous_report_id": null,
+        "client_package_id": null,
+        "deliverable_ids": [],
+        "client_calendar_event_ids": [],
+        "approved_client_context_update_ids": [],
+        "client_guide_id": "653c6c4e-c8a7-4413-bb4c-19d83fdc50a0",
+        "marketing_library_skill_card_ids": [],
+        "marketing_library_cards": [],
+        "package_verification_confirmed_at": "2026-09-23T14:28:01.095523+00:00",
+        "package_verification_actor_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee",
+        "package_source_references": [
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "source_windows": {
+        "previous_report_period_end": null,
+        "previous_strategy_month": null,
+        "client_calendar_events": [],
+        "incorporated_context_updates": [],
+        "confirmed_package_scope": {
+          "professional_video": null,
+          "reels": null,
+          "photo_content": 2,
+          "design_poster": 2,
+          "animated_poster": null,
+          "campaign_recommendation": null
+        }
+      },
+      "candidate_data": {
+        "version": 1,
+        "clientDirection": [],
+        "clientRequestNotes": "",
+        "topContent": {
+          "autoCaption": null,
+          "autoPlatform": null,
+          "autoMetricLabel": null,
+          "autoMetricValue": null,
+          "autoImageUrl": null,
+          "coverImageUrl": "",
+          "contentType": "",
+          "whyItWorked": [],
+          "whatThisTellsUs": ""
+        },
+        "strategyDrivers": [],
+        "strategyGoingForward": "1. Open with a real window-film application detail.\n\n2. Follow with the careful finishing image.\n\n3. Use two companion cards to invite the vehicle and service question.",
+        "actionPlan": {
+          "professional_video": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "Measured for the vehicle.\n\nShow a genuine film-application or preparation detail.",
+              "The finishing detail.\n\nMake careful real workmanship visible."
+            ],
+            "notes": ""
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "Which vehicle and service?\n\nBring the actual vehicle into the enquiry.",
+              "What would you like to understand?\n\nAsk the team about the application shown."
+            ],
+            "notes": ""
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        },
+        "clientActionsRequired": [
+          "Choose the real vehicle and service examples to feature.",
+          "Review the current service context and its enquiry route."
+        ],
+        "calendarSelections": [
+          {
+            "eventId": "2026-11-theme-festive-black-friday-build-up",
+            "title": "Festive & Black Friday build-up",
+            "date": null,
+            "use": false,
+            "note": ""
+          },
+          {
+            "eventId": "2026-11-27-black-friday",
+            "title": "Black Friday",
+            "date": "2026-11-27",
+            "use": false,
+            "note": ""
+          }
+        ],
+        "goldStandard": {
+          "objective": "Make vehicle-protection workmanship visible through two real details.\n\nConnect a window-film or installation image with a specific driver question.",
+          "audienceAndIntent": "Drivers considering a vehicle-protection or fitment question.\n\nPeople who want to discuss an actual vehicle and a specific WiseRide service.",
+          "coreMessage": "The detail behind the application.\n\nShow the work and invite the question about the actual vehicle.",
+          "formatsAndRationale": "2 photos — Measured for the vehicle; The finishing detail.\n\n2 posters — Which vehicle and service?; What would you like to understand?",
+          "testAndChange": "Your measured installation and vehicle-detail stories make the workmanship visible.\n\nBuild on those real details with one practical driver question at a time.\n\nUse the questions people bring to the team to choose the next useful explanation.",
+          "pillarsAndHooks": "THE VEHICLE\nIdentify the context.\n\nTHE DETAIL\nSee the workmanship.\n\nTHE QUESTION\nDiscuss the service.",
+          "mustAvoid": "Human, focused and specific to the actual job.\n\nLet the visible detail explain why the conversation matters.",
+          "channelIntegration": "Use WiseRide’s own channels and the enquiry route for the service featured.\n\nKeep vehicle-protection and workshop contexts clearly identified.",
+          "successSignals": "Enquiries naming the actual vehicle and service question.\n\nDrivers reaching the appropriate WiseRide team.",
+          "nextMonthGamePlan": "START\nOpen with a real window-film application detail.\n\nBUILD\nFollow with the careful finishing image.\n\nCLOSE\nUse two companion cards to invite the vehicle and service question."
+        }
+      },
+      "write_status": "NOT_SAVED_NOT_APPROVED_NOT_PUBLISHED",
+      "required_next_step": "After reviewed runtime release, re-read canonical exact-month brief, require source admission and unchanged row/package/guide, then use the existing draft tool. Never replay this artifact as an apply manifest.",
+      "private_legacy_context_to_preserve": {
+        "strategyDrivers": [
+          "client ID: 504113ee-fba9-4993-807e-a86066615212",
+          "casing variants of the same exact brand",
+          "another Wiseman-owned automotive business",
+          "WiseRide is presented as an Auto Armor-authorised application centre",
+          "it offers vehicle-protection services in Bloemfontein",
+          "the public location label is Nelson Mandela Dr"
+        ],
+        "reason": "Unchanged v1 seed contains internal identity/alias instructions; preserve privately in any later exact-field amendment, never display as client strategy."
+      }
+    },
+    {
+      "client_id": "504113ee-fba9-4993-807e-a86066615212",
+      "client_name": "WiseRide",
+      "strategy_month": "2026-12-01",
+      "canonical_state": "blocked",
+      "canonical_blockers": [
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ],
+      "existing_strategy_id": "3c751d3d-c0e9-42bb-9a0e-e80a654fe354",
+      "expected_version": 1,
+      "expected_row_hash": "398ddf53ea81c52c8145b9eb3eea1ef6",
+      "current_brief_fingerprint": "d31a5ec36b3fa8787ab06c716cbf5085446c883eb2d63feafffaf73949af64a9",
+      "guide_id": "653c6c4e-c8a7-4413-bb4c-19d83fdc50a0",
+      "guide_hash": "4bab28d2206b88842c45bf69c9f907bb",
+      "client_hash": "ce129a008c90e2f35b83a078c6902a28",
+      "confirmed_scope": {
+        "professional_video": null,
+        "reels": null,
+        "photo_content": 2,
+        "design_poster": 2,
+        "animated_poster": null,
+        "campaign_recommendation": null
+      },
+      "source_ids": {
+        "previous_monthly_strategy_id": null,
+        "previous_report_id": null,
+        "client_package_id": null,
+        "deliverable_ids": [],
+        "client_calendar_event_ids": [],
+        "approved_client_context_update_ids": [],
+        "client_guide_id": "653c6c4e-c8a7-4413-bb4c-19d83fdc50a0",
+        "marketing_library_skill_card_ids": [],
+        "marketing_library_cards": [],
+        "package_verification_confirmed_at": "2026-09-23T14:28:01.095523+00:00",
+        "package_verification_actor_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee",
+        "package_source_references": [
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "source_windows": {
+        "previous_report_period_end": null,
+        "previous_strategy_month": null,
+        "client_calendar_events": [],
+        "incorporated_context_updates": [],
+        "confirmed_package_scope": {
+          "professional_video": null,
+          "reels": null,
+          "photo_content": 2,
+          "design_poster": 2,
+          "animated_poster": null,
+          "campaign_recommendation": null
+        }
+      },
+      "candidate_data": {
+        "version": 1,
+        "clientDirection": [],
+        "clientRequestNotes": "",
+        "topContent": {
+          "autoCaption": null,
+          "autoPlatform": null,
+          "autoMetricLabel": null,
+          "autoMetricValue": null,
+          "autoImageUrl": null,
+          "coverImageUrl": "",
+          "contentType": "",
+          "whyItWorked": [],
+          "whatThisTellsUs": ""
+        },
+        "strategyDrivers": [],
+        "strategyGoingForward": "1. Start with the actual vehicle surface.\n\n2. Show the genuine application detail.\n\n3. Close with two focused protection-enquiry prompts.",
+        "actionPlan": {
+          "professional_video": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "The actual surface.\n\nShow the vehicle detail being discussed.",
+              "The application step.\n\nMake a genuine paint-protection process visible."
+            ],
+            "notes": ""
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "Which part of the vehicle?\n\nIdentify the surface in your enquiry.",
+              "What is the protection question?\n\nDiscuss the actual vehicle and intended use."
+            ],
+            "notes": ""
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        },
+        "clientActionsRequired": [
+          "Choose the real vehicle and service examples to feature.",
+          "Review the current service context and its enquiry route."
+        ],
+        "calendarSelections": [
+          {
+            "eventId": "2026-12-theme-festive-season",
+            "title": "Festive season",
+            "date": null,
+            "use": false,
+            "note": ""
+          },
+          {
+            "eventId": "2026-12-16-day-of-reconciliation",
+            "title": "Day of Reconciliation",
+            "date": "2026-12-16",
+            "use": false,
+            "note": ""
+          },
+          {
+            "eventId": "2026-12-25-christmas-day",
+            "title": "Christmas Day",
+            "date": "2026-12-25",
+            "use": false,
+            "note": ""
+          },
+          {
+            "eventId": "2026-12-26-day-of-goodwill",
+            "title": "Day of Goodwill",
+            "date": "2026-12-26",
+            "use": false,
+            "note": ""
+          }
+        ],
+        "goldStandard": {
+          "objective": "Help December drivers discuss the surface or exposure behind a protection question.\n\nUse actual paint-protection work and vehicle detail as the visual anchor.",
+          "audienceAndIntent": "Drivers considering a vehicle-protection or fitment question.\n\nPeople who want to discuss an actual vehicle and a specific WiseRide service.",
+          "coreMessage": "Show the surface you want to discuss.\n\nMake the protection enquiry about the actual vehicle.",
+          "formatsAndRationale": "2 photos — The actual surface; The application step.\n\n2 posters — Which part of the vehicle?; What is the protection question?",
+          "testAndChange": "Your measured installation and vehicle-detail stories make the workmanship visible.\n\nBuild on those real details with one practical driver question at a time.\n\nUse the questions people bring to the team to choose the next useful explanation.",
+          "pillarsAndHooks": "THE SURFACE\nSee the real detail.\n\nTHE WORK\nUnderstand the application task.\n\nTHE ENQUIRY\nBring the specific question.",
+          "mustAvoid": "Human, focused and specific to the actual job.\n\nLet the visible detail explain why the conversation matters.",
+          "channelIntegration": "Use WiseRide’s own channels and the enquiry route for the service featured.\n\nKeep vehicle-protection and workshop contexts clearly identified.",
+          "successSignals": "Enquiries naming the actual vehicle and service question.\n\nDrivers reaching the appropriate WiseRide team.",
+          "nextMonthGamePlan": "START\nStart with the actual vehicle surface.\n\nBUILD\nShow the genuine application detail.\n\nCLOSE\nClose with two focused protection-enquiry prompts."
+        }
+      },
+      "write_status": "NOT_SAVED_NOT_APPROVED_NOT_PUBLISHED",
+      "required_next_step": "After reviewed runtime release, re-read canonical exact-month brief, require source admission and unchanged row/package/guide, then use the existing draft tool. Never replay this artifact as an apply manifest."
+    },
+    {
+      "client_id": "504113ee-fba9-4993-807e-a86066615212",
+      "client_name": "WiseRide",
+      "strategy_month": "2027-01-01",
+      "canonical_state": "blocked",
+      "canonical_blockers": [
+        "EXACT_STRATEGY_EVIDENCE_UNAVAILABLE"
+      ],
+      "existing_strategy_id": null,
+      "expected_version": null,
+      "expected_row_hash": null,
+      "current_brief_fingerprint": "b4730d14f7669ec5d01bc2668a4e172dc2f97be243729dcc9b8499090d8996dc",
+      "guide_id": "653c6c4e-c8a7-4413-bb4c-19d83fdc50a0",
+      "guide_hash": "4bab28d2206b88842c45bf69c9f907bb",
+      "client_hash": "ce129a008c90e2f35b83a078c6902a28",
+      "confirmed_scope": {
+        "professional_video": null,
+        "reels": null,
+        "photo_content": 2,
+        "design_poster": 2,
+        "animated_poster": null,
+        "campaign_recommendation": null
+      },
+      "source_ids": {
+        "previous_monthly_strategy_id": null,
+        "previous_report_id": null,
+        "client_package_id": null,
+        "deliverable_ids": [],
+        "client_calendar_event_ids": [],
+        "approved_client_context_update_ids": [],
+        "client_guide_id": "653c6c4e-c8a7-4413-bb4c-19d83fdc50a0",
+        "marketing_library_skill_card_ids": [],
+        "marketing_library_cards": [],
+        "package_verification_confirmed_at": "2026-09-23T14:28:01.095523+00:00",
+        "package_verification_actor_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee",
+        "package_source_references": [
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "source_windows": {
+        "previous_report_period_end": null,
+        "previous_strategy_month": null,
+        "client_calendar_events": [],
+        "incorporated_context_updates": [],
+        "confirmed_package_scope": {
+          "professional_video": null,
+          "reels": null,
+          "photo_content": 2,
+          "design_poster": 2,
+          "animated_poster": null,
+          "campaign_recommendation": null
+        }
+      },
+      "candidate_data": {
+        "version": 1,
+        "clientDirection": [],
+        "clientRequestNotes": "",
+        "topContent": {
+          "autoCaption": null,
+          "autoPlatform": null,
+          "autoMetricLabel": null,
+          "autoMetricValue": null,
+          "autoImageUrl": null,
+          "coverImageUrl": "",
+          "contentType": "",
+          "whyItWorked": [],
+          "whatThisTellsUs": ""
+        },
+        "strategyDrivers": [],
+        "strategyGoingForward": "1. Open with a genuine vehicle-protection detail.\n\n2. Follow with an actual tyre or workshop task.\n\n3. Use two cards to separate the enquiry routes.",
+        "actionPlan": {
+          "professional_video": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "reels": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "photo_content": {
+            "enabled": true,
+            "items": [
+              "The protection application.\n\nShow an actual job with its service context identified.",
+              "The workshop question.\n\nUse a genuine tyre or workshop detail at the relevant WiseRide location."
+            ],
+            "notes": ""
+          },
+          "design_poster": {
+            "enabled": true,
+            "items": [
+              "A protection question?\n\nName the actual vehicle and application.",
+              "A tyre or workshop question?\n\nDescribe the vehicle concern and confirm the relevant WiseRide team."
+            ],
+            "notes": ""
+          },
+          "animated_poster": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          },
+          "campaign_recommendation": {
+            "enabled": false,
+            "items": [],
+            "notes": ""
+          }
+        },
+        "clientActionsRequired": [
+          "Choose the real vehicle and service examples to feature.",
+          "Review the current service context and its enquiry route."
+        ],
+        "calendarSelections": [],
+        "goldStandard": {
+          "objective": "Make January enquiries clear about the WiseRide service context.\n\nSeparate a protection application from a tyre or workshop question.",
+          "audienceAndIntent": "Drivers considering a vehicle-protection or fitment question.\n\nPeople who want to discuss an actual vehicle and a specific WiseRide service.",
+          "coreMessage": "One vehicle, one clear question.\n\nIdentify the service before choosing the next conversation.",
+          "formatsAndRationale": "2 photos — The protection application; The workshop question.\n\n2 posters — A protection question?; A tyre or workshop question?",
+          "testAndChange": "Your measured installation and vehicle-detail stories make the workmanship visible.\n\nBuild on those real details with one practical driver question at a time.\n\nUse the questions people bring to the team to choose the next useful explanation.",
+          "pillarsAndHooks": "THE NEED\nName the vehicle question.\n\nTHE SERVICE\nIdentify the protection or workshop context.\n\nTHE TEAM\nUse the relevant enquiry route.",
+          "mustAvoid": "Human, focused and specific to the actual job.\n\nLet the visible detail explain why the conversation matters.",
+          "channelIntegration": "Use WiseRide’s own channels and the enquiry route for the service featured.\n\nKeep vehicle-protection and workshop contexts clearly identified.",
+          "successSignals": "Enquiries naming the actual vehicle and service question.\n\nDrivers reaching the appropriate WiseRide team.",
+          "nextMonthGamePlan": "START\nOpen with a genuine vehicle-protection detail.\n\nBUILD\nFollow with an actual tyre or workshop task.\n\nCLOSE\nUse two cards to separate the enquiry routes."
+        }
+      },
+      "write_status": "NOT_SAVED_NOT_APPROVED_NOT_PUBLISHED",
+      "required_next_step": "After reviewed runtime release, re-read canonical exact-month brief, require source admission and unchanged row/package/guide, then use the existing draft tool. Never replay this artifact as an apply manifest."
+    }
+  ],
+  "clients": [
+    {
+      "client_id": "1007e58b-3fea-4515-88b7-ddaa85763de6",
+      "client_name": "Hino Trucks",
+      "package_settings": {
+        "verification": {
+          "status": "confirmed",
+          "version": 2,
+          "confirmed_at": "2026-09-23T14:23:38.012856+00:00",
+          "field_states": {
+            "package_notes": "known",
+            "reels_per_month": "unknown",
+            "package_exclusions": "unknown",
+            "shoot_days_per_month": "unknown",
+            "photo_posts_per_month": "unknown",
+            "monthly_campaign_budget": "unknown",
+            "design_posters_per_month": "unknown",
+            "other_agreed_deliverables": "unknown",
+            "website_updates_per_month": "unknown",
+            "animated_posters_per_month": "unknown",
+            "campaign_management_included": "unknown",
+            "professional_videos_per_month": "known"
+          },
+          "evidence_note": "CA approved the complete 56-active-client package batch on Issue #504; exact-client evidence and named overrides were reviewed.",
+          "inference_note": "Initially unknown: reels_per_month, photo_posts_per_month, design_posters_per_month, animated_posters_per_month, campaign_management_included, monthly_campaign_budget, shoot_days_per_month, website_updates_per_month, other_agreed_deliverables, package_exclusions. Recent production cadence was treated as supporting evidence only, not contractual scope.",
+          "source_references": [
+            "client_package:f9ecd2e7-fa2d-47c8-a7d3-444cf47e20a2 (Monthly Content Package; current from 2026-06-30)",
+            "package_template:7978d77a-7b6b-40a8-b977-7bbddb2f463b (Video 1; 1/month)",
+            "package_template:9502effd-403d-4c24-81fc-7889d98c8523 (Video 2; 1/month)",
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+          ],
+          "confirmed_by_profile_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee"
+        },
+        "package_notes": "Prepared from Teams Planner Excel dry-run",
+        "reels_per_month": null,
+        "package_exclusions": null,
+        "shoot_days_per_month": null,
+        "photo_posts_per_month": null,
+        "monthly_campaign_budget": null,
+        "design_posters_per_month": null,
+        "other_agreed_deliverables": null,
+        "website_updates_per_month": null,
+        "animated_posters_per_month": null,
+        "campaign_management_included": null,
+        "professional_videos_per_month": 2
+      }
+    },
+    {
+      "client_id": "a5eab798-3e00-44cc-947e-463386fdac39",
+      "client_name": "Jenkor",
+      "package_settings": {
+        "verification": {
+          "status": "confirmed",
+          "version": 2,
+          "confirmed_at": "2026-09-23T14:24:16.563937+00:00",
+          "field_states": {
+            "package_notes": "known",
+            "reels_per_month": "unknown",
+            "package_exclusions": "unknown",
+            "shoot_days_per_month": "unknown",
+            "photo_posts_per_month": "unknown",
+            "monthly_campaign_budget": "unknown",
+            "design_posters_per_month": "known",
+            "other_agreed_deliverables": "unknown",
+            "website_updates_per_month": "unknown",
+            "animated_posters_per_month": "unknown",
+            "campaign_management_included": "unknown",
+            "professional_videos_per_month": "known"
+          },
+          "evidence_note": "CA approved the complete 56-active-client package batch on Issue #504; exact-client evidence and named overrides were reviewed.",
+          "inference_note": "Initially unknown: reels_per_month, photo_posts_per_month, animated_posters_per_month, campaign_management_included, monthly_campaign_budget, shoot_days_per_month, website_updates_per_month, other_agreed_deliverables, package_exclusions. Recent production cadence was treated as supporting evidence only, not contractual scope.",
+          "source_references": [
+            "client_package:4e05ce5c-8b5c-47c5-8cb9-bc55efababc9 (Monthly Content Package; current from 2026-06-30)",
+            "package_template:b5b585d1-4bf8-40cc-b9d7-59cd414cee90 (Video 1; 1/month)",
+            "package_template:8fec65ae-b3d8-4d27-9fa7-de5db320df64 (DP1; 1/month)",
+            "package_template:edd85c0c-4adc-4393-a381-f6b7a077d1d6 (DP2; 1/month)",
+            "package_template:5b406d10-61f5-40e9-a00b-97f4b53d330d (DP3; 1/month)",
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+          ],
+          "confirmed_by_profile_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee"
+        },
+        "package_notes": "Prepared from Teams Planner Excel dry-run",
+        "reels_per_month": null,
+        "package_exclusions": null,
+        "shoot_days_per_month": null,
+        "photo_posts_per_month": null,
+        "monthly_campaign_budget": null,
+        "design_posters_per_month": 3,
+        "other_agreed_deliverables": null,
+        "website_updates_per_month": null,
+        "animated_posters_per_month": null,
+        "campaign_management_included": null,
+        "professional_videos_per_month": 1
+      }
+    },
+    {
+      "client_id": "a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b",
+      "client_name": "Peyper Bonds",
+      "package_settings": {
+        "verification": {
+          "status": "confirmed",
+          "version": 2,
+          "confirmed_at": "2026-09-23T14:25:23.899664+00:00",
+          "field_states": {
+            "package_notes": "known",
+            "reels_per_month": "unknown",
+            "package_exclusions": "unknown",
+            "shoot_days_per_month": "unknown",
+            "photo_posts_per_month": "known",
+            "monthly_campaign_budget": "unknown",
+            "design_posters_per_month": "known",
+            "other_agreed_deliverables": "unknown",
+            "website_updates_per_month": "unknown",
+            "animated_posters_per_month": "unknown",
+            "campaign_management_included": "unknown",
+            "professional_videos_per_month": "known"
+          },
+          "evidence_note": "CA approved the complete 56-active-client package batch on Issue #504; exact-client evidence and named overrides were reviewed.",
+          "inference_note": "Initially unknown: reels_per_month, animated_posters_per_month, campaign_management_included, monthly_campaign_budget, shoot_days_per_month, website_updates_per_month, other_agreed_deliverables, package_exclusions. Recent production cadence was treated as supporting evidence only, not contractual scope.",
+          "source_references": [
+            "client_package:c8a87ca5-179d-4068-9528-09a4c0fba868 (Monthly Content Package; current from 2026-06-30)",
+            "package_template:77c6ae3a-2b45-4965-b48c-37e04346697d (Video 1; 1/month)",
+            "package_template:0694a51d-4711-465e-b5e5-ba3177e3997f (F1; 1/month)",
+            "package_template:ae75604f-ebd0-4168-a89b-70fe9235bdbd (F2; 1/month)",
+            "package_template:2a48fdaa-2478-481f-8b2f-611bb9609f1c (F3; 1/month)",
+            "package_template:a19bd288-5748-4b36-815d-8c51234893c9 (DP1; 1/month)",
+            "package_template:c42b5cdf-357f-4c25-83b6-38c834aaadff (DP2; 1/month)",
+            "package_template:c16bea84-e261-49de-9d6e-06adce9316a9 (DP3; 1/month)",
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+          ],
+          "confirmed_by_profile_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee"
+        },
+        "package_notes": "Prepared from Teams Planner Excel dry-run",
+        "reels_per_month": null,
+        "package_exclusions": null,
+        "shoot_days_per_month": null,
+        "photo_posts_per_month": 3,
+        "monthly_campaign_budget": null,
+        "design_posters_per_month": 3,
+        "other_agreed_deliverables": null,
+        "website_updates_per_month": null,
+        "animated_posters_per_month": null,
+        "campaign_management_included": null,
+        "professional_videos_per_month": 1
+      }
+    },
+    {
+      "client_id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+      "client_name": "Supa Quick BFN",
+      "package_settings": {
+        "verification": {
+          "status": "confirmed",
+          "version": 2,
+          "confirmed_at": "2026-09-23T14:26:33.968888+00:00",
+          "field_states": {
+            "package_notes": "known",
+            "reels_per_month": "unknown",
+            "package_exclusions": "unknown",
+            "shoot_days_per_month": "unknown",
+            "photo_posts_per_month": "unknown",
+            "monthly_campaign_budget": "unknown",
+            "design_posters_per_month": "known",
+            "other_agreed_deliverables": "unknown",
+            "website_updates_per_month": "unknown",
+            "animated_posters_per_month": "unknown",
+            "campaign_management_included": "unknown",
+            "professional_videos_per_month": "known"
+          },
+          "evidence_note": "CA approved the complete 56-active-client package batch on Issue #504; exact-client evidence and named overrides were reviewed.",
+          "inference_note": "Initially unknown: reels_per_month, photo_posts_per_month, animated_posters_per_month, campaign_management_included, monthly_campaign_budget, shoot_days_per_month, website_updates_per_month, other_agreed_deliverables, package_exclusions. Recent production cadence was treated as supporting evidence only, not contractual scope.",
+          "source_references": [
+            "client_package:5b15c7e9-49b4-403e-9bca-70d43801a868 (Monthly Content Package; current from 2026-06-30)",
+            "package_template:612f76a0-c7dc-4c2f-9bce-83b0a68e841e (Video 1; 1/month)",
+            "package_template:de8d488c-5db7-4ad5-9526-4fc594671111 (DP1; 1/month)",
+            "package_template:5bfe6323-afb7-43d1-a57b-25150c4d60e3 (DP2; 1/month)",
+            "package_template:6b41c899-9bd0-441e-9dbe-d4ebf7049f62 (DP3; 1/month)",
+            "package_template:611279dc-9409-470d-aaad-0169bfde3dec (DP4; 1/month)",
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+          ],
+          "confirmed_by_profile_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee"
+        },
+        "package_notes": "Prepared from Teams Planner Excel dry-run",
+        "reels_per_month": null,
+        "package_exclusions": null,
+        "shoot_days_per_month": null,
+        "photo_posts_per_month": null,
+        "monthly_campaign_budget": null,
+        "design_posters_per_month": 3,
+        "other_agreed_deliverables": null,
+        "website_updates_per_month": null,
+        "animated_posters_per_month": null,
+        "campaign_management_included": null,
+        "professional_videos_per_month": 1
+      }
+    },
+    {
+      "client_id": "e2ad6d57-5b06-46e1-b75b-b67f017d57f1",
+      "client_name": "Toyota Bloemfontein",
+      "package_settings": {
+        "verification": {
+          "status": "confirmed",
+          "version": 2,
+          "confirmed_at": "2026-09-23T14:27:21.977046+00:00",
+          "field_states": {
+            "package_notes": "known",
+            "reels_per_month": "unknown",
+            "package_exclusions": "unknown",
+            "shoot_days_per_month": "unknown",
+            "photo_posts_per_month": "unknown",
+            "monthly_campaign_budget": "unknown",
+            "design_posters_per_month": "unknown",
+            "other_agreed_deliverables": "unknown",
+            "website_updates_per_month": "unknown",
+            "animated_posters_per_month": "unknown",
+            "campaign_management_included": "unknown",
+            "professional_videos_per_month": "known"
+          },
+          "evidence_note": "CA approved the complete 56-active-client package batch on Issue #504; exact-client evidence and named overrides were reviewed.",
+          "inference_note": "Initially unknown: reels_per_month, photo_posts_per_month, design_posters_per_month, animated_posters_per_month, campaign_management_included, monthly_campaign_budget, shoot_days_per_month, website_updates_per_month, other_agreed_deliverables, package_exclusions. Recent production cadence was treated as supporting evidence only, not contractual scope.",
+          "source_references": [
+            "client_package:c3cb4d60-bd41-4f30-bbed-757c18c780d3 (Monthly Content Package; current from 2026-06-30)",
+            "package_template:8bd9130c-2ff6-4735-b695-95a920da9a20 (Video 1; 1/month)",
+            "package_template:89d5879a-1711-4abf-8d11-a2aa6b7e1445 (Video 2; 1/month)",
+            "package_template:d107b70e-0a8e-4fdf-97d0-d8d9bf566076 (Video 3; 1/month)",
+            "package_template:a061b1e1-aff9-48b5-a358-739af65e37de (Video 4; 1/month)",
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+          ],
+          "confirmed_by_profile_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee"
+        },
+        "package_notes": "Prepared from Teams Planner Excel dry-run",
+        "reels_per_month": null,
+        "package_exclusions": null,
+        "shoot_days_per_month": null,
+        "photo_posts_per_month": null,
+        "monthly_campaign_budget": null,
+        "design_posters_per_month": null,
+        "other_agreed_deliverables": null,
+        "website_updates_per_month": null,
+        "animated_posters_per_month": null,
+        "campaign_management_included": null,
+        "professional_videos_per_month": 4
+      }
+    },
+    {
+      "client_id": "504113ee-fba9-4993-807e-a86066615212",
+      "client_name": "WiseRide",
+      "package_settings": {
+        "verification": {
+          "status": "confirmed",
+          "version": 2,
+          "confirmed_at": "2026-09-23T14:28:01.095523+00:00",
+          "field_states": {
+            "package_notes": "known",
+            "reels_per_month": "unknown",
+            "package_exclusions": "unknown",
+            "shoot_days_per_month": "unknown",
+            "photo_posts_per_month": "known",
+            "monthly_campaign_budget": "unknown",
+            "design_posters_per_month": "known",
+            "other_agreed_deliverables": "known",
+            "website_updates_per_month": "unknown",
+            "animated_posters_per_month": "unknown",
+            "campaign_management_included": "unknown",
+            "professional_videos_per_month": "unknown"
+          },
+          "evidence_note": "CA approved the complete 56-active-client package batch on Issue #504; exact-client evidence and named overrides were reviewed.",
+          "inference_note": "Initially unknown: professional_videos_per_month, reels_per_month, photo_posts_per_month, design_posters_per_month, animated_posters_per_month, campaign_management_included, monthly_campaign_budget, shoot_days_per_month, website_updates_per_month, other_agreed_deliverables, package_notes, package_exclusions. Recent production cadence was treated as supporting evidence only, not contractual scope.",
+          "source_references": [
+            "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+          ],
+          "confirmed_by_profile_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee"
+        },
+        "package_notes": "No fixed WiseRide-specific professional-video quantity is confirmed.",
+        "reels_per_month": null,
+        "package_exclusions": null,
+        "shoot_days_per_month": null,
+        "photo_posts_per_month": 2,
+        "monthly_campaign_budget": null,
+        "design_posters_per_month": 2,
+        "other_agreed_deliverables": "Video capacity is shared with Wiseman Group and may feature Midas/WiseRide.",
+        "website_updates_per_month": null,
+        "animated_posters_per_month": null,
+        "campaign_management_included": null,
+        "professional_videos_per_month": null
+      }
+    }
+  ]
+}

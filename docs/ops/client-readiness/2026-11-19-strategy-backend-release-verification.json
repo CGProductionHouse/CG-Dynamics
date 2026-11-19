@@ -1,0 +1,167 @@
+{
+  "kind": "ZERO_WRITE_STRATEGY_CONNECTOR_RELEASE_PREFLIGHT",
+  "recorded_at": "2026-11-19T19:46:01.583Z",
+  "pr": 1003,
+  "source_head": "98fded5a634341b112f48af2b064c486f4d912fd",
+  "refetched_main": "b524a9f91d61a5727db355194db2a988594b8af1",
+  "project_id": "ehtjfntukiwbgptqgbzy",
+  "organization_id": "cgwucfjufkuunddzmuyf",
+  "function_slug": "cg-dynamics-mcp",
+  "expected_live_version": 90,
+  "verify_jwt": false,
+  "manifest_sha256": "f7182fa1a0c7a66d053144aa477316966a1c2f10bcbee39b0b90af576750edea",
+  "source_files": 70,
+  "changed_strategy_files": 2,
+  "unchanged_live_files": 68,
+  "live_source_retrieved_at": "2026-11-19T19:37:40Z",
+  "live_source_unchanged": true,
+  "production_read_at": "2026-11-19T19:41:26.132996+00:00",
+  "production_comparison": {
+    "clients": {
+      "count": 63,
+      "changed": [],
+      "removed": []
+    },
+    "guides": {
+      "count": 52,
+      "changed": [],
+      "removed": []
+    },
+    "strategies": {
+      "count": 141,
+      "changed": [],
+      "removed": []
+    }
+  },
+  "production_snapshot_sha256": "12798e0290300ade384ed9cffcd0ee982a379fab9cc227fbe273161a563d0154",
+  "strategy_data_writes": 0,
+  "cloud_builds": 0,
+  "cloud_deployments": 0,
+  "vercel_operations": 0,
+  "migrations": 0,
+  "approvals": 0,
+  "publications": 0,
+  "source_review_writes": 0,
+  "verification": {
+    "actual_live_based_candidate": {
+      "passed": 91,
+      "failed": 0
+    },
+    "source_serial_run": {
+      "passed": 146,
+      "failed": 0
+    },
+    "final_release_guard_suite": {
+      "passed": 8,
+      "failed": 0
+    },
+    "source_distinct_checks": 147,
+    "counts_overlap": true,
+    "local_typescript_vite_build": "PASS",
+    "scoped_eslint": "PASS",
+    "git_diff_check": "PASS",
+    "official_local_edge_runtime": "v1.74.3",
+    "strategy_workspace_eszip": {
+      "bytes": 676107,
+      "sha256": "0bf7a049a52a66c39c1367c2ecce70647207ab90448e7625e965e9e876416172"
+    },
+    "full_connector_eszip": {
+      "bytes": 2475457,
+      "sha256": "d1ac4402830f466dad1103b74283984667764258c5318d92cfe1e2c33f7ed0c9"
+    },
+    "physical_phone_check": false,
+    "hosted_release_acceptance": false
+  },
+  "budget": {
+    "source": "Existing company Chrome - official Supabase organization Usage",
+    "observation_recorded_before_utc": "2026-11-19T19:37:40Z",
+    "cycle_start": "2026-11-14",
+    "cycle_end": "2026-12-14",
+    "refresh_lag_up_to_minutes": 60,
+    "invocations": {
+      "used": 44975,
+      "included": 2000000,
+      "remaining": 1955025
+    },
+    "egress_gb": {
+      "used": 2.367,
+      "included": 250,
+      "remaining": 247.633
+    },
+    "storage_gb": {
+      "used": 0.005,
+      "included": 100,
+      "remaining": 99.995
+    },
+    "proposed_max_additional_spend_usd": 0,
+    "approved_max_additional_spend_usd": null,
+    "release_authority": "PENDING_EXACT_RELEASE_APPROVAL_UNDER_679",
+    "proposed_acceptance_call_limit": 100,
+    "proposed_production_reserve": {
+      "invocations": 1000000,
+      "egress_gb": 100,
+      "storage_gb": 10
+    }
+  },
+  "protected": {
+    "previous_saved_drafts": 77,
+    "previous_corrected_published_plans": 16,
+    "candidate_rows_not_saved": 18,
+    "live_held_clients": 32,
+    "missing_guide_clients": 4,
+    "unstructured_guide_clients": 7,
+    "no_confirmed_monthly_scope_clients": 15,
+    "worker_autopilot_release": false,
+    "other_agents_unchanged": true
+  },
+  "uptime": {
+    "checked_at": "2026-11-19T19:41:50.799Z",
+    "rows": [
+      {
+        "url": "https://cgdynamics.co.za/login",
+        "method": "GET",
+        "status": 200,
+        "finalUrl": "https://www.cgdynamics.co.za/login",
+        "bytes": 1216,
+        "authenticate": null
+      },
+      {
+        "url": "https://www.cgdynamics.co.za/login",
+        "method": "GET",
+        "status": 200,
+        "finalUrl": "https://www.cgdynamics.co.za/login",
+        "bytes": 1216,
+        "authenticate": null
+      },
+      {
+        "url": "https://ehtjfntukiwbgptqgbzy.supabase.co/functions/v1/cg-dynamics-mcp/.well-known/oauth-protected-resource",
+        "method": "GET",
+        "status": 200,
+        "finalUrl": "https://ehtjfntukiwbgptqgbzy.supabase.co/functions/v1/cg-dynamics-mcp/.well-known/oauth-protected-resource",
+        "bytes": 242,
+        "authenticate": null,
+        "metadata": {
+          "resource": "https://ehtjfntukiwbgptqgbzy.supabase.co/functions/v1/cg-dynamics-mcp/mcp",
+          "authorization_servers": [
+            "https://ehtjfntukiwbgptqgbzy.supabase.co/auth/v1"
+          ],
+          "bearer_methods_supported": [
+            "header"
+          ],
+          "scopes_supported": [
+            "email",
+            "profile"
+          ]
+        }
+      },
+      {
+        "url": "https://ehtjfntukiwbgptqgbzy.supabase.co/functions/v1/cg-dynamics-mcp/mcp",
+        "method": "POST",
+        "status": 401,
+        "finalUrl": "https://ehtjfntukiwbgptqgbzy.supabase.co/functions/v1/cg-dynamics-mcp/mcp",
+        "bytes": 36,
+        "authenticate": "Bearer resource_metadata=\"https://ehtjfntukiwbgptqgbzy.supabase.co/functions/v1/cg-dynamics-mcp/.well-known/oauth-protected-resource\""
+      }
+    ]
+  }
+}
