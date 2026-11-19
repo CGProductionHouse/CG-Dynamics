@@ -69,10 +69,13 @@ test('read tools cover exact staff, task, calendar, schedule, lead, client conte
 //    (microsoft-transition-sync, provider sync) which carries its own idempotency, and are
 //    resumed by their own job token rather than a per-call key.
 const ORCHESTRATION_TOOLS = new Set(['run_microsoft_sync', 'run_provider_sync'])
+// OAuth setup is a deliberately non-idempotent expiring login request, not an
+// operational record or publication job. Raw login state is never a write receipt.
+const OAUTH_SETUP_TOOLS = new Set(['start_facebook_permission_setup'])
 
 test('every record mutation is non-destructive, idempotent and bound to a canonical action contract', () => {
   const writes = catalog.CG_DYNAMICS_MCP_TOOLS
-    .filter(tool => !tool.annotations.readOnlyHint && !ORCHESTRATION_TOOLS.has(tool.name))
+    .filter(tool => !tool.annotations.readOnlyHint && !ORCHESTRATION_TOOLS.has(tool.name) && !OAUTH_SETUP_TOOLS.has(tool.name))
   assert.ok(writes.length > 0)
   for (const tool of writes) {
     assert.equal(tool.annotations.idempotentHint, true)
@@ -103,13 +106,13 @@ test('server instruction states the shared-connection contract and forbids unsaf
   assert.doesNotMatch(instructions, /Project name.*identity/i)
 })
 
-test('catalog contains exactly 63 tools: 32 read + 31 write', () => {
+test('catalog contains exactly 64 tools: 32 read + 32 non-read', () => {
   const tools = catalog.CG_DYNAMICS_MCP_TOOLS
-  assert.equal(tools.length, 63)
+  assert.equal(tools.length, 64)
   const reads = tools.filter(t => t.annotations.readOnlyHint)
   const writes = tools.filter(t => !t.annotations.readOnlyHint)
   assert.equal(reads.length, 32)
-  assert.equal(writes.length, 31)
+  assert.equal(writes.length, 32)
 })
 
 test('every tool maps to a declared dependency and no tool references an unknown upstream', () => {

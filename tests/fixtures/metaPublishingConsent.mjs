@@ -15,11 +15,16 @@ export function metaConsentFixture({ enabled = false, role = 'manager', active =
     } }
   const env = { META_APP_ID:'123456',META_REDIRECT_URI:'https://fixture.invalid/callback',SUPABASE_URL:'https://fixture.invalid',
     SUPABASE_SERVICE_ROLE_KEY:'fixture-only',SOCIAL_FACEBOOK_PHOTO_CONSENT_ENABLED:gateValue??(enabled?'true':'false') }
+  const shared = {exports:{}}
+  vm.runInNewContext(ts.transpileModule(readFileSync('supabase/functions/_shared/metaOAuthRequest.ts','utf8'),{
+    compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022} }).outputText,
+    {exports:shared.exports,crypto:webcrypto,TextEncoder,btoa,URL,URLSearchParams,Date})
   const code = ts.transpileModule(readFileSync('supabase/functions/meta-oauth-start/index.ts','utf8'),{
     compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022} }).outputText
   vm.runInNewContext(code,{exports:{},crypto:webcrypto,TextEncoder,btoa,URL,URLSearchParams,Date,Response,
     console:{error(){}}, Deno:{env:{get(name){envReads.push(name);return env[name]}},serve(fn){handler=fn}},
     require(name){
+      if(name.endsWith('/metaOAuthRequest.ts'))return shared.exports
       if(name.endsWith('/cors.ts'))return {corsHeaders:{},jsonResponse:(body,status=200)=>Response.json(body,{status})}
       if(name.endsWith('/meta.ts'))return {resolveMetaGraphConfig:()=>({version:'v27.0'})}
       if(name==='https://esm.sh/@supabase/supabase-js@2')return {createClient:()=>sb}

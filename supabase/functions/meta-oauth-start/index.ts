@@ -1,33 +1,7 @@
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { resolveMetaGraphConfig } from '../_shared/meta.ts'
-
-// Scopes required for future Meta asset discovery and reporting:
-// - pages_show_list          - list Facebook Pages the connected user manages
-// - pages_read_engagement    - read Facebook Page posts, engagement and follower fields
-// - read_insights            - read historical Facebook Page insights
-// - instagram_basic          - discover Instagram Business accounts linked to Pages
-// - instagram_manage_insights - read Instagram media/account insights for reports
-// - business_management      - discover Business Manager-owned pages/ad accounts
-const SCOPES = [
-  'pages_show_list',
-  'pages_read_engagement',
-  'read_insights',
-  'instagram_basic',
-  'instagram_manage_insights',
-  'business_management',
-]
-
-function base64Url(bytes: Uint8Array): string {
-  const raw = btoa(String.fromCharCode(...bytes))
-  return raw.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '')
-}
-
-async function sha256Hex(value: string): Promise<string> {
-  const data = new TextEncoder().encode(value)
-  const digest = await crypto.subtle.digest('SHA-256', data)
-  return [...new Uint8Array(digest)].map(byte => byte.toString(16).padStart(2, '0')).join('')
-}
+import { createMetaOAuthRequest } from '../_shared/metaOAuthRequest.ts'
 
 async function requireStaff(req: Request, sb: SupabaseClient) {
   const authHeader = req.headers.get('Authorization') ?? ''
@@ -98,53 +72,14 @@ Deno.serve(async (req) => {
       || [...requestParams.keys()].some(key => !['purpose', 'confirm_permission_request'].includes(key))) {
       return jsonResponse({ ok: false, code: 'META_PUBLISHING_CONSENT_REQUEST_INVALID', error: 'Confirm the exact Facebook publishing permission request.' }, 400)
     }
-    if (Deno.env.get('SOCIAL_FACEBOOK_PHOTO_CONSENT_ENABLED') !== 'true') {
-      return jsonResponse({ ok: false, code: 'META_PUBLISHING_CONSENT_DISABLED', error: 'Facebook publishing permission setup is not enabled.' }, 409)
-    }
-    const actor = await sb.from('profiles').select('role,is_active').eq('id', auth.userId).maybeSingle()
-    if (actor.error || actor.data?.is_active !== true || !['admin', 'manager'].includes(actor.data.role)) {
-      return jsonResponse({ ok: false, code: 'ACTIVE_MANAGER_REQUIRED', error: 'Active admin or manager access required.' }, 403)
-    }
   }
 
-  const stateBytes = new Uint8Array(32)
-  crypto.getRandomValues(stateBytes)
-  const state = base64Url(stateBytes)
-  const stateHash = await sha256Hex(state)
-  const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString()
-
-  const { error: stateError } = await sb
-    .from('meta_oauth_states')
-    .insert({
-      state_hash: stateHash,
-      user_id: auth.userId,
-      expires_at: expiresAt,
-    })
-
-  if (stateError) {
-    console.error('Meta OAuth state insert failed:', stateError.code ?? 'unknown')
-    return jsonResponse({ ok: false, error: 'Could not start Meta connection.' }, 500)
+  const result = await createMetaOAuthRequest(sb, auth.userId, {
+    appId, redirectUri, graphVersion, publishing: publishingRequested,
+  }, name => Deno.env.get(name))
+  if (!result.ok) {
+    const { status, ...body } = result
+    return jsonResponse(body, status)
   }
-
-  const params = new URLSearchParams({
-    client_id: appId,
-    redirect_uri: redirectUri,
-    response_type: 'code',
-    state,
-    scope: (publishingRequested ? [...SCOPES, 'pages_manage_posts'] : SCOPES).join(','),
-  })
-  // Owner consent remains required, including when this permission was declined.
-  // A resulting grant must still pass exact Page/app/token validation separately.
-  if (publishingRequested) params.set('auth_type', 'rerequest')
-
-  const url = `https://www.facebook.com/${graphVersion}/dialog/oauth?${params.toString()}`
-
-  return jsonResponse({
-    ok: true,
-    url,
-    ...(publishingRequested ? {
-      consent_purpose: 'facebook_photo_publishing', publishing_ready: false,
-      note: 'Permission request only. Preserve existing asset selections. Owner consent, app eligibility and exact Page verification are still required; publishing remains separately disabled.',
-    } : {}),
-  })
+  return jsonResponse(result)
 })

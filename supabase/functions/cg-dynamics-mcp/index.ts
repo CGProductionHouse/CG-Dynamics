@@ -12,6 +12,7 @@ import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supa
 import { readMicrosoftScheduleSource } from './microsoftScheduleSource.ts'
 import { readFacebookPostReadiness } from './facebookPostReadiness.ts'
 import { facebookPublicationAction } from './facebookPublicationActions.ts'
+import { startFacebookPermissionSetup } from './facebookPermissionSetup.ts'
 import { fetchAllRows, fetchAllRowsByIdChunks } from '../_shared/paginatedRows.ts'
 import { CG_DYNAMICS_MCP_TOOLS, CG_DYNAMICS_MCP_SECURITY_SCHEMES } from './toolCatalog.ts'
 import { filterCapabilitiesByScope } from './capabilityManifest.ts'
@@ -3651,6 +3652,7 @@ const toolHandlers: Record<string, ToolHandler> = {
   run_microsoft_sync: handleRunMicrosoftSync,
   get_provider_health: handleGetProviderHealth,
   get_facebook_post_readiness: (staff, input) => readFacebookPostReadiness(staff.supabase, staff.profileId, input, name => Deno.env.get(name)),
+  start_facebook_permission_setup: (staff, input) => startFacebookPermissionSetup(staff.supabase, staff.connection.profileId, input, name => Deno.env.get(name)),
   prepare_facebook_photo_publication: (staff, input) => facebookPublicationAction(staff.supabase, staff.profileId, 'preview', input, name => Deno.env.get(name)),
   confirm_facebook_photo_publication: (staff, input) => facebookPublicationAction(staff.supabase, staff.profileId, 'confirm', input, name => Deno.env.get(name)),
   get_social_publication_status: (staff, input) => facebookPublicationAction(staff.supabase, staff.profileId, 'status', input, name => Deno.env.get(name)),

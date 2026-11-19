@@ -181,6 +181,7 @@ export const COMPANY_ADMIN_TOOLS: readonly string[] = [
   'run_microsoft_sync',
   'get_provider_health',
   'get_facebook_post_readiness',
+  'start_facebook_permission_setup',
   'prepare_facebook_photo_publication', 'confirm_facebook_photo_publication', 'get_social_publication_status',
   'get_google_ads_audit',
   'run_provider_sync',

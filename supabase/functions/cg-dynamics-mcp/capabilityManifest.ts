@@ -51,7 +51,7 @@ export const CG_CAPABILITY_MANIFEST: readonly CgCapability[] = [
       'Never invent ownership, deadlines, status, or a second task list.',
       'Never merge CG Calendar and Client Schedule.',
       'Use exact client IDs; never borrow facts from another client.',
-      'All writes are audited and idempotent.',
+      'Operational record writes are audited and idempotent. Explicit Facebook permission setup creates a fresh expiring OAuth state; never auto-retry it or treat it as a publishing grant.',
     ],
     requiredRole: ['admin', 'manager', 'staff', 'team'],
     expectedConnectedInCompanyWorkspace: true,

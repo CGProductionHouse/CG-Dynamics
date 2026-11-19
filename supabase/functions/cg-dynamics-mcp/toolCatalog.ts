@@ -174,6 +174,13 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
     dependency: 'main', canonicalContract: 'existing content_review_versions + monthly_deliverables + meta_client_assets; shared read-only Facebook inspector (#220/#236)',
   },
   {
+    name: 'start_facebook_permission_setup', title: 'Request Facebook publishing permission setup',
+    description: 'Company-admin only. Only after the account owner explicitly asks to connect/enable Facebook photo publishing permission, call with confirm_permission_request:true to return an expiring official Facebook consent URL. Reuses existing Meta OAuth state/callback; adds only pages_manage_posts to the existing reporting scopes. Creates a fresh short-lived hashed login state on each call: not idempotent, never auto-retry or run during ordinary reporting/readiness checks. The owner must open/review/complete Facebook consent in the existing company browser; never consent for them, copy sessions or change asset selections. No token, account mapping, content, queue, publishing or Microsoft change occurs here. A link is not a permission grant, and a grant is not publishing readiness. Never expose this private setup link to clients or include it in logs. After owner consent inspect the exact client with get_facebook_post_readiness account_only:true. Separate submission/worker/release gates remain required.',
+    inputSchema: objectSchema({ confirm_permission_request: { type: 'boolean', const: true } }, ['confirm_permission_request']),
+    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false },
+    dependency: 'main', canonicalContract: 'existing meta-oauth-start hashed state and meta-oauth-callback; permission setup only (#220/#236)',
+  },
+  {
     name: 'prepare_facebook_photo_publication', title: 'Preview approved Facebook photo scheduling',
     description: 'Company-admin only, read-only preparation for one exact approved client review. Reuses the staff scheduling preflight and returns the exact Page, approved caption/image hash, future time and confirmation fingerprint; creates no job and never posts. Separate MCP/staff/dispatch/exact-account release gates must all be enabled. No caller account, caption, media, date, approval or Teams override. Use only when staff asks to schedule this approved content. Show the exact Page, content and SAST time, then confirm only if that exact scheduling was explicitly requested. A preview is not publication or a queue receipt. Missing consent, source, media or access stays blocked.',
     inputSchema: objectSchema({ client_id: uuid, review_id: uuid }, ['client_id', 'review_id']),
@@ -768,6 +775,7 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
 ] as const
 
 const PUBLICATION_SCHEDULING_INSTRUCTIONS =
+  'Only when the account owner explicitly requests Facebook publishing permission setup, use start_facebook_permission_setup with confirm_permission_request:true. It creates an expiring login request, not a permission grant or scheduled post. The owner must review and complete the official consent link in the existing company browser. Do not initiate setup during read-only readiness checks or auto-retry it; preserve current asset selections. After owner consent recheck the exact account with get_facebook_post_readiness account_only:true. ' +
   'For an explicit company-admin Facebook photo scheduling request, read get_facebook_post_readiness, then prepare_facebook_photo_publication for the exact approved review. Confirm only the exact Page, approved creative and future SAST time explicitly requested by staff, using its unchanged fingerprint and the same idempotency key. confirm_facebook_photo_publication records a durable queue authorization, not a verified platform post. Never approve content, change a date/account, bypass a disabled gate or silently add Instagram. Read get_social_publication_status after confirmation and whenever a response is uncertain, before retrying or scheduling manually. That status covers stored Dynamics jobs only, not native schedules. Unknown outcomes never authorize another provider submission. '
 
 export const CG_DYNAMICS_MCP_SERVER_INSTRUCTIONS = PUBLICATION_SCHEDULING_INSTRUCTIONS +
