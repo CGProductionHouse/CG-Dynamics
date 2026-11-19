@@ -76,6 +76,9 @@ export function buildMonthlyStrategyPrompt(input: {
       'Observed performance belongs only to its stated fact window and may be partial. Never call it current-month or complete. Missing figures are unavailable, not zero.',
       'When an outcome is unknown, frame a measurable proposed test or an owner question, not a claim.',
       'Internal caption rules, contact footers and identity guardrails are constraints, not business strategy.',
+      'Write a positive, supported reflection on earlier work and a clear game plan with a beginning, middle and end. Describe what to build on without criticising the client or CG.',
+      'Use short paragraphs separated by blank lines, three clear strategic steps and titled action ideas. Keep implementation checks and measurement caveats out of client-facing prose.',
+      'A positive reflection must not invent sales, ROI or a winning result. Distinguish an observed response from a proposed goal.',
       'Produce a concise commercial objective, customer problem, differentiated creative thesis, jobs within confirmed formats, timing, test and learning decision.',
       'Give every confirmed format at least one distinct, actionable concept. Do not repeat one sentence across the strategy fields or substitute writing rules for the business plan.',
       'Respect the exact confirmed monthly capacity for each format. A concept is not an extra promised deliverable; never infer a quantity from an unknown value.',
@@ -182,6 +185,11 @@ const ACTION_KEYS: ActionPlanKey[] = [
 ]
 
 const clean = (value: string) => value.replace(/\s+/g, ' ').trim()
+// Comparisons still use clean(); authored copy retains its reading structure.
+// Bound blank lines and incidental horizontal spacing without storing a wall of text.
+const readable = (value: string) => value.replace(/\r\n?/g, '\n')
+  .split('\n').map(line => line.replace(/[^\S\n]+/g, ' ').trim()).join('\n')
+  .replace(/\n{3,}/g, '\n\n').trim()
 const RULE_ONLY = /^(?:do not|don't|never|avoid|no influencer|keep captions|use natural|canonical client|approved (?:regional )?footer)\b/i
 const LEGACY_PACKAGE_NOTE = 'Scope comes from the explicitly confirmed client package; Client Schedule remains execution evidence.'
 const LEGACY_PACKAGE_GOLD: Partial<Record<keyof GoldStandardStrategy, RegExp>> = {
@@ -273,13 +281,13 @@ export function mergeMonthlyStrategyProposal(target: ProposalTarget, proposal: M
       if (existing === clean(proposed)) continue
       // A later incorporated meeting note can refresh system-authored prose.
       // Any staff change to that prose breaks this exact comparison and wins.
-      if (previous?.proposedGoldStandard?.[key] === existing || isUneditedLegacyGoldSeed(target, key, existing)) {
-        merged.goldStandard[key] = clean(proposed)
+      if ((typeof previous?.proposedGoldStandard?.[key] === 'string' && clean(previous.proposedGoldStandard[key]) === existing) || isUneditedLegacyGoldSeed(target, key, existing)) {
+        merged.goldStandard[key] = readable(proposed)
         filledFields.push(`goldStandard.${key}`)
       } else conflicts.push(`goldStandard.${key}`)
       continue
     }
-    merged.goldStandard[key] = clean(proposed)
+    merged.goldStandard[key] = readable(proposed)
     filledFields.push(`goldStandard.${key}`)
   }
 
@@ -296,8 +304,8 @@ export function mergeMonthlyStrategyProposal(target: ProposalTarget, proposal: M
     if (proposedItems.length === 0) return blocked('INCOMPLETE_CONFIRMED_FORMAT_PLAN')
     if (current.actionPlan[key].items.length > 0) {
       const existingItems = current.actionPlan[key].items.map(clean)
-      const newItems = proposedItems.map(clean)
-      if (JSON.stringify(existingItems) === JSON.stringify(newItems)) continue
+      const newItems = proposedItems.map(readable)
+      if (JSON.stringify(existingItems) === JSON.stringify(proposedItems.map(clean))) continue
       if (isUneditedLegacyPackageSeed(target, current, key)) {
         merged.actionPlan[key].items = newItems
         merged.actionPlan[key].notes = ''
@@ -312,9 +320,9 @@ export function mergeMonthlyStrategyProposal(target: ProposalTarget, proposal: M
       } else if (proposedItems.length) conflicts.push(`actionPlan.${key}.items`)
       continue
     }
-    const items = proposedItems.map(clean).filter(Boolean)
+    const items = proposedItems.map(readable).filter(Boolean)
     if (items.length > 0) {
-      if (items.some(item => item.length < 12 || item.length > 300) || items.length > MAX_CONCEPTS_PER_FORMAT) return blocked('INVALID_ACTION_PLAN')
+      if (items.some(item => clean(item).length < 12 || clean(item).length > 300) || items.length > MAX_CONCEPTS_PER_FORMAT) return blocked('INVALID_ACTION_PLAN')
       merged.actionPlan[key].items = items
       filledFields.push(`actionPlan.${key}.items`)
     }
