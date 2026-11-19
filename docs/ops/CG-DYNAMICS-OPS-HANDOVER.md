@@ -1,4 +1,51 @@
-## 19 November — publishing permission screen qualified; exact release pending
+## 19 November — exact-approved MCP and consent backend release is LIVE
+
+CA explicitly approved the two immutable backend packets and ONLY the consent
+setup flag. Executed from tested source08960624, same DRAFT PR #991. Final hosted
+readback AFTER configuration: cg-dynamics-mcp v89/68files and meta-oauth-start
+v75/5files ACTIVE, every file byte matches its approved packet, verify_jwt=false/
+import_map=false unchanged. MCP preserves62prior hosted files; OAuth preserves
+3helpers and includes only documented identical duplicate-property cleanup.
+OAuth deploy response reported an internal error, but fresh readback proved the
+exact ACTIVE source; NO duplicate deploy/retry. Initial readback path normalization
+was corrected for src/ helpers and functions/ roots, not the deployed content.
+
+Added ONLY SOCIAL_FACEBOOK_PHOTO_CONSENT_ENABLED=true. Digest-only CLI metadata
+proved all76prior configuration digests unchanged, one new flag, and publishing/
+submission/confirmation/exact-release gates all ABSENT. No actual secret values
+read, copied or logged. CLI calls its SHA256 field value rather than digest;
+verification checked all rows are64hex and compared the known public true hash.
+No write was repeated after correcting that verifier. Unauthenticated MCP and
+OAuth-start each return401; authenticated Cape listing still returns available,
+zero candidates, confirmation/publication false. No job/content/mapping/SQL,
+provider consent, Microsoft, Vercel, campaign or native publication action.
+
+Company Chrome profile cgproductionhouse.com and ChatGPT info@cgproductionhouse.com
+verified. Existing Dynamics plugin refreshed in place; actual installed catalogue
+now31write/32read with prepare_facebook_photo_publication,
+confirm_facebook_photo_publication and get_social_publication_status present.
+Existing Allow all setting and two connections untouched. Separate new normal
+ChatGPT acceptance chat COMPLETE: Inspect Facebook Readiness,
+https://chatgpt.com/c/6afedf1d-0e2c-83ea-bc80-cce2e02bd297.
+It sees all3new actions, actually ran resolve_project_context +two read-only
+readiness inspections, and truthfully reports EXACT_ACCOUNT_MAPPING_REQUIRED /
+zero eligible future reviews. No prepare/confirm/status call without a real review
+ID, no record/job/permission/sync write. Discovery/read-only execution PASS;
+native scheduling remains BLOCKED. Screenshot/transcript retained. No staff/Nolan
+chat changed. The frontend permission screen
+is built/tested SOURCE ONLY; no Vercel or production UI release performed.
+
+Remaining: owner Facebook consent via a supported accessible surface (new frontend
+control is not live; its approved hosting release is still separate), actual grant/
+exact Page-connection binding, one approved unscheduled future photo/caption/time,
+fresh Teams/native duplicate check, then separately approved worker/submission/
+exact-account activation and controlled post/readback. No future approved pilot
+or Cape review snapshot was present in bounded reads; never invent IDs/approvals.
+Elcheck repair separately pending. Full local5051pass/32skip,102focused,10real DOM
+checks and375/390/430viewport receipts remain current. No new local runtime edit
+after that freeze. Google tracker target still unidentified; do not guess.
+
+## 19 November — publishing permission screen qualified; release authorized
 
 Resumed SAME PR #991 from1dda40f4; origin/mainb524a9f9 and current ownership
 checked. Only this Codex lane active; other client/staff/Nolan/Teams work preserved.

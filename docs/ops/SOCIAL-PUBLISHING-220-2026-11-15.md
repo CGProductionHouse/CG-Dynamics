@@ -1,5 +1,81 @@
 # Social publishing — 15 November 2026
 
+## 19 November — TWO exact-approved backend packets live; dispatch still off
+
+CA approved only the reviewed MCP scheduling actions + OAuth permission-setup
+handler and consent-setup flag, including the documented identical-property
+cleanup. No approval for publishing, jobs, client mappings, migrations, Vercel,
+worker activation or Facebook consent. Source checkpoint08960624 is built/tested
+and pushed to SAME DRAFT PR #991; existing owners/Teams hold preserved.
+
+Deployed the unchanged immutable packets after fresh source/auth drift checks:
+MCP payload5aac9755859e0a54fcdf7b0bbc38e14e2cca0e294230e870ba54302dde4610cf,
+OAuth payload07750f9e57118aab7b51c98a5b70d950e91cab9e1ca8c8ed1203a17014cf8d09.
+MCP initialv88 then FINALv89 after config,68files ACTIVE, bundle
+cf248a21ded526729053224bef5f238abf2aa1f2ac4948bb8b2c756b7af04f15.
+OAuth initialv74 then FINALv75 after config,5files ACTIVE, bundle
+d8f5654726d3ae72eabd5eb3c4367e3774e32b820fc5b36dda46ceebdcf8264d.
+Every final hosted source file matches its approved packet byte-for-byte;
+verify_jwt=false/import_map=false preserved. MCP62hosted files and OAuth3helpers
+preserved. No source packet regenerated or extra function implementation deployed.
+OAuth deployment API reported internal error while exact source was actually
+ACTIVE; fresh readback recovered truth and NO retry/redeploy occurred. First
+verifier assumed all helper paths contained supabase/; corrected normalization
+for src/ and functions/ roots and verified unique complete sets. No runtime fix
+or rollback was needed; errors are retained in private release evidence.
+
+Used the installed authenticated Supabase CLI2.115.0 only after reading its
+current --help. Read metadata, set ONLY
+SOCIAL_FACEBOOK_PHOTO_CONSENT_ENABLED=true, then read metadata again. All76prior
+configuration hashes unchanged,77rows total, exactly this one new flag. Actual
+publishing/confirmation/MCP submission/exact-account release keys are all ABSENT.
+CLI output labels SHA256 digest value rather than digest; verified all76/77
+rows contain64hex digests, checked true's known digest, compared every existing
+name/value hash. Corrected verifier without repeating a write. No actual secret,
+token, auth store, encryption key or credential values read/exported. CLI uses its
+existing authorized connection internally; no copied credentials or new login.
+
+Unauthenticated POST to each live endpoint returns401. Existing authenticated
+company-admin Cape readiness list still returns available/empty/has_more:false/
+canConfirm:false/canPublish:false. Bounded canonical SELECT found no eligible
+future approved unscheduled Facebook photo, and no linked Cape review snapshot.
+No invented review ID or historical-post reuse. This release only makes supported
+MCP actions and consent setup available; it does not confer a grant or job authority.
+
+Company Chrome and ChatGPT info@cgproductionhouse.com verified through visible
+profile/account UI; existing company ChatGPT plugin remained installed with both
+connections and unchanged Allow all setting. Before refresh catalogue30write/
+30read; after one Refresh tools and completion, actual app modal31write/32read
+and all3new exact action names present. Captured catalogue screenshot. A separate
+new normal ChatGPT read-only acceptance asks for Cape readiness and exposed tools,
+explicitly prohibiting confirmation, job/content/date/mapping/consent/provider/
+Microsoft writes or invented IDs. Never touch staff/Nolan chats; catalogue exposure
+and actual normal-chat execution are separate receipts. Result is captured with
+this increment's private evidence and PR handoff. No plugin permission expansion.
+
+The permission UI source is fully tested but not deployed (ZERO Vercel). Owner
+consent is still pending and needs a supported accessible setup surface; do not
+pretend the new source button is live or extract/copy auth to manufacture a URL.
+Actual future approved pilot, exact account binding, native duplicate/Teams proof,
+specific dispatch/worker release, controlled native post/readback and normal-chat
+acceptance remain. Other held migrations and Elcheck repair are untouched.
+No scheduling, publication, campaign/spend, SQL/data, Microsoft or hosting action.
+Google Control Centre target still unknown; no guessed update.
+
+Normal ChatGPT acceptance finished in the COMPANY account, ordinary Chat mode:
+https://chatgpt.com/c/6afedf1d-0e2c-83ea-bc80-cce2e02bd297
+(title Inspect Facebook Readiness). It confirms all3new actions exposed; executed
+ONLY resolve_project_context and two get_facebook_post_readiness inspections.
+The actual responses show exact-account mapping unavailable and a complete empty
+eligible-review list. It refuses invented IDs and distinguishes exposed tools
+from executed calls. Final discovery PASS/read-only inspection PASS, native Cape
+scheduling BLOCKED. No prepare/confirm/status call was fabricated without a real
+review; no jobs/data/provider/consent/sync writes. Preserved new test chat as the
+review deliverable; all pre-existing company/staff/Nolan tabs/chats unchanged.
+Private company-normal-chat-acceptance transcript/screenshot and refreshed app
+catalogue screenshot retained. This is genuine normal-chat read acceptance,
+NOT successful platform publication or proof of actual token grants.
+
 ## 19 November — explicit publishing permission setup in the existing Meta screen
 
 Resumed SAME DRAFT PR #991 from1dda40f4; fetched mainb524a9f9 unchanged, PR/open
