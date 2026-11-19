@@ -1,6 +1,7 @@
 ## 19 November — MSI crashes: reduced local workload is mandatory for this lane
 
-CA reports repeated MSI laptop crashes and asks that agents watch machine load.
+CA reports repeated MSI laptop crashes and confirms the WHOLE laptop freezes or
+restarts, not only ChatGPT/Codex. Agents must watch machine load.
 Read-only Windows evidence: Cyborg15A13VF/31.7GB RAM; Event41/6008 confirms
 unexpected shutdowns reported at09:44:30 and13:47:29 SAST today. BugcheckCode0,
 PowerButtonTimestamp0, no minidump/MEMORY.DMP, no observed resource-exhaustion2004
@@ -18,9 +19,20 @@ manufacturer limits or a guarantee against crashes. If pressure rises, checkpoin
 and stop only the exact task-owned job; preserve staff/browser/other-agent work.
 Read-only local sampler:
 C:/Users/chris/.codex/artifacts/msi-stability/2026-11-19/Read-WorkCapacity.ps1.
-It is on-demand, not a background monitor. No new service/automation, firmware,
+At14:20:57 SAST the sampler returned hold_new_heavy_work:5.08GB RAM free,
+47.7%commit,39%CPU. Heavy work HELD; do not start another full test/build until
+capacity recovers. Process groups include Chrome3.58GB, ChatGPT3.27GB, WSL2.75GB,
+Claude1.79GB, WebView1.68GB and Node1.62GB. No single-process cause established;
+none were killed, shared WSL/Docker preserved. Historical disk-controller Event11
+targets Harddisk2/DR2 (16/17Nov); current enumeration cannot identify that historical
+device. Do not blame the internal NVMe. No WHEA/Display/nvlddmkm/stornvme/volmgr
+warnings/errors returned by bounded3day queries; this is not a hardware pass.
+Crash dump configuration is already3/minidump with event logging on; no dump
+present. No registry change, diagnostics reboot, scan or stress test performed.
+
+The sampler is on-demand, not a background monitor. No new service/automation, firmware,
 driver, power, pagefile, firewall, credential or production change authorized.
-No heavy task launched during this diagnostic. Crash symptoms question pending.
+No heavy task launched during this diagnostic. Whole-system crash scope confirmed.
 
 ## 19 November — exact-approved MCP and consent backend release is LIVE
 
