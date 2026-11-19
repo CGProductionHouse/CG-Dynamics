@@ -1,0 +1,1007 @@
+{
+  "kind": "Frozen extraction QA receipt; not strategy authority",
+  "guides": [
+    {
+      "client_id": "fd16ebae-a50b-4920-afe0-94c2631f8f06",
+      "client_name": "All Around PVC",
+      "guide_id": "110e136a-bd5c-4fd7-86b1-6fb8178218ef",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/ALL-AROUND-PVC-CHATGPT-PROJECT-MIGRATION-AUDIT-2026-09-08.md",
+      "source_revision": "383ae2cb1c4342593dab678b55cee90e54e5e5e2",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "all-around-pvc.md",
+      "content_sha256": "af1df2166acf6a8d3b54036a96016cb3fbad8736a6a3f1c5d1c97ca7233b5791",
+      "before_signals": [],
+      "after_signals": []
+    },
+    {
+      "client_id": "3b85973f-bcad-49eb-b8f1-c27f7c7f1aba",
+      "client_name": "AV Event Life",
+      "guide_id": "658290a7-b2ff-4947-bc1e-0a84dc72eab8",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/AV-EVENT-LIFE-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "65c55627eb1eafa57a1a8161d7ee5a7620d7e4ff",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "av-event-life.md",
+      "content_sha256": "e13004e7f725ce7449276c4e3f5c820708ce24bd289ab06650f9dc2e554232f1",
+      "before_signals": [
+        "empty/unfinished venue",
+        "setup sequence",
+        "speech clarity",
+        "screen/presentation visibility"
+      ],
+      "after_signals": [
+        "empty/unfinished venue",
+        "setup sequence",
+        "speech clarity",
+        "screen/presentation visibility"
+      ]
+    },
+    {
+      "client_id": "32bd9db3-5339-4404-825b-5a615cadec6a",
+      "client_name": "Bat Hill Royale",
+      "guide_id": "2220dc84-d853-4d65-8268-e89bc00ba278",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/BAT-HILL-ROYALE-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "c32fef89b9e86e9811a093fe6a5b0971bb633529",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "bat-hill-royale.md",
+      "content_sha256": "4c1887cdd21388bc4853ab7418a2ebc9d55de1590d251cd8f4fd57f79898dd6f",
+      "before_signals": [
+        "one-person reels can move through different venue areas instead of explaining each section",
+        "30–40 second scene-driven concepts suit many fun social briefs",
+        "school/league outreach can work through concise on-screen messaging",
+        "humour should be situational and golf/venue-specific, never influencer/meme filler"
+      ],
+      "after_signals": [
+        "one-person reels can move through different venue areas instead of explaining each section",
+        "30–40 second scene-driven concepts suit many fun social briefs",
+        "school/league outreach can work through concise on-screen messaging",
+        "humour should be situational and golf/venue-specific, never influencer/meme filler"
+      ]
+    },
+    {
+      "client_id": "b28af30a-3d44-490a-8290-1e56dac7b127",
+      "client_name": "Bloem Action Sports",
+      "guide_id": "8e636f86-b3db-461a-95dc-8374d7e64398",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/BLOEM-ACTION-SPORTS-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "a6ad66478976405290e130ec0a1fd8afd5409c3a",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "bloem-action-sports.md",
+      "content_sha256": "b6f5fd56243293883cc0e76e3d76bde693c490aca537aa2d2f38e9d66a8f92df",
+      "before_signals": [
+        "new season and team registration",
+        "sport-specific poster copy",
+        "winter/summer league campaigns",
+        "short title + supporting subtitle"
+      ],
+      "after_signals": [
+        "new season and team registration",
+        "sport-specific poster copy",
+        "winter/summer league campaigns",
+        "short title + supporting subtitle"
+      ]
+    },
+    {
+      "client_id": "89e0ad6d-e08c-4a75-8b8e-abea71af581c",
+      "client_name": "Bloem Marble & Granite",
+      "guide_id": "ca8e7042-2fc9-4670-9d75-a3fce3a373f2",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/BLOEM-MARBLE-GRANITE-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "744bdef91493e932f7e9e20e81549d12321aa6bb",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "bloem-marble-and-granite.md",
+      "content_sha256": "ee026566b563d9c4b84413c9b84b50886c4e931255866586b6057d464a1e653c",
+      "before_signals": [],
+      "after_signals": []
+    },
+    {
+      "client_id": "2d16262d-8450-458d-ae7e-084ef9ff662d",
+      "client_name": "Bloem Vascular",
+      "guide_id": "c0ca0c1e-bbe6-44c1-9a99-f7dcad2313d3",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/BLOEM-VASCULAR-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "52e4d0e9b765cb576992ce808f440a493fe9abe6",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "bloem-vascular.md",
+      "content_sha256": "68e97b03b0ef6e0a3d7f8fa51ea4d3815ce56b191cd550234db2b8b402648398",
+      "before_signals": [
+        "What does a vascular surgeon do?",
+        "peripheral arterial disease",
+        "room directions",
+        "referral pathways"
+      ],
+      "after_signals": [
+        "What does a vascular surgeon do?",
+        "peripheral arterial disease",
+        "room directions",
+        "referral pathways"
+      ]
+    },
+    {
+      "client_id": "5dfdf4bd-9d94-4cc6-9dee-0e480a2234cb",
+      "client_name": "Bohemia Quick Stop",
+      "guide_id": "9ed5b6e6-957e-4d69-8aa4-2354b3995387",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/BOHEMIA-QUICK-STOP-CHATGPT-PROJECT-MIGRATION-AUDIT-2026-09-08.md",
+      "source_revision": "01fcdad0741fba507f38b7bc35b4fb60c44f2863",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "bohemia-quick-stop.md",
+      "content_sha256": "3cbc8264ceb3557ea638e1c385f1690e40e39a2450789f6960af1e911ff49999",
+      "before_signals": [],
+      "after_signals": []
+    },
+    {
+      "client_id": "8e448cf9-1534-4ba1-89a4-93e4c8b83d2f",
+      "client_name": "Bouwer & Coetzee Attorneys",
+      "guide_id": "5fc53cc8-d8a4-46f2-93f0-805a88465b80",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/BOUWER-COETZEE-ATTORNEYS-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "98da2261a84cbbb0687c8de6456a20b0bf4f2a7f",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "bouwer-and-coetzee-attorneys.md",
+      "content_sha256": "9a40a390c47c77e3d6a0063443705a0be397998e893d8429e2320bd53d080843",
+      "before_signals": [],
+      "after_signals": []
+    },
+    {
+      "client_id": "6b67a2df-e2ab-418b-bcee-03aef5963d37",
+      "client_name": "Braize",
+      "guide_id": "e6d152bf-b540-4dd8-bfff-0a475c3e4e3d",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/BRAIZE-CHATGPT-PROJECT-MIGRATION-AUDIT-2026-09-08.md",
+      "source_revision": "9c379e3785422732e57946f4ab769732dbeb2a1b",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "braize.md",
+      "content_sha256": "b2b55c9358a605f9ccdac8c89a11c961c2e6cefc0c8712dcc57f3c9970225c06",
+      "before_signals": [],
+      "after_signals": []
+    },
+    {
+      "client_id": "afb62c53-d6d3-4ef8-9393-def88ed899d8",
+      "client_name": "C&L Innovations",
+      "guide_id": "b7c3a72c-3c16-49f1-b97d-872b402be137",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/C-L-INNOVATIONS-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "b132069e1c40a543d466b4af53f7d3cbf21f540c",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "candl-innovations.md",
+      "content_sha256": "94c4cbdad69fa78d53ab309705cc49e8f3e5cd1347c914a474639a78766ed7f6",
+      "before_signals": [
+        "clean full-product reveal",
+        "measuring a room before choosing a table",
+        "edge/grain/joinery close-up",
+        "table proportions and circulation space"
+      ],
+      "after_signals": [
+        "clean full-product reveal",
+        "measuring a room before choosing a table",
+        "edge/grain/joinery close-up",
+        "table proportions and circulation space"
+      ]
+    },
+    {
+      "client_id": "42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa",
+      "client_name": "Cape Lumber",
+      "guide_id": "9023fc27-f39b-4526-a1cf-6a1be676a306",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/CAPE-LUMBER-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "a6ad66478976405290e130ec0a1fd8afd5409c3a",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "cape-lumber.md",
+      "content_sha256": "baaa4102989d7ec2f8c488efbaab54ced1ab52c1a7112e93a039d96e2eda9ea8",
+      "before_signals": [
+        "Business: timber and building-material supplier serving professional, commercial and project buyers",
+        "structural/treated Pine",
+        "send the timber list",
+        "long or bulky material"
+      ],
+      "after_signals": [
+        "Business: timber and building-material supplier serving professional, commercial and project buyers",
+        "structural/treated Pine",
+        "send the timber list",
+        "long or bulky material"
+      ]
+    },
+    {
+      "client_id": "079df21e-783a-4648-b3fa-0acae6e68867",
+      "client_name": "Case Bloemfontein",
+      "guide_id": "a40fa439-9b54-4cbd-ac12-c871ccedc21a",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/CASE-BLOEMFONTEIN-CHATGPT-PROJECT-MIGRATION-AUDIT-2026-09-08.md",
+      "source_revision": "2ab107bc61e0407c3fd729df1199112a2c685395",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "case-bloemfontein.md",
+      "content_sha256": "cd12b2e737334ace456007e935acc5503fbcc5d8916b1e984146b3f0de3dd6d0",
+      "before_signals": [],
+      "after_signals": []
+    },
+    {
+      "client_id": "6b313cac-283e-48c4-9df6-ba43af2f7353",
+      "client_name": "Central Canvas",
+      "guide_id": "87234fba-85b2-434e-9f30-73a04c467ae6",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/CENTRAL-CANVAS-CHATGPT-PROJECT-MIGRATION-AUDIT-2026-09-08.md",
+      "source_revision": "63b3683694c8662a6d9b4666ddf18bf3d1031a3a",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "central-canvas.md",
+      "content_sha256": "41eec7cb6d46676f9d109a521b3a2e4da4024903be9dd54efbcaddb4d05bf004",
+      "before_signals": [],
+      "after_signals": []
+    },
+    {
+      "client_id": "c27d2185-08e4-4c49-be48-2572564ceecf",
+      "client_name": "CG Production House",
+      "guide_id": "0edbb751-31e8-444f-b22c-b5fe36e444ef",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/CG-PRODUCTION-HOUSE-CANONICAL-CLIENT-INTELLIGENCE-2026-09.md",
+      "source_revision": "22cefb3da4ffa4e00f25fbdd3700b7ccbbd4962e",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "cg-production-house.md",
+      "content_sha256": "847203369ed11cee5eff64952fbbd9cad927e774be662f9f09257e09f27e2cbd",
+      "before_signals": [],
+      "after_signals": []
+    },
+    {
+      "client_id": "3404f726-a693-4b2d-8c13-c9d3dfd17bbc",
+      "client_name": "Daisy & Co",
+      "guide_id": "112489fb-7362-4d1a-b045-6439a8ad03ce",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/DAISY-CO-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "cca107e5959e42f76dfb41288d2e7fafbd670373",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "daisy-and-co.md",
+      "content_sha256": "85346b3f3cf610c82d037a7f77129c5fb1b6f07a56239b21e15e7989a012a10b",
+      "before_signals": [
+        "real new-in-store products",
+        "fresh-today counter content",
+        "gifts by occasion",
+        "gift-by-budget only with current approved prices"
+      ],
+      "after_signals": [
+        "real new-in-store products",
+        "fresh-today counter content",
+        "gifts by occasion",
+        "gift-by-budget only with current approved prices"
+      ]
+    },
+    {
+      "client_id": "06b20bb1-ed4a-4aa1-9f48-8c6cb0531aba",
+      "client_name": "Delta Gas",
+      "guide_id": "961ada38-4cca-440d-94f8-0dcf501168f8",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/DELTA-GAS-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "6a7ce096e407eb31a5b238ba4c63a2ce2c7e5d17",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "delta-gas.md",
+      "content_sha256": "31c9df55f4658607d376b7fee645b7c0244f36b237b0f96d0e88b2df85839280",
+      "before_signals": [
+        "educational cylinder/product content",
+        "safety awareness",
+        "product information",
+        "myth vs fact"
+      ],
+      "after_signals": [
+        "educational cylinder/product content",
+        "safety awareness",
+        "product information",
+        "myth vs fact"
+      ]
+    },
+    {
+      "client_id": "2aed8a31-bd53-4ad1-a3dc-432865adfb3d",
+      "client_name": "Dulux Paint & Paper Bloemfontein",
+      "guide_id": "8410d079-0ac2-44ec-9579-a7efb4fb74d5",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/DULUX-PAINT-PAPER-BLOEMFONTEIN-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "5db7702ec269fbeaf7fa4a464ec6ebc583fe5ed6",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "dulux-paint-and-paper-bloemfontein.md",
+      "content_sha256": "690942220fd26584440158196b82d6fd6aef6ab26a84e9e1042fa7980ec0034d",
+      "before_signals": [
+        "it is about 20 to 30 seconds",
+        "short, readable copy often performs the job better than long polished wording",
+        "the hook lands in the first 2 to 3 seconds",
+        "captions should add to artwork, not duplicate it"
+      ],
+      "after_signals": [
+        "it is about 20 to 30 seconds",
+        "short, readable copy often performs the job better than long polished wording",
+        "the hook lands in the first 2 to 3 seconds",
+        "captions should add to artwork, not duplicate it"
+      ]
+    },
+    {
+      "client_id": "61acf81b-1011-404e-9fae-2e209be65fca",
+      "client_name": "Econofoods",
+      "guide_id": "ea910524-c3fe-4c89-8d2a-c7b14815f464",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/ECONOFOODS-CHATGPT-PROJECT-MIGRATION-AUDIT-2026-09-08.md",
+      "source_revision": "6164d78d39628b25a6166ad42a4be6c9426a53ed",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "econofoods.md",
+      "content_sha256": "9a0a55fb97f8c58f907f63ca76c505030710fc1028d5748129e4976794f77333",
+      "before_signals": [],
+      "after_signals": []
+    },
+    {
+      "client_id": "ec643c75-51f5-4839-829f-3f5b7f48829a",
+      "client_name": "Ehrlich Park Butchery",
+      "guide_id": "8361e5f1-2e15-403a-91b1-2536d4b97830",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/EHRLICH-PARK-BUTCHERY-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "5aa73d999ed06345162cdb89b8ebb5fbccdf949a",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "ehrlich-park-butchery.md",
+      "content_sha256": "7b02de89072b94caf7a93a04ac369c4b04d1020d1b1efce4c0ad010461a66047",
+      "before_signals": [
+        "Ask the Butcher",
+        "Braai Sorted",
+        "Cut of the Week",
+        "Friday at Ehrlich Park"
+      ],
+      "after_signals": [
+        "Ask the Butcher",
+        "Braai Sorted",
+        "Cut of the Week",
+        "Friday at Ehrlich Park"
+      ]
+    },
+    {
+      "client_id": "d53d8e62-9e6a-4bb9-be3f-554f40942d45",
+      "client_name": "Emmanuel Funerals",
+      "guide_id": "46656a87-147f-4475-94ed-134753c7d79b",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/EMMANUEL-FUNERALS-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "bf319f00380c8d597cc0681f1eda708409a41779",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "emmanuel-funerals.md",
+      "content_sha256": "4d5ce847276c26dd591d4603ea9880ef15c16f04df4b367b4e0fd8499db2b8e2",
+      "before_signals": [
+        "transport and practical service highlights",
+        "tent/chair, floral and grave-site setup",
+        "documentation / what happens next? education",
+        "funeral and cremation explainers"
+      ],
+      "after_signals": [
+        "transport and practical service highlights",
+        "tent/chair, floral and grave-site setup",
+        "documentation / what happens next? education",
+        "funeral and cremation explainers"
+      ]
+    },
+    {
+      "client_id": "217a547c-7b22-45cc-bf88-9d45a8e93dfe",
+      "client_name": "Emoya Estate Driving Range",
+      "guide_id": "bad817fd-099b-49ce-905c-60ca56fd7ce6",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/EMOYA-ESTATE-DRIVING-RANGE-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "7db320ba78fa8d77e585f8c0dd6f24b037699655",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "emoya-estate-driving-range.md",
+      "content_sha256": "d41fc0eeb3d162be319ea5246d4efee641c25a652da40490ba23582d79608ced",
+      "before_signals": [
+        "provide clear scenes plus script/on-screen dialogue when requested",
+        "hook in the first moments with action, a challenge, a miss/hit or a recognisable social situation",
+        "one simple mechanic per Reel is stronger than a generic montage",
+        "build to a visible payoff/reaction"
+      ],
+      "after_signals": [
+        "provide clear scenes plus script/on-screen dialogue when requested",
+        "hook in the first moments with action, a challenge, a miss/hit or a recognisable social situation",
+        "one simple mechanic per Reel is stronger than a generic montage",
+        "build to a visible payoff/reaction"
+      ]
+    },
+    {
+      "client_id": "c8d34a97-8400-4f52-8b0d-843491fe3d3b",
+      "client_name": "First Technology Central",
+      "guide_id": "ceff2ea3-0c33-4d62-95fa-91038290d9eb",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/FIRST-TECHNOLOGY-CENTRAL-BLOEMFONTEIN-CLIENT-MARKETING-INTELLIGENCE-2026-08.md",
+      "source_revision": "d47954305eb6f0aa79ebd3775abfb7d75b0a2afa",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "first-technology-central.md",
+      "content_sha256": "4d907adc542d31a1275200001a98a90a388d261857f456a3d53a77adf6195036",
+      "before_signals": [],
+      "after_signals": []
+    },
+    {
+      "client_id": "4424ed69-7270-4d30-a1ea-0b77d76912df",
+      "client_name": "Forklift Trucks",
+      "guide_id": "aaa3824a-42bc-4f07-a261-a0ea3838fb35",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/FORKLIFT-TRUCKS-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "e9335fe2a4163e326b905aa644f6206ace819f5a",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "forklift-trucks.md",
+      "content_sha256": "c7bcc9d65066a9c8b7b07418fcdb7852b9b0ac92f7ab18322f4f9d84ab32eb98",
+      "before_signals": [
+        "warehouse aisles",
+        "rent or buy?",
+        "walking-and-talking when practical",
+        "loading/offloading"
+      ],
+      "after_signals": [
+        "warehouse aisles",
+        "rent or buy?",
+        "walking-and-talking when practical",
+        "loading/offloading"
+      ]
+    },
+    {
+      "client_id": "b6052710-417d-4b3b-8348-0f126bfea671",
+      "client_name": "Germoparts",
+      "guide_id": "247d841d-9028-4eae-b121-0cf7ce43407b",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/GERMOPARTS-CHATGPT-PROJECT-MIGRATION-AUDIT-2026-09-08.md",
+      "source_revision": "e808404571ba985201f8e639bd1c50434d5ba25e",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "germoparts.md",
+      "content_sha256": "23b2a8007e11b3917d991f6bcb6be23cf8b427248261779b6e0040d465e5c33b",
+      "before_signals": [],
+      "after_signals": []
+    },
+    {
+      "client_id": "1007e58b-3fea-4515-88b7-ddaa85763de6",
+      "client_name": "Hino Trucks",
+      "guide_id": "b80d3ca3-9bd7-43bc-822c-53a94be1ab68",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/HINO-TRUCKS-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "57411cca291031ce8dc40f23d7227016a915dc3b",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "hino-trucks.md",
+      "content_sha256": "09d804c5c0cb0b7e8ba712e3788ec801ef752eb6bce227cdf6216002d41e0c7f",
+      "before_signals": [],
+      "after_signals": [
+        "30–40 second multi-scene dealership reels with quick visual progression",
+        "playful Sales-department concepts that still revolve around the actual truck",
+        "product-identity challenges, such as selling a Hino 700 without saying Hino",
+        "cross-department stories using Sales, Workshop and Parts as different roles contributing to the same customer/truck outcome"
+      ]
+    },
+    {
+      "client_id": "572555e0-d4d0-404a-8d67-beeeeed6a1f2",
+      "client_name": "HMHI",
+      "guide_id": "ece94583-561d-4622-b2d5-d4841c314a2b",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/HILL-MCHARDY-HERBST-INC-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "7e44edb52906f319d8f2355eb25e3cbfd2423c13",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "hmhi.md",
+      "content_sha256": "1240c65814603d541d8dd427250558415a0c391cd24ec0fb204b5317b27e8bc1",
+      "before_signals": [
+        "attorney/team profiles",
+        "plain-language service explainers",
+        "what does this mean? legal education",
+        "correspondent-work explainers for other legal practitioners"
+      ],
+      "after_signals": [
+        "attorney/team profiles",
+        "plain-language service explainers",
+        "what does this mean? legal education",
+        "correspondent-work explainers for other legal practitioners"
+      ]
+    },
+    {
+      "client_id": "816c7f59-d56c-46a3-ba15-f76971d83769",
+      "client_name": "Human Auto",
+      "guide_id": "11c4c954-aaa7-41e2-bf24-2a30eac2b5ce",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/HUMAN-AUTO-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "08e30839d533852a655b36e7b9c9fadb724e8ee8",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "human-auto.md",
+      "content_sha256": "f39d7355ed4fa53efe029116947105bb01b807d1c64f8a98c03ce6a799eae863",
+      "before_signals": [],
+      "after_signals": []
+    },
+    {
+      "client_id": "2e643855-e2ad-481f-a6c6-3d934b9f4a50",
+      "client_name": "Ipopeng Office Supplies",
+      "guide_id": "a1b18fa4-49a0-4a48-ac84-55da19440703",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/IPOPENG-OFFICE-SUPPLIES-CLIENT-INTELLIGENCE-2026-09.md",
+      "source_revision": "785a60a0e57cedafa6c4b4a71f0ac6235eefec3f",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "ipopeng-office-supplies.md",
+      "content_sha256": "d591c0b7773c39553bccfa4bb8ff1d7ba371f9dd7c347e9f698301aeb662ff47",
+      "before_signals": [],
+      "after_signals": []
+    },
+    {
+      "client_id": "a5eab798-3e00-44cc-947e-463386fdac39",
+      "client_name": "Jenkor",
+      "guide_id": "fe7be999-7e24-4cbf-85d3-b7b9c1a64611",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/JENKOR-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "28105226a83716865f9af6a6adca7a3ce7186cb3",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "jenkor.md",
+      "content_sha256": "3d2eb915b1c8552913de710f26474edf97f8d9ee25f0834ef7aaed65f388e0e4",
+      "before_signals": [],
+      "after_signals": [
+        "yard movement",
+        "paving patterns",
+        "cement bricks/blocks",
+        "bulk-order preparation/logistics"
+      ]
+    },
+    {
+      "client_id": "2a5ea019-64f5-4f8e-8a61-61a28940aa6e",
+      "client_name": "Local Deli",
+      "guide_id": "49611dd3-c345-43b4-8114-950c6926d786",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/LOCAL-DELI-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "ed343124e48925e2d66dd78958fd87989c14f611",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "local-deli.md",
+      "content_sha256": "3563680f3a87a81fa3bef497344bece820dc97acf0e7b29aa81564dec32926e7",
+      "before_signals": [],
+      "after_signals": []
+    },
+    {
+      "client_id": "21300630-6755-4591-9a49-e22abbaf7e3d",
+      "client_name": "Loraclox",
+      "guide_id": "82d973af-7244-4314-95f7-c125380cc58b",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/LORACLOX-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "63ca07a17017cab34ed92eaae069938f9185d308",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "loraclox.md",
+      "content_sha256": "c936fcc997b330d0bc630bebf4e1444d580534c46f6c6c805738dfa65f9e18af",
+      "before_signals": [
+        "installation/process footage",
+        "neat cabling, mounting and finishing detail",
+        "camera-positioning/site-assessment explainers without exposing vulnerabilities",
+        "access-control demonstrations with private credentials hidden"
+      ],
+      "after_signals": [
+        "installation/process footage",
+        "neat cabling, mounting and finishing detail",
+        "camera-positioning/site-assessment explainers without exposing vulnerabilities",
+        "access-control demonstrations with private credentials hidden"
+      ]
+    },
+    {
+      "client_id": "7b47afb0-fa55-4916-85f6-09c57e5905b9",
+      "client_name": "Madison Wear",
+      "guide_id": "6874b9e1-9cf0-4d7d-b8a5-c2580575778b",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/MADISON-WEAR-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "52b90ef46a63786730abad7b00dc6b14e1080b36",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "madison-wear.md",
+      "content_sha256": "559e835b621295975afdea3bacb52d6b812da55486fe6d93189e5b459838eb03",
+      "before_signals": [
+        "exact product features",
+        "product-on-model posts",
+        "outfit pairings",
+        "styling tips"
+      ],
+      "after_signals": [
+        "exact product features",
+        "product-on-model posts",
+        "outfit pairings",
+        "styling tips"
+      ]
+    },
+    {
+      "client_id": "e276f019-a580-44c5-a7ab-e43840c33a64",
+      "client_name": "Mimosa Mall",
+      "guide_id": "7c3a8fb8-0fe8-43f1-b48b-6d2edadbcb31",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/MIMOSA-MALL-CLIENT-MARKETING-INTELLIGENCE-2026-09.md",
+      "source_revision": "df77b027ef59a3c218e6337b8fa728c0466b9052",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "mimosa-mall.md",
+      "content_sha256": "df82d693c21f661594f5e498b77a675c93984027b07ff8a518bf6d94c05c3750",
+      "before_signals": [],
+      "after_signals": []
+    },
+    {
+      "client_id": "94fe2568-3cf1-47dc-801e-d8d5396a0965",
+      "client_name": "NCNA",
+      "guide_id": "e3ac560e-7777-49f2-99ac-b13b788ce6bc",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/NCNA-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "fb401c0c838ebdce5f153cc55bfd10529b2fec5b",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "ncna.md",
+      "content_sha256": "07b3e415f98223cb83ef6ab3380f50b9c1093e6e00234f67e3e6611becade529",
+      "before_signals": [],
+      "after_signals": []
+    },
+    {
+      "client_id": "4236a60a-990f-484f-8d19-13d2f92fbe3b",
+      "client_name": "Novus Steel",
+      "guide_id": "b79a3705-18e9-4594-9981-2fdfffda57d1",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/NOVUS-STEEL-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "dba733f761c897653b5a281dae044d04e0361555",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "novus-steel.md",
+      "content_sha256": "19c5a16f015649b7462a0c1a0aa9728781c89104301ff2402585ffdf6ee435b7",
+      "before_signals": [
+        "Project Shots",
+        "Before/After Fixes",
+        "Location Feel"
+      ],
+      "after_signals": [
+        "Project Shots",
+        "Before/After Fixes",
+        "Location Feel"
+      ]
+    },
+    {
+      "client_id": "a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b",
+      "client_name": "Peyper Bonds",
+      "guide_id": "cd03b3c1-79bc-4ce8-9ff5-8de1bcbb5de7",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/PEYPER-BONDS-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "bbf466cecbdef846a9370352caf59960d0116f60",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "peyper-bonds.md",
+      "content_sha256": "1c53cd3763060daf4acfe84bdd815f15ec18c3ece7e8d873b965228877c20079",
+      "before_signals": [],
+      "after_signals": [
+        "first-time buyer preparation",
+        "pre-approval education",
+        "bond-application document preparation",
+        "what happens after signing an offer to purchase"
+      ]
+    },
+    {
+      "client_id": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
+      "client_name": "Piek Group",
+      "guide_id": "d5aff059-f929-4431-a71f-6154869a1939",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/PIEK-GROUP-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "06986fa0de259a22001fbdcbfd86cf2e1bc0b9d5",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "piek-group.md",
+      "content_sha256": "0f17176b7dc55b0437ab6032d2cb110a9dee5829a0d209d6efac82ee53090ce7",
+      "before_signals": [
+        "family/group story",
+        "network growth/operations",
+        "partner relationships",
+        "community/CSR"
+      ],
+      "after_signals": [
+        "family/group story",
+        "network growth/operations",
+        "partner relationships",
+        "community/CSR"
+      ]
+    },
+    {
+      "client_id": "29a28efd-c998-45e2-a57c-4a751e779e66",
+      "client_name": "PSG Bloemfontein",
+      "guide_id": "558399fe-251b-42f1-af71-cb9c02c27f9c",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/PSG-BLOEMFONTEIN-CHATGPT-PROJECT-MIGRATION-AUDIT-2026-09-08.md",
+      "source_revision": "322b28b6f63ec222517d3cb4190e4abfda4ac843",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "psg-bloemfontein.md",
+      "content_sha256": "6df31267343a11ec57dfb4fa34dceffe6ae3aa3289ec52bd085b4f4d201e395b",
+      "before_signals": [],
+      "after_signals": []
+    },
+    {
+      "client_id": "4f6106de-c437-404e-8cef-fbe848de0665",
+      "client_name": "RC-Polypipe",
+      "guide_id": "dc022004-517b-4761-a118-6eb9404b5477",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/RC-POLYPIPE-CHATGPT-PROJECT-MIGRATION-AUDIT-2026-09-08.md",
+      "source_revision": "16473b409df988723f8b134ae4c0703492517497",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "rc-polypipe.md",
+      "content_sha256": "696f7f0b6a9c7e4822eb4ee5d70aac37bcc0294eac9252c49269cb62c756e881",
+      "before_signals": [],
+      "after_signals": []
+    },
+    {
+      "client_id": "cdb11a82-339e-4b46-9b09-bde1a23efeaf",
+      "client_name": "Red Oak",
+      "guide_id": "55c8774b-c8a1-4e15-8f35-538de5234580",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/RED-OAK-CHATGPT-PROJECT-MIGRATION-AUDIT-2026-09-08.md",
+      "source_revision": "aaca2bffb70bf41e92968cd5275b300dbad1ef10",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "red-oak.md",
+      "content_sha256": "925d4e5c12ea724936f282b3562634535ceda04d824839103567a042aaafec89",
+      "before_signals": [],
+      "after_signals": []
+    },
+    {
+      "client_id": "917d6f7c-1c2a-4c20-82f0-daa41b9062f5",
+      "client_name": "SecuriForce",
+      "guide_id": "a5600730-27bd-4f3f-a604-a777e598ce28",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/SECURIFORCE-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "ccd3550c7d34a09973c627c5a740a826687f50a7",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "securiforce.md",
+      "content_sha256": "de64cc1135213223fcab4f75c417e0a67ed1155a9ed415d239c66094e13f4c2b",
+      "before_signals": [
+        "real team/community proof works",
+        "current service posts often use a practical CTA",
+        "incident posts are strongest when they explain what happened and what the team did",
+        "five focused hashtags is a useful ceiling"
+      ],
+      "after_signals": [
+        "real team/community proof works",
+        "current service posts often use a practical CTA",
+        "incident posts are strongest when they explain what happened and what the team did",
+        "five focused hashtags is a useful ceiling"
+      ]
+    },
+    {
+      "client_id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+      "client_name": "Supa Quick BFN",
+      "guide_id": "59416761-98d2-4f92-abb5-aef04adada83",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/SUPA-QUICK-BFN-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "97ec81d5302289c1968605221a3a82f473a0d495",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "supa-quick-bfn.md",
+      "content_sha256": "d75cccae30df8201ac8cfaa90547d31503d59c17cea97b2f3a34c102c0c0cf48",
+      "before_signals": [],
+      "after_signals": [
+        "real workshop/staff process",
+        "practical tyre, battery, shock, brake, alignment or balancing education",
+        "simple in-store interactive/guess-and-reveal concepts",
+        "natural workshop sound and straightforward edits"
+      ]
+    },
+    {
+      "client_id": "e2870110-930c-4e63-b2fe-c858030f7258",
+      "client_name": "Supa Quick Centurion",
+      "guide_id": "304e73d1-7469-4b12-8c45-cbf3ae17e46d",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/SUPA-QUICK-CENTURION-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "4bd35988f5f4eb4f8c80d40e791712d538c3c300",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "supa-quick-centurion.md",
+      "content_sha256": "b06e3511a83a817ba5197a719e1c57e9f80a1db4dc376ad054c389a93231b2d4",
+      "before_signals": [
+        "respond to what is actually shown",
+        "add customer relevance or context"
+      ],
+      "after_signals": [
+        "respond to what is actually shown",
+        "add customer relevance or context"
+      ]
+    },
+    {
+      "client_id": "a36ba938-e9dc-4ecf-bb67-4853608b1c01",
+      "client_name": "TBS Brokers",
+      "guide_id": "c6f04664-a1ec-4182-ab3f-172442629523",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/TBS-BROKERS-CHATGPT-PROJECT-MIGRATION-AUDIT-2026-09-08.md",
+      "source_revision": "21c872945c4607b856caefccd53580c09d86e694",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "tbs-brokers.md",
+      "content_sha256": "48459a66a3b3080402b32e5d5f0dad835aa81a602ed6db2ec5ab8ecc6177790c",
+      "before_signals": [],
+      "after_signals": []
+    },
+    {
+      "client_id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+      "client_name": "The Staffordshire",
+      "guide_id": "f74a6363-1442-4324-b0b8-ae66ac9161b1",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/THE-STAFFORDSHIRE-CHATGPT-PROJECT-MIGRATION-AUDIT-2026-09-08.md",
+      "source_revision": "3b2032edc5d02f9607be97b79842f51461f43853",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "the-staffordshire.md",
+      "content_sha256": "5c32138b9e10af5dc11b7a31638fa6034bdab2ca6daa0b9f553928650c3667cf",
+      "before_signals": [
+        "let the speaker feel like a person at the venue, not an announcer reading a poster",
+        "20-30 seconds is often enough",
+        "drinking/pouring/bar actions can create a natural opening when relevant",
+        "band/artist cameos should say something useful, not merely stand in frame"
+      ],
+      "after_signals": [
+        "let the speaker feel like a person at the venue, not an announcer reading a poster",
+        "20-30 seconds is often enough",
+        "drinking/pouring/bar actions can create a natural opening when relevant",
+        "band/artist cameos should say something useful, not merely stand in frame"
+      ]
+    },
+    {
+      "client_id": "204f4f22-14c7-42ed-a956-da57af102706",
+      "client_name": "Tobich Optics",
+      "guide_id": "dd3013a1-41ca-4b3e-bef2-e42bf5ae8882",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/TOBICH-OPTICS-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "134cdae1b5be661e0e1d05a1ed30e9a66a3ad1db",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "tobich-optics.md",
+      "content_sha256": "053bd9457b58d2376de4dddd74429053e8c4eb84bef8f590b0b09a71b25db75c",
+      "before_signals": [
+        "product/frame features",
+        "designer-range/new-stock content with freshness-checked availability",
+        "real customer lifestyle imagery",
+        "eye-test/appointment service posts"
+      ],
+      "after_signals": [
+        "product/frame features",
+        "designer-range/new-stock content with freshness-checked availability",
+        "real customer lifestyle imagery",
+        "eye-test/appointment service posts"
+      ]
+    },
+    {
+      "client_id": "e2ad6d57-5b06-46e1-b75b-b67f017d57f1",
+      "client_name": "Toyota Bloemfontein",
+      "guide_id": "4e6b75d9-9a2b-4bd6-8376-b75bca646ecd",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/TOYOTA-BLOEMFONTEIN-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "a2aa56af7cdc8c4a9c2ffb1a4dfeac18f6dca9ea",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "toyota-bloemfontein.md",
+      "content_sha256": "8a5b1d28e29a8ea5ca5dbf41193ff08f8260aefd1d38428f9eb896ef8f966230",
+      "before_signals": [],
+      "after_signals": [
+        "sales-team personality",
+        "staff experience",
+        "service-team humour",
+        "workshop process/scale"
+      ]
+    },
+    {
+      "client_id": "1f0406bb-d643-4b83-bc3e-b1ebe87eeb89",
+      "client_name": "Vrystaat Kunstefees",
+      "guide_id": "e5dfd3c1-3155-4464-bacd-3b890851f5d2",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/VRYSTAAT-KUNSTEFEES-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "7eda72b09e0c4995976670a36b3aac173b4cf427",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "vrystaat-kunstefees.md",
+      "content_sha256": "19740805e0cf7d987cabaae914beb8856c0d06a8951fc1841207b37560e8cd2f",
+      "before_signals": [],
+      "after_signals": []
+    },
+    {
+      "client_id": "e1cb958e-3f68-4a77-b5ea-b471ea62bdef",
+      "client_name": "Watch Addict",
+      "guide_id": "3a6dcc38-1f3d-4b45-a162-7ca9879c27f3",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/WATCH-ADDICT-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "04178cfa73aca2389ad1cfbb95d61990d646643e",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "watch-addict.md",
+      "content_sha256": "93555c129e69fc8c22e3c258b1398ab010f6e0803868750af105513a74fe7264",
+      "before_signals": [
+        "product/model features",
+        "brand/collection posts",
+        "launch/new-arrival posts with current stock verification",
+        "sale/promotion posts with current price verification"
+      ],
+      "after_signals": [
+        "product/model features",
+        "brand/collection posts",
+        "launch/new-arrival posts with current stock verification",
+        "sale/promotion posts with current price verification"
+      ]
+    },
+    {
+      "client_id": "2b953772-e791-4dff-a278-d4dd3521f02e",
+      "client_name": "We Ar Fuels",
+      "guide_id": "0dd16592-0e50-499b-8f22-f2847e09da61",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/WE-AR-FUELS-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "11013c779753a76a6a2c4035b8216fa103cbdb69",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "we-ar-fuels.md",
+      "content_sha256": "310381bf77b26433a4c546ee0b4990f73f7951250bf3381a3e6c87de9fc2da43",
+      "before_signals": [
+        "real delivery/service moments",
+        "practical fuel-planning tips for farms/businesses",
+        "team and vehicle features",
+        "behind-the-scenes loading/delivery/process content where safe"
+      ],
+      "after_signals": [
+        "real delivery/service moments",
+        "practical fuel-planning tips for farms/businesses",
+        "team and vehicle features",
+        "behind-the-scenes loading/delivery/process content where safe"
+      ]
+    },
+    {
+      "client_id": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
+      "client_name": "Wiseman Group",
+      "guide_id": "2229c151-b187-4aa8-97c9-5c5af69a5835",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/WISEMAN-GROUP-CG-DYNAMICS-CLIENT-GUIDE.md",
+      "source_revision": "33f53f23447a3a4449f1bd5fed88930ab9b5d2bc",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "wiseman-group.md",
+      "content_sha256": "9b937ff915b8c0a51dd25ab58a1625e2629a7c62dbda1f2b06df00babee1ca8c",
+      "before_signals": [
+        "real team/office moments where current roles are known",
+        "group events/customer days/community involvement when current",
+        "real coordination across businesses when the supplied content proves it",
+        "group-level service awareness without inventing branch specifics"
+      ],
+      "after_signals": [
+        "real team/office moments where current roles are known",
+        "group events/customer days/community involvement when current",
+        "real coordination across businesses when the supplied content proves it",
+        "group-level service awareness without inventing branch specifics"
+      ]
+    },
+    {
+      "client_id": "504113ee-fba9-4993-807e-a86066615212",
+      "client_name": "WiseRide",
+      "guide_id": "653c6c4e-c8a7-4413-bb4c-19d83fdc50a0",
+      "version": 1,
+      "runtime_readiness": "ready",
+      "source_pack_path": "docs/ai-workforce/client-intelligence/WISERIDE-CLIENT-INTELLIGENCE-2026-09.md",
+      "source_revision": "16204a8d3d16bf44a59085321d1483821e99fab9",
+      "source_observed_at": "2026-09-07 22:00:00+00",
+      "file": "wiseride.md",
+      "content_sha256": "19f0783d4cd680d396a2155ddf14551e5a4091dc6a2756511e2fd8b6fb31e5d3",
+      "before_signals": [],
+      "after_signals": [
+        "product/service showcases",
+        "car-protection tips and education",
+        "behind-the-scenes / staff moments",
+        "customer installation highlights/testimonials where permission and exact facts are available"
+      ]
+    }
+  ]
+}

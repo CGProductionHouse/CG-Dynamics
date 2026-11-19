@@ -1,3 +1,26 @@
+## 19 November — six guide-heading holds fixed locally; 18 zero-write reviews
+
+Same DRAFT PR1003 continuation, no hosted release/Vercel. Fresh13 ready-guide
+holds reproduced. Local monthlyStrategySeed exact-heading fallback recovers four
+topics each for Hino, Jenkor, Peyper Bonds, Supa Quick BFN, Toyota and WiseRide.
+52frozen sources unchanged;25 prior evidence selections identical,6 recovered,
+21 without automatic topics. Nested unsafe-section, UUID and caption-rule guards
+retained/tightened. Real preparation/workspace exact-source tests pass.
+
+18 distinct Nov–Jan candidates reviewed locally:12 exact existing drafts plus
+6missing January targets, NOT SAVED/APPROVED/PUBLISHED. Current77 reviewed drafts
+and16 live plans stay protected. Fresh read-only63client/52guide/141strategy
+hashes all unchanged. No source-review or canonical data writes. Live32-client
+holds remain until reviewed release/source admission; no whole-guide fallback.
+Seven audit/container guides remain evidence-held;Elcheck/JFJ/Neshora/VCS have no
+guide row. Preserve Neshora#546 scope/evidence; no new research lane.
+
+165distinct focused checks pass (164serial +new exact-source readback test);
+build/scopedlint/diff pass. No collision with checked #991/#995/#1004 paths.
+No other-agent/provider/package/permission/worker/schedule/website change.
+All earlier unapplied/undeployed PR1003 gates remain; source fixes NOT LIVE.
+[Source review, exact monthly candidates and next guarded action](CLIENT-STRATEGY-SOURCE-REVIEW-2026-11-19.md).
+
 ## 19 November — full-fleet positive strategy continuation; no Vercel
 
 CA continued ALL-client positive strategy setup. Same isolated DRAFT PR1003.

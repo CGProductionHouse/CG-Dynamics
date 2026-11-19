@@ -24,9 +24,13 @@ export interface MonthlyBaselineInput {
 
 const MAX_SIGNAL_LENGTH = 180
 const CONTENT_GUIDE_HEADING = /(content (ideas|formats|directions|that suits)|recurring formats|content[, /]+reels|reels? \/ video|social\/content lessons|(?:umbrella|engen|sasol|get together) mode)/i
+// Exact headings used by reviewed legacy guides. Consult them only when the
+// established extraction is empty, preserving already-admitted source fences.
+const LEGACY_CONTENT_GUIDE_HEADING = /^(?:best-fit content pillars|strong recurring content themes|content and video guidance|poster and video|video\s*\/\s*reels?)$/i
+const LEGACY_COPY_GUIDE_HEADING = /caption|content lessons|voice|style|copy rules/i
 const POSITIONING_GUIDE_HEADING = /(identity|positioning|audience)/i
 const UNSAFE_GUIDE_HEADING = /(contact|address|website|hashtag|freshness|unresolved|mistakes|guardrail)/i
-const UNSAFE_SIGNAL = /(@|https?:\/\/|www\.|\+\d|\b\d{2,4}[ -]\d{3}[ -]\d{3,4}\b)/i
+const UNSAFE_SIGNAL = /(@|https?:\/\/|www\.|\+\d|\b\d{2,4}[ -]\d{3}[ -]\d{3,4}\b|\b[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\b)/i
 const ADMINISTRATIVE_SIGNAL = /^(canonical (cg )?client|public trading style)\s*:/i
 const NEGATIVE_SIGNAL = /^(?:do not|don't|never|avoid|no |only |keep |use |prefer |must |where |when |if )/i
 
@@ -64,10 +68,15 @@ function uniqueSignals(values: string[], limit: number): string[] {
  * deliberately excluded from automatic campaign direction.
  */
 export function extractReadyGuideSignals(markdown: string): string[] {
+  const established = extractGuideSignals(markdown, false)
+  return established.length ? established : extractGuideSignals(markdown, true)
+}
+
+function extractGuideSignals(markdown: string, includeLegacyHeadings: boolean): string[] {
   const contentByTopic = new Map<string, string[]>()
   const positioning: string[] = []
   let section: 'content' | 'positioning' | 'other' = 'other'
-  let unsafeSubsection = false
+  let unsafeHeadingDepth: number | null = null
   let topic = ''
   let inUsefulThemes = false
 
@@ -75,20 +84,26 @@ export function extractReadyGuideSignals(markdown: string): string[] {
     const heading = rawLine.match(/^(#{2,4})\s+(.+)$/)
     if (heading) {
       const title = cleanSignal(heading[2])
-      if (heading[1].length === 2) {
+      const depth = heading[1].length
+      if (depth === 2) {
         section = UNSAFE_GUIDE_HEADING.test(title) ? 'other'
-          : CONTENT_GUIDE_HEADING.test(title) ? 'content'
+          : CONTENT_GUIDE_HEADING.test(title) || (includeLegacyHeadings && LEGACY_CONTENT_GUIDE_HEADING.test(title)) ? 'content'
             : POSITIONING_GUIDE_HEADING.test(title) ? 'positioning' : 'other'
-        unsafeSubsection = false
+        unsafeHeadingDepth = null
         topic = title.replace(/^\d+[.)]\s*/, '')
         inUsefulThemes = !/\bmode\b/i.test(title)
       } else {
-        unsafeSubsection = UNSAFE_GUIDE_HEADING.test(title)
+        // A safe-looking child cannot escape an unsafe parent section. Resume
+        // only at a sibling/ancestor; never admit nested contact/held material.
+        if (unsafeHeadingDepth !== null && depth <= unsafeHeadingDepth) unsafeHeadingDepth = null
+        if (UNSAFE_GUIDE_HEADING.test(title) || (includeLegacyHeadings && LEGACY_COPY_GUIDE_HEADING.test(title))) {
+          unsafeHeadingDepth = Math.min(unsafeHeadingDepth ?? depth, depth)
+        }
         topic = title
       }
       continue
     }
-    if (section === 'other' || unsafeSubsection) continue
+    if (section === 'other' || unsafeHeadingDepth !== null) continue
 
     const line = rawLine.trim()
     if (!line || line.startsWith('#')) continue
