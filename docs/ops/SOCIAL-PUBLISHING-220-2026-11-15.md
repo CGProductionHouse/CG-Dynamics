@@ -1,6 +1,30 @@
 # Social publishing — 15 November 2026
 
-## 19 November — MCP90 exact-approved release COMPLETE; new company action test pending
+## 19 November, 17:28 SAST — company new-action acceptance and ONE setup link complete
+
+Existing company Chrome/ChatGPT identity info@cgproductionhouse.com verified in
+Account settings; sessions/tabs/pinned WhatsApp retained. Existing CG Dynamics
+Refresh tools clicked ONCE; Write31 became Write32. Normal company ChatGPT chat
+https://chatgpt.com/c/6aff14bf-d3f8-83e9-9d37-fc1a0e399f09 resolved company_admin
+then reported ONE confirmed start_facebook_permission_setup invocation, returning
+an official Facebook code/HTTPS callback URL with reporting scopes plus ONLY
+pages_manage_posts. Independent read-only aggregate by observed nonce SHA256:
+ONE matching request, active manager=true, unused=true, expiry
+2026-11-19T16:25:16.856Z (18:25:16 SAST). First SELECT used nonexistent consumed_at;
+source inspection established used_at and corrected SELECT passed. No writes in
+verification; no credentials/token values read. Raw URL/state stays out of records.
+
+ONE-link approval consumed; NEVER auto retry or regenerate. Owner uses the actual
+link in the company chat for consent while preserving asset selections. No consent
+opened/accepted, no deployment/configuration/mapping/permission/Microsoft/job/content/
+publication/migration/Vercel change. MCPv90 unchanged; do not redeploy. Company
+ordinary-chat action acceptance now verified; this Codex chat's cached catalogue
+refresh is unverified. Publishing still disabled; exact grant/Page binding, eligible
+approved future creative, fresh Teams/native duplicate evidence and separately
+approved worker/account/controlled-post activation remain. Documentation-only
+checkpoint; previous runtime/build/SQL receipts unchanged, not rerun.
+
+## 19 November — MCP90 release complete; earlier company action acceptance hold
 
 CA explicitly confirmed at 17:13 SAST on 19 November: "Yes—approve exact MCP
 release and setup link", answering revision323d83da's unchanged70-file packet +

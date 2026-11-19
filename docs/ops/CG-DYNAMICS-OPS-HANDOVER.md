@@ -1,4 +1,28 @@
-## 19 November — exact MCP permission-setup packet LIVE v90; browser acceptance held
+## 19 November, 17:28 SAST — company plugin refreshed; ONE Facebook setup link verified
+
+Recovered supported Computer Use in the EXISTING company Chrome session; verified
+ChatGPT Account email info@cgproductionhouse.com before acting. Clicked the existing
+CG Dynamics Refresh tools ONCE; UI changed Write31 to Write32. New ordinary company
+chat https://chatgpt.com/c/6aff14bf-d3f8-83e9-9d37-fc1a0e399f09 resolved company_admin
+and reported ONE start_facebook_permission_setup call with confirmation=true.
+Actual official Facebook code/HTTPS callback/seven-scope URL returned. Read-only
+production aggregate against its SHA256 state hash independently confirms ONE
+matching request, active manager, unused, expires2026-11-19T16:25:16.856Z
+(18:25:16 SAST). Initial SELECT incorrectly named consumed_at; corrected to the
+existing callback's used_at after reading source. Both were SELECT only.
+
+The ONE-link approval is now consumed: do NOT generate another or retry this call.
+The link remains in that company chat; raw URL/state excluded from durable records.
+Owner Facebook consent is NEXT, preserving existing asset selections; not opened
+or accepted here. No backend redeploy, settings/permission/config/key/mapping change,
+Microsoft, content/job/publication, migration or Vercel action. Existing two company
+connections, tabs and pinned WhatsApp preserved. Publishing remains disabled; native
+grant/Page binding and controlled publication acceptance remain separately gated.
+UI recovery/link verification supersede the historical browser hold below. This
+Codex chat's own cached action discovery was NOT proven refreshed. Documentation
+only; prior runtime/build qualification unchanged, no expensive tests repeated.
+
+## 19 November — exact MCP permission-setup packet LIVE v90; earlier browser hold
 
 At 17:13 SAST on 19 November, CA explicitly confirmed the existing approval request:
 "Yes—approve exact MCP release and setup link" for revision323d83da's unchanged
