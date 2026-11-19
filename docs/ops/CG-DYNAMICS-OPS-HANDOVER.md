@@ -1,3 +1,38 @@
+## 19 November — exact MCP permission-setup packet LIVE v90; browser acceptance held
+
+CA replied Please continue immediately after the explicit exact70-file MCP release
+and one setup-link request. Treated as go-ahead for ONLY that packet + one link;
+not permission for provider consent, publishing, configuration or other releases.
+Executed ONE deploy after fresh v89/68file complete-closure comparison to the
+frozen manifest. MCPv90/70files ACTIVE. Independent hosted readback: ALL70files
+match the frozen payload byte-for-byte,64prior files preserved,4changed,2added;
+verify_jwt=false/import_map=false unchanged. Payload SHA256
+04461b73d8bf6a301f5b0c603892921376f87f7b0ffdedb26fdf2b3c0602830a;
+hosted bundle5b7668d35da8caa13239dd7b656b37fb4448321ff2d15d09dd50dd65737cb6ca.
+OAuth-start remainsv75, all5files/settings unchanged. Read-only digest metadata
+shows ALL77configuration digests unchanged; no actual secret values read/copied.
+Consent-setup flag stays enabled; publishing/submission/confirmation/exact-release
+gates remain absent/false. Unauthenticated MCP returns401. NO duplicate deployment.
+
+The backend now exposes start_facebook_permission_setup in its source catalogue;
+actual installed company ChatGPT discovery/execution is NOT yet verified. Computer
+Use stopped this turn because it could not confidently determine Chrome's current
+URL for policy enforcement. No further app input/retry/alternate browser automation,
+profile/session copying or security-setting change. Company refresh, normal-chat
+acceptance and the authorised ONE expiring setup link remain unfinished; NO OAuth
+state/link was generated. Do not describe previous v89 normal-chat acceptance as
+v90/new-action acceptance. Existing signed-in sessions/tabs preserved.
+
+Private source snapshots, preflight, deploy result, all-file readback, digest-only
+config proof and release receipt: C:/Users/chris/.codex/artifacts/social-publishing-991/
+2026-11-19/mcp-permission-release. Next supported company UI/tool recovery must
+verify the existing company account, refresh its existing catalogue and generate
+ONE already-authorised link, without redeployingv90 or changing flags. Owner Meta
+consent, exact grant/Page binding, approved future original photo/caption/time,
+fresh Teams/native duplicate proof and separate worker/account/one-post approval
+remain. No native provider, mapping, token, content/job, production SQL/migration,
+Microsoft, Vercel or cost action. Google tracker target still unknown.
+
 ## 19 November — six additional REAL PostgreSQL state checks PASS; packet unchanged
 
 Continued SAME PR #991 from10eb7d97. Added only the opt-in test

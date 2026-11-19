@@ -1,5 +1,40 @@
 # Social publishing — 15 November 2026
 
+## 19 November — MCP90 exact-approved release COMPLETE; new company action test pending
+
+CA's latest Please continue directly followed the exact70-file MCP release + one
+setup-link request; treated as go-ahead for only that scope. Fresh livev89 complete
+source closure matched the frozen baseline. ONE deploy; final MCPv90/70files ACTIVE,
+all70hosted file bytes match approved candidate-v2,64preserved/4changed/2added,
+verify_jwt=false/import_map=false preserved. Payload SHA256
+04461b73d8bf6a301f5b0c603892921376f87f7b0ffdedb26fdf2b3c0602830a;
+hosted bundle5b7668d35da8caa13239dd7b656b37fb4448321ff2d15d09dd50dd65737cb6ca.
+OAuth-startv75 remains untouched: all5files and auth settings unchanged. Digest-only
+metadata before/after proves all77configurations unchanged; no actual secret values
+read or copied, no CLI upgrade. Publishing/submission/confirmation/exact-release
+gates still absent/false, existing consent-setup flag enabled. Anonymous MCP401.
+No production migration/account/content/job/config/Microsoft/Vercel/provider action.
+
+New action availability is source-hosted VERIFIED, installed company ChatGPT
+catalogue and ordinary-chat execution NOT verified. Computer Use stopped because
+Chrome's current URL could not be determined confidently for policy enforcement;
+no further Windows input or alternate browser route attempted. No profile/session
+copy, browser restart, remote-debug port or security/permission change. The authorised
+ONE expiring setup link was NOT generated; no OAuth state was created and no Meta
+consent attempted. Preserve existing company sessions/tabs. Previous company Chat
+acceptance was v89 and does not count for the new action.
+
+Current release evidence lives at C:/Users/chris/.codex/artifacts/social-publishing-991/
+2026-11-19/mcp-permission-release (private source/metadata snapshots, preflight,
+single deploy response, exact readback and release-receipt.json). No unchanged tests
+repeated after a byte-identical frozen release. NEXT: supported company Chrome/tool
+recovery → existing plugin refresh → actual64-tool/new-action discovery → generate
+ONE already-authorised expiring link. Do NOT redeployv90 or change keys/flags.
+Owner consent, actual exact grant/Page binding, real approved future creative,
+fresh Teams/native duplicate evidence and separately authorised worker/submission/
+account/controlled-post rollout remain. Existing DB pair not replayed; remaining
+migrations/runtime/Elcheck holds unchanged. Google tracker exact target unidentified.
+
 ## 19 November — REAL PostgreSQL acceptance for the permission-state boundary
 
 Additional verification only, same PR #991 from10eb7d97; application source
