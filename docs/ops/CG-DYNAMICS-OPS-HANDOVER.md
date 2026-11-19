@@ -1,3 +1,24 @@
+## 19 November — live client strategies corrected after CA editorial rejection
+
+CA rejected Delta's live internal/long-form copy and explicitly requested fixing all
+previous client handoffs. Prior structural/API acceptance is NOT editorial approval.
+16 canonical published plans across 15 clients deliberately amended, independently
+read back, reviewed/approved/published using existing guarded RPCs: all 15 November
+plans plus Cape December. 48 immutable revision events; no ad-hoc strategy writes.
+Each has a concise goal, positive supported reflection, three-stage direction,
+spaced content ideas and clear next actions. Production caveats retained privately.
+
+All 18 exact client-role RPC contexts pass, no foreign reports; Delta actual login/RPC200,
+own API session local-only logout204. 18 client/package rows, 17 October reports and
+35 other-month strategies unchanged. Bat Hill, CG and Econofoods private holds remain
+private; no invented package, result, stock, ROI, date or publication. Same #731 author
+must follow the new editorial standard; no replacement task/configuration.
+
+Same isolated DRAFT PR1003; 39 focused tests, local build, scoped lint and diff pass.
+No Vercel, migration, runtime/provider/credential/schedule/
+package/social-publication change or other-agent work. Native phone not claimed.
+[Exact receipt and future-author writing contract](CLIENT-STRATEGY-EDITORIAL-CORRECTION-2026-11-19.md).
+
 ## 18 November — Ehrlich accepted; Econofoods video-only launch held
 
 Same isolated DRAFT PR1003, mainb524a9f9 unchanged, NO VERCEL. EHPec643c75 exact
