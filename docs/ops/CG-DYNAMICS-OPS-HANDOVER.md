@@ -1,3 +1,31 @@
+## 19 November — six additional REAL PostgreSQL state checks PASS; packet unchanged
+
+Continued SAME PR #991 from10eb7d97. Added only the opt-in test
+tests/metaPermissionStatePostgres.test.mjs; no application/runtime change. Six
+checks PASS on real isolated PostgreSQL17.10: actual MCP dispatcher/installed SDK
+state persistence, actor/hash/expiry, concurrent callback consumption with ONE
+winner and no replay, expired/tampered states, inactive/mid-insert role revocation,
+unconfirmed/wrong-context/disabled requests, and a genuine INSERT permission error.
+The actual callback hash/query subsection is executed BEFORE any provider/code
+exchange. PostgREST wire transport is synthetic; minimal fixture schema/grants are
+NOT production schema/RLS or native Facebook acceptance. New six tests skip by
+default and cannot touch Docker without the exact existing QA opt-in.
+
+Verified task label + network=none + no published ports; reused only the previously
+stopped cg-dynamics-social-220-qa container. Its private random database was dropped,
+remaining matching databases0; container stopped cleanly/exited0. Other containers,
+staff apps and Microsoft unchanged. No credentials inspected; test metadata reads
+only task/network/ports/running fields. Syntax/diff and disabled-mode checks pass.
+Previous159affected/native/build/lint receipts remain applicable to unchanged app
+source b84fe934; full23-minute suite not repeated for this test-only addition.
+
+Exact70-file candidate-v2 and SHA04461b73d8bf6a301f5b0c603892921376f87f7b0ffdedb26fdf2b3c0602830a
+UNCHANGED. Fresh native DB evidence is private under artifacts/social-publishing-991/
+2026-11-19/meta-state-postgres in C:/Users/chris/.codex. Production release approval
+remains pending; no state/link, grant, mapping, job, config, SQL, deployment or
+Vercel action in production. Do not treat a generic continuation as a new exact
+release packet or as proof of native publishing readiness.
+
 ## 19 November — ChatGPT Facebook permission setup prepared, NOT live
 
 Same DRAFT PR #991; tested source b84fe934. Reproduced the missing accessible

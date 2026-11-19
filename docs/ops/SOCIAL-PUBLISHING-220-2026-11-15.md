@@ -1,5 +1,31 @@
 # Social publishing — 15 November 2026
 
+## 19 November — REAL PostgreSQL acceptance for the permission-state boundary
+
+Additional verification only, same PR #991 from10eb7d97; application source
+b84fe934 and exact candidate-v2 SHA04461b73d8bf6a301f5b0c603892921376f87f7b0ffdedb26fdf2b3c0602830a
+are unchanged. Added tests/metaPermissionStatePostgres.test.mjs to the existing
+opt-in task-owned PostgreSQL lane. Six checks PASS/no skips on PostgreSQL17.10:
+actual MCP dispatcher + installed SDK persist the correct actor/hash/expiry;
+the actual callback's hash/conditional UPDATE has ONE concurrent winner, refuses
+replay/expired/tampered state; inactive and mid-insert role changes withhold URLs;
+unconfirmed/staff-context/disabled requests insert nothing; a real denied INSERT
+returns a safe unavailable result. No provider/code exchange or token/connection
+write is exercised. The SDK's PostgREST wire adapter is synthetic over real SQL;
+minimal fixture schema/grants do not attest hosted schema/RLS or native consent.
+
+Only verified cg-dynamics-social-220-qa was started: task label, network=none and
+no published ports checked without reading environment/credentials. Random private
+database dropped, matching-database count0, owned container exited0. Other project
+containers/apps untouched. Six tests skip cleanly without the explicit opt-in;
+syntax/diff pass. Last159affected/native/build/lint evidence remains applicable to
+unchanged application code; no repeated full suite/build. Private receipt/logs:
+C:/Users/chris/.codex/artifacts/social-publishing-991/2026-11-19/meta-state-postgres.
+
+No production OAuth state, consent, connection/mapping, content/job, secret/config,
+SQL/Edge/Vercel/provider/Microsoft action. Exact release approval remains pending;
+existing next steps and protected gates below still apply. No new checklist/system.
+
 ## 19 November — explicit ChatGPT Facebook permission setup, SOURCE ONLY
 
 Tested source b84fe934, SAME DRAFT PR #991. Installed tools/live v89 lack a
