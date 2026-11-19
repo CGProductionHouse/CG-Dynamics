@@ -1,3 +1,46 @@
+## 19 November — publishing permission screen qualified; exact release pending
+
+Resumed SAME PR #991 from1dda40f4; origin/mainb524a9f9 and current ownership
+checked. Only this Codex lane active; other client/staff/Nolan/Teams work preserved.
+Finished the previously uncommitted Facebook permission setup in the EXISTING
+Meta integration screen. Normal reporting Connect Meta remains unchanged.
+Separate review + explicit checkbox invokes only the existing opt-in OAuth
+endpoint. Strict response/purpose/URL/scope validation refuses an older reporting
+response, unsafe redirects or broadened permissions. A recorded scope never
+claims Page publishing readiness. No request on render/open/cancel; pending guard
+prevents double-click requests; unmount/connection-state changes suppress late
+navigation. Server consent, actual owner grant and dispatch gates remain separate.
+
+Final full5083total/5051pass/32optional skips/0fail (473.5s). Build + app-bearing
+MetaIntegration bundle, scoped lint/diff and102focused tests
+pass, including ACTUAL Supabase FunctionsClient -> actual OAuth handler with
+synthetic auth/database/provider fixtures, disabled gate and current-role refusals.
+Company Chrome recovered this turn: correct cgproductionhouse.com profile used.
+Actual local React DOM10checks pass; desktop and375/390/430viewport checks have
+no horizontal overflow. Screenshots/private fixture receipt retained; viewport
+reset, created test tab closed, owned fixture server stopped. No native consent,
+real ChatGPT action invocation, provider publishing or physical-phone acceptance.
+Final whole-suite receipt is recorded in this increment's PR and social work record.
+
+Bounded SELECT-only future approved PNG/JPEG Facebook pilot search (same-client,
+active, unarchived, unposted, unscheduled; null-status handling matches source)
+returned no candidates. Cape's authenticated readiness remains
+EXACT_ACCOUNT_MAPPING_REQUIRED from the last exact-client read. No approval,
+asset/date/account binding, Teams refresh or old-post replay manufactured.
+
+Read-only release preflight: MCPv87/65files and OAuth-startv73/5files retain the
+same deployment-bundle hashes as the immutable prepared packets; verify_jwt and
+import_map still false. No credentials/config values read. Existing packet hashes
+and helper-preservation counts below remain authority; no packet rebuilt.
+CA explicitly APPROVED these TWO backend updates and consent-setup flag only;
+execution/readback is the immediate next step, not yet a live-release claim here.
+Publishing/MCP submission/staff confirmation/worker activation remain
+off; no Vercel, migrations, mappings, campaign/content/permission writes performed.
+Elcheck repair request is separately pending and untouched. Google tracker target
+still unidentified. Next is the exact approved release/owner consent, verified
+account binding and one explicitly approved future pilot, then independent native
+receipt and company normal-chat acceptance. Fixtures are not native readiness.
+
 ## 18 November — safely paused for laptop shutdown
 
 CA requested pause/shutdown after tested source4f6efcfc was pushed to SAME DRAFT

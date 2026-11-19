@@ -1,5 +1,101 @@
 # Social publishing — 15 November 2026
 
+## 19 November — explicit publishing permission setup in the existing Meta screen
+
+Resumed SAME DRAFT PR #991 from1dda40f4; fetched mainb524a9f9 unchanged, PR/open
+ownership and active workers checked. No second scheduler or overlapping staff,
+Nolan, client, Teams, calendar or package lane. The missing publishing-permission
+UI was reproduced before implementation in the preceding continuation; completed
+that saved local work here. Normal reporting handleConnect remains unchanged.
+
+FacebookPublishingConsent.tsx uses existing branded buttons and the existing
+integration card: separate review, explicit checkbox, then opt-in OAuth request.
+It does not connect accounts automatically or schedule/publish. Checking, unknown,
+absent and recorded permission states stay distinct; recorded scope still needs
+Page checks. No OAuth request on render/open/cancel; synchronous pending guard,
+disabled controls and cleared confirmation prevent accidental duplicate requests.
+Unmount/changed connection state cannot navigate on a late response. React ref
+update moved into a layout effect after scoped lint reproduced the render-ref
+failure. Existing manager route/server current-role gates remain authority.
+
+metaPublishingConsent.ts invokes ONLY meta-oauth-start with the exact purpose and
+confirmation query. It accepts only a verified publishing-purpose response with
+publishing_ready:false, HTTPS www.facebook.com versioned dialog/code request,
+one-use-format state, rerequest and the exact existing six reporting scopes plus
+pages_manage_posts. Duplicate/unknown URL parameters, credentials/hash, unsafe
+callback scheme, missing/broadened scopes and old reporting-only backend responses
+are refused without navigation. Only safe known server error codes become UI copy;
+no raw service error/token/URL is displayed or logged. Server opt-in gate and
+owner consent remain independent from worker/confirmation/exact-release gates.
+
+Deterministic regressions:102focused pass, including actual installed
+Supabase FunctionsClient -> actual OAuth-start handler, with synthetic database/
+auth/provider fixtures. Shared handler fixture extracted without changing its
+prior10tests. Actual SDK proves query propagation, disabled/no-state behavior,
+current-role refusal and hashed state; React SSR proves no request on initial
+render and no false permission=readiness claim. No mocked transport proves a grant.
+Build (tsc/Vite7.3.6) and actual MetaIntegrationPage-DXEg0Naj emitted app bundle
+contain the new controls; scoped lint/diff pass. No new dependency or lock change.
+
+Correct company Chrome profile cgproductionhouse.com was available this turn.
+Private local fixture uses actual React DOM and compiled app CSS, synthetic
+invoke/navigation ports, fake public Supabase settings and blocked external fetch.
+TEN interaction checks pass: render/open zero requests, explicit consent, cancel
+reset, disabled refusal, rapid repeated clicks one request, backend error privacy/
+confirmation reset, verified-purpose captured redirect, connection-change and
+unmount late-response suppression. Initial private harness read the Response
+stream too early; bounded act/event-loop settling corrected the HARNESS, not the
+production behavior. Actual375/390/430viewports show scroll widths360/375/415;
+desktop and phone screenshots retained. Viewport reset, created tab closed,
+task-owned fixture server stopped. No native Facebook consent/post, company
+ChatGPT normal-chat action acceptance or physical-phone verification claimed.
+
+Full-suite fixture uses the existing documented fake Supabase URL/key, Git
+OpenSSL PATH and CG_PUBLICATION_JPEG_PACKAGE pointing to the previously qualified
+official jpeg-js0.4.4 TEMP package. Shared node_modules lacks that already-approved
+package; no install/change to shared dependencies was made. Initial broad run
+without that package override was interrupted, preserved as failed/incomplete,
+and not counted as acceptance. The preceding focused attempt also lacked the
+documented fake environment; the final102pass receipt supersedes it. Final whole
+suite5083total/5051pass/32optional skips/0fail/0cancel (473.5s) is the final receipt.
+Existing37real
+PostgreSQL tests remain PRIOR green evidence: no queue/SQL/worker change here,
+so do not count a rerun or infer native publishing from those synthetic responses.
+
+Bounded read-only pilot search with source-equivalent approval/client/date/media/
+archive/posted/status checks returned ZERO future approved unscheduled Facebook
+photos. Null production statuses are included consistently with the actual source
+helper. No original media/caption copied, approval manufactured, staff date changed
+or old published post reused. Cape's last authenticated exact-account inspection
+returned EXACT_ACCOUNT_MAPPING_REQUIRED; browser human access is not API binding.
+
+Fresh read-only hosted source metadata matches immutable packet baselines:
+MCPv87/65files, bundle88fd63fd438fcded48a9d6f08615293f4eff4059d18950d8261dc3def5d7ca50;
+OAuth-startv73/5files, bundle88f73a2c52f1f70fc69f635ae98b808d7d96d12654802ddcd66567fc4f49893c.
+verify_jwt=false/import_map=false preserved. No env values, tokens or credentials
+read; no source packet regenerated. Qualified payloads remain the MCP68-file
+5aac9755859e0a54fcdf7b0bbc38e14e2cca0e294230e870ba54302dde4610cf and OAuth5-file
+07750f9e57118aab7b51c98a5b70d950e91cab9e1ca8c8ed1203a17014cf8d09 packets below.
+
+CA explicitly APPROVED ONLY these two backend updates plus consent-setup flag.
+Source checkpoint precedes execution; no live release is claimed until readback.
+Existing publishing,
+MCP queue submission, staff confirmation and worker activation stay disabled;
+owner's Facebook consent is separate. No Vercel, SQL/migration, accounts/mappings,
+ads, content/date/approval, Microsoft, secrets or publishing action. Elcheck exact
+repair approval separately pending and untouched. Google Control Centre target
+unknown; no guessed write. Client-facing release/phone acceptance still separate.
+
+Next executable live path after exact authorization: release these packets with
+fresh drift checks, owner consent without altering existing asset selections,
+verify actual grant/exact Page/connection mapping, select one explicitly approved
+unscheduled future photo/caption/time, inspect fresh Teams/native duplicates,
+then separately approve exact dispatch/worker activation and controlled native
+post/readback. ChatGPT uses the existing company-admin preview/confirmation/status
+actions, same fingerprint/key and same queue; actual normal-chat catalogue and
+receipt acceptance remain required. No silent Instagram cross-posting or implied
+TikTok/LinkedIn/YouTube readiness.
+
 ## 18 November — ChatGPT preview, exact confirmation and receipt recovery
 
 Continued SAME DRAFT PR #991 from0149441d; mainb524a9f9/ownership checked;
