@@ -1222,5 +1222,27 @@ Deno.serve(async request => {
     return streamResponse(buffer, upload.mime_type ?? result.mimeType, upload.original_filename)
   }
 
+  if (action === 'staff_check_onedrive_mapping') {
+    if (authorized.profile.role !== 'admin') return json({ ok: false, error: 'Admin access required.' }, 403)
+    const clientId = cleanString(body.clientId, 50)
+    if (!clientId) return json({ ok: false, error: 'Select a client.' }, 400)
+
+    const [{ data: mapping, error: mappingError }] = await service
+      .rpc('get_client_onedrive_mapping', { p_client_id: clientId })
+
+    if (mappingError || !mapping) return json({ ok: false, error: mappingError?.message ?? 'OneDrive mapping not found for this client.' }, 404)
+
+    return json({ ok: true, data: {
+      driveId: mapping.drive_id,
+      clientFolderItemId: mapping.client_folder_item_id,
+      videosFolderItemId: mapping.videos_folder_item_id,
+      webUrl: mapping.web_url,
+      folderName: mapping.folder_name,
+      mappedAt: mapping.mapped_at,
+      lastVerifiedAt: mapping.last_verified_at,
+      hasFullMapping: Boolean(mapping.drive_id && mapping.client_folder_item_id && mapping.folder_name),
+    } })
+  }
+
   return json({ ok: false, error: 'Not found.' }, 404)
 })
