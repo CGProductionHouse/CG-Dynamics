@@ -19,12 +19,17 @@ type UploadQueueItem = {
   error?: string
 }
 
-export default function WelcomeToCgPage() {
+type WelcomeToCgPageProps = {
+  previewClientName?: {}
+}
+
+export default function WelcomeToCgPage({ previewClientName }: WelcomeToCgPageProps = {}) {
   const [token] = useState(() => {
     const fragmentToken = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : ''
     const historyToken = typeof window.history.state?.onboardingToken === 'string' ? window.history.state.onboardingToken : ''
     return fragmentToken || historyToken
   })
+  const isPreview = !token && !!previewClientName
   const [state, setState] = useState<ClientOnboardingState | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -180,9 +185,22 @@ export default function WelcomeToCgPage() {
   }
 
   if (loading) return <OnboardingShell><p className="text-sm text-report-muted">Opening your welcome link...</p></OnboardingShell>
-  if (!state) return <OnboardingShell><Message title="This link is unavailable" body={error ?? 'Ask CG for a fresh welcome link.'} /></OnboardingShell>
+  if (!state && !isPreview) return <OnboardingShell><Message title="This link is unavailable" body={error ?? 'Ask CG for a fresh welcome link.'} /></OnboardingShell>
+  if (isPreview && !state) {
+    return (
+      <OnboardingShell>
+        <div className="py-6 sm:py-12">
+          <p className="text-xs font-bold uppercase tracking-[0.22em] text-report-accent">About 5 minutes</p>
+          <h1 className="mt-4 text-4xl font-black tracking-tight text-white sm:text-6xl">Welcome to CG, {previewClientName ? 'Client' : 'Client'}</h1>
+          <p className="mt-5 max-w-xl text-base leading-relaxed text-report-muted sm:text-lg">Send what you have. We'll take it from there.</p>
+          <VideoWalkthrough videoUrl={WALKTHROUGH_VIDEO_URL} />
+          <ActionButton size="lg" className="mt-8 min-h-14 w-full sm:w-auto" onClick={() => void undefined} disabled>Start</ActionButton>
+        </div>
+      </OnboardingShell>
+    )
+  }
 
-  const step = state.currentStep
+  const step = state?.currentStep
   return (
     <OnboardingShell step={step}>
       {error && <p role="alert" className="mb-5 rounded-xl border border-[#d8a07a]/25 bg-[#d8a07a]/10 p-4 text-sm text-[#e5b18d]">{error}</p>}
