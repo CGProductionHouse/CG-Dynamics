@@ -10,18 +10,19 @@ test('Performance zone exposes onboarding as a first-class client-intelligence s
   assert.match(nav, /export const performanceNavItems/)
   assert.match(nav, /to: '\/admin\/client-performance', label: 'Performance Dashboard'/)
   assert.match(nav, /to: '\/admin\/clients', label: 'Clients'/)
-  assert.match(nav, /to: '\/admin\/client-onboarding', label: 'Client Onboarding', shortLabel: 'Onboarding', marker: 'ON', access: 'manager'/)
+  assert.match(nav, /to: '\/admin\/client-onboarding', label: 'Client Onboarding', shortLabel: 'Onboarding', marker: 'ON'/)
   assert.match(nav, /to: '\/admin\/reports', label: 'Reports'/)
   assert.match(nav, /to: '\/admin\/published', label: 'Client Preview'/)
   assert.match(nav, /to: '\/admin\/integrations', label: 'Integrations'/)
 })
 
-test('Onboarding and Integrations in the Performance zone stay manager-gated', () => {
+test('Onboarding is a first-class staff-accessible surface in the Performance zone', () => {
   // The integrations entry in performanceNavItems must carry manager access so
   // normal staff never see integration controls.
   const block = nav.slice(nav.indexOf('performanceNavItems'), nav.indexOf('export type NavZone'))
   assert.match(block, /'\/admin\/integrations'[\s\S]*access: 'manager'/)
-  assert.match(block, /'\/admin\/client-onboarding'[\s\S]*access: 'manager'/)
+  // Onboarding is now a first-class destination visible to all staff in the Performance zone.
+  assert.match(block, /'\/admin\/client-onboarding'/)
   assert.ok(block.indexOf("'/admin/client-onboarding'") < block.indexOf("'/admin/reports'"), 'Onboarding must be in the first four mobile destinations')
 })
 
