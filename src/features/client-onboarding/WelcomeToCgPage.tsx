@@ -19,12 +19,13 @@ type UploadQueueItem = {
   error?: string
 }
 
-export default function WelcomeToCgPage() {
+export default function WelcomeToCgPage({ previewClientName = {} }: { previewClientName?: { name: string } }) {
   const [token] = useState(() => {
     const fragmentToken = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : ''
     const historyToken = typeof window.history.state?.onboardingToken === 'string' ? window.history.state.onboardingToken : ''
     return fragmentToken || historyToken
   })
+  const isPreview = !token && !!previewClientName
   const [state, setState] = useState<ClientOnboardingState | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -48,6 +49,18 @@ export default function WelcomeToCgPage() {
     if (!meta.parentNode) document.head.appendChild(meta)
     if (token) window.history.replaceState({ ...window.history.state, onboardingToken: token }, '', '/welcome')
   }, [token])
+
+  if (isPreview) {
+    return (
+      <OnboardingShell>
+        <p className="text-sm text-report-muted">Preview mode</p>
+        <h1 className="mt-4 text-4xl font-black tracking-tight text-white sm:text-6xl">Welcome to CG, {previewClientName.name}</h1>
+        <p className="mt-5 max-w-xl text-base leading-relaxed text-report-muted sm:text-lg">Send what you have. We'll take it from there.</p>
+        <VideoWalkthrough videoUrl={WALKTHROUGH_VIDEO_URL} />
+        <ActionButton size="lg" className="mt-8 min-h-14 w-full sm:w-auto" disabled>Start</ActionButton>
+      </OnboardingShell>
+    )
+  }
 
   useEffect(() => {
     let active = true
