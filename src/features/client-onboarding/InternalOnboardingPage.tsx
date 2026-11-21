@@ -17,6 +17,8 @@ export default function InternalOnboardingPage() {
   const [clientId, setClientId] = useState('')
   const [platforms, setPlatforms] = useState<OnboardingPlatform[]>([])
   const [generatedLink, setGeneratedLink] = useState<string | null>(null)
+  const [previewing, setPreviewing] = useState(false)
+  const [previewClientName, setPreviewClientName] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [working, setWorking] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -47,6 +49,13 @@ export default function InternalOnboardingPage() {
   }, [])
 
   const clientNames = useMemo(() => new Map(clients.map(client => [client.id, client.name])), [clients])
+  const clientSessionsMap = useMemo(() => {
+    const map: Record<string, StaffOnboardingSummary> = {}
+    for (const s of sessions) {
+      map[s.clientId] = s
+    }
+    return map
+  }, [sessions])
 
   async function generate() {
     if (!clientId) return
@@ -58,6 +67,14 @@ export default function InternalOnboardingPage() {
       await load()
     } else setError(result.error)
     setWorking(false)
+  }
+
+  function handlePreview() {
+    const firstActive = sessions.find(s => s.status !== 'completed' && s.status !== 'revoked' && s.status !== 'expired')
+    if (firstActive) {
+      setPreviewing(true)
+      setPreviewClientName(clientNames.get(firstActive.clientId) ?? firstActive.clientName)
+    }
   }
 
   async function revoke(sessionId: string) {
@@ -96,7 +113,46 @@ export default function InternalOnboardingPage() {
     return counts
   }, [sessions])
 
-  const emptyState = onboardingEmptyState({ activeClients: clients.length, sessions: sessions.length, filteredSessions: filteredSessions.length, loading, error })
+  const emptyState = onboardingEmptyState({ activeClients: clients.length, sessions: sessions.length, filteredSessions: filteredSessions.length, loading, error, previewing, previewClientName, handlePreview, clientSessionsMap })
+
+  if (previewing) {
+    return (
+      <div className="w-full max-w-7xl p-4 sm:p-6 lg:p-8">
+        <header>
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-brand-accent">Client Performance</p>
+          <h1 className="mt-2 font-display text-3xl font-black uppercase tracking-wide text-white sm:text-4xl">Client onboarding</h1>
+          <p className="mt-2 max-w-2xl text-sm text-brand-primary/80">Generate Welcome to CG links and review exact-client setup state.</p>
+        </header>
+        <section className="mt-6 rounded-2xl border border-white/10 bg-white/[0.035] p-5 sm:p-6">
+          <h2 className="text-lg font-bold text-white">Preview onboarding</h2>
+          <p className="mt-2 text-sm text-brand-primary/60">Client: {previewClientName}</p>
+          <WelcomeToCgPage previewClientName={{ name: previewClientName }} />
+        </section>
+        <section className="mt-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-lg font-bold text-white">Onboarding status</h2>
+            <div className="flex flex-wrap gap-2">
+              <input
+                type="text"
+                value={search}
+                onChange={event => setSearch(event.target.value)}
+                placeholder="Search clients..."
+                className="min-h-10 w-full rounded-xl border border-white/10 bg-black/20 px-4 text-sm text-white placeholder:text-report-faint sm:w-56"
+              />
+              <StatusPill label="All" count={statusCounts.all} active={statusFilter === 'all'} onClick={() => setStatusFilter('all')} />
+              <StatusPill label="Active" count={statusCounts.in_progress} active={statusFilter === 'in_progress'} onClick={() => setStatusFilter('in_progress')} tone="accent" />
+              <StatusPill label="Done" count={statusCounts.completed} active={statusFilter === 'completed'} onClick={() => setStatusFilter('completed')} tone="teal" />
+              <StatusPill label="Expired" count={statusCounts.expired} active={statusFilter === 'expired'} onClick={() => setStatusFilter('expired')} />
+              <StatusPill label="Revoked" count={statusCounts.revoked} active={statusFilter === 'revoked'} onClick={() => setStatusFilter('revoked')} />
+            </div>
+          </div>
+          {previewing ? (
+            <p className="mt-4 text-sm text-brand-primary">Preview mode active — showing Welcome to CG page for {previewClientName}</p>
+          ) : null}
+        </section>
+      </div>
+    )
+  }
 
   return (
     <div className="w-full max-w-7xl p-4 sm:p-6 lg:p-8">
@@ -165,7 +221,12 @@ export default function InternalOnboardingPage() {
         {loading ? (
           <p className="mt-4 text-sm text-brand-primary">Loading onboarding status...</p>
         ) : filteredSessions.length === 0 ? (
-          emptyState && <EmptyState className="mt-4" title={emptyState.title} message={emptyState.message} />
+          <>
+            {emptyState && <EmptyState className="mt-4" title={emptyState.title} message={emptyState.message} />}
+            {clients.length > 0 && !previewing && !loading && !error && (
+              <ActionButton variant="secondary" onClick={() => void handlePreview()}>Preview onboarding</ActionButton>
+            )}
+          </>
         ) : (
           <div className="mt-4 space-y-4">
             {filteredSessions.map(session => {
