@@ -379,7 +379,7 @@ export default function ClientPerformancePage() {
           <details className="mt-6 rounded-xl border border-white/10 bg-white/[0.02] p-4">
             <summary className="cursor-pointer text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-teal">More performance tools</summary>
               <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                {LINKS.filter(link => link.to !== '/admin/client-onboarding' || canManageOnboarding).map((link) => (
+                {LINKS.map((link) => (
                   <Link
                     key={link.to}
                     to={link.to}
