@@ -7,6 +7,7 @@ import { generateOnboardingLink, listStaffOnboarding, revokeOnboardingLink, upda
 import { OnboardingActivityFeed } from './OnboardingActivityFeed'
 import { ONBOARDING_PLATFORMS, type OnboardingPlatform, type StaffOnboardingSummary } from './types'
 import { PLATFORM_GUIDES } from './platformGuides'
+import { VideoWalkthrough } from './VideoWalkthrough'
 import { onboardingEmptyState } from './emptyState'
 
 type StatusFilter = 'all' | 'not_started' | 'in_progress' | 'completed' | 'revoked' | 'expired'
@@ -17,6 +18,8 @@ export default function InternalOnboardingPage() {
   const [clientId, setClientId] = useState('')
   const [platforms, setPlatforms] = useState<OnboardingPlatform[]>([])
   const [generatedLink, setGeneratedLink] = useState<string | null>(null)
+  const [previewing, setPreviewing] = useState(false)
+  const [previewClientName, setPreviewClientName] = useState('')
   const [loading, setLoading] = useState(true)
   const [working, setWorking] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -48,6 +51,16 @@ export default function InternalOnboardingPage() {
 
   const clientNames = useMemo(() => new Map(clients.map(client => [client.id, client.name])), [clients])
 
+  const clientSessionsMap = useMemo(() => {
+    const map = new Map<string, StaffOnboardingSummary[]>()
+    for (const session of sessions) {
+      const clientId = session.clientId
+      if (!map.has(clientId)) map.set(clientId, [])
+      map.get(clientId)!.push(session)
+    }
+    return map
+  }, [sessions])
+
   async function generate() {
     if (!clientId) return
     setWorking(true)
@@ -64,6 +77,13 @@ export default function InternalOnboardingPage() {
     const result = await revokeOnboardingLink(sessionId)
     if (result.error) setError(result.error)
     else await load()
+  }
+
+  async function handlePreview() {
+    const firstActive = sessions.find(s => !s.revokedAt && s.status !== 'completed')
+    if (!firstActive) return
+    setPreviewClientName(firstActive.clientName ?? '')
+    setPreviewing(true)
   }
 
   const filteredSessions = useMemo(() => {
@@ -96,7 +116,7 @@ export default function InternalOnboardingPage() {
     return counts
   }, [sessions])
 
-  const emptyState = onboardingEmptyState({ activeClients: clients.length, sessions: sessions.length, filteredSessions: filteredSessions.length, loading, error })
+  const emptyState = onboardingEmptyState({ activeClients: clients.length, sessions: sessions.length, filteredSessions: filteredSessions.length, loading, error, previewing })
 
   return (
     <div className="w-full max-w-7xl p-4 sm:p-6 lg:p-8">
@@ -162,89 +182,138 @@ export default function InternalOnboardingPage() {
           </div>
         </div>
 
-        {loading ? (
-          <p className="mt-4 text-sm text-brand-primary">Loading onboarding status...</p>
-        ) : filteredSessions.length === 0 ? (
-          emptyState && <EmptyState className="mt-4" title={emptyState.title} message={emptyState.message} />
+{previewing ? (
+          <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-6 lg:p-8">
+            <h2 className="text-lg font-bold text-white">Preview onboarding</h2>
+            <p className="mt-2 text-sm text-brand-primary/80">Client: {previewClientName}</p>
+            <VideoWalkthrough videoUrl={WALKTHROUGH_VIDEO_URL} />
+            <ActionButton size="lg" className="mt-8 min-h-14 w-full sm:w-auto" onClick={() => void 0} disabled>{'Start'}</ActionButton>
+          </div>
         ) : (
-          <div className="mt-4 space-y-4">
-            {filteredSessions.map(session => {
-              const isExpanded = expandedId === session.clientId
-              return (
-                <article key={session.clientId} className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <button type="button" onClick={() => setExpandedId(isExpanded ? null : session.clientId)} className="text-left">
-                        <h3 className="font-bold text-white hover:text-brand-teal transition-colors">{clientNames.get(session.clientId) ?? session.clientName}</h3>
-                      </button>
-                      <p className="mt-1 text-xs text-brand-primary/70">
-                        {session.sessionId ? (
-                          <>Started {formatDate(session.startedAt)} · Completed {formatDate(session.completedAt)} · Last activity {formatDate(session.lastActivityAt)}</>
-                        ) : (
-                          <span className="text-brand-primary/50">Not started</span>
+        <section className="mt-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-lg font-bold text-white">Onboarding status</h2>
+            <div className="flex flex-wrap gap-2">
+              <input
+                type="text"
+                value={search}
+                onChange={event => setSearch(event.target.value)}
+                placeholder="Search clients..."
+                className="min-h-10 w-full rounded-xl border border-white/10 bg-black/20 px-4 text-sm text-white placeholder:text-report-faint sm:w-56"
+              />
+              <StatusPill label="All" count={statusCounts.all} active={statusFilter === 'all'} onClick={() => setStatusFilter('all')} />
+              <StatusPill label="Active" count={statusCounts.in_progress} active={statusFilter === 'in_progress'} onClick={() => setStatusFilter('in_progress')} tone="accent" />
+              <StatusPill label="Done" count={statusCounts.completed} active={statusFilter === 'completed'} onClick={() => setStatusFilter('completed')} tone="teal" />
+              <StatusPill label="Expired" count={statusCounts.expired} active={statusFilter === 'expired'} onClick={() => setStatusFilter('expired')} />
+              <StatusPill label="Revoked" count={statusCounts.revoked} active={statusFilter === 'revoked'} onClick={() => setStatusFilter('revoked')} />
+            </div>
+          </div>
+
+          {loading ? (
+            <p className="mt-4 text-sm text-brand-primary">Loading onboarding status...</p>
+          ) : filteredSessions.length === 0 ? (
+            <div>
+              {clients.length > 0 && !previewing && (
+                <EmptyState
+                  className="mt-4"
+                  title="Start onboarding"
+                  message="Generate a Welcome to CG link for a client to begin their onboarding journey. Select a client and click 'Generate secure link'."
+                />
+              )}
+              {clients.length === 0 && !previewing && (
+                <EmptyState
+                  className="mt-4"
+                  title="No clients found"
+                  message="Add clients to manage their onboarding setup."
+                />
+              )}
+            </div>
+          ) : (
+            <div className="mt-4 space-y-4">
+              {filteredSessions.map(session => {
+                const isExpanded = expandedId === session.clientId
+                return (
+                  <article key={session.clientId} className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <button type="button" onClick={() => setExpandedId(isExpanded ? null : session.clientId)} className="text-left">
+                          <h3 className="font-bold text-white hover:text-brand-teal transition-colors">{clientNames.get(session.clientId) ?? session.clientName}</h3>
+                        </button>
+                        <p className="mt-1 text-xs text-brand-primary/70">
+                          {session.sessionId ? (
+                            <>Started {formatDate(session.startedAt)} · Completed {formatDate(session.completedAt)} · Last activity {formatDate(session.lastActivityAt)}</>
+                          ) : (
+                            <span className="text-brand-primary/50">Not started</span>
+                          )}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <SessionStatusBadge status={session.status} expiresAt={session.expiresAt} revokedAt={session.revokedAt} />
+                        {session.sessionId && !session.revokedAt && session.status !== 'completed' && (
+                          <ActionButton variant="secondary" className="min-h-9 text-xs" onClick={() => void revoke(session.sessionId)}>Revoke</ActionButton>
                         )}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <SessionStatusBadge status={session.status} expiresAt={session.expiresAt} revokedAt={session.revokedAt} />
-                      {session.sessionId && !session.revokedAt && session.status !== 'completed' && (
-                        <ActionButton variant="secondary" className="min-h-9 text-xs" onClick={() => void revoke(session.sessionId)}>Revoke</ActionButton>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Progress bar */}
-                    <div className="mt-4">
-                      <ProgressStrip session={session} />
+                      </div>
                     </div>
 
-                    <Link to={`/admin/published?client=${session.clientId}&view=setup`} className="mt-4 inline-flex min-h-11 items-center text-sm font-bold text-brand-teal hover:underline">
-                      Preview onboarding
-                    </Link>
+                    {/* Progress bar */}
+                      <div className="mt-4">
+                        <ProgressStrip session={session} />
+                      </div>
 
-                  {/* Quick status */}
-                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                    <StatusLine label="Logo" value={session.uploads.some(u => u.category === 'logo' && u.uploadStatus === 'received') ? 'Received' : 'Not received'} received={session.uploads.some(u => u.category === 'logo' && u.uploadStatus === 'received')} />
-                    <StatusLine label="Services" value={session.typedDescription || session.serviceItems.length || session.uploads.some(u => u.category === 'services' && u.uploadStatus === 'received') ? 'Received' : 'Not received'} received={!!(session.typedDescription || session.serviceItems.length || session.uploads.some(u => u.category === 'services' && u.uploadStatus === 'received'))} />
-                  </div>
+                      <Link to={`/admin/published?client=${session.clientId}&view=setup`} className="mt-4 inline-flex min-h-11 items-center text-sm font-bold text-brand-teal hover:underline">
+                        Preview onboarding
+                      </Link>
 
-                  {/* Expanded drill-down */}
-                  {isExpanded && (
-                    <div className="mt-4 border-t border-white/10 pt-4">
-                      {/* Platform access */}
-                      {session.platformAccess.length > 0 && (
-                        <div className="divide-y divide-white/10">
-                          {session.platformAccess.map(access => (
-                            <div key={access.platform} className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm">
-                              <span className="font-semibold text-white">{PLATFORM_GUIDES[access.platform].label}</span>
-                              <div className="flex items-center gap-2">
-                                <span className="text-brand-primary/70">{access.clientChoice ?? 'no choice'} · {access.connectionState.replaceAll('_', ' ')}</span>
-                                {access.clientChoice === 'connect_now' && !access.verifiedAt && (
-                                  <>
-                                    <button type="button" className="min-h-9 rounded-lg border border-brand-teal/30 px-3 text-xs font-bold text-brand-teal" onClick={() => void updateStaffAccess(session.sessionId, access.platform, 'verified').then(load)}>Verify</button>
-                                    <button type="button" className="min-h-9 rounded-lg border border-red-400/25 px-3 text-xs font-bold text-red-300" onClick={() => void updateStaffAccess(session.sessionId, access.platform, 'failed').then(load)}>Needs follow-up</button>
-                                  </>
-                                )}
+                    {/* Quick status */}
+                    <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                      <StatusLine label="Logo" value={session.uploads.some(u => u.category === 'logo' && u.uploadStatus === 'received') ? 'Received' : 'Not received'} received={session.uploads.some(u => u.category === 'logo' && u.uploadStatus === 'received')} />
+                      <StatusLine label="Services" value={session.typedDescription || session.serviceItems.length || session.uploads.some(u => u.category === 'services' && u.uploadStatus === 'received') ? 'Received' : 'Not received'} received={!!(session.typedDescription || session.serviceItems.length || session.uploads.some(u => u.category === 'services' && u.uploadStatus === 'received'))} />
+                    </div>
+
+                    {/* Expanded drill-down */}
+                    {isExpanded && (
+                      <div className="mt-4 border-t border-white/10 pt-4">
+                        {/* Platform access */}
+                        {session.platformAccess.length > 0 && (
+                          <div className="divide-y divide-white/10">
+                            {session.platformAccess.map(access => (
+                              <div key={access.platform} className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm">
+                                <span className="font-semibold text-white">{PLATFORM_GUIDES[access.platform].label}</span>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-brand-primary/70">{access.clientChoice ?? 'no choice'} · {access.connectionState.replaceAll('_', ' ')}</span>
+                                  {access.clientChoice === 'connect_now' && !access.verifiedAt && (
+                                    <>
+                                      <button type="button" className="min-h-9 rounded-lg border border-brand-teal/30 px-3 text-xs font-bold text-brand-teal" onClick={() => void updateStaffAccess(session.sessionId, access.platform, 'verified').then(load)}>Verify</button>
+                                      <button type="button" className="min-h-9 rounded-lg border border-red-400/25 px-3 text-xs font-bold text-red-300" onClick={() => void updateStaffAccess(session.sessionId, access.platform, 'failed').then(load)}>Needs follow-up</button>
+                                    </>
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                            ))}
+                          </div>
+                        )}
 
-                      {/* Activity feed */}
-                      <OnboardingActivityFeed session={session} />
+                        {/* Activity feed */}
+                        <OnboardingActivityFeed session={session} />
 
-                      {/* Additional notes */}
-                      {session.additionalNotes && (
-                        <div className="mt-4">
-                          <p className="text-xs font-bold uppercase tracking-[0.16em] text-report-faint">Additional notes</p>
-                          <p className="mt-2 text-sm text-report-muted whitespace-pre-wrap">{session.additionalNotes}</p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </article>
-              )
+                        {/* Additional notes */}
+                        {session.additionalNotes && (
+                          <div className="mt-4">
+                            <p className="text-xs font-bold uppercase tracking-[0.16em] text-report-faint">Additional notes</p>
+                            <p className="mt-2 text-sm text-report-muted whitespace-pre-wrap">{session.additionalNotes}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </article>
+                )
+              })}
+            </div>
+          ))}
+        )}
+      </section>
+    </div>
+  )
             })}
           </div>
         )}
