@@ -13,6 +13,11 @@ import { uploadFileToGraphSession } from './upload-session'
 
 type ApiResult<T> = { data: T | null; error: string | null }
 
+export type OnboardingLinkReadiness = {
+  canGenerate: boolean
+  state: 'admin_required' | 'activation_off' | 'client_unavailable' | undefined
+}
+
 async function invoke<T>(body: Record<string, unknown>, token?: string): Promise<ApiResult<T>> {
   const { data, error } = await supabase.functions.invoke('client-onboarding', {
     body,
@@ -75,7 +80,7 @@ export async function uploadOnboardingFile(
   return completeOnboardingUpload(token, session.uploadId, uploadResult.item)
 }
 
-export async function downloadOnboardingFile(uploadId: string, audience: 'client' | 'staff' = 'client', previewClientId?: string): Promise<{ data: Blob | null; error: string | null }> {
+export async function downloadOnboardingFile(uploadId: string, audience: 'client' | 'staff' = 'client'): Promise<{ data: Blob | null; error: string | null }> {
   try {
     const { data: { session } } = await supabase.auth.getSession()
     if (!session?.access_token) return { data: null, error: 'Download failed.' }
@@ -90,7 +95,7 @@ export async function downloadOnboardingFile(uploadId: string, audience: 'client
         apikey: supabaseKey,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ action: previewClientId ? 'staff_preview_portal_download' : audience === 'staff' ? 'download_file' : 'portal_download', uploadId, ...(previewClientId ? { clientId: previewClientId } : {}) }),
+      body: JSON.stringify({ action: audience === 'staff' ? 'download_file' : 'portal_download', uploadId }),
     })
     if (!response.ok) {
       const err = await response.json().catch(() => null)
@@ -103,12 +108,16 @@ export async function downloadOnboardingFile(uploadId: string, audience: 'client
   }
 }
 
-export function loadPortalSetup(previewClientId?: string) {
-  return invoke<ClientOnboardingState>(previewClientId ? { action: 'staff_preview_portal_load', clientId: previewClientId } : { action: 'portal_load' })
+export function loadPortalSetup() {
+  return invoke<ClientOnboardingState>({ action: 'portal_load' })
 }
 
 export function listStaffOnboarding() {
   return invoke<StaffOnboardingSummary[]>({ action: 'staff_list' })
+}
+
+export function loadOnboardingLinkReadiness(clientId: string) {
+  return invoke<OnboardingLinkReadiness>({ action: 'staff_link_readiness', clientId })
 }
 
 export function loadStaffSetupPreview(clientId: string) {

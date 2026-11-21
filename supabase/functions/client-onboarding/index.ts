@@ -1082,6 +1082,31 @@ Deno.serve(async request => {
     return json({ ok: true, data: responseState })
   }
 
+  if (action === 'staff_link_readiness') {
+    if (authorized.profile.role !== 'admin') return json({ ok: false, error: 'Admin access required.' }, 403)
+    const clientId = cleanString(body.clientId, 50)
+    if (!clientId) return json({ ok: false, error: 'Select a client.' }, 400)
+    const { data: session, error: sessionError } = await service
+      .from('client_onboarding_sessions')
+      .select('id, client_id, status, current_step, vector_unavailable, enabled_platforms, started_at, completed_at, last_activity_at, token_expires_at, revoked_at, clients!inner(name, logo_url)')
+      .eq('client_id', clientId)
+      .order('last_activity_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (sessionError) return json({ ok: false, error: 'Onboarding status is unavailable.' }, 503)
+    if (!session) {
+      return json({ ok: true, data: { canGenerate: false, state: 'client_unavailable' } })
+    }
+    if (session.vector_unavailable) {
+      return json({ ok: true, data: { canGenerate: false, state: 'client_unavailable' } })
+    }
+    const hasUploadAdapter = !!session.enabled_platforms?.length
+    if (!hasUploadAdapter) {
+      return json({ ok: true, data: { canGenerate: false, state: 'activation_off' } })
+    }
+    return json({ ok: true, data: { canGenerate: true, state: undefined } })
+  }
+
   if (action === 'staff_resolve_portal_root') {
     if (authorized.profile.role !== 'admin') return json({ ok: false, error: 'Admin access required.' }, 403)
     const clientId = cleanString(body.clientId, 50)
