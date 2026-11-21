@@ -20,6 +20,8 @@ export default function InternalOnboardingPage() {
   const [loading, setLoading] = useState(true)
   const [working, setWorking] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [previewing, setPreviewing] = useState(false)
+  const [previewClientName, setPreviewClientName] = useState('')
 
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
@@ -47,6 +49,13 @@ export default function InternalOnboardingPage() {
   }, [])
 
   const clientNames = useMemo(() => new Map(clients.map(client => [client.id, client.name])), [clients])
+  const clientSessionsMap = useMemo(() => {
+    const map = new Map<string, StaffOnboardingSummary>()
+    for (const session of sessions) {
+      map.set(session.clientId, session)
+    }
+    return map
+  }, [sessions])
 
   async function generate() {
     if (!clientId) return
