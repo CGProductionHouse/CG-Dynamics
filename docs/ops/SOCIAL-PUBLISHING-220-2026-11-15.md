@@ -1,5 +1,45 @@
 # Social publishing — 15 November 2026
 
+## 24 November, 13:04 SAST — diagnostic release96 complete; local OAuth correction qualified
+
+Exact CA three-helper approval consumed by ONE MCP deploy. Current hosted baseline
+was95/73files, not92/70: retained #1005's newer index/context/catalogue and3 added
+video-tracking files. Approved3 helper bytes matched both reviewed hashes and current
+preimages. Immediate fresh full-source comparison passed;96 ACTIVE all73 hosted
+file bytes matched independently (3changed/70preserved/0added/0removed by this release).
+All77 configuration digests and auth/import-map settings unchanged; publishing/
+submission/confirmation/exact-release settings absent, inspection enabled; anonymous401.
+Receipt approvals/FACEBOOK-READINESS-DIAGNOSTICS-2026-11-24-RECEIPT.json contains exact
+source/bundle hashes. Do not repeat deployment or Cape's completed binding repair.
+
+Real company-admin account_only ->META_PUBLISHING_TOKEN_EXPIRY_UNVERIFIED. The live
+gate is credential lifetime, not the previously missing binding. Current Page task/
+app publishing acceptance remains unverified. No post/queue/content/Microsoft/Vercel
+action, token refresh, credential extraction or permission change.
+
+Confirmed additional callback defect against live74's matching source: one code
+exchange was incorrectly described as obtaining a long-lived credential. Meta's
+[official long-lived User-token flow](https://developers.facebook.com/documentation/facebook-login/guides/access-tokens/get-long-lived)
+includes a separate fb_exchange_token grant. Reproduced actual callback storing a
+synthetic short credential. Implemented that second server-only request locally,
+with no automatic retries/redirects, fixed error messages and explicit finite
+provider-issued lifetime. Existing token encryption/scope checks/state consumption
+remain; no short-token fallback on second-stage failure. Existing real connection
+is not refreshed/replaced and unknown publishing-expiry policy is not relaxed.
+
+80 focused checks pass/no failures/skips, including actual callback encrypted
+persistence and no connection/token mutation after a failed second exchange.
+Native Deno of exact8-file current callback overlay, build/tsc/Vite7.3.6/app bundle,
+scoped lint/diff pass. First broader run needed synthetic Vite env; corrected80green.
+No full-suite/SQL/browser/native OAuth acceptance claimed for this local increment.
+Manifest approvals/META-LONG-LIVED-CALLBACK-2026-11-24.json;1 changed callback,
+6 preserved hosted files,1 added helper; candidate source SHA256
+5454f1c9a768c65c14a5332c9f3de47df1b84083df341026c62795a69c631808.
+NOT approved/deployed. Next request is the exact callback release plus ONE fresh
+setup link; owner consent remains manual, with unchanged asset selections. Only
+after consent can actual lifetime/Page proof be retested. No claim that local
+fixtures establish Cape's readiness. All other scheduler/platform/Teams gates remain.
+
 ## 24 November, 12:42 SAST — local staff credential guidance ready
 
 Generic staff copy for the newly classified credential/lifetime errors was

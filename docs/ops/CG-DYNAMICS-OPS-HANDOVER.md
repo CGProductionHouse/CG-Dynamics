@@ -1,3 +1,53 @@
+## 24 November, 13:04 SAST — approved diagnostics LIVE96; long-lived callback correction LOCAL
+
+CA answered "Approve exact three-file diagnostic release". Fresh read found MCP95/
+73files, with #1005's added video-tracking files and changed entry/catalogue/context.
+All3 approved helper baseline/replacement hashes still matched bb390745. Preserved
+ALL70 other current hosted files, including the3 newly added upstream files; no
+downgrade to the old92/70file bundle. Exact overlay source SHA256
+d208d708f3e6ed50db1fc21cf94a87af0ebfe493da4ddca3df4f06626706fe80. Fresh immediate
+preflight matched entire95 source. ONE deployment -> MCP96 ACTIVE/73files; all73
+hosted bytes independently matched. Bundle SHA256
+d8175572431b3a417fd3ab5de120d1042ef17a94958a6bc4586b921ba5e6facc.
+verify_jwt=false/import_map=false and custom authentication preserved. All77
+configuration digests unchanged; publishing/submission/confirmation/exact-release
+settings absent, inspection enabled. Anonymous MCP401. CLI2.115's API `value`
+field is DIGEST (verified against official CLI formatter), normalized to metadata;
+no actual credential values retrieved/copied. Do NOT redeploy this completed packet.
+
+Fresh company-admin native account_only now returns
+META_PUBLISHING_TOKEN_EXPIRY_UNVERIFIED. This is the precise current credential
+lifetime block; missing mapping is fixed, but Page CREATE_CONTENT is still not
+verified because credential lifetime blocks the Page reads. Publishing stays OFF.
+Receipt: approvals/FACEBOOK-READINESS-DIAGNOSTICS-2026-11-24-RECEIPT.json.
+
+Traced a separate confirmed OAuth implementation gap: callback74 (source baseline
+matches this branch) claimed long-lived exchange but only performed the initial
+code exchange. Meta's current official long-lived-token documentation requires a
+second fb_exchange_token request. Local reproduction stored the synthetic short
+token instead of final long token. Corrected callback + new server-only helper:
+one code POST, one documented long-lived GET, no retries/redirects, strict final
+bearer token and finite >2minute lifetime, conservative issuance time, fixed errors.
+Only final credential reaches existing app/scope checks and encrypted persistence.
+Failed/malformed/throttled/uncertain second exchange causes no connection/token
+replacement. State consumption/encryption/scopes/mappings/publishing policy unchanged.
+This does not repair the currently stored credential or bypass the unknown-expiry gate.
+
+LOCAL ONLY:80 focused Meta/OAuth/reporting/consent checks pass/no skips; actual
+callback storage/failure integration, native Deno of the exact8-file callback
+candidate, build/tsc/Vite7.3.6/app bundle and scoped lint/diff pass. One initial
+broader harness lacked synthetic Vite env; corrected fixture-only env run80green.
+Existing SQL/state interfaces unchanged; no fresh full-suite/PG/native OAuth/phone
+acceptance claimed. Manifest approvals/META-LONG-LIVED-CALLBACK-2026-11-24.json:
+callback74 baseline7files ->1changed/6preserved/1new helper, source SHA256
+5454f1c9a768c65c14a5332c9f3de47df1b84083df341026c62795a69c631808.
+No callback deployment, token refresh/replacement, new login/setup state, permission,
+mapping/content/Microsoft/Vercel action. Next exact authority: callback correction
+release and ONE fresh owner-consent setup link; owner completes consent, then read
+back encrypted/lifetime metadata and exact Page readiness. Do not assume this fixes
+Cape until real provider acceptance. Preserve #1005/#995 and other lanes; Google
+Control Centre exact target still unidentified, so no guessed update.
+
 ## 24 November, 12:42 SAST — staff credential-recovery guidance completed locally
 
 Continued #991 from bb390745; current main remains an ancestor and #1005's

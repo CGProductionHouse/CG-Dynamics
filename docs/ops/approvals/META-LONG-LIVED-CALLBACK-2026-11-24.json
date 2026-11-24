@@ -1,0 +1,38 @@
+{
+  "status": "LOCAL_NOT_APPROVED_NOT_DEPLOYED",
+  "baselineVersion": 74,
+  "baselineBundleSha256": "157b4976e07f035c16f00e965b0f330981a3f032fa01e0f11b51d37913c1d602",
+  "fileCount": 8,
+  "changed": 1,
+  "preserved": 6,
+  "added": 1,
+  "removed": 0,
+  "verify_jwt": false,
+  "import_map": false,
+  "candidateSourceSha256": "5454f1c9a768c65c14a5332c9f3de47df1b84083df341026c62795a69c631808",
+  "nativeProviderAcceptance": false,
+  "project": "ehtjfntukiwbgptqgbzy",
+  "function": "meta-oauth-callback",
+  "officialProviderDocumentation": "https://developers.facebook.com/documentation/facebook-login/guides/access-tokens/get-long-lived",
+  "qualification": {
+    "focusedTests": 80,
+    "failed": 0,
+    "skipped": 0,
+    "actualCallbackEncryptedStorageAndFailurePreservation": true,
+    "nativeDenoCandidate": "PASS",
+    "buildAndAppBundle": "PASS tsc/Vite7.3.6",
+    "scopedLintAndDiff": "PASS",
+    "fullSuiteRerun": false,
+    "nativeProviderAcceptance": false
+  },
+  "protectedScope": {
+    "currentStoredTokens": "unchanged",
+    "existingConnectionsAndMappings": "unchanged",
+    "scopeAndProviderSettings": "unchanged",
+    "encryptionAndKeys": "unchanged",
+    "publishing": "disabled",
+    "microsoft": "unchanged",
+    "vercel": "no actions",
+    "consent": "future owner action only; no login or setup link requested yet"
+  }
+}
