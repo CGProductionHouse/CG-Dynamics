@@ -1,5 +1,43 @@
 # Social publishing — 15 November 2026
 
+## 24 November — worker-auth prototype tested locally and held for safe capacity
+
+Separate from consumed runtime approval: prepared one37file worker candidate
+(entry changed/35live helpers preserved/1new private capability helper) and exact
+cron-job1 guarded command, without generating/configuring keys or production writes.
+Gate requires a fresh256bit64hex key in Edge BACKGROUND_WORKER_INVOCATION_SECRET
+and Vault cg_background_worker_invocation_secret; compares fixed-length values,
+no public-key/bearer fallback, rejects methods/wrong/missing config BEFORE any
+privileged client/housekeeping. Exact current cron MD5a432533625dcb8db3cd10c3c7e518e69,
+minute schedule/active identity/30s timeout and unrelated rows are guarded. Command
+only sends HTTP when one valid Vault key exists. Rollout is key parity, cron, guard
+LAST; existing publishing gates remain OFF. Rollback would restore captured66
+under separate approval, retaining authenticated caller and all audit/jobs.
+
+Fresh15HTTP/actual-entry/queue checks and13real PostgreSQL checks PASS/no skips.
+Postgres fixtures emulate cron/Vault/net, only production fingerprint substituted;
+test missing/malformed/ambiguous keys, command/null/schedule/identity drift, replay,
+no invocation during preparation, valid caller and transactional rollback.
+No live auth or cron acceptance claimed. Existing browser nudge is opportunistic:
+it would be refused; no private key enters browser, RLS enqueue/read stays and
+minute cron is durable guarantee. This caller tradeoff requires explicit review.
+
+Full local suite was interrupted by stopping ONLY exact owned Node descendants
+when MSI freeRAM dropped below conservative8GB. Subsequent19:53 sample7.12GB/CPU0;
+no more heavy work admitted, no other agents/apps/settings touched. No observed
+assertion failures before interruption, but NO green whole-suite receipt. Native
+Deno/build/app-bundle/lint pending for new prototype. Do not commit unbuilt source
+or request its live approval yet. Existing approved runtime186 qualification stays
+complete and is not re-used as proof of the changed authentication guard.
+
+Preserved all5 prototype files with hashes, exact payload and rollout/rollback in
+private artifact root social-publishing-991/2026-11-24/worker-auth-hardening,
+manifest.json/README.md/proposal/. New files moved out of repo and ONLY our entry
+patch reversed; no deletion or unrelated change. Source restored clean. Next:
+once capacity passes, verify hashes/current source/cron/ownership, restore proposal,
+finish native/build qualification, then separate exact key+cron+worker approval.
+No key generated, live hardening, publishing activation or Vercel action.
+
 ## 24 November — exact approved runtime installed; no publishing activation
 
 CA's reply "Approved please finisg" explicitly approved the preceding three-part

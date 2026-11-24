@@ -1,3 +1,32 @@
+## 24 November — auth hardening prototype preserved; MSI capacity hold
+
+Approved runtime below remains LIVE66/1/1, all publishing switches OFF. Separate
+local coordinated worker-auth prototype prepared, NOT authorized/deployed and no
+key generated. New private64hex header gate refuses before any client/housekeeping;
+one guarded cron command keeps job1's minute schedule/30s timeout/user/database and
+all other jobs. Requires a fresh private Edge+Vault key and worker guard LAST.
+15 guard/queue checks +13 actual isolated PostgreSQL checks pass/no skips. SQL uses
+fixture cron/Vault/net and substitutes only the synthetic baseline fingerprint.
+Known caller impact: browser nudgeBackgroundWorker is opportunistic and would be
+refused; canonical RLS enqueue/read remains and minute cron is durable authority.
+Do not silently expose a private worker key in the browser or create another queue.
+
+Broad suite stopped ONLY its verified owned Node tree when freeRAM fell below8GB;
+last sample19:53 SAST7.12GB, CPU0. No other app/agent/OS setting touched. Full suite
+is INTERRUPTED, not passing; no observed assertion failures before interruption.
+Native Deno/build/bundle/lint of this prototype remain PENDING; do not request
+production approval or commit unbuilt source. Prior approved runtime186-check
+qualification remains separate and complete. No repeated full-suite run now.
+
+All5 prototype files, exact37file worker payload, guarded cron SQL, hashes,
+qualification/rollout/rollback and resume instructions are preserved privately:
+C:/Users/chris/.codex/artifacts/social-publishing-991/2026-11-24/worker-auth-hardening/
+manifest.json and README.md. They were moved outside the checkout and only our
+tracked entry patch reversed, leaving committed qualified source clean. Nothing
+deleted. Once capacity admits work, verify hashes/current ownership/live source
+and cron command fingerprint before restoring proposal/ files; finish focused
+qualification/build and then obtain separate exact security/cron/key approval.
+
 ## 24 November — approved runtime LIVE, publishing OFF; existing worker auth gap
 
 CA's "Approved please finisg" consumed the exact disabled-runtime request for
