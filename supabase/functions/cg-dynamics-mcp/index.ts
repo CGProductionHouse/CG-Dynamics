@@ -13,6 +13,7 @@ import { readMicrosoftScheduleSource } from './microsoftScheduleSource.ts'
 import { registerExistingInternalVideo } from './existingVideoTracking.ts'
 import { resolveGuidelinePreparation, setPreparedGuidelineMonth } from './guidelinePreparation.ts'
 import { fetchAllRows, fetchAllRowsByIdChunks } from '../_shared/paginatedRows.ts'
+import { withMicrosoftTransitionHealth } from '../../../src/lib/microsoftTransitionHealth.ts'
 import { CG_DYNAMICS_MCP_TOOLS, CG_DYNAMICS_MCP_SECURITY_SCHEMES } from './toolCatalog.ts'
 import { filterCapabilitiesByScope } from './capabilityManifest.ts'
 import {
@@ -1251,7 +1252,7 @@ async function invokeSiblingFunction(
 }
 
 /** Bounded work units per invocation so the Edge time budget is never exceeded. */
-const MAX_SYNC_PROCESS_STEPS = 40
+const MAX_SYNC_PROCESS_STEPS = 4
 
 /**
  * Run the EXISTING durable Microsoft reconciliation (#325 item 1). Drives the canonical
@@ -1318,13 +1319,16 @@ const handleRunMicrosoftSync: ToolHandler = async (staff, input) => {
     lastError ? 'failed' : finished ? (status ?? 'complete') : (status ?? 'running'),
     sources,
   )
+  const collecting = !finished && !lastError && status === 'running' && outcome.sources_failed === 0
 
   return {
     job_id: jobId,
     finished,
     steps_processed: steps,
-    verdict: outcome.verdict,
-    reason: outcome.reason,
+    verdict: collecting ? 'IN_PROGRESS' : outcome.verdict,
+    reason: collecting
+      ? 'The durable preview is still collecting source evidence. Continue with this same job_id. No source failure is recorded; Dynamics mirror freshness is unchanged until reconciliation applies.'
+      : outcome.reason,
     coverage: {
       sources_total: outcome.sources_total,
       sources_complete: outcome.sources_complete,
@@ -1622,10 +1626,21 @@ const handleGetMicrosoftSyncStatus: ToolHandler = async (staff, input) => {
   const runs = data ?? []
   const latest = runs[0] ?? null
   const thresholdMinutes = Number(input.freshness_threshold_minutes ?? 0) || undefined
-  const health = summarizeSyncHealth(latest, new Date().toISOString(), thresholdMinutes)
+  const transition = await staff.supabase.from('microsoft_sync_settings')
+    .select('transition_status,updated_at').eq('id', true).maybeSingle()
+  const health = withMicrosoftTransitionHealth(
+    summarizeSyncHealth(latest, new Date().toISOString(), thresholdMinutes),
+    transition.data?.transition_status, !transition.error && !!transition.data,
+  )
 
   return {
     sync_health: health,
+    collection_status: {
+      state: health.transition_status,
+      observed_at: new Date().toISOString(),
+      changed_at: transition.error ? null : transition.data?.updated_at ?? null,
+      ...(transition.error ? { error: 'Microsoft collection status could not be verified.' } : {}),
+    },
     latest_run: latest,
     recent_runs: runs.map((r: Record<string, unknown>) => ({
       id: r.id, status: r.status, trigger_type: r.trigger_type,
@@ -2251,7 +2266,7 @@ const handleGetMyAssistantBootstrap: ToolHandler = async (staff) => {
       'Attach governed collateral by Drive asset key — never freeze binary IDs into Project Instructions and never use stale/superseded collateral.',
       'DAILY UPDATE CONTRACT: morning = greeting → summary → Today timeline → Work Queue → optional blocker → action prompt. Evening = closing → Done Today → Still Open → Tomorrow → Prep.',
       'PERSONALITY: derived from staff profile (working_preferences, output_preferences, repeated_corrections). Never hardcode tone across staff. Personality belongs in greeting/closing; work body stays operational.',
-      'NATURAL TASK REPLIES: during coexistence, "done", "50%", "waiting on client", "move to Friday", "add note" and "follow up Monday" update the exact live Teams/Planner task first, then run_microsoft_sync refreshes Dynamics. If reconciliation is delayed, report DYNAMICS SYNC PENDING; never duplicate the Microsoft-backed task.',
+      'NATURAL TASK REPLIES: during coexistence, "done", "50%", "waiting on client", "move to Friday", "add note" and "follow up Monday" update the exact live Teams/Planner task first. The existing worker refreshes Dynamics. Staff verify get_microsoft_sync_status and the exact linked task; run_microsoft_sync is company_admin-only, so never switch identity to invoke it. If reconciliation is delayed, report DYNAMICS SYNC PENDING; never duplicate the Microsoft-backed task or repeat a successful Microsoft write.',
       'CONTENT-RUN CLOSEOUT: When a staff member had client shoots/content runs that day, use get_content_run_plan to retrieve the canonical shot list, then collect per-client field updates, reconcile planned vs captured items, record missed/cancelled items with reasons, capture field notes, flag reshoots, verify OneDrive upload status and write approved updates to Dynamics via close_content_run. Never ask staff to recreate a plan already in Dynamics. Never mark closeout complete if upload is missing/partial/unverified.',
       'GUIDELINE PREPARATION: When staff needs a content guideline, use ensure_content_guideline with the exact client and content month if no run is known. It reuses saved planning or prepares one undated run/draft; a shoot booking, package slot and production folder are not prerequisites for writing or sharing scripts. Never create a fake booking or tell staff to create a blank run manually. A saved calendar content-run event can instead be supplied by exact calendar_event_id. Ask only for a genuinely missing client/month or which of multiple real shoots is intended. Verify saved wording; when staff requests the client link, publish the saved guideline for review and verify client_share_url. Calendar changes still use the existing exact-staff/company-admin operational action and real requested date/time; never claim an undated plan booked a shoot.',
       'ONEDRIVE UPLOAD GATE: For every content run, use verify_content_run_upload to inspect the exact mapped client/content-run folder. If footage is missing/partial/unverified, keep the item unresolved and give the staff member the exact next action. After staff approval, use update_closeout_upload_status; it performs a fresh authorised inspection and persists only that evidence. Staff self-report alone always remains unverified.',

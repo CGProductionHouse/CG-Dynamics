@@ -126,7 +126,7 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   },
   {
     name: 'get_microsoft_sync_status', title: 'Get Microsoft sync status',
-    description: 'Read the latest Microsoft to Dynamics reconciliation health, status, source completeness and freshness. Call this BEFORE relying on Dynamics task/calendar mirrors in a daily brief; never assume a scheduled job ran. Read-only: it reports state and triggers nothing.',
+    description: 'Read the current collection lifecycle (active/paused/complete/unverified) plus latest Microsoft to Dynamics reconciliation health, status, source completeness and freshness. Active collection is separate from a fresh or fully reconciled mirror. Call this BEFORE relying on Dynamics task/calendar mirrors in a daily brief; never assume a scheduled job ran. Read-only: it reports state and triggers nothing.',
     inputSchema: objectSchema({ history_limit: { type: 'integer', minimum: 1, maximum: 20 }, freshness_threshold_minutes: { type: 'integer', minimum: 1 } }),
     annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
     dependency: 'main', canonicalContract: 'microsoft_sync_runs canonical reconciliation history (#325)',
@@ -165,7 +165,7 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   },
   {
     name: 'run_microsoft_sync', title: 'Run Microsoft reconciliation',
-    description: 'Company-admin only. Runs the EXISTING durable Microsoft reconciliation PREVIEW job (job_start then bounded job_process units), returning PASS/DEGRADED/FAIL with per-source completeness. It fetches Microsoft truth but does not claim Dynamics mirrors were applied or fresh. It cannot auto-apply Client Schedule/monthly_deliverables decisions and never changes MASTER CLIENT TO DO or protected Client Socials plans. If unfinished, call again with the returned job_id.',
+    description: 'Company-admin only. Runs the EXISTING durable Microsoft reconciliation PREVIEW job (job_start then bounded job_process units), returning IN_PROGRESS while safely collecting, or PASS/DEGRADED/FAIL after the bounded preview step. Each call processes at most four source units; continue the same job_id. Per-source completeness is explicit. It fetches Microsoft truth but does not claim Dynamics mirrors were applied or fresh. It cannot auto-apply Client Schedule/monthly_deliverables decisions and never changes MASTER CLIENT TO DO or protected Client Socials plans. If unfinished, call again with the returned job_id.',
     inputSchema: objectSchema({
       job_id: { type: 'string', description: 'Resume an in-flight job returned by a previous call.' },
       range_start: { type: 'string' }, range_end: { type: 'string' },

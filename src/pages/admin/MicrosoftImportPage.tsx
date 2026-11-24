@@ -1,6 +1,7 @@
 import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react'
 import MicrosoftRunConflictReview from '../../components/admin/MicrosoftRunConflictReview'
 import { microsoftConflictCount, microsoftRunOutcome } from '../../lib/microsoftRunReview'
+import { describeMicrosoftTransition } from '../../lib/microsoftTransitionHealth'
 import { addBusinessDays, businessDateKey } from '../../lib/businessTime'
 import {
   summarizeMicrosoftReconciliation,
@@ -208,7 +209,7 @@ export default function MicrosoftImportPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [connection, setConnection] = useState<MicrosoftConnectionStatus | null>(null)
   const [connectionError, setConnectionError] = useState<string | null>(null)
-  const [transitionStatus, setTransitionStatus] = useState<MicrosoftTransitionStatus>('active')
+  const [transitionStatus, setTransitionStatus] = useState<MicrosoftTransitionStatus>('paused')
   const [runs, setRuns] = useState<MicrosoftSyncRunSummary[]>([])
   const [runItems, setRunItems] = useState<MicrosoftSyncRunItem[]>([])
   const [runItemsState, setRunItemsState] = useState<'loading' | 'ready' | 'error'>('loading')
@@ -250,8 +251,10 @@ export default function MicrosoftImportPage() {
   const completedOperationalSkipped = items.filter(item => item.skipCode === 'completed_operational_not_imported' && item.reconciliationAction === 'skipped').length
   const removalCount = items.filter(item => item.requiresRemovalApproval).length
   const lastSuccess = runs.find(run => run.status === 'completed' || (run.summary.applied ?? 0) > 0)
+  const transitionHealth = describeMicrosoftTransition(transitionStatus, !!connection && !connectionError && !migrationNeeded)
   const applicableCount = getMicrosoftExecutableItems(items, approveRemovals).length
   const selectedRun = runs.find(run => run.id === selectedRunId) ?? null
+  const automaticApplyPending = selectedRun?.status === 'applying' && selectedRun.summary.automatic === true
   const meaningfulRunItems = runItems.filter(item => item.resultStatus !== 'skipped')
   const failedRunItems = runItems.filter(item => item.resultStatus === 'failed')
 
@@ -578,9 +581,8 @@ export default function MicrosoftImportPage() {
       <section className="mt-5 rounded-2xl border border-amber-300/25 bg-amber-300/[0.07] p-5">
         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-200/80">Transition status · beta</p>
         <p className="mt-2 text-sm leading-relaxed text-amber-50/90">
-          Automatic Microsoft collection and the last verified Dynamics mirror are active. Manual preview and
-          apply remain reviewable and auditable. Do not retire Microsoft Planner until CA completes the separate
-          transition decision.
+          {transitionHealth.message} Manual preview and apply remain reviewable and auditable.
+          Do not retire Microsoft Planner until CA completes the separate transition decision.
         </p>
       </section>
 
@@ -682,9 +684,11 @@ export default function MicrosoftImportPage() {
 
       {selectedRun?.status === 'applying' && (
         <section className="mt-5 rounded-2xl border border-amber-300/25 bg-amber-300/[0.07] p-4">
-          <p className="text-sm font-black text-white">This apply run did not finish.</p>
-          <p className="mt-1 text-xs text-white/55">Reviewed identities and completed audit rows are preserved. Recovery will retry only actions with no successful audit result.</p>
-          <button type="button" disabled={loading || applying} onClick={() => void prepareRunRecovery(selectedRun.id)} className="mt-3 rounded-lg border border-amber-300/40 bg-amber-300/10 px-4 py-2 text-xs font-black text-amber-200 disabled:opacity-35">Prepare interrupted-run recovery</button>
+          <p className="text-sm font-black text-white">{automaticApplyPending ? 'Automatic reconciliation is awaiting completion.' : 'This apply run did not finish.'}</p>
+          <p className="mt-1 text-xs text-white/55">{automaticApplyPending ? 'The existing worker resumes this exact run in bounded batches. Saved audit results are preserved. Refresh progress before starting another reconciliation.' : 'Reviewed identities and completed audit rows are preserved. Recovery will retry only actions with no successful audit result.'}</p>
+          {automaticApplyPending
+            ? <button type="button" onClick={() => void loadStatus()} className="mt-3 rounded-lg border border-brand-teal/40 bg-brand-teal/10 px-4 py-2 text-xs font-black text-brand-teal">Refresh progress</button>
+            : <button type="button" disabled={loading || applying} onClick={() => void prepareRunRecovery(selectedRun.id)} className="mt-3 rounded-lg border border-amber-300/40 bg-amber-300/10 px-4 py-2 text-xs font-black text-amber-200 disabled:opacity-35">Prepare interrupted-run recovery</button>}
         </section>
       )}
 

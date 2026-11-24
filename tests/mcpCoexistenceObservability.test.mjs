@@ -189,7 +189,7 @@ test('policy explicitly supersedes the stale fallback-only wording', () => {
 test('fresh bootstrap policy preserves exact owner real-work exclusions without cancelling the reporting obligation', () => {
   for (const kind of ['staff', 'company_admin']) {
     const p = policy.buildStaffAssistantPolicy(kind)
-    assert.equal(p.policy_version, '2026.10.19-master-month-cross-check-5')
+    assert.equal(p.policy_version, '2026.11.24-scoped-reconciliation-6')
     assert.match(p.authority, /#841.*CGPH-PLANNER-CALENDAR-CLEANUP-OWNER-HANDOVER-2026-10-18/)
     assert.match(p.supersedes.join(' '), /calendar-to-edit factory/)
     const rules = p.active_queue_rule.join(' ')

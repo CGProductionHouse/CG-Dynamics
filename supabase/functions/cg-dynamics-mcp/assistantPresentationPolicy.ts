@@ -126,7 +126,7 @@ export function buildDailyUpdateContract(fullName: string | null): DailyUpdateCo
       ],
       task_write_sequence: [
         'During the temporary coexistence period, a natural task update is written first to the exact live Teams/Planner task through the connected Microsoft action, matched by durable IDs.',
-        'Then call run_microsoft_sync to refresh its Dynamics mirror through the existing durable sync engine. Do not directly write a second Microsoft-backed task state into Dynamics and do not create a duplicate.',
+        'The existing durable sync engine refreshes the Dynamics mirror automatically. Only a company_admin Project may call run_microsoft_sync for an explicit preview/recovery. Staff use get_microsoft_sync_status and re-read the exact linked task without changing Project identity. Do not directly write a second Microsoft-backed task state into Dynamics and do not create a duplicate.',
         'If Microsoft succeeds but reconciliation does not, report DYNAMICS SYNC PENDING or PARTIAL SYNC truthfully. Dynamics-only work continues through its canonical Dynamics action.',
       ],
     },
