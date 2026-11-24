@@ -103,13 +103,13 @@ test('server instruction states the shared-connection contract and forbids unsaf
   assert.doesNotMatch(instructions, /Project name.*identity/i)
 })
 
-test('catalog contains exactly 59 tools: 29 read + 30 write', () => {
+test('catalog contains exactly 60 tools: 29 read + 31 write', () => {
   const tools = catalog.CG_DYNAMICS_MCP_TOOLS
-  assert.equal(tools.length, 59)
+  assert.equal(tools.length, 60)
   const reads = tools.filter(t => t.annotations.readOnlyHint)
   const writes = tools.filter(t => !t.annotations.readOnlyHint)
   assert.equal(reads.length, 29)
-  assert.equal(writes.length, 30)
+  assert.equal(writes.length, 31)
 })
 
 test('every tool maps to a declared dependency and no tool references an unknown upstream', () => {

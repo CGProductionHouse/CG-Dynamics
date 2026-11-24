@@ -64,6 +64,65 @@ test('same stable identity is deterministic across devices and independent of re
   assert.notEqual(await rules.existingVideoId(input.clientId, input.identity), await rules.existingVideoId('22222222-2222-4222-8222-222222222222', input.identity))
 })
 
+test('actual legacy stems are retained, including one-digit numbers and unnumbered old films', async () => {
+  for (const [identity, number] of [['2026_12_PRACTICE_VIDEO_1', 1], ['2026_12_PRACTICE_VIDEO_YEAR_END', null], ['2026_12_PRACTICE_VIDEO', null]]) {
+    const repo = repository()
+    const result = await rules.registerExistingVideoWith({ ...input, identity, filename: identity + '.mp4' }, 'actor', repo)
+    assert.equal(result.error, null)
+    assert.equal(result.data.canonical_name, identity)
+    assert.equal(result.data.video_number, number)
+    assert.equal(result.data.folder_client_code, 'PRACTICE')
+  }
+  for (const identity of ['2026_12_PRACTICE_VIDEO_0', '2026_12_PRACTICE_VIDEO_000', '2026_12_PRACTICE_VIDEO_1_FINAL']) {
+    assert.equal(rules.parseExistingFilmIdentity(identity), null)
+  }
+})
+
+test('padded numbers/concept changes collide atomically instead of creating another film', async () => {
+  const a = '2026_12_PRACTICE_VIDEO_1', b = '2026_12_PRACTICE_VIDEO_01_NEW_CONCEPT'
+  assert.equal(await rules.existingVideoId(input.clientId, a), await rules.existingVideoId(input.clientId, b))
+  assert.notEqual(await rules.existingVideoId(input.clientId, a), await rules.existingVideoId(input.clientId, '2026_12_PRACTICE_VIDEO_2'))
+  const repo = repository([{ id: 'old', client_id: input.clientId, canonical_name: a, month: '2026-12-01', title: 'Old title', status: 'archived' }])
+  const result = await rules.registerExistingVideoWith({ ...input, identity: b, filename: b + '.mp4' }, 'actor', repo)
+  assert.equal(repo.writes, 0); assert.equal(result.matches[0].id, 'old')
+})
+
+const localExport = { ...input, evidenceKind: 'internal_delivery', mediaUrl: '',
+  sourceDevice: 'EDITOR-WORKSTATION', sourcePath: 'D:\\Review\\' + input.filename }
+
+test('verified internal local export is tracked honestly without a portal URL or approval', async () => {
+  const repo = repository()
+  const result = await rules.registerExistingVideoWith(localExport, 'actor', repo)
+  assert.equal(result.error, null)
+  assert.equal(result.data.onedrive_internal_review_url, null)
+  assert.equal(result.data.onedrive_client_approval_url, null)
+  assert.equal(result.data.production_status, 'internal_review')
+  const receipt = JSON.parse(result.data.notes.split('\nHistorical registration')[0].slice('EXISTING_VIDEO_V1\n'.length))
+  assert.equal(receipt.media_filing, 'pending')
+  assert.equal(receipt.source_path, localExport.sourcePath)
+  assert.equal(receipt.source_device, localExport.sourceDevice)
+  assert.equal(result.data.deliverable_id, null)
+  assert.equal(result.data.content_guideline_id, null)
+})
+
+test('unfiled exports cannot claim approval/client delivery or hide a missing/mismatched source', async () => {
+  for (const patch of [{ evidenceKind: 'owner_approval' }, { evidenceKind: 'client_approval' }, { evidenceKind: 'client_delivery' },
+    { sourceDevice: '' }, { sourcePath: '' }, { sourcePath: 'D:\\Review\\wrong.mp4' },
+    { sourcePath: 'D:\\Review\\..\\' + input.filename }, { sourcePath: 'file:///D:/Review/' + input.filename },
+    { sourceDevice: 'device\nother' }]) {
+    const repo = repository()
+    const result = await rules.registerExistingVideoWith({ ...localExport, ...patch }, 'actor', repo)
+    assert.ok(result.error, JSON.stringify(patch)); assert.equal(repo.writes, 0)
+  }
+})
+
+test('unfiled readback must retain NULL media; no fabricated link is accepted', async () => {
+  const repo = repository()
+  repo.get = async () => ({ data: { ...repo.rows[0], onedrive_internal_review_url: 'https://example.com/wrong-file' }, error: null })
+  const result = await rules.registerExistingVideoWith(localExport, 'actor', repo)
+  assert.equal(result.data, null); assert.match(result.error, /readback/)
+})
+
 test('legacy title and archived hash matches block creation; sibling clients stay isolated', async () => {
   const legacy = { id: 'legacy', client_id: input.clientId, month: '2026-12-01', title: input.title, canonical_name: null, notes: '', status: 'archived' }
   const repo = repository([legacy])

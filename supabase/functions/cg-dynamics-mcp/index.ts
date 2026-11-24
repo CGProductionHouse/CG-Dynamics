@@ -10,6 +10,7 @@
 
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { readMicrosoftScheduleSource } from './microsoftScheduleSource.ts'
+import { registerExistingInternalVideo } from './existingVideoTracking.ts'
 import { fetchAllRows, fetchAllRowsByIdChunks } from '../_shared/paginatedRows.ts'
 import { CG_DYNAMICS_MCP_TOOLS, CG_DYNAMICS_MCP_SECURITY_SCHEMES } from './toolCatalog.ts'
 import { filterCapabilitiesByScope } from './capabilityManifest.ts'
@@ -487,7 +488,7 @@ async function recordIdempotency(
   audit?: ContextAuditEnvelope,
   result?: unknown,
 ) {
-  if (GUIDELINE_WRITE_TOOLS.has(toolName)) {
+  if (GUIDELINE_WRITE_TOOLS.has(toolName) || toolName === 'register_existing_internal_video') {
     // The deployed private audit table already has result_payload and its read
     // RPC replays it. Insert the original result + dual-principal audit together;
     // never rewrite historical status-only rows or downgrade to a status receipt.
@@ -3607,6 +3608,7 @@ const handleRevokeContentGuidelineShare: ToolHandler = (staff, input) => manageG
 // ── Tool Router ─────────────────────────────────────────────────────────────
 
 const WRITE_TOOLS = new Set([
+  'register_existing_internal_video',
   'submit_monthly_strategy_draft',
   'amend_monthly_strategy_draft',
   'create_task',
@@ -3648,6 +3650,7 @@ const CANONICAL_RECEIPT_REPLAY_TOOLS = new Set([
 ])
 
 const toolHandlers: Record<string, ToolHandler> = {
+  register_existing_internal_video: registerExistingInternalVideo,
   publish_content_guideline: handlePublishContentGuideline,
   get_content_guideline_share: handleGetContentGuidelineShare,
   revoke_content_guideline_share: handleRevokeContentGuidelineShare,
@@ -3814,6 +3817,10 @@ async function handleToolsCall(
     if (existing.duplicate) {
       const conflict = (existing.result as { status?: string } | undefined)?.status === 'conflict'
       const previousError = (existing.result as { status?: string } | undefined)?.status === 'error' || isMcpErrorResult(existing.result)
+      if (toolName === 'register_existing_internal_video' && !conflict && !previousError
+        && typeof (existing.result as { id?: unknown } | undefined)?.id !== 'string') {
+        return jsonRpcError(id, -32603, 'Video tracking receipt has no original record ID. Read the Pipeline before any new write.')
+      }
       if (GUIDELINE_WRITE_TOOLS.has(toolName) && !conflict && !previousError
         && !ownsGuidelineWriteReceipt(existing.result, toolName, staff.profileId, canonicalIdempotencyKey)) {
         const nextRead = typeof toolInput.content_run_id === 'string'

@@ -174,6 +174,7 @@ export const CLIENT_SCOPED_TOOLS: readonly string[] = [
  * because the shared OAuth principal happens to be an admin account.
  */
 export const COMPANY_ADMIN_TOOLS: readonly string[] = [
+  'register_existing_internal_video',
   'list_company_tasks',
   'read_microsoft_schedule_source',
   'list_company_recurring_tasks',

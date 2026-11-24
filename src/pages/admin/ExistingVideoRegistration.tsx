@@ -14,6 +14,7 @@ export interface ExistingVideoRegistrationProps {
 const EMPTY: ExistingVideoInput = {
   clientId: '', clientName: '', month: '', title: '', identity: '', filename: '', sha256: '',
   revision: '', editorName: '', mediaUrl: '', evidenceUrl: '', evidence: '', evidenceKind: 'private_edit',
+  sourceDevice: '', sourcePath: '',
 }
 
 export default function ExistingVideoRegistration({ clients, onRegister, onOpen, onSaved }: ExistingVideoRegistrationProps) {
@@ -44,9 +45,9 @@ export default function ExistingVideoRegistration({ clients, onRegister, onOpen,
     } finally { setBusy(false) }
   }
 
-  const field = (key: Exclude<keyof ExistingVideoInput, 'evidenceKind' | 'clientId' | 'clientName'>, label: string, type = 'text', placeholder = '') => (
+  const field = (key: Exclude<keyof ExistingVideoInput, 'evidenceKind' | 'clientId' | 'clientName'>, label: string, type = 'text', placeholder = '', required = true) => (
     <label className="block min-w-0 space-y-1.5"><span className={LABEL_CLS}>{label}</span>
-      <input required type={type} className={INPUT_CLS} value={form[key]} onChange={event => set(key, event.target.value)} placeholder={placeholder} />
+      <input required={required} type={type} className={INPUT_CLS} value={form[key] ?? ''} onChange={event => set(key, event.target.value)} placeholder={placeholder} />
     </label>
   )
 
@@ -74,7 +75,12 @@ export default function ExistingVideoRegistration({ clients, onRegister, onOpen,
           {field('filename', 'Exact MP4 filename')}{field('revision', 'Current revision')}
         </div>
         {field('sha256', 'Exact revision SHA-256')}
-        {field('mediaUrl', 'Private media / package link', 'url')}
+        {field('mediaUrl', 'Private media / package link', 'url', '', !['private_edit', 'internal_delivery'].includes(form.evidenceKind))}
+        {!form.mediaUrl.trim() && ['private_edit', 'internal_delivery'].includes(form.evidenceKind) && <div className="space-y-3 rounded-xl border border-white/10 p-3">
+          <p className="text-sm text-white/75">Not filed online yet? Track the verified internal export now. Filing remains pending; this does not share or approve the film.</p>
+          {field('sourceDevice', 'Export workstation')}
+          {field('sourcePath', 'Exact local MP4 path')}
+        </div>}
         <label className="block space-y-1.5"><span className={LABEL_CLS}>Evidence supports</span>
           <select className={INPUT_CLS} value={form.evidenceKind} onChange={event => set('evidenceKind', event.target.value as ExistingVideoInput['evidenceKind'])}>
             {Object.entries(EXISTING_VIDEO_EVIDENCE).map(([value, entry]) => <option key={value} value={value}>{entry.label}</option>)}
