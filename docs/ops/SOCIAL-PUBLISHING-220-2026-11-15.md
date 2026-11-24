@@ -1,6 +1,6 @@
 # Social publishing — 15 November 2026
 
-## 24 November, 12:45 SAST — local staff credential guidance ready
+## 24 November, 12:42 SAST — local staff credential guidance ready
 
 Generic staff copy for the newly classified credential/lifetime errors was
 reproduced in the actual panel harness. Added specific administrator/read-only

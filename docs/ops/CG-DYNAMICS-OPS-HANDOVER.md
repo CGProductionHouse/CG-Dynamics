@@ -1,4 +1,4 @@
-## 24 November, 12:45 SAST — staff credential-recovery guidance completed locally
+## 24 November, 12:42 SAST — staff credential-recovery guidance completed locally
 
 Continued #991 from bb390745; current main remains an ancestor and #1005's
 guideline/video-tracking lane is separate. No additional release approval has
