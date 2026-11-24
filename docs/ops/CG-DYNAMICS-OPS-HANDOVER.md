@@ -1,3 +1,62 @@
+## 24 November — Cape binding APPLIED; native publishing proof remains unavailable
+
+CA explicitly answered "Approve exact Cape Facebook binding repair" today.
+Verified original packet SHA256e46c5af88aac81731f7fd5d94b57a77d8a59c6fd838ffb3955d1ef0308fbc781
+and unchanged preimage/consent/scope/encrypted-row guards, then executed ONE guarded
+transaction at08:56:54.936043Z. Independent readback confirms mapping4441c144-d1c5-46b1-980f-9145280857fc
+for Cape42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa / Page262645554440912 now binds to
+65d8f626-54d7-45fa-ac75-5348eb364540. Normal updated_at changed; Page/Instagram/ad
+identity preserved. All46 other complete mapping rows retain digest
+eaeb58b984aa90a28bfc5ccaf80cd5bd. Receipt:
+docs/ops/approvals/CAPE-FACEBOOK-CONNECTION-BINDING-2026-11-24-RECEIPT.json.
+DO NOT replay the approved SQL or ask for the same repair again.
+
+Fresh company-admin MCP account_only advances beyond EXACT_ACCOUNT_MAPPING_REQUIRED
+but returns PUBLICATION_VERIFICATION_UNAVAILABLE. Native CREATE_CONTENT/app/token
+proof is NOT established. Separate complete exact-client candidate read08:58:01.702Z:
+zero future approved Facebook PNG/JPEG reviews, has_more=false. No content approved,
+scheduled, queued or published. No deployment/config/key/permission/Microsoft/Vercel action.
+
+Metadata-only token read: stored validation valid/USER at23Nov07:01:37.135Z,
+token_expires_at NULL, data-access expiry17Feb2027. This is historical metadata,
+not the precise cause of today's generic failure. Existing credential policy
+requires a fresh finite lifetime. Reproduced unknown-expiry rejection and opaque
+diagnostics locally; added fixed server-owned META_PUBLISHING_TOKEN_EXPIRY_UNVERIFIED
+and META_PUBLISHING_CREDENTIAL_UNAVAILABLE classifications, preserving every block,
+role/client boundary and retry rule. Provider strings/exception codes cannot be
+copied to public errors. The actual MCP path has a deterministic encrypted-store +
+Graph-response regression, not native provider acceptance. Diagnostics remain LOCAL.
+
+Qualification:116 focused checks pass/no skips; npm build/tsc/Vite7.3.6 and actual
+app-bundle content pass, scoped ESLint/diff pass, native Deno2.9.8 checks all3
+helpers. Initial Node harness lacked its qualified JPEG path and native Deno
+needed node-modules-dir=none; corrected harnesses passed using private caches,
+without repository dependency/lockfile/shared node_modules changes. No fresh
+whole-suite, PostgreSQL, browser-action or phone acceptance claimed for this narrow
+error-classification change. MSI capacity check before build:12.31GB free RAM,
+45.4% commit,45.02GB free C:,CPU7%; one heavy job only.
+
+Live MCP is now v92/70files from another lane, not v90. All3 diagnostic helper
+baselines match v92; preserve its other67 files and recent #1005 guideline changes.
+No redeploy today. Company Chrome extension profile cgproductionhouse.com is
+available through current cua_repl inventory; personal christie-ann and pinned
+WhatsApp sessions preserved. No browser settings/restart/credential extraction.
+
+Three-file diagnostic packet is qualified and remains NOT APPROVED/DEPLOYED:
+docs/ops/approvals/FACEBOOK-READINESS-DIAGNOSTICS-2026-11-24.json, candidate source
+SHA25651ad493e685ee6d592f7598e600b8e450df3059526c96acf6523f9ab4ff5c3c7.
+Full candidate entry passes native Deno with the prior seven type-only support
+files/existing checker config; support files are NOT deployment additions.
+No review blocker found in this bounded self-review; no independent review/merge
+of the entire draft PR is claimed. Only a separately authorized live diagnostic
+release can reveal the current credential failure; fresh live baseline must match.
+Do not bypass unknown expiry, refresh/backfill/copy tokens or repeat consent
+speculatively. Afterwards establish actual exact Page task/app/token proof, one
+approved future image/caption/time, fresh Teams/native duplicate evidence and
+separately authorized publishing/runtime/controlled-post activation. #991/#220/#236
+retain the scheduler lane; #1005/#995 MCP entry/catalogue and staff/Nolan lanes stay
+separate. Google Control Centre exact target remains unidentified; no guessed write.
+
 ## 19 November, 18:35 SAST — consent and Cape asset access verified; exact binding awaits approval
 
 Owner consent completed: exact setup state used2026-11-19T15:43:17.868Z;

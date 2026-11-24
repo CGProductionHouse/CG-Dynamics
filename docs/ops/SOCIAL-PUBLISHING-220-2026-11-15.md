@@ -1,5 +1,57 @@
 # Social publishing — 15 November 2026
 
+## 24 November — approved Cape binding repaired; diagnostic increment stays local
+
+CA answered "Approve exact Cape Facebook binding repair" today. Original immutable
+19Nov SQL packet/hash and all fresh guards matched. Executed exactly ONCE at
+08:56:54.936043Z; independent readback verifies Cape's connection_id now65d8f626-54d7-45fa-ac75-5348eb364540.
+Page/client/Instagram/ad fields preserved; all46 other mapping rows retain
+eaeb58b984aa90a28bfc5ccaf80cd5bd. Receipt is
+approvals/CAPE-FACEBOOK-CONNECTION-BINDING-2026-11-24-RECEIPT.json. Do not replay.
+
+Native account-only inspection now returns PUBLICATION_VERIFICATION_UNAVAILABLE,
+so CREATE_CONTENT/current app/token proof remains unverified. Exact-client approved
+future image scan08:58:01.702Z returned0 / has_more=false. Saved token metadata was
+valid/USER23Nov but expiry NULL; this suggests a lifetime-policy blocker and does
+not prove today's exact provider response. No credential values read/copied.
+
+Reproduced the opaque unknown-expiry failure locally. Three shared helper changes
+classify unknown expiry and otherwise unavailable credentials using fixed codes,
+without relaxing finite-lifetime/permissions/app/encryption/role/client checks.
+Arbitrary provider exception codes/private reasons are discarded. Tests exercise
+the actual MCP account-only adapter over encrypted fixture credentials and a
+synthetic Graph response; no Page/publish API is reached on unknown expiry.
+116 focused Facebook/MCP/authorization/Instagram credential checks pass/no skips.
+First test attempt lacked the already-approved JPEG package; reused its existing
+qualified temporary0.4.4 package without installation/shared node_modules changes.
+Then both regression assertions failed for the intended missing-code cause before
+the implementation; final focused116green. No SQL/queue/schema code changed, so
+the earlier15 actual PostgreSQL packet checks were not rerun or counted again.
+
+Build/tsc/Vite7.3.6, actual emitted app content, scoped ESLint/diff and native
+Deno2.9.8 checking all3 helpers pass. Deno initially required explicit
+node-modules-dir=none for the private cache; repository dependency declarations,
+lockfile and shared node_modules remain untouched. No fresh whole-suite, browser
+actions or physical-phone acceptance claimed. MSI snapshot before build admitted
+one heavy job (12.31GB free RAM/45.4% commit/45.02GB free system disk/CPU7%).
+
+Live MCP v92/70files now includes other-lane work. All3 helper baselines match it;
+preserve its other67 files and #1005/#995 MCP entry/catalogue changes. No deployment,
+publication, schedule/content approval, configuration/key/provider/Microsoft/Vercel
+change. Browser inventory confirms existing company cgproductionhouse.com Chrome
+available, with personal/pinned WhatsApp sessions preserved. No settings change.
+Prepared/qualified diagnostic release manifest:
+approvals/FACEBOOK-READINESS-DIAGNOSTICS-2026-11-24.json, source SHA256
+51ad493e685ee6d592f7598e600b8e450df3059526c96acf6523f9ab4ff5c3c7.
+Full v92-overlay entry passes Deno using prior type-only checker support/config;
+the7 support files are not part of the70-file payload. Bounded self-review found
+no new blocker; entire draft PR independent review/merge is not claimed.
+Next: exact separate diagnostic-release approval + fresh live drift check;
+determine actual current blocker before any reconnect. After native account proof,
+identify an explicitly approved future
+creative/time and fresh Teams/native duplicate evidence before requesting a later
+controlled-post/runtime release. Current publishing remains disabled.
+
 ## 19 November, 18:35 SAST — Cape binding prepared/tested; production application awaits approval
 
 Owner consent is verified: exact OAuth state consumed15:43:17.868Z; existing

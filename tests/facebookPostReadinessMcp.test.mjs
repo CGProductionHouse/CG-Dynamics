@@ -36,7 +36,7 @@ function fixture(count = 26) {
       then(resolve, reject) { return Promise.resolve(result()).then(resolve, reject) } }
     return query
   } }
-  return { tables, calls, failures, envReads, read(input = { client_id: client }) { return adapter.readFacebookPostReadiness(sb, actor, input, key => { envReads.push(key); return undefined }) } }
+  return { tables, calls, failures, envReads, read(input = { client_id: client }, env = {}) { return adapter.readFacebookPostReadiness(sb, actor, input, key => { envReads.push(key); return env[key] }) } }
 }
 test('candidate listing uses one exact client, pages explicitly, excludes scheduled work and never reads provider settings', async () => {
   const f = fixture(); f.tables.monthly_deliverables[0].production_status = 'scheduled'
@@ -91,6 +91,31 @@ test('account-only inspection does not require an approved review and retains it
   assert.equal(result.code, 'PUBLICATION_INSPECTION_DISABLED')
   assert.equal(result.canConfirm, false); assert.equal(result.canPublish, false)
   assert.equal(f.calls.includes('content_review_versions'), false)
+})
+
+test('account-only returns a safe unknown-expiry blocker without reaching Page or publication APIs', async () => {
+  const f = fixture(0), connection = id(700), tokenStorage = await server.ssrLoadModule('/supabase/functions/_shared/metaTokenStorage.ts')
+  const env = { SOCIAL_FACEBOOK_PHOTO_INSPECTION_ENABLED: 'true', META_GRAPH_VERSION: 'v27.0', META_APP_ID: '789', META_APP_SECRET: 'fixture-app-secret',
+    SUPABASE_URL: 'https://fixture.supabase.co', META_TOKEN_ENCRYPTION_KEY_B64: Buffer.alloc(32, 7).toString('base64'), META_TOKEN_ENCRYPTION_KEY_VERSION: 'v1' }
+  f.tables.meta_client_assets = [{ id: id(701), client_id: client, connection_id: connection, facebook_page_id: '123', is_active: true }]
+  f.tables.meta_connections = [{ id: connection, status: 'connected' }]
+  f.tables.meta_connection_tokens = [{ connection_id: connection, encrypted_access_token:
+    await tokenStorage.encryptMetaStoredToken('fixture-user-token', connection, env.META_TOKEN_ENCRYPTION_KEY_B64, 'v1') }]
+  const fetchBefore = globalThis.fetch, requests = []
+  globalThis.fetch = async (raw, init) => {
+    const url = new URL(raw); requests.push({ path: url.pathname, method: init?.method ?? 'GET' })
+    assert.equal(url.origin, 'https://graph.facebook.com'); assert.equal(url.pathname, '/v27.0/debug_token')
+    return Response.json({ data: { app_id: '789', is_valid: true, type: 'USER', expires_at: 0,
+      data_access_expires_at: Math.floor(Date.now() / 1000) + 3600, scopes: ['pages_show_list', 'pages_manage_posts', 'pages_read_engagement'] } })
+  }
+  try {
+    const result = await f.read({ client_id: client, account_only: true }, env)
+    assert.equal(result.code, 'META_PUBLISHING_TOKEN_EXPIRY_UNVERIFIED')
+    assert.equal(result.data_state, 'unavailable'); assert.equal(result.canPublish, false); assert.equal(result.canConfirm, false)
+    assert.doesNotMatch(JSON.stringify(result), /fixture-user-token|fixture-app-secret|access_token|encrypted_access_token/)
+    assert.deepEqual(requests, [{ path: '/v27.0/debug_token', method: 'GET' }])
+    assert.equal(f.calls.includes('content_review_versions'), false)
+  } finally { globalThis.fetch = fetchBefore }
 })
 
 test('account-only rejects overrides, wrong types and conflicting modes; false keeps ordinary metadata listing', async () => {

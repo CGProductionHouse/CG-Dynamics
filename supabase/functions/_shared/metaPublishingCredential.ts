@@ -9,13 +9,24 @@ const scopes = {
   instagram_facebook_photo: ['pages_show_list', 'instagram_basic', 'instagram_content_publish', 'pages_read_engagement'],
 } as const
 
+/** Fixed server-owned diagnostics only. Never copy provider reasons, tokens or
+ * arbitrary exception codes into preparation receipts. Unknown expiry remains
+ * blocked; this classification does not relax credential lifetime policy. */
+export class MetaPublishingCredentialError extends Error {
+  constructor(readonly code: 'META_PUBLISHING_CREDENTIAL_UNAVAILABLE' | 'META_PUBLISHING_TOKEN_EXPIRY_UNVERIFIED') {
+    super('Exact Meta publishing credential unavailable.')
+  }
+}
+
 /** PRIVATE token/app validation only; this does NOT grant any Page/Instagram
  * account access. Callers must independently verify the exact active asset and
  * current Page tasks/account identity. No legacy plaintext or latest-user fallback.
  */
 export async function resolveMetaPublishingCredential(sb: SupabaseClient, target: Readonly<{ clientId: string; connectionId: string }>,
   config: MetaPublishingCredentialConfig, use: keyof typeof scopes, ports: MetaPublishingCredentialPorts = {}) {
-  function fail(): never { throw new Error('Exact Meta publishing credential unavailable.') }
+  function fail(code: MetaPublishingCredentialError['code'] = 'META_PUBLISHING_CREDENTIAL_UNAVAILABLE'): never {
+    throw new MetaPublishingCredentialError(code)
+  }
   if (!Object.hasOwn(scopes, use) || !/^v\d+\.\d+$/.test(config.graphVersion) || !/^\d+$/.test(config.appId)) fail()
   try {
     const [client, connection, token] = await Promise.all([
@@ -31,8 +42,13 @@ export async function resolveMetaPublishingCredential(sb: SupabaseClient, target
     const now = (ports.now ?? Date.now)(), checked = Date.parse(d.validatedAt), expiry = Date.parse(d.expiresAt ?? '')
     const dataExpiry = d.dataAccessExpiresAt === null ? Infinity : Date.parse(d.dataAccessExpiresAt)
     if (d.state !== 'valid' || d.tokenType !== 'USER' || !Number.isFinite(now) || !Number.isFinite(checked)
-      || checked < now - 120_000 || checked > now + 30_000 || !Number.isFinite(expiry)
-      || expiry <= now + 120_000 || !(dataExpiry > now + 120_000) || scopes[use].some(s => !d.grantedScopes.includes(s))) fail()
+      || checked < now - 120_000 || checked > now + 30_000
+      || !(dataExpiry > now + 120_000) || scopes[use].some(s => !d.grantedScopes.includes(s))) fail()
+    if (!Number.isFinite(expiry)) fail('META_PUBLISHING_TOKEN_EXPIRY_UNVERIFIED')
+    if (expiry <= now + 120_000) fail()
     return { accessToken: stored.accessToken, tokenValidUntil: new Date(Math.min(expiry, dataExpiry)).toISOString(), grantedScopes: [...d.grantedScopes] }
-  } catch { return fail() }
+  } catch (error) {
+    if (error instanceof MetaPublishingCredentialError) throw error
+    return fail()
+  }
 }

@@ -1,5 +1,5 @@
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { resolveMetaPublishingCredential, type MetaPublishingCredentialPorts } from './metaPublishingCredential.ts'
+import { MetaPublishingCredentialError, resolveMetaPublishingCredential, type MetaPublishingCredentialPorts } from './metaPublishingCredential.ts'
 import { readFacebookPhotoStatus, submitFacebookPhoto } from './facebookPublishing.ts'
 import { facebookPhotoTransport, verifyFacebookPageAccess } from './facebookPublishingTransport.ts'
 import { approvedSnapshotDelivery, inspectPublicationSnapshot } from './socialPublishingMedia.ts'
@@ -30,7 +30,12 @@ async function facebookPublishingCredential(sb: SupabaseClient, intent: Readonly
       .eq('facebook_page_id', intent.accountId).eq('is_active', true).maybeSingle()
     if (mapping.error || !mapping.data) fail()
     return await resolveMetaPublishingCredential(sb, intent, config, 'facebook_photo', ports)
-  } catch { return fail() }
+  } catch (error) {
+    if (error instanceof MetaPublishingCredentialError) {
+      throw Object.assign(new Error('Exact Facebook publishing credential unavailable.'), { code: error.code })
+    }
+    return fail()
+  }
 }
 
 export async function facebookPublishingUserToken(sb: SupabaseClient, intent: Readonly<PublishingIntent>, config: FacebookServerConfig,

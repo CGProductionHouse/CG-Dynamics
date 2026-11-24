@@ -251,6 +251,31 @@ test('credential loader refuses wrong-app/unknown/expired/near-expiry or analyti
   }
 })
 
+test('unknown credential expiry remains blocked with a useful sanitized preparation code', async () => {
+  const i = intent(), g = graphFixture()
+  const authorization = await server.ssrLoadModule('/supabase/functions/_shared/socialPublicationAuthorization.ts')
+  await assert.rejects(credentials.verifyFacebookPublishingTarget(store(await credentialStore(i)), i, config,
+    { now: () => NOW, fetch: g.fetch, inspect: async () => ({ ...diagnostics(), expiresAt: null }) }), error => {
+      assert.equal(authorization.publicationPreparationBlocker(error), 'META_PUBLISHING_TOKEN_EXPIRY_UNVERIFIED')
+      assert.doesNotMatch(JSON.stringify(error), /fixture-user-token|PRIVATE|access_token/)
+      return true
+    })
+  assert.equal(g.calls.length, 0)
+})
+
+test('provider diagnostics cannot inject a public preparation code or private reason', async () => {
+  const i = intent(), authorization = await server.ssrLoadModule('/supabase/functions/_shared/socialPublicationAuthorization.ts')
+  for (const inspect of [async () => { throw Object.assign(new Error('PRIVATE fixture-user-token'), { code: 'META_PUBLISHING_TOKEN_EXPIRY_UNVERIFIED' }) },
+    async () => ({ ...diagnostics(), state: 'unverified', errorCode: 'PRIVATE fixture-user-token', errorReason: 'PRIVATE' })]) {
+    await assert.rejects(credentials.facebookPublishingUserToken(store(await credentialStore(i)), i, config,
+      { now: () => NOW, inspect }), error => {
+        assert.equal(authorization.publicationPreparationBlocker(error), 'META_PUBLISHING_CREDENTIAL_UNAVAILABLE')
+        assert.doesNotMatch(JSON.stringify(error), /fixture-user-token|PRIVATE/)
+        return true
+      })
+  }
+})
+
 test('concrete provider preflight reads exact app and Page rights without returning credentials or mutation handles', async () => {
   const i = intent(), sb = store(await credentialStore(i)), g = graphFixture()
   const result = await credentials.verifyFacebookPublishingTarget(sb, i, config, { now: () => NOW, fetch: g.fetch,
