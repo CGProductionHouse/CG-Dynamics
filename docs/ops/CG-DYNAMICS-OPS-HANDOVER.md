@@ -1,3 +1,23 @@
+## 24 November — RC client-Project guideline repair in progress (#896 / PR1005)
+
+Owner requested ordinary script preparation and review sharing from RC-Polypipe's
+internal client ChatGPT Project. Isolated branch `fix/rc-guideline-project-workflow`.
+Discovery gate was incorrectly staff-only; exact-client discovery is live as MCPv91
+with all70 source files read back. Existing active-staff OAuth and foreign-client
+denials remain enforced. Genuine authoring acceptance then exposed injected routing
+`client_id` being rejected as an editable video field; the narrow add/update handler
+correction is locally green, not yet live. Track the complete receipt in
+`docs/ops/RC-GUIDELINE-PROJECT-WORKFLOW-2026-11-24.md` and PR1005.
+
+Actual bounded preparation created one undated planning run and canonical draft
+guideline from the intact24Nov eight-script source. No shoot/calendar/month/package
+allocation was invented. Existing cancelled runs and unrelated pipeline films stay
+unchanged. Script save/retry/publication-for-review acceptance remains in progress.
+154 focused tests,58 live-candidate tests, production build, scoped lint, diff and
+official local Edge bundle pass. No Vercel, migration, provider/config/secret change.
+Live includes other-agent publishing modules: patch the exact live bundle only;
+never replace it wholesale with main. Other worktrees remain untouched.
+
 ## 16 November — authorised brand panel merge reconciliation (#984)
 
 Owner requested #984 into main before #999 into the existing PR910 branch.

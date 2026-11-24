@@ -19,6 +19,13 @@ are refused before names or navigation escape. Personal tasks, CG Hours,
 calendar/linkage mutations and company-wide inventories retain their gates.
 There is no new role, permission or customer access.
 
+The first live authoring test also reproduced a second defect: the dispatcher
+adds the proven `client_id` routing field, then the add/update handlers passed it
+to strict video-field validation, which rejects client reassignment. Both handlers
+now compare routing against the resolved run/video owner and remove only that
+non-editable routing field before validation. The validators stay strict. The
+failed live append created no video; its original retry key remains in use.
+
 ## Exact source recovered
 
 Canonical RC-Polypipe: `4f6106de-c437-404e-8cef-fbe848de0665`.
@@ -27,7 +34,7 @@ Body MD5: `da42f58fc42aedba3cad96a1a74dcf48`.
 Full-row MD5: `21dec273417af412a264433df2fba5c8`.
 
 All eight Afrikaans scripts, cast lines, endings, visual directions, production
-requirements and technical checks are intact. No canonical RC guideline exists.
+requirements and technical checks are intact. Initially no canonical RC guideline existed.
 Three exact RC runs and their calendar events are cancelled. Two existing pipeline
 films are unrelated. Do not overwrite or revive these records.
 
@@ -35,6 +42,13 @@ The existing schema and `createRun` helper allow an undated `planning` run.
 Preparation must keep date, time, coverage month and calendar identity null until
 supplied. Eight ideas do not establish eight monthly slots or a booking. Preserve
 the source verbatim and technical checks as pending before filming.
+
+Actual preparation: one source/hash/actor-guarded undated planning run
+`c705cece-9e5c-4952-b217-73f3f9e5ee96`, and its one canonical draft guideline
+`1f9eab52-8291-4733-bf1e-45e7fd9a0d8b`, ensured through the installed MCP app in
+RC's client Project. Date/time/month/calendar remain null. This is an actual
+narrow production preparation write, not a zero-write audit. Script save and
+review publication acceptance are pending the authoring correction below.
 
 ## Local verification
 
@@ -48,6 +62,12 @@ the source verbatim and technical checks as pending before filming.
 - Health advisor has no health lints; logs are available. The deterministic policy
   refusal is not a provider-connection failure. Supabase's status banner is still
   monitoring an earlier API incident; no blind retry on an ambiguous write.
+- The follow-up authoring regressions failed on the uncorrected real handlers,
+  then pass after separating routing from editable fields: add, update, original
+  retry receipts, changed-input conflict, foreign routing/video refusal, retained
+  reserved-field guards and direct-handler mismatch refusal. Cumulative focused
+  repository tests: 154/154. Live-based candidate tests: 58/58. Local production
+  build, scoped lint, diff check and official Edge Runtime bundle pass.
 
 ## Exact backend release boundary
 
@@ -79,3 +99,18 @@ Record actual script-save/share acceptance separately. A review publication is
 not client approval, filming, footage, delivery, posting or a scheduled date.
 No migration, package, existing calendar, credential, permission, other-client
 or other-agent data is part of this repair.
+
+## Release receipts in progress
+
+Discovery correction is live as MCPv91, bundle
+`500abb5cc19b05a2c24a98e9b50b54a9ea6873a49721fbba209639655b6f1d0e`.
+All70 deployed files independently matched the reviewed candidate. Actual installed
+RC client-Project discovery works; foreign-client discovery is refused. OAuth
+metadata/login return200 and unauthenticated MCP returns401.
+
+The follow-up authoring candidate uses that exact v91 preimage: only `index.ts`
+changes; the other69 files are byte-identical. Its index SHA256 is
+`44c6994f1cb96df273fcf6b7f750ddbfae2c21e666bc6e5478da5d5c81b63389`.
+Private v91 rollback and candidate are separately preserved. Re-read v91 before
+deployment and verify actual save/readback/retry/share afterward. Do not deploy
+Git main wholesale or overwrite the other lane's newer publishing modules.

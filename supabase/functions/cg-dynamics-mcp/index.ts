@@ -3412,8 +3412,14 @@ const handleGetContentVideoReadiness: ToolHandler = async (staff, input) => {
 const handleAddContentGuidelineVideo: ToolHandler = async (staff, input) => {
   const loaded = await loadRunGuideline(staff, input.content_run_id as string, true)
   if ('error' in loaded) return { error: loaded.error }
+  if (input.client_id !== undefined && input.client_id !== loaded.scope.clientId) {
+    return { error: 'The routing client does not match this content run.' }
+  }
   const fields = { ...input }
   delete fields.content_run_id
+  // The dispatcher pins client Projects to their exact client. That proven
+  // routing scope is not an editable video field; ownership comes from the run.
+  delete fields.client_id
   const validated = validateNewVideo(fields)
   if (!validated.ok) return { error: validated.error }
   const position = loaded.videos.reduce((max, video) => Math.max(max, Number(video.position ?? 0)), 0) + 1
@@ -3462,7 +3468,12 @@ async function resolveVideoScope(staff: AuthenticatedStaff, videoId: string) {
 const handleUpdateContentGuidelineVideo: ToolHandler = async (staff, input) => {
   const resolved = await resolveVideoScope(staff, input.content_guide_idea_id as string)
   if ('error' in resolved) return { error: resolved.error }
-  const validated = validateVideoPatch(input)
+  if (input.client_id !== undefined && input.client_id !== resolved.video.client_id) {
+    return { error: 'The routing client does not match this guideline video.' }
+  }
+  const fields = { ...input }
+  delete fields.client_id
+  const validated = validateVideoPatch(fields)
   if (!validated.ok) return { error: validated.error }
   const { data, error } = await staff.supabase
     .from('content_guide_ideas')
