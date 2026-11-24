@@ -1,6 +1,6 @@
 import { corsHeaders } from '../_shared/cors.ts'
 import { metaFetch, readMetaError, redact, resolveMetaGraphConfig } from '../_shared/meta.ts'
-import { inspectMetaAccessToken } from '../_shared/metaTokenDiagnostics.ts'
+import { inspectMetaAccessToken, verifiedMetaTokenValidUntil } from '../_shared/metaTokenDiagnostics.ts'
 import { encryptMetaStoredToken, validateMetaTokenEncryptionConfig } from '../_shared/metaTokenStorage.ts'
 import { exchangeMetaCodeForLongLivedToken } from '../_shared/metaLongLivedToken.ts'
 
@@ -158,6 +158,10 @@ Deno.serve(async (req) => {
 
   const grantedScopes = await fetchGrantedScopes(graphBaseUrl, accessToken)
   const tokenDiagnostics = await inspectMetaAccessToken({ graphBaseUrl, appId, appSecret, accessToken })
+  if (!verifiedMetaTokenValidUntil(tokenDiagnostics, Date.now())) {
+    console.error('Meta token lifetime could not be verified; existing credentials were not replaced.')
+    return redirect(`${appUrl}/admin/integrations/meta?meta=error`)
+  }
   const missingScopes = REQUESTED_SCOPES.filter(scope => !grantedScopes.includes(scope))
   const connectionStatus = tokenDiagnostics.state === 'invalid' || missingScopes.length > 0 ? 'needs_reauth' : 'connected'
   const permissionError = tokenDiagnostics.state === 'invalid'
@@ -237,9 +241,9 @@ Deno.serve(async (req) => {
       connection_id: connectionId,
       encrypted_access_token: storedToken,
       token_type: tokenDiagnostics.tokenType,
-      token_expires_at: tokenDiagnostics.expiresAt
+      token_expires_at: tokenDiagnostics.expiresAt && tokenData.expiresAt
         ? new Date(Math.min(Date.parse(tokenDiagnostics.expiresAt), Date.parse(tokenData.expiresAt))).toISOString()
-        : tokenData.expiresAt,
+        : tokenDiagnostics.expiresAt ?? tokenData.expiresAt,
       data_access_expires_at: tokenDiagnostics.dataAccessExpiresAt,
       last_validated_at: tokenDiagnostics.validatedAt,
       validation_state: tokenDiagnostics.state,

@@ -1,6 +1,6 @@
 import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { readMetaStoredToken } from './metaTokenStorage.ts'
-import { inspectMetaAccessToken } from './metaTokenDiagnostics.ts'
+import { inspectMetaAccessToken, verifiedMetaTokenValidUntil } from './metaTokenDiagnostics.ts'
 
 export interface MetaPublishingCredentialConfig { graphVersion: string; appId: string; appSecret: string; encryptionKey: string; keyVersion: string }
 export type MetaPublishingCredentialPorts = { inspect?: typeof inspectMetaAccessToken; now?: () => number }
@@ -39,14 +39,14 @@ export async function resolveMetaPublishingCredential(sb: SupabaseClient, target
     if (!stored.encryptedAtRest) fail()
     const d = await (ports.inspect ?? inspectMetaAccessToken)({ graphBaseUrl: `https://graph.facebook.com/${config.graphVersion}`,
       appId: config.appId, appSecret: config.appSecret, accessToken: stored.accessToken })
-    const now = (ports.now ?? Date.now)(), checked = Date.parse(d.validatedAt), expiry = Date.parse(d.expiresAt ?? '')
-    const dataExpiry = d.dataAccessExpiresAt === null ? Infinity : Date.parse(d.dataAccessExpiresAt)
-    if (d.state !== 'valid' || d.tokenType !== 'USER' || !Number.isFinite(now) || !Number.isFinite(checked)
-      || checked < now - 120_000 || checked > now + 30_000
-      || !(dataExpiry > now + 120_000) || scopes[use].some(s => !d.grantedScopes.includes(s))) fail()
-    if (!Number.isFinite(expiry)) fail('META_PUBLISHING_TOKEN_EXPIRY_UNVERIFIED')
-    if (expiry <= now + 120_000) fail()
-    return { accessToken: stored.accessToken, tokenValidUntil: new Date(Math.min(expiry, dataExpiry)).toISOString(), grantedScopes: [...d.grantedScopes] }
+    const now = (ports.now ?? Date.now)()
+    if (d.state !== 'valid' || d.tokenType !== 'USER' || scopes[use].some(s => !d.grantedScopes.includes(s))) fail()
+    const validUntil = verifiedMetaTokenValidUntil(d, now)
+    if (!validUntil) {
+      if (!Number.isFinite(Date.parse(d.expiresAt ?? ''))) fail('META_PUBLISHING_TOKEN_EXPIRY_UNVERIFIED')
+      fail()
+    }
+    return { accessToken: stored.accessToken, tokenValidUntil: validUntil, grantedScopes: [...d.grantedScopes] }
   } catch (error) {
     if (error instanceof MetaPublishingCredentialError) throw error
     return fail()

@@ -64,13 +64,20 @@ test('failed or malformed code exchange cannot trigger the second grant', async 
   }
 })
 
-test('missing, zero, malformed or expired long-lived lifetime never falls back to the short credential', async () => {
-  for (const change of [{ expires_in: undefined }, { expires_in: null }, { expires_in: 0 }, { expires_in: -60 }, { expires_in: 120 },
+test('malformed or expired long-lived lifetime never falls back to the short credential', async () => {
+  for (const change of [{ expires_in: -60 }, { expires_in: 120 }, { expires_in: '0' },
     { expires_in: 1.5 }, { expires_in: '1e6' }, { expires_in: ' 3600' }, { expires_in: '03600' }, { expires_in: Number.MAX_SAFE_INTEGER },
     { token_type: undefined }, { token_type: 'PAGE' }, { access_token: '' }, { access_token: 123 }]) {
     const f = fixture(short, { ...long, ...change })
     await assert.rejects(exchangeMetaCodeForLongLivedToken(config(), { fetch: f.fetch, now: () => NOW }), safe)
     assert.equal(f.calls.length, 2)
+  }
+})
+
+test('absent relative lifetime returns only an unqualified private credential for mandatory native verification', async () => {
+  for (const expires_in of [undefined, null, 0]) {
+    const f = fixture(short, { ...long, expires_in })
+    assert.deepEqual(await exchangeMetaCodeForLongLivedToken(config(), { fetch: f.fetch, now: () => NOW }), { accessToken: long.access_token, expiresAt: null })
   }
 })
 

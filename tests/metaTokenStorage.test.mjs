@@ -4,6 +4,7 @@ import { test } from 'node:test'
 import ts from 'typescript'
 import { encryptMetaStoredToken, readMetaStoredToken, validateMetaTokenEncryptionConfig } from '../supabase/functions/_shared/metaTokenStorage.ts'
 import { exchangeMetaCodeForLongLivedToken } from '../supabase/functions/_shared/metaLongLivedToken.ts'
+import { verifiedMetaTokenValidUntil } from '../supabase/functions/_shared/metaTokenDiagnostics.ts'
 
 const connection = '11111111-1111-4111-8111-111111111111'
 const other = '22222222-2222-4222-8222-222222222222'
@@ -68,7 +69,7 @@ function loadEndpoint(endpoint, dependencies) {
   const javascript = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.None } }).outputText
   const args = { Deno: { serve: fn => { handler = fn }, env: { get: name => dependencies.env[name] } }, console: { error() {} },
     corsHeaders: {}, jsonResponse: (body, status = 200) => Response.json(body, { status }),
-    readMetaStoredToken, encryptMetaStoredToken, validateMetaTokenEncryptionConfig,
+    readMetaStoredToken, encryptMetaStoredToken, validateMetaTokenEncryptionConfig, verifiedMetaTokenValidUntil,
     exchangeMetaCodeForLongLivedToken: input => exchangeMetaCodeForLongLivedToken(input, { fetch: dependencies.metaFetch }),
     resolveMetaGraphConfig: () => ({ baseUrl: 'https://graph.facebook.com/v25.0' }), ...dependencies }
   new Function(...Object.keys(args), javascript)(...Object.values(args))
@@ -95,7 +96,8 @@ test('actual OAuth callback stores only ciphertext, and invalid storage config c
       ? { access_token: init?.method === 'POST' ? `${secret}-short` : secret, token_type: 'bearer', expires_in: 5_184_000 }
       : { data: scopes.map(permission => ({ permission, status: 'granted' })) })
   }
-  const diagnostics = async () => ({ state: 'valid', tokenType: 'USER', expiresAt: '2027-01-01T00:00:00Z', grantedScopes: scopes })
+  const diagnostics = async () => ({ state: 'valid', tokenType: 'USER', expiresAt: '2027-01-01T00:00:00Z',
+    dataAccessExpiresAt: null, validatedAt: new Date().toISOString(), grantedScopes: scopes })
   const dependencies = { env, createClient, metaFetch: provider, inspectMetaAccessToken: diagnostics }
   const request = () => new Request('https://fixture.supabase.co/callback?state=fixture-state&code=fixture-code')
   const response = await loadEndpoint('meta-oauth-callback', dependencies)(request())
@@ -112,6 +114,20 @@ test('actual OAuth callback stores only ciphertext, and invalid storage config c
       ? new Response('PRIVATE PROVIDER DETAIL', { status: 400 }) : provider(url, init) })(request())
   assert.ok(exchangeFailure.headers.get('location').endsWith('?meta=error'))
   assert.equal(writes.filter(write => write.table !== 'meta_oauth_states').length, 0)
+  for (const [expiryKind, saved] of [['explicit_zero', true], ['unknown', false]]) {
+    writes.length = 0; calls.length = 0
+    const result = await loadEndpoint('meta-oauth-callback', { ...dependencies,
+      metaFetch: async (url, init) => url.includes('/oauth/') && init?.method === 'GET'
+        ? Response.json({ access_token: secret, token_type: 'bearer' }) : provider(url, init),
+      inspectMetaAccessToken: async () => ({ ...await diagnostics(), expiresAt: null, expiryKind,
+        dataAccessExpiresAt: new Date(Date.now() + 3_600_000).toISOString() }) })(request())
+    const stored = writes.find(write => write.table === 'meta_connection_tokens')
+    assert.equal(result.headers.get('location').endsWith('?meta=connected'), saved)
+    if (saved) {
+      assert.equal(stored.value.token_expires_at, null, 'proof window must not become a fabricated token expiry')
+      assert.deepEqual(await readMetaStoredToken(stored.value.encrypted_access_token, connection, key, 'v1'), { accessToken: secret, encryptedAtRest: true })
+    } else assert.equal(writes.filter(write => write.table !== 'meta_oauth_states').length, 0)
+  }
   writes.length = 0; calls.length = 0
   const failure = await loadEndpoint('meta-oauth-callback', { ...dependencies, env: { ...env, META_TOKEN_ENCRYPTION_KEY_B64: undefined } })(request())
   assert.ok(failure.headers.get('location').endsWith('?meta=config_error'))

@@ -1,0 +1,94 @@
+{
+  "status": "LOCAL_NOT_APPROVED_NOT_DEPLOYED",
+  "project": "ehtjfntukiwbgptqgbzy",
+  "packets": [
+    {
+      "function": "cg-dynamics-mcp",
+      "baselineVersion": 96,
+      "baselineBundleSha256": "d8175572431b3a417fd3ab5de120d1042ef17a94958a6bc4586b921ba5e6facc",
+      "candidateSourceSha256": "14740d92f5a948b9f5e45405caa6a1d339792a9c0dddc93c4f48abebd4a8efe9",
+      "fileCount": 73,
+      "changed": [
+        {
+          "name": "supabase/functions/_shared/metaPublishingCredential.ts",
+          "beforeSha256": "a0897f01aa61a41a0d3529acfd83c78bb7d5051967882c15f9c50825bffa7861",
+          "afterSha256": "500a4b239458ae5d40fe57aec6fc2c470f2c83f64cfa19da09eca8b3e2170ce1"
+        },
+        {
+          "name": "supabase/functions/_shared/metaTokenDiagnostics.ts",
+          "beforeSha256": "e98450af39dd73edb91c7d2cd68b288f938d7bc6eeaa651608aef8ee7ec077f2",
+          "afterSha256": "67bc2345e47a7a012c43c2f49afb9f7eaf5ce8b14ffd370607d6e85b99e7d721"
+        }
+      ],
+      "preserved": 71,
+      "added": 0,
+      "removed": 0,
+      "verify_jwt": false,
+      "import_map": false,
+      "checkerSupportExcludedFromPayload": [
+        "src/lib/companyCalendar.ts",
+        "src/lib/microsoftImport.ts",
+        "src/lib/supabase.ts",
+        "src/types/reportPlatform.ts",
+        "supabase/functions/_shared/metaDatabaseClient.ts",
+        "supabase/functions/_shared/socialPublishingExecution.ts",
+        "supabase/functions/_shared/socialPublishingQueue.ts",
+        "src/lib/contentWorkflow.ts"
+      ]
+    },
+    {
+      "function": "meta-oauth-callback",
+      "baselineVersion": 75,
+      "baselineBundleSha256": "3eb5436ccc10e60f8002ea5bf512540a47b8913caca97fa1131aeb5ef2b7b616",
+      "candidateSourceSha256": "4919b88958e1c4400598c8fc0eee6773edafa40ed9162d2ddbc3f3c0df3f28b8",
+      "fileCount": 8,
+      "changed": [
+        {
+          "name": "functions/meta-oauth-callback/index.ts",
+          "beforeSha256": "7ef0ef3385f4b7a8a4ef84bf3d6c250e884ff710680cfc06ea77f4329bd5c6af",
+          "afterSha256": "094773a2e8fe5361f7ffc6580420f95f63c019380d0c33fc6f3c399f35ef48e7"
+        },
+        {
+          "name": "functions/_shared/metaTokenDiagnostics.ts",
+          "beforeSha256": "e98450af39dd73edb91c7d2cd68b288f938d7bc6eeaa651608aef8ee7ec077f2",
+          "afterSha256": "67bc2345e47a7a012c43c2f49afb9f7eaf5ce8b14ffd370607d6e85b99e7d721"
+        },
+        {
+          "name": "functions/_shared/metaLongLivedToken.ts",
+          "beforeSha256": "04e336ca721884a76dcc96048fa55e49460d95bfdbe7b4a3fb0fec60ee8219b9",
+          "afterSha256": "67197ee3117335a77d9cc216fb525297a0a743b7a7f51e06c96ec42f9f55f278"
+        }
+      ],
+      "preserved": 5,
+      "added": 0,
+      "removed": 0,
+      "verify_jwt": false,
+      "import_map": false,
+      "checkerSupportExcludedFromPayload": [
+        "functions/_shared/metaDatabaseClient.ts"
+      ]
+    }
+  ],
+  "noNewConsentOrTokenRefresh": true,
+  "publishingEnabled": false,
+  "freshBaselineRequired": true,
+  "qualification": {
+    "focusedTestsPassed": 202,
+    "focusedTestsFailed": 0,
+    "focusedTestsSkipped": 0,
+    "scopedLintAndDiff": "PASS",
+    "build": "PASS tsc/Vite7.3.6 and app bundle",
+    "nativeDenoBothCompleteCandidates": "PASS with excluded type-only checker support",
+    "fullSuiteRerun": false,
+    "nativeProviderAcceptance": false
+  },
+  "policy": {
+    "onlyNativeNumericZeroRecognized": true,
+    "missingOrMalformedExpiryStillBlocked": true,
+    "requiresFreshValidAppBoundUser": true,
+    "requiresExactScopesAndPageTask": true,
+    "requiresFiniteFutureDataAccess": true,
+    "proofWindowCapSeconds": 900,
+    "proofWindowNotPersistedAsTokenExpiry": true
+  }
+}

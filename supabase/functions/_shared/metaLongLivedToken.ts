@@ -10,7 +10,7 @@ const credential = (v: unknown): v is string => typeof v === 'string' && v.lengt
  * refresh existing connections here, retry either request, or expose provider URLs.
  * https://developers.facebook.com/docs/facebook-login/guides/access-tokens/get-long-lived/
  */
-export async function exchangeMetaCodeForLongLivedToken(input: MetaCodeExchange, ports: ExchangePorts = {}): Promise<{ accessToken: string; expiresAt: string }> {
+export async function exchangeMetaCodeForLongLivedToken(input: MetaCodeExchange, ports: ExchangePorts = {}): Promise<{ accessToken: string; expiresAt: string | null }> {
   const config = Object.freeze({ ...input }), fetcher = ports.fetch ?? fetch, now = ports.now ?? Date.now
   function fail(): never { throw new Error('Meta long-lived token exchange is unavailable.') }
   try {
@@ -37,11 +37,17 @@ export async function exchangeMetaCodeForLongLivedToken(input: MetaCodeExchange,
     if (!Number.isFinite(issuedAt)) fail()
     const long = await request('GET', new URLSearchParams({ grant_type: 'fb_exchange_token', client_id: config.appId,
       client_secret: config.appSecret, fb_exchange_token: short.access_token as string }))
+    if (typeof long.token_type !== 'string' || long.token_type.toLowerCase() !== 'bearer') fail()
+    // This is still an unqualified private credential. The callback MUST obtain
+    // fresh app-bound diagnostics before storage; absent relative lifetime alone
+    // never proves permanence. Only native explicit-zero + finite data access can.
+    if (long.expires_in === undefined || long.expires_in === null || long.expires_in === 0) {
+      return { accessToken: long.access_token as string, expiresAt: null }
+    }
     const lifetime = typeof long.expires_in === 'number' ? long.expires_in
       : typeof long.expires_in === 'string' && /^[1-9]\d*$/.test(long.expires_in) ? Number(long.expires_in) : NaN
     const expires = issuedAt + lifetime * 1000, completedAt = now()
-    if (typeof long.token_type !== 'string' || long.token_type.toLowerCase() !== 'bearer'
-      || !Number.isSafeInteger(lifetime) || lifetime <= 0 || !Number.isFinite(completedAt) || completedAt < issuedAt
+    if (!Number.isSafeInteger(lifetime) || lifetime <= 0 || !Number.isFinite(completedAt) || completedAt < issuedAt
       || !Number.isFinite(expires) || expires > 8_640_000_000_000_000 || expires <= completedAt + 120_000) fail()
     return { accessToken: long.access_token as string, expiresAt: new Date(expires).toISOString() }
   } catch {

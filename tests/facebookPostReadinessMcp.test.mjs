@@ -105,7 +105,7 @@ test('account-only returns a safe unknown-expiry blocker without reaching Page o
   globalThis.fetch = async (raw, init) => {
     const url = new URL(raw); requests.push({ path: url.pathname, method: init?.method ?? 'GET' })
     assert.equal(url.origin, 'https://graph.facebook.com'); assert.equal(url.pathname, '/v27.0/debug_token')
-    return Response.json({ data: { app_id: '789', is_valid: true, type: 'USER', expires_at: 0,
+    return Response.json({ data: { app_id: '789', is_valid: true, type: 'USER',
       data_access_expires_at: Math.floor(Date.now() / 1000) + 3600, scopes: ['pages_show_list', 'pages_manage_posts', 'pages_read_engagement'] } })
   }
   try {
@@ -126,6 +126,40 @@ test('account-only rejects overrides, wrong types and conflicting modes; false k
   }
   const f = fixture(0), result = await f.read({ client_id: client, account_only: false })
   assert.equal(result.data_state, 'available'); assert.deepEqual(result.candidates, []); assert.deepEqual(f.envReads, [])
+})
+
+test('native explicit-zero USER expiry still needs exact Page tasks and finite data access, with no publication authority', async () => {
+  const tokenStorage = await server.ssrLoadModule('/supabase/functions/_shared/metaTokenStorage.ts')
+  const env = { SOCIAL_FACEBOOK_PHOTO_INSPECTION_ENABLED: 'true', META_GRAPH_VERSION: 'v27.0', META_APP_ID: '789', META_APP_SECRET: 'fixture-app-secret',
+    SUPABASE_URL: 'https://fixture.supabase.co', META_TOKEN_ENCRYPTION_KEY_B64: Buffer.alloc(32, 7).toString('base64'), META_TOKEN_ENCRYPTION_KEY_VERSION: 'v1' }
+  for (const mode of ['valid', 'missing-data-expiry', 'foreign-page', 'missing-task']) {
+    const f = fixture(0), connection = id(700), requests = []
+    f.tables.meta_client_assets = [{ id: id(701), client_id: client, connection_id: connection, facebook_page_id: '123', is_active: true }]
+    f.tables.meta_connections = [{ id: connection, status: 'connected' }]
+    f.tables.meta_connection_tokens = [{ connection_id: connection, encrypted_access_token:
+      await tokenStorage.encryptMetaStoredToken('fixture-user-token', connection, env.META_TOKEN_ENCRYPTION_KEY_B64, 'v1') }]
+    const original = globalThis.fetch
+    globalThis.fetch = async (raw, init) => {
+      const url = new URL(raw); assert.equal(url.origin, 'https://graph.facebook.com')
+      requests.push({ path: url.pathname, method: init?.method ?? 'GET' })
+      if (url.pathname.endsWith('/debug_token')) return Response.json({ data: { app_id: '789', is_valid: true, type: 'USER', expires_at: 0,
+        data_access_expires_at: mode === 'missing-data-expiry' ? undefined : Math.floor(Date.now() / 1000) + 3600,
+        scopes: ['pages_show_list', 'pages_manage_posts', 'pages_read_engagement'] } })
+      if (url.pathname.endsWith('/me/permissions')) return Response.json({ data: ['pages_show_list', 'pages_manage_posts', 'pages_read_engagement'].map(permission => ({ permission, status: 'granted' })) })
+      if (url.pathname.endsWith('/me/accounts')) return Response.json({ data: [{ id: mode === 'foreign-page' ? '999' : '123', access_token: 'fixture-page-token', tasks: mode === 'missing-task' ? ['ANALYZE'] : ['CREATE_CONTENT'] }] })
+      assert.equal(url.pathname, '/v27.0/me'); return Response.json({ id: '123', name: 'Fixture exact Page' })
+    }
+    try {
+      const result = await f.read({ client_id: client, account_only: true }, env)
+      assert.equal(result.data_state, mode === 'valid' ? 'available' : 'unavailable')
+      if (mode === 'valid') { assert.equal(result.account.create_content_task_verified, true); assert.equal(result.account.account_id, '123') }
+      if (mode === 'missing-data-expiry') assert.equal(requests.length, 1)
+      assert.equal(result.canConfirm, false); assert.equal(result.canPublish, false)
+      assert.equal(requests.some(r => r.method !== 'GET'), false)
+      assert.equal(f.calls.includes('content_review_versions'), false)
+      assert.doesNotMatch(JSON.stringify(result), /fixture-user-token|fixture-page-token|fixture-app-secret|access_token/)
+    } finally { globalThis.fetch = original }
+  }
 })
 
 test('actual catalog and operating-context policy expose a closed read-only company-admin tool only', () => {

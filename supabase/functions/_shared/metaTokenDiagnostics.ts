@@ -6,6 +6,7 @@ export interface MetaTokenDiagnostics {
   state: MetaTokenValidationState
   tokenType: string | null
   expiresAt: string | null
+  expiryKind?: 'fixed' | 'explicit_zero' | 'unknown'
   dataAccessExpiresAt: string | null
   validatedAt: string
   grantedScopes: string[]
@@ -16,6 +17,24 @@ export interface MetaTokenDiagnostics {
 function epochSecondsToIso(value: unknown): string | null {
   if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) return null
   return new Date(value * 1000).toISOString()
+}
+
+/** A finite PRIVATE proof window, not a fabricated token expiry. Meta's SDK
+ * treats literal numeric zero separately from expired dates. Missing/malformed
+ * expiry is never equivalent. Zero requires fresh valid USER/app proof plus a
+ * finite future data-access expiry; revalidate at every prepare/dispatch.
+ * https://github.com/facebookarchive/php-graph-sdk/blob/5.x/src/Facebook/Authentication/AccessTokenMetadata.php
+ */
+export function verifiedMetaTokenValidUntil(d: MetaTokenDiagnostics, now: number): string | null {
+  const checked = Date.parse(d.validatedAt), fixed = Date.parse(d.expiresAt ?? '')
+  const data = d.dataAccessExpiresAt === null ? Infinity : Date.parse(d.dataAccessExpiresAt)
+  if (d.state !== 'valid' || d.tokenType !== 'USER' || !Number.isFinite(now) || !Number.isFinite(checked)
+    || checked < now - 120_000 || checked > now + 30_000 || !(data > now + 120_000)) return null
+  let until: number
+  if (Number.isFinite(fixed)) until = Math.min(fixed, data)
+  else if (d.expiryKind === 'explicit_zero' && d.expiresAt === null && Number.isFinite(data)) until = Math.min(data, checked + 900_000)
+  else return null
+  return until > now + 120_000 ? new Date(until).toISOString() : null
 }
 
 /**
@@ -53,10 +72,12 @@ export async function inspectMetaAccessToken(args: {
       ? data.scopes.filter((scope): scope is string => typeof scope === 'string')
       : []
 
+    const expiresAt = epochSecondsToIso(data.expires_at)
     return {
       state: isValid ? 'valid' : 'invalid',
       tokenType: typeof data.type === 'string' ? data.type : null,
-      expiresAt: epochSecondsToIso(data.expires_at),
+      expiresAt,
+      expiryKind: data.expires_at === 0 ? 'explicit_zero' : expiresAt ? 'fixed' : 'unknown',
       dataAccessExpiresAt: epochSecondsToIso(data.data_access_expires_at),
       validatedAt,
       grantedScopes: scopes,

@@ -1,5 +1,39 @@
 # Social publishing — 15 November 2026
 
+## 24 November — native-zero expiry support qualified locally; existing grant retained
+
+No more consent requested: callback75/MCP96 stay live, the one owner setup is used,
+and existing token remains intact. Native lifetime refusal was the last observed
+result. Reproduced conversion of literal numeric zero and absent expiry toNULL.
+Primary [Facebook SDK implementation](https://github.com/facebookarchive/php-graph-sdk/blob/5.x/src/Facebook/Authentication/AccessTokenMetadata.php)
+distinguishes zero from expired dates. Local parser now distinguishes it too.
+Only a fresh valid app-bound USER with explicit numeric zero AND finite future
+data-access expiry receives a private proof capped at15minutes/the data expiry.
+Exact scopes/Page CREATE_CONTENT/current roles still required. Unknown/malformed/
+string-zero/missing-data/stale/expired/foreign evidence fails. Proof deadline is
+not stored as the token's expiry. Existing fixed-expiry behavior is retained.
+
+Callback's exchange result can be unqualified when relative expiry is absent;
+fresh native lifetime verification is mandatory before connection/token writes.
+Unknown proof preserves old credentials. No automatic refresh, retries, links or
+permission/configuration/publishing changes. The existing valid grant can be
+inspected after release without another owner consent.
+
+202 focused checks PASS/no skips, including actual MCP + encrypted fixture store +
+synthetic native Page rights path, callback encrypted persistence/failure retention,
+bounded proof, exact-client/scopes and prior publishing/Instagram/Meta truth checks.
+Build/tsc/Vite7.3.6/app bundle, scoped lint/diff and native Deno of BOTH full source
+overlays pass. Checker-only support excluded from payloads. No full-suite/SQL/live
+provider/phone acceptance claimed. Current native result still requires release.
+
+Manifest approvals/META-ZERO-EXPIRY-2026-11-24.json: MCP96 changes2/preserves71,
+callback75 changes3/preserves5; no added/removed files. Source hashes
+14740d92f5a948b9f5e45405caa6a1d339792a9c0dddc93c4f48abebd4a8efe9 and
+4919b88958e1c4400598c8fc0eee6773edafa40ed9162d2ddbc3f3c0df3f28b8.
+NOT approved/deployed. Next is separate exact two-function release approval,
+fresh live-source checks/readbacks, then account_only using the existing grant.
+No new setup link/token replacement, Microsoft or Vercel action. Same existing PR.
+
 ## 24 November — callback75 and one consumed setup; no Page acceptance yet
 
 Exact callback+one-link approval consumed. One reviewed release74->75/8files;

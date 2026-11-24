@@ -1,3 +1,45 @@
+## 24 November — explicit-zero lifetime correction qualified LOCALLY; no further consent
+
+Existing deployed state remains MCP96 / callback75. Owner's ONE request is used;
+do not regenerate/replay consent. Native lifetime gate remains the last observed
+result until the following separate release is authorized. No token replacement,
+refresh, mapping, scope, configuration/key, content, Microsoft or Vercel write.
+
+Reproduced parser defect: numeric expires_at=0 and missing expiry both becameNULL.
+Facebook's own AccessTokenMetadata SDK leaves numeric zero distinct from expired
+DateTime values. Local correction preserves an optional native expiryKind, accepts
+ONLY explicit numeric zero with fresh valid app-bound USER evidence and a finite
+future data-access expiry, and limits private proof to min(data expiry,15minutes).
+Required scopes, exact mapping/native Page CREATE_CONTENT and worker revalidation
+remain. Unknown/string-zero/malformed expiry, missing bounds, stale/wrong-app/type,
+expired evidence and foreign Pages stay blocked. The proof window is NOT persisted
+as a fabricated token expiry. Current stored credential is reused without export.
+
+Callback's private exchange may return an unqualified nullable relative expiry;
+callback now MUST verify the fresh native lifetime BEFORE any connection/token
+replacement. Explicit-zero native evidence plus finite data access is supported;
+missing/unknown proof fails and preserves existing data. This avoids reconsent loops
+and does not turn on publishing or perform background token renewal.
+
+202 focused tests PASS/no failures/skips: actual MCP/Graph-response + encrypted
+store path checks zero/missing bounds/foreign Page/missing CREATE_CONTENT with zero
+publication calls; actual callback preserves encryption/no writes on unknown
+lifetime; proof cap/staleness/expiry and prior authorization/Instagram/Meta truth
+checks included. Build/app bundle, scoped lint/diff and native Deno of both full
+current-source overlays PASS; checker-only types excluded. No new whole-suite,
+SQL/native-provider/physical-phone acceptance is claimed. No dependency change.
+
+Prepared frozen manifest approvals/META-ZERO-EXPIRY-2026-11-24.json:
+MCP96/73files ->2helpers changed/71preserved, source SHA256
+14740d92f5a948b9f5e45405caa6a1d339792a9c0dddc93c4f48abebd4a8efe9;
+callback75/8files ->3changed/5preserved, source SHA256
+4919b88958e1c4400598c8fc0eee6773edafa40ed9162d2ddbc3f3c0df3f28b8.
+ZERO added/removed files, auth/settings unchanged. NOT approved/deployed. Next exact
+approval is only these two function overlays, fresh drift check, readback, then
+native account_only using EXISTING consent. No link or token refresh is needed to
+test it. Preserve all other-agent hosted bytes; same #991/#220/#236 ownership and
+staff/Nolan/Teams/Microsoft holds. Google Control Centre target remains unidentified.
+
 ## 24 November — callback75 LIVE, one setup link consumed; lifetime gate persists
 
 CA approved "Approve callback fix and one setup link" for831cb1c8. Fresh full
