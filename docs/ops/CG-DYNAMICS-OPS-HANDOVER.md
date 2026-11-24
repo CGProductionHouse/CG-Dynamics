@@ -1,3 +1,28 @@
+## 24 November, 12:45 SAST — staff credential-recovery guidance completed locally
+
+Continued #991 from bb390745; current main remains an ancestor and #1005's
+guideline/video-tracking lane is separate. No additional release approval has
+arrived. Cape's applied binding is not replayed; no repeated native/metadata sweep.
+The exact three-helper diagnostic packet/source hash remains unchanged and held.
+
+Reproduced generic staff instructions for the new credential/unknown-expiry codes
+in the actual publication panel harness. src/lib/socialPublishing.ts now gives
+administrator/read-only diagnostic guidance, preserves the exact account, and
+does not prescribe reconnecting for an unverified lifetime. Possible-start and
+unknown-outcome reconciliation messages retain precedence, so credential errors
+cannot become permission for another post. Test corrected a harness collapse on
+the second case, then all51 publication-management checks pass/no skips. Build,
+tsc/Vite7.3.6, actual changed ContentReviewCard bundle, scoped ESLint/diff pass.
+No browser/device/native publishing acceptance claimed; this is local frontend
+copy, not part of the pending Supabase packet or authorization for Vercel.
+
+Only two app/test files changed; auth/roles/confirmation flags/queue behavior
+unchanged. No production/provider/Microsoft/data/config/permission/content write,
+deployment or cost action this increment. Same pending exact three-file diagnostic
+approval is next, then fresh hosted-source comparison and account-only diagnosis.
+Do not weaken expiry policy or create a post to get around this hold. Google
+Control Centre target remains unidentified; owning PR/issues hold the record.
+
 ## 24 November — Cape binding APPLIED; native publishing proof remains unavailable
 
 CA explicitly answered "Approve exact Cape Facebook binding repair" today.

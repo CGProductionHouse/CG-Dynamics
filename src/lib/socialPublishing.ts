@@ -20,6 +20,10 @@ export function publicationNextAction(item: Pick<StaffPublication, 'state' | 'er
   if (item.state === 'unknown_outcome' || item.providerMayHaveStarted && ['blocked', 'failed'].includes(item.state))
     return 'A post may already exist. Check the native platform and reconcile this attempt before scheduling again.'
   if (!['blocked', 'failed'].includes(item.state)) return null
+  if (item.errorCode === 'META_PUBLISHING_TOKEN_EXPIRY_UNVERIFIED')
+    return 'The Meta credential lifetime could not be verified. Ask an administrator to review the read-only credential diagnostics before reconnecting. Continue scheduling in Teams and the native platform.'
+  if (item.errorCode === 'META_PUBLISHING_CREDENTIAL_UNAVAILABLE')
+    return 'The exact account’s publishing credential could not be verified. Ask an administrator to review the read-only account and credential diagnostics. Keep the existing account binding and publishing settings unchanged.'
   if (item.errorCode === 'FRESH_TEAMS_EVIDENCE_REQUIRED')
     return 'The Teams schedule could not be verified as current. Ask the scheduling owner to review the sync hold and refresh the approved capture; do not change Teams or reschedule this post to bypass it.'
   if (['CURRENT_UNSCHEDULED_REVIEW_REQUIRED', 'CANONICAL_PUBLICATION_SOURCE_UNAVAILABLE', 'PREPARATION_SOURCE_CHANGED', 'BLOCKED_SOURCE_CHANGED', 'CLAIM_OR_SOURCE_LOST'].includes(item.errorCode ?? ''))

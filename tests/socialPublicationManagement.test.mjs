@@ -441,6 +441,24 @@ test('manager sees the exact safe recovery action; uncertain attempts always tak
   }
 })
 
+test('credential blocks show administrator guidance while a possible publication still requires reconciliation', async () => {
+  const f = await fixture(), status = await readStatus(f), item = status.items[0]
+  for (const [errorCode, explanation] of [
+    ['META_PUBLISHING_TOKEN_EXPIRY_UNVERIFIED', /credential lifetime could not be verified/],
+    ['META_PUBLISHING_CREDENTIAL_UNAVAILABLE', /publishing credential could not be verified/],
+  ]) {
+    Object.assign(item, { state: 'blocked', errorCode, providerMayHaveStarted: false })
+    const panel = componentHarness({ getStaffPublicationStatus: async () => status }, ids.review)
+    panel.click('Publishing status'); await settle()
+    assert.match(panel.text(), explanation)
+    assert.match(panel.text(), /administrator.*read-only/)
+    assert.doesNotMatch(panel.text(), /META_PUBLISHING_|Connect Meta|Try again|Confirm this Facebook schedule/)
+    item.providerMayHaveStarted = true
+    assert.match(panel.text(), /A post may already exist/)
+    assert.doesNotMatch(panel.text(), explanation)
+  }
+})
+
 const confirmationPreview = { reviewId: ids.review, clientId: ids.client, accountId: '12345', platform: 'facebook', caption: 'Approved caption', mediaType: 'image/png',
   assetSha256: 'a'.repeat(64), fingerprint: 'b'.repeat(64), scheduledAt: '2026-11-17T08:00:00Z' }
 const previewResponse = () => ({ ok: true, preview: { ...confirmationPreview, target: { reviewVersionId: ids.review, clientId: ids.client, accountId: '12345', route: 'facebook_page' } } })

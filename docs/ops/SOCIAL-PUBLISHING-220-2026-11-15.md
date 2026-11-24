@@ -1,5 +1,27 @@
 # Social publishing — 15 November 2026
 
+## 24 November, 12:45 SAST — local staff credential guidance ready
+
+Generic staff copy for the newly classified credential/lifetime errors was
+reproduced in the actual panel harness. Added specific administrator/read-only
+diagnostic guidance in src/lib/socialPublishing.ts. A missing lifetime does not
+mean consent expired; no automatic reconnect/account change is suggested. A
+possibly started post still takes precedence and requires reconciliation. The
+actual panel regression covers both codes, no raw-code display/confirmation CTA
+and unknown-outcome precedence. After correcting the harness's second-case
+collapse, all51 publication-management checks pass, no skips. Build/tsc/Vite7.3.6,
+changed app-bundle content, scoped ESLint/diff pass. No real-browser/phone/native
+platform acceptance claimed. Private tests/build logs are in2026-11-24/cape-binding.
+
+This two-file frontend/test increment is local and requires a later approved
+frontend release. Pending bb390745 three-helper Supabase packet remains byte-
+identical (all3 hashes checked), source51ad493e685ee6d592f7598e600b8e450df3059526c96acf6523f9ab4ff5c3c7.
+It is NOT approved/deployed. Existing Cape repair was not replayed; no repeat
+provider sweep. #1005 guideline/video-tracking ownership preserved. No production,
+data, permission, configuration, Microsoft, publishing, deployment or Vercel action.
+Next remains the pending exact diagnostic-release approval, followed by fresh live
+source comparison and safe account-only diagnosis; no speculative reconsent.
+
 ## 24 November — approved Cape binding repaired; diagnostic increment stays local
 
 CA answered "Approve exact Cape Facebook binding repair" today. Original immutable
