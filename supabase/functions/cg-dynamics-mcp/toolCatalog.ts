@@ -545,8 +545,13 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   },
   {
     name: 'ensure_content_guideline', title: 'Ensure content guideline',
-    description: '#450. Return the ONE canonical Content Guideline for an exact Content Run, creating the draft document if it does not exist yet. Idempotent: a run always has exactly one guideline, and an existing guideline is returned untouched — never duplicated, never reset. Staff should never have to create a blank guideline by hand. Returns guideline_url for the exact saved document and, when resolved, content_run_url. When asked for the Dynamics link, return guideline_url as a clickable staff review link (staff sign-in required); never invent URLs or present a draft as client-published. Read list_content_guideline_videos after edits to verify saved content.',
-    inputSchema: objectSchema({ content_run_id: uuid, idempotency_key: idempotencyKeySchema }, ['content_run_id', 'idempotency_key']),
+    description: '#450. Prepare or return the canonical saved guideline. Supply ONE of content_run_id, an exact saved content-run calendar_event_id, or month (YYYY-MM) with the exact client. In a client Project the client is automatically pinned. If staff needs a guideline before a shoot is booked, use client + month: reuse the existing monthly document/run or create ONE undated planning workspace and draft. A shoot date, calendar event, package slot or production folder is NOT required to author or share a guideline. Never ask staff to create a blank run manually or book a fake shoot. Existing wording, scripts and publications are preserved; retries reuse the original document. Multiple real candidates return their saved identities for disambiguation. Return guideline_url for staff; when staff asks for the client review link, publish the saved scripts through publish_content_guideline and verify client_share_url. Preparation never books a shoot, approves content, changes packages or writes Client Schedule.',
+    inputSchema: {
+      ...objectSchema({ content_run_id: uuid, calendar_event_id: uuid, client_id: uuid,
+        month: { type: 'string', pattern: '^\\d{4}-(0[1-9]|1[0-2])(?:-01)?$', description: 'Requested content coverage month, not a fabricated shoot date.' },
+        idempotency_key: idempotencyKeySchema }, ['idempotency_key']),
+      oneOf: [{ required: ['content_run_id'] }, { required: ['calendar_event_id'] }, { required: ['month'] }],
+    },
     annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
     dependency: '#450', canonicalContract: 'get_or_create_content_guideline_as_actor service-only RPC with server-resolved workforce actor (one guideline per run)',
   },

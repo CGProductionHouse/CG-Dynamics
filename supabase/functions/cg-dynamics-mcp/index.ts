@@ -11,6 +11,7 @@
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { readMicrosoftScheduleSource } from './microsoftScheduleSource.ts'
 import { registerExistingInternalVideo } from './existingVideoTracking.ts'
+import { resolveGuidelinePreparation, setPreparedGuidelineMonth } from './guidelinePreparation.ts'
 import { fetchAllRows, fetchAllRowsByIdChunks } from '../_shared/paginatedRows.ts'
 import { CG_DYNAMICS_MCP_TOOLS, CG_DYNAMICS_MCP_SECURITY_SCHEMES } from './toolCatalog.ts'
 import { filterCapabilitiesByScope } from './capabilityManifest.ts'
@@ -503,6 +504,16 @@ async function recordIdempotency(
         effective_client_id: audit.effective_client_id,
       } : {}),
     })
+    if (error?.code === '23505' && toolName === 'ensure_content_guideline' && status === 'success') {
+      // A canonical ensure may safely recover its earlier failed preparation.
+      // Upgrade ONLY that exact errored input receipt; successful/legacy/foreign
+      // receipts and other editorial mutations remain immutable.
+      const recovered = await sb.from('mcp_idempotency_log').update({ result_status: status, result_payload: result })
+        .eq('caller_profile_id', callerProfileId).eq('tool_name', toolName)
+        .eq('idempotency_key', idempotencyKey).eq('input_hash', inputHash)
+        .eq('result_status', 'error').select('id').maybeSingle()
+      if (!recovered.error && recovered.data) return
+    }
     if (error) throw new Error('Guideline work may have been saved, but its retry receipt could not be confirmed. Read the existing guideline before any new write; do not create a replacement blindly.')
     return
   }
@@ -1118,9 +1129,19 @@ const handleUpsertCalendarEvent: ToolHandler = async (staff, input) => {
   }
 
   // Client-context pinning: a client Project cannot write another client's event.
+  if (existing) {
+    const existingScope = assertRecordClientMatchesContext(staff.contextKind, staff.effectiveClientId, existing.client_id as string | null, 'existing calendar event')
+    if (!existingScope.allowed) return { error: existingScope.error }
+  }
   const targetClientId = (input.client_id as string | undefined) ?? (existing?.client_id as string | undefined) ?? null
   const scope = assertRecordClientMatchesContext(staff.contextKind, staff.effectiveClientId, targetClientId, 'calendar event')
   if (!scope.allowed) return { error: scope.error }
+  let canonicalClientName: string | undefined
+  if (targetClientId) {
+    const client = await staff.supabase.from('clients').select('id,name,active').eq('id', targetClientId).eq('active', true).maybeSingle()
+    if (client.error || !client.data) return { error: 'The exact active calendar client could not be verified. No event was changed.' }
+    canonicalClientName = client.data.name
+  }
 
   const nowIso = new Date().toISOString()
   const partialSync = !nativeOnly && input.outlook_write_succeeded === false
@@ -1144,6 +1165,7 @@ const handleUpsertCalendarEvent: ToolHandler = async (staff, input) => {
   if (input.assigned_to_name !== undefined) writable.assigned_to_name = input.assigned_to_name
   if (input.client_id !== undefined) writable.client_id = input.client_id
   if (input.client_name !== undefined) writable.client_name = input.client_name
+  if (canonicalClientName !== undefined) writable.client_name = canonicalClientName
   if (!partialSync && effectiveMicrosoftEventId && effectiveMicrosoftCalendarId) {
     writable.microsoft_event_id = effectiveMicrosoftEventId
     writable.microsoft_source_type = 'outlook_calendar'
@@ -2206,6 +2228,7 @@ const handleGetMyAssistantBootstrap: ToolHandler = async (staff) => {
       'PERSONALITY: derived from staff profile (working_preferences, output_preferences, repeated_corrections). Never hardcode tone across staff. Personality belongs in greeting/closing; work body stays operational.',
       'NATURAL TASK REPLIES: during coexistence, "done", "50%", "waiting on client", "move to Friday", "add note" and "follow up Monday" update the exact live Teams/Planner task first, then run_microsoft_sync refreshes Dynamics. If reconciliation is delayed, report DYNAMICS SYNC PENDING; never duplicate the Microsoft-backed task.',
       'CONTENT-RUN CLOSEOUT: When a staff member had client shoots/content runs that day, use get_content_run_plan to retrieve the canonical shot list, then collect per-client field updates, reconcile planned vs captured items, record missed/cancelled items with reasons, capture field notes, flag reshoots, verify OneDrive upload status and write approved updates to Dynamics via close_content_run. Never ask staff to recreate a plan already in Dynamics. Never mark closeout complete if upload is missing/partial/unverified.',
+      'GUIDELINE PREPARATION: When staff needs a content guideline, use ensure_content_guideline with the exact client and content month if no run is known. It reuses saved planning or prepares one undated run/draft; a shoot booking, package slot and production folder are not prerequisites for writing or sharing scripts. Never create a fake booking or tell staff to create a blank run manually. A saved calendar content-run event can instead be supplied by exact calendar_event_id. Ask only for a genuinely missing client/month or which of multiple real shoots is intended. Verify saved wording; when staff requests the client link, publish the saved guideline for review and verify client_share_url. Calendar changes still use the existing exact-staff/company-admin operational action and real requested date/time; never claim an undated plan booked a shoot.',
       'ONEDRIVE UPLOAD GATE: For every content run, use verify_content_run_upload to inspect the exact mapped client/content-run folder. If footage is missing/partial/unverified, keep the item unresolved and give the staff member the exact next action. After staff approval, use update_closeout_upload_status; it performs a fresh authorised inspection and persists only that evidence. Staff self-report alone always remains unverified.',
     ],
     message: profile
@@ -3240,7 +3263,7 @@ async function loadGuidelineVideos(staff: AuthenticatedStaff, guidelineId: strin
 async function ensureGuideline(staff: AuthenticatedStaff, scope: ContentRunScope, allowCreate = false) {
   const existing = await staff.supabase
     .from('content_guidelines')
-    .select('id, content_run_id, client_id, title, month, coverage_start, coverage_end, status')
+    .select('id, content_run_id, client_id, title, month, coverage_start, coverage_end, status, updated_at')
     .eq('content_run_id', scope.runId)
     .maybeSingle()
   if (existing.error) return { error: existing.error.message }
@@ -3278,8 +3301,19 @@ async function loadRunGuideline(staff: AuthenticatedStaff, runId: string, allowC
 }
 
 const handleEnsureContentGuideline: ToolHandler = async (staff, input) => {
-  const loaded = await loadRunGuideline(staff, input.content_run_id as string, true)
-  if ('error' in loaded) return { error: loaded.error }
+  if ([input.content_run_id, input.calendar_event_id, input.month].filter(value => value !== undefined).length !== 1) {
+    return { error: 'Use one exact Content Run, one saved calendar event, or the client content month. No shoot date is needed for preparation.' }
+  }
+  const preparation = input.content_run_id === undefined ? await resolveGuidelinePreparation(staff, input) : null
+  if (preparation && 'error' in preparation) return preparation
+  const runId = preparation?.runId ?? input.content_run_id as string
+  const loaded = await loadRunGuideline(staff, runId, true)
+  if ('error' in loaded) return { error: loaded.error, content_run_id: runId, message: 'Re-use this saved run when retrying guideline preparation; no replacement booking is needed.' }
+  if (preparation) {
+    const covered = await setPreparedGuidelineMonth(staff, loaded.guideline, preparation.requestedMonth)
+    if ('error' in covered) return { ...covered, content_run_id: runId }
+    loaded.guideline = covered.guideline
+  }
   return {
     ...buildGuidelineNavigation(loaded.guideline.id, loaded.scope.clientId, loaded.scope.runId),
     content_run_id: loaded.scope.runId,
@@ -3289,6 +3323,9 @@ const handleEnsureContentGuideline: ToolHandler = async (staff, input) => {
     title: loaded.guideline.title,
     coverage_start: loaded.guideline.coverage_start ?? null,
     coverage_end: loaded.guideline.coverage_end ?? null,
+    month: loaded.guideline.month ?? null,
+    booking_state: loaded.scope.runDate ? 'dated_run' : 'unbooked_preparation',
+    run_date: loaded.scope.runDate,
     created: loaded.created,
     video_count: loaded.videos.length,
     note: loaded.created
@@ -3832,7 +3869,10 @@ async function handleToolsCall(
           next_read: nextRead, _context: audit,
         }) }], isError: true })
       }
-      if (operationalCreate && !conflict && !ownsOperationalReceipt(toolName, existing.result, { actorId: staff.profileId, key: canonicalIdempotencyKey })) {
+      if (toolName === 'ensure_content_guideline' && previousError && !conflict) {
+        // Retry the exact idempotent ensure against current canonical records.
+        // A transient source failure must not trap staff in a cached error loop.
+      } else if (operationalCreate && !conflict && !ownsOperationalReceipt(toolName, existing.result, { actorId: staff.profileId, key: canonicalIdempotencyKey })) {
         return jsonRpcError(id, -32603, 'Legacy operational receipt has no original record projection. Re-read before creating any replacement; do not retry with a new key blindly.')
       } else if (CANONICAL_RECEIPT_REPLAY_TOOLS.has(toolName) && !conflict) {
         replayThroughCanonicalKey = true

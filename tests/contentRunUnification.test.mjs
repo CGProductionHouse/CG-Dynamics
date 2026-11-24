@@ -72,8 +72,12 @@ test('creating a CG run also creates one linked content_run calendar event', () 
   assert.match(DATA, /createCompanyEvent\(\{[\s\S]*?event_type:\s*'content_run'/)
   // The run is linked to the created event.
   assert.match(DATA, /createRun\(\{\s*\.\.\.input,\s*calendar_event_id:\s*eventResult\.data\.id\s*\}\)/)
-  // On run-insert failure the event is cancelled (not left as a duplicate, not hard-deleted).
-  assert.match(DATA, /updateCompanyEvent\(eventResult\.data\.id,\s*\{\s*status:\s*'cancelled'\s*\}\)/)
+  // The actual calendar trigger already creates its mirror. Read it before a
+  // compatibility insert; a lost response must not cancel a genuine booking.
+  assert.match(DATA, /const mirrored = await mirrorRead\(\)/)
+  assert.match(DATA, /if \(mirrored\.data\)/)
+  assert.match(DATA, /const recovered = await mirrorRead\(\)/)
+  assert.doesNotMatch(DATA, /updateCompanyEvent\(eventResult\.data\.id,\s*\{\s*status:\s*'cancelled'\s*\}\)/)
 })
 
 test('the run create page uses the linked-event create path, not a bare createRun', () => {

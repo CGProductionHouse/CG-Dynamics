@@ -227,8 +227,8 @@ function calendarPatchFromRun(run: ContentRun, patch: ContentRunInput | Partial<
 // The calendar event carries the shared identity; run.calendar_event_id links
 // them. Requires a run_date so the calendar event has a start; without one a
 // standalone run is created (both migrations should be applied together). If the
-// run insert fails after the event is created, the orphan event is cancelled
-// (never hard-deleted) so no duplicate content_run event lingers.
+// calendar trigger already created its mirror, return that exact run instead of
+// inserting a second run and cancelling the genuine booking on a unique error.
 export async function createRunWithCalendarEvent(input: ContentRunInput): Promise<QueryResult<ContentRun | null>> {
   if (!input.run_date) {
     return createRun(input)
@@ -250,12 +250,31 @@ export async function createRunWithCalendarEvent(input: ContentRunInput): Promis
   if (eventResult.error || !eventResult.data) {
     return { data: null, error: eventResult.error?.message ?? 'Could not create the linked calendar event.', migrationNeeded: false }
   }
-  const runResult = await createRun({ ...input, calendar_event_id: eventResult.data.id })
-  if ((runResult.error || !runResult.data) && !runResult.migrationNeeded) {
-    // Roll the calendar event back to cancelled so it is not an orphan duplicate.
-    await updateCompanyEvent(eventResult.data.id, { status: 'cancelled' })
+  const mirrorRead = () => supabase.from('content_runs').select('*')
+    .eq('calendar_event_id', eventResult.data!.id).maybeSingle()
+  const mirrored = await mirrorRead()
+  if (mirrored.error) return { data: null, error: 'The calendar booking was saved, but its Content Run read failed. Re-open that same booking; do not create another.', migrationNeeded: false }
+  if (mirrored.data) {
+    if (mirrored.data.client_id !== (input.client_id ?? null)) return { data: null, error: 'The saved calendar run has a different client. Nothing was overwritten.', migrationNeeded: false }
+    const operational: Partial<ContentRun> = {}
+    for (const key of ['lead_user_id', 'helper_names', 'internal_notes', 'created_by'] as const) {
+      if (input[key] !== undefined) Object.assign(operational, { [key]: input[key] })
+    }
+    if (!Object.keys(operational).length) return wrap(mirrored.data as ContentRun, null, null)
+    let save = supabase.from('content_runs').update(operational).eq('id', mirrored.data.id)
+      .eq('updated_at', mirrored.data.updated_at)
+    save = input.client_id ? save.eq('client_id', input.client_id) : save.is('client_id', null)
+    const saved = await save.select('*').maybeSingle()
+    return saved.data && !saved.error ? wrap(saved.data as ContentRun, null, null)
+      : { data: null, error: 'The booking exists, but its production details changed concurrently. Re-open the saved run; do not book it again.', migrationNeeded: false }
   }
-  return runResult
+  // Compatibility for an installation whose mirroring trigger is not present.
+  const runResult = await createRun({ ...input, calendar_event_id: eventResult.data.id })
+  if (!runResult.error && runResult.data) return runResult
+  const recovered = await mirrorRead()
+  if (!recovered.error && recovered.data?.client_id === (input.client_id ?? null)) return wrap(recovered.data as ContentRun, null, null)
+  // A lost response is not evidence that the real event should be cancelled.
+  return { data: null, error: 'The calendar booking was saved, but Content Run creation could not be confirmed. Re-open the same booking before retrying.', migrationNeeded: false }
 }
 
 // Update a run and keep its linked calendar event aligned. Calendar-owned fields
