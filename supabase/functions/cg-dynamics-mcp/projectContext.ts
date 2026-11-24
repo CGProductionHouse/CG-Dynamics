@@ -137,7 +137,7 @@ export const STAFF_SUBJECT_TOOLS: readonly string[] = [
   'log_ordinary_hours', 'log_kilometre_entry', 'read_my_recent_entries', 'correct_my_entry',
   // Internal operational/content actions. They may run for an exact staff subject or an
   // explicit company-admin context, but never inside a client Project.
-  'find_content_runs', 'link_content_run_deliverables', 'upsert_calendar_event',
+  'link_content_run_deliverables', 'upsert_calendar_event',
 ]
 
 /**
@@ -153,6 +153,9 @@ export const EXACT_STAFF_PROJECT_TOOLS: readonly string[] = [
  * Project they are hard-pinned to that Project's canonical client.
  */
 export const CLIENT_SCOPED_TOOLS: readonly string[] = [
+  // Internal client Projects already author and share their own guidelines. Their
+  // read-only discovery uses that same exact-client scope, not a staff identity.
+  'find_content_runs',
   'list_client_schedule', 'get_client_context', 'get_content_run_plan',
   'get_content_run_closeout', 'verify_content_run_upload', 'close_content_run',
   'update_closeout_upload_status',

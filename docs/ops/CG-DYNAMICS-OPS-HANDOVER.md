@@ -1247,6 +1247,24 @@ This is a later direct CA operating correction that overrides older catch-all ta
 
 # CG Dynamics Ops Handover
 
+## 24 November — RC guideline client-Project repair in progress (#896)
+
+Owner urgently requested fixing normal client-Project guideline preparation and
+sharing. Isolated `fix/rc-guideline-project-workflow`; main b524a9f9. Reproduced
+live staff-only find_content_runs denial despite exact-client guideline actions
+already being allowed. Minimal read-only classification +nested tenant fences
+pass132 repo tests/build/lint and51 actual live-based candidate tests. Full
+official local Edge bundle passes. v90/70-file rollback saved; candidate changes
+only three connector files,67others byte-identical. Never deploy Git folder over
+newer other-agent publishing modules. No Vercel/migration/provider/role change.
+
+Recovered exact RC update a2685141-92e3-47e1-9ff1-360e56882498: all8 final scripts
+and technical/visual/cast instructions intact. No RC guideline exists;3runs are
+cancelled and two pipeline films are unrelated. Do not revive/change those or
+guess a shoot date. Existing nullable schema supports an undated planning run.
+Live release +script preparation/share acceptance remain pending this checkpoint.
+[Exact repair and release boundaries](RC-GUIDELINE-PROJECT-WORKFLOW-2026-11-24.md).
+
 ### 27 October — provider freshness and false staff diagnostic corrected
 
 Current exact-client inventory/launch sequence is in the existing

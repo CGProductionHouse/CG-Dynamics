@@ -756,13 +756,16 @@ const handleListClientSchedule: ToolHandler = async (staff, input) => {
  * Read-only. Raw OneDrive drive/item identifiers and web URLs are deliberately withheld.
  */
 const handleFindContentRuns: ToolHandler = async (staff, input) => {
+  const clientId = (input.client_id as string | undefined) ?? staff.effectiveClientId ?? null
+  const selectionScope = assertRecordClientMatchesContext(staff.contextKind, staff.effectiveClientId, clientId, 'content run selection')
+  if (!selectionScope.allowed) return { error: selectionScope.error }
+
   let query = staff.supabase
     .from('content_runs')
     .select('id, client_id, client_name, name, run_date, start_time, location, status, calendar_event_id')
     .order('run_date', { ascending: false })
     .limit(Math.min(Math.max(Number(input.limit ?? 10), 1), 25))
 
-  const clientId = (input.client_id as string | undefined) ?? staff.effectiveClientId ?? null
   if (clientId) query = query.eq('client_id', clientId)
   if (input.run_date) query = query.eq('run_date', input.run_date)
   if (input.from) query = query.gte('run_date', input.from)
@@ -771,12 +774,14 @@ const handleFindContentRuns: ToolHandler = async (staff, input) => {
 
   // Deliverable -> run: resolve through the guideline video that references the deliverable.
   if (input.deliverable_id) {
-    const { data: ideas, error: ideaError } = await staff.supabase
+    let ideaQuery = staff.supabase
       .from('content_guide_ideas')
       .select('content_guideline_id')
       .eq('deliverable_id', input.deliverable_id)
       .neq('status', 'archived')
       .limit(2)
+    if (clientId) ideaQuery = ideaQuery.eq('client_id', clientId)
+    const { data: ideas, error: ideaError } = await ideaQuery
     if (ideaError) return { error: ideaError.message }
     if ((ideas ?? []).length > 1) {
       return { error: 'More than one active guideline video references that deliverable. Exact Content Run discovery is ambiguous and was refused.' }
@@ -785,12 +790,17 @@ const handleFindContentRuns: ToolHandler = async (staff, input) => {
     if (!guidelineId) {
       return { runs: [], matched_by: 'deliverable_id', note: 'No guideline video references that exact deliverable, so no Content Run could be resolved. Reported rather than guessed.' }
     }
-    const { data: guideline, error: guidelineError } = await staff.supabase
+    let guidelineQuery = staff.supabase
       .from('content_guidelines')
-      .select('content_run_id')
+      .select('content_run_id, client_id')
       .eq('id', guidelineId)
-      .maybeSingle()
+    if (clientId) guidelineQuery = guidelineQuery.eq('client_id', clientId)
+    const { data: guideline, error: guidelineError } = await guidelineQuery.maybeSingle()
     if (guidelineError) return { error: guidelineError.message }
+    if (guideline) {
+      const scope = assertRecordClientMatchesContext(staff.contextKind, staff.effectiveClientId, guideline.client_id, 'content guideline')
+      if (!scope.allowed) return { error: scope.error }
+    }
     if (!guideline?.content_run_id) {
       return { runs: [], matched_by: 'deliverable_id', note: 'The referencing guideline has no linked Content Run.' }
     }
@@ -799,13 +809,19 @@ const handleFindContentRuns: ToolHandler = async (staff, input) => {
 
   const { data: runs, error } = await query
   if (error) return { error: error.message }
+  // Reject a malformed/foreign result before any nested source reads or names,
+  // navigation, folder labels and statuses could escape this Project's client.
+  for (const run of runs ?? []) {
+    const scope = assertRecordClientMatchesContext(staff.contextKind, staff.effectiveClientId, run.client_id, 'content run')
+    if (!scope.allowed) return { error: scope.error }
+  }
 
   const detailed = await Promise.all((runs ?? []).map(async (run: Record<string, unknown>) => {
     const runId = run.id as string
     const [guidelineRes, mappingRes, closeoutRes] = await Promise.all([
-      staff.supabase.from('content_guidelines').select('id, title, month, status, client_id').eq('content_run_id', runId).maybeSingle(),
-      staff.supabase.from('content_run_onedrive_folders').select('drive_id, month_folder_item_id, folder_name, web_url, last_verified_at').eq('content_run_id', runId).maybeSingle(),
-      staff.supabase.from('content_run_closeouts').select('upload_status').eq('content_run_id', runId).maybeSingle(),
+      staff.supabase.from('content_guidelines').select('id, title, month, status, client_id').eq('content_run_id', runId).eq('client_id', run.client_id).maybeSingle(),
+      staff.supabase.from('content_run_onedrive_folders').select('drive_id, month_folder_item_id, folder_name, web_url, last_verified_at').eq('content_run_id', runId).eq('client_id', run.client_id).maybeSingle(),
+      staff.supabase.from('content_run_closeouts').select('upload_status').eq('content_run_id', runId).eq('client_id', run.client_id).maybeSingle(),
     ])
 
     const detailErrors = [guidelineRes.error, mappingRes.error, closeoutRes.error].filter(Boolean)
@@ -829,6 +845,7 @@ const handleFindContentRuns: ToolHandler = async (staff, input) => {
         .from('content_guide_ideas')
         .select('id, title, position, status, deliverable_id, client_id')
         .eq('content_guideline_id', guideline.id)
+        .eq('client_id', run.client_id)
         .order('position', { ascending: true })
       if (ideaRowsError) {
         return {
@@ -837,6 +854,9 @@ const handleFindContentRuns: ToolHandler = async (staff, input) => {
         }
       }
       videos = (ideaRows ?? []) as Array<Record<string, unknown>>
+      if (videos.some(video => video.client_id !== run.client_id)) {
+        return { error: 'A guideline video belongs to a different client. Video navigation was refused.' }
+      }
     }
 
     return {

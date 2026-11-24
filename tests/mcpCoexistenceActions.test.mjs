@@ -400,11 +400,19 @@ test('company-wide actions require an explicit company_admin context', () => {
   }
 })
 
-test('internal calendar/content-run actions are unavailable in client Projects', () => {
-  for (const name of ['find_content_runs', 'link_content_run_deliverables', 'upsert_calendar_event']) {
+test('internal calendar/linkage writes remain unavailable in client Projects', () => {
+  for (const name of ['link_content_run_deliverables', 'upsert_calendar_event']) {
     assert.equal(ctx.assertToolAllowedInContext(name, 'client').allowed, false)
     assert.equal(ctx.assertToolAllowedInContext(name, 'staff').allowed, true)
     assert.equal(ctx.assertToolAllowedInContext(name, 'company_admin').allowed, true)
+  }
+})
+
+test('read-only Content Run discovery shares the exact-client guideline scope', () => {
+  assert.ok(ctx.CLIENT_SCOPED_TOOLS.includes('find_content_runs'))
+  assert.ok(!ctx.STAFF_SUBJECT_TOOLS.includes('find_content_runs'))
+  for (const kind of ['client', 'staff', 'company_admin']) {
+    assert.equal(ctx.assertToolAllowedInContext('find_content_runs', kind).allowed, true)
   }
 })
 

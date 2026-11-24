@@ -138,7 +138,7 @@ test('a Red Oak client_id can never redirect a We Ar Fuels write', () => {
   assert.match(SQL, /already linked to a different client/)
 })
 
-test('generic create_task still fails in a client Project, and the staff-subject guard is unchanged', () => {
+test('generic create_task still fails in a client Project, and personal staff tools stay guarded', () => {
   const r = ctx.assertToolAllowedInContext('create_task', 'client')
   assert.equal(r.allowed, false)
   assert.match(r.error, /not available in a client Project/)
@@ -148,7 +148,7 @@ test('generic create_task still fails in a client Project, and the staff-subject
     'update_my_preferences', 'get_my_assistant_bootstrap', 'get_my_recurring_tasks',
     'create_recurring_task', 'compose_mail_draft', 'log_lead_email_activity',
     'log_ordinary_hours', 'log_kilometre_entry', 'read_my_recent_entries', 'correct_my_entry',
-    'find_content_runs', 'link_content_run_deliverables', 'upsert_calendar_event',
+    'link_content_run_deliverables', 'upsert_calendar_event',
   ])
 })
 
