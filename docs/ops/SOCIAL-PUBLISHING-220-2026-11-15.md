@@ -1,5 +1,26 @@
 # Social publishing — 15 November 2026
 
+## 24 November — callback75 and one consumed setup; no Page acceptance yet
+
+Exact callback+one-link approval consumed. One reviewed release74->75/8files;
+all8 hosted bytes match,1changed/6preserved/1new helper, auth/settings and77
+configuration digests unchanged. Receipt:
+approvals/META-LONG-LIVED-CALLBACK-2026-11-24-RECEIPT.json. ONE setup invocation
+created one unexpired hash-only request. Owner completed consent and exact request
+used11:10:59.066Z. No raw URL/state persisted outside private chat. Do not repeat
+either release or setup-link generation.
+
+Current native result still META_PUBLISHING_TOKEN_EXPIRY_UNVERIFIED; expected
+connection's last_connected_at remains19Nov and no intended replacement is
+established. One encrypted USER token is valid, expiry NULL, data-access22Feb2027,
+validated11:11:06.742Z. Keep old credential intact and do not send owner through
+consent again. Page CREATE_CONTENT/publishing remain unverified and disabled.
+Local investigation next: explicit raw zero expiry and missing expiry are collapsed
+by current diagnostics. Primary Facebook SDK treats zero as distinct from expired
+dates; any correction needs exact fresh proof and finite bounds, not an assumed
+permanent credential. No new policy/backend approval is implied. No publishing,
+mapping, scope, config/key, Microsoft or Vercel changes. Same #991 ownership.
+
 ## 24 November, 13:04 SAST — diagnostic release96 complete; local OAuth correction qualified
 
 Exact CA three-helper approval consumed by ONE MCP deploy. Current hosted baseline

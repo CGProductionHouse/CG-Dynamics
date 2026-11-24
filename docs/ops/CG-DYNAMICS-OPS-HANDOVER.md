@@ -1,3 +1,30 @@
+## 24 November — callback75 LIVE, one setup link consumed; lifetime gate persists
+
+CA approved "Approve callback fix and one setup link" for831cb1c8. Fresh full
+callback74 baseline matched; ONE deployment ->75 ACTIVE/8files, all8 hosted bytes
+independently matched,1changed/6preserved/1added helper. Auth/import-map settings
+and all77 configuration digests unchanged. Exact release receipt:
+approvals/META-LONG-LIVED-CALLBACK-2026-11-24-RECEIPT.json. Do not redeploy/repeat.
+
+Generated exactly ONE setup link through existing company-admin MCP. Official
+host/callback/code/unchanged7-scope contract verified; one unused hashed request
+independently confirmed before delivery. Owner completed consent; that exact
+request was consumed24Nov11:10:59.066Z. Do NOT regenerate or replay the link. Raw
+URL/state stays only in the private owner conversation, outside repo/artifacts.
+
+Post-consent native account_only still returns META_PUBLISHING_TOKEN_EXPIRY_UNVERIFIED.
+The expected connection remains last_connected_at19Nov15:43:19.424Z; one encrypted
+USER row remains valid, expiry NULL, newly validated24Nov11:11:06.742Z with data
+access until22Feb2027. The intended credential replacement is not established.
+Preserved old credential; do not claim fresh token/Page proof or request consent
+again. Bounded log probes returned no usable failure detail; no raw provider log
+or credentials exported. Continue local lifetime parsing investigation: current
+diagnostics collapses explicit numeric zero and missing expiry into the same NULL.
+Meta's own SDK treats numeric zero separately from expired dates. Any correction
+must retain fresh validity/app/USER/scopes, finite data-access bounds and exact
+native Page rights; unknown/missing/expired evidence must remain refused. No such
+new lifetime-policy release is authorized yet. Publishing/Microsoft/Vercel remain off.
+
 ## 24 November, 13:04 SAST — approved diagnostics LIVE96; long-lived callback correction LOCAL
 
 CA answered "Approve exact three-file diagnostic release". Fresh read found MCP95/
