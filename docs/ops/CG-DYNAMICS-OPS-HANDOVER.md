@@ -1,3 +1,29 @@
+## 24 November — all63 client guideline contexts verified;13missing drafts prepared
+
+CA asked to extend the RC repair to all clients. Same isolated PR1005, no new
+release. Actual installed connector:63exact active-client resolutions/discovery
+reads matched166canonical runs; all63real foreign-client requests denied. Full
+saved-field reads pass for all41canonical guidelines across27clients/39scripts.
+Prepared13missing draft documents for13existing non-cancelled November runs across
+11clients through the normal canonical ensure action; replay returns original ID.
+No new run/date/event/monthly slot, script edit, approval or publication.
+
+All4existing public review links verified anonymously (22videos), with bad-token
+and foreign-slug denial. All627existing client/package/video/guideline/run/calendar/
+share row hashes preserved; only13draft guidelines added. Another staff-created
+Bloem Action Sports guide during initial reads was protected, not duplicated.
+No duplicate/run-client/video-client/orphan-script/position integrity failures.
+MCPv92/all70source files still match the prior green154tests/build/lint release.
+
+Do not call all clients content-complete.3packages remain unverified (Agape,
+Jodrico,LHP);23clients have no run, including5with confirmed video capacity;
+11canonical research guides absent;62shortcodes unset/0registered run-folder maps.
+Existing video codes are candidates, not configuration authority. All exact IDs,
+source references, per-client next actions and protected boundaries are in
+[the complete fleet receipt](ACTIVE-CLIENT-GUIDELINE-SETUP-2026-11-24.md).
+No Vercel/deployment/migration/provider/OAuth/config/secrets/autopilot/Teams/other
+agent change. No guessed tracker; exact Control Centre destination unavailable.
+
 ## 24 November — RC client-Project guidelines fixed LIVE (#896 / PR1005)
 
 Owner requested ordinary script preparation and review sharing from RC-Polypipe's
