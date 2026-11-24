@@ -61,6 +61,15 @@ export async function resolveGuidelinePreparation(staff: PreparationActor, input
     if (known.status === 'cancelled') return { error: 'This planning workspace was cancelled. It was not recreated or reopened.', content_run_id: id }
     return { runId: id, createdRun: false, requestedMonth: month }
   }
+  // Check our exact deterministic workspace first: an interrupted month write
+  // must remain recoverable. Other unassigned documents need exact selection;
+  // missing coverage is not permission to duplicate or silently relabel them.
+  const unassigned = guides.data.filter(guide => guide.month == null && guide.status !== 'archived'
+    && runs.data.some(run => run.id === guide.content_run_id && run.run_date == null && run.status !== 'cancelled'))
+  if (unassigned.length) return {
+    error: 'Existing undated guidelines have unassigned coverage. Read these saved documents first and reuse the intended exact content_run_id; no replacement or month assignment was made.',
+    candidates: unassigned.map(g => ({ guideline_id: g.id, content_run_id: g.content_run_id, title: g.title, month: null, status: g.status })),
+  }
   const candidates = runs.data.filter(run => typeof run.run_date === 'string' && run.run_date.slice(0, 7) === month.slice(0, 7) && !['cancelled', 'completed'].includes(String(run.status)))
   if (candidates.length > 1) return { error: 'More than one shoot exists for this month. Select the intended booking; no duplicate was created.', candidates: candidates.map(r => ({ content_run_id: r.id, name: r.name, run_date: r.run_date })) }
   if (candidates.length === 1) return { runId: String(candidates[0].id), createdRun: false, requestedMonth: month }

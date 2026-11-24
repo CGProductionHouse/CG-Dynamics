@@ -1,3 +1,26 @@
+## 24 November — guideline preparation and date-filtered discovery LIVE
+
+Same isolated PR1005. MCP100 ACTIVE,74 independently verified files, bundle
+`1da6cb62a662e0823aeeae4eeeeab7015df1f433d2d306f7ad3ce256c6edf19d`.
+This supersedes the earlier v95/v97 release baselines below. Preserve the current
+live preimage, including the parallel Meta/publishing modules. Existing auth and
+permissions are unchanged. No migration, Vercel or business-data write this increment.
+
+Staff can prepare one canonical guideline by exact active client/content month
+before booking a shoot. Deterministic identity and failed-receipt/month recovery
+avoid duplicates; existing unassigned documents are offered for exact reuse.
+Date searches now separately surface saved undated guidelines without inventing
+dates. RC's original blocked company ChatGPT conversation now returns the working
+eight-script no-login review link using read-only actions. Three cancelled
+1December bookings remain cancelled; no fake booking or publication was performed.
+
+219/219 final focused serial tests incl real disposable SQL, build, scoped lint,
+diff, official Edge bundle and helper native type check pass. Full downloaded
+runtime retains its pre-existing type-only support diagnostics. Calendar FORM
+mirror/duplicate repair is source-only, not live frontend. Exact limits and source
+receipt: [guideline release](GUIDELINE-PREPARATION-RELEASE-2026-11-24.md).
+Root/other worktrees remain untouched; earlier client/package/media holds remain.
+
 ## 24 November — missing Elcheck film tracked; canonical connector registration LIVE
 
 CA's Studio screenshot exposed a real missing December R02, rather than another

@@ -5,6 +5,7 @@ import ts from 'typescript'
 import { actualOperationalDispatcher } from './helpers/mcpOperationalDispatcher.mjs'
 import { assertRecordClientMatchesContext } from '../supabase/functions/cg-dynamics-mcp/projectContext.ts'
 import { buildGuidelineNavigation } from '../supabase/functions/cg-dynamics-mcp/contentGuidelineActions.ts'
+import { fetchAllRows } from '../supabase/functions/_shared/paginatedRows.ts'
 
 const CLIENT = '11111111-1111-4111-8111-111111111111'
 const FOREIGN = '22222222-2222-4222-8222-222222222222'
@@ -15,24 +16,29 @@ const source = readFileSync('supabase/functions/cg-dynamics-mcp/index.ts', 'utf8
 const start = source.indexOf('const handleFindContentRuns:')
 const end = source.indexOf('\n/**', start)
 const js = ts.transpileModule(source.slice(start, end), { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText
-const discover = new Function('classifyOneDriveReadiness', 'buildGuidelineNavigation', 'assertRecordClientMatchesContext',
-  `${js}; return handleFindContentRuns`)(() => ({ readiness: 'unmapped' }), buildGuidelineNavigation, assertRecordClientMatchesContext)
+const discover = new Function('classifyOneDriveReadiness', 'buildGuidelineNavigation', 'assertRecordClientMatchesContext', 'fetchAllRows',
+  `${js}; return handleFindContentRuns`)(() => ({ readiness: 'unmapped' }), buildGuidelineNavigation, assertRecordClientMatchesContext, fetchAllRows)
 
 function database({ rows = {}, fail = null, ignoreRunFilter = false } = {}) {
   const reads = []
   return { reads, from(table) {
     const filters = []
-    reads.push({ table, filters })
+    let from = 0, to = Infinity
+    const read = { table, filters, from }; reads.push(read)
     const resolve = () => {
-      if (fail === table) return { data: null, error: { message: 'Source unavailable' } }
+      if (fail === table || fail === `${table}:${from}`) return { data: null, error: { message: 'Source unavailable' } }
       let data = rows[table] ?? []
       if (!(ignoreRunFilter && table === 'content_runs')) data = data.filter(row => filters.every(([key, value, op]) =>
-        op === 'neq' ? row[key] !== value : row[key] === value))
-      return { data, error: null }
+        op === 'neq' ? row[key] !== value : op === 'gte' ? row[key] != null && row[key] >= value : op === 'lte' ? row[key] != null && row[key] <= value : row[key] === value))
+      return { data: data.slice(from, to + 1), error: null }
     }
     const query = { select() { return this }, order() { return this }, limit() { return this },
       eq(key, value) { filters.push([key, value, 'eq']); return this },
       neq(key, value) { filters.push([key, value, 'neq']); return this },
+      is(key, value) { return this.eq(key, value) },
+      gte(key, value) { filters.push([key, value, 'gte']); return this },
+      lte(key, value) { filters.push([key, value, 'lte']); return this },
+      range(a, b) { from = a; to = b; read.from = from; return this },
       async maybeSingle() { const result = resolve(); return { ...result, data: result.data?.[0] ?? null } },
       then(done, reject) { return Promise.resolve(resolve()).then(done, reject) },
     }
@@ -110,4 +116,41 @@ test('personal tasks, staff identities, calendar mutations and company inventori
     assert.ok(response.error, tool)
     assert.equal(db.reads.length, 0)
   }
+})
+
+test('three cancelled dated bookings do not hide the eight-script undated review document', async () => {
+  const rows = {
+    content_runs: [ownRun, ...[1,2,3].map(i => ({ ...ownRun, id:`cancelled-${i}`, status:'cancelled', run_date:'2026-12-01' }))],
+    content_guidelines: [{id:GUIDE,client_id:CLIENT,content_run_id:RUN,month:null,status:'published',title:'Eight final scripts'}],
+    content_guide_ideas: Array.from({length:8}, (_,i)=>({id:`script-${i}`,client_id:CLIENT,content_guideline_id:GUIDE,title:`Exact script ${i+1}`,position:i+1,status:'idea'})),
+  }
+  const before=JSON.stringify(rows), db=database({rows})
+  const found=result(await dispatcher(db)({context,from:'2026-11-24',to:'2026-12-15'},'find_content_runs'))
+  assert.equal(found.runs.length,3); assert.ok(found.runs.every(r=>r.content_run.status==='cancelled'))
+  assert.equal(found.undated_preparation_count,1); assert.equal(found.undated_preparations_truncated,false)
+  const saved=found.undated_preparations[0]
+  assert.equal(saved.content_run.id,RUN); assert.equal(saved.content_run.run_date,null)
+  assert.equal(saved.content_guideline.id,GUIDE); assert.equal(saved.content_guideline.month,null)
+  assert.equal(saved.videos.length,8); assert.match(found.note,/get_content_guideline_share/)
+  assert.equal(JSON.stringify(rows),before)
+})
+
+test('undated lookup genuinely pages through row 1001 and refuses incomplete or foreign history', async () => {
+  const history=Array.from({length:1000},(_,i)=>({...ownRun,id:`no-guide-${i}`}))
+  const rows={content_runs:[...history,ownRun],content_guidelines:[{id:GUIDE,client_id:CLIENT,content_run_id:RUN,status:'published'}]}
+  const db=database({rows}), args={context,run_date:'2026-12-01'}
+  const found=result(await dispatcher(db)(args,'find_content_runs'))
+  assert.equal(found.runs.length,0); assert.equal(found.undated_preparations[0].content_run.id,RUN)
+  assert.ok(db.reads.some(r=>r.table==='content_runs'&&r.from===1000))
+  const failed=await dispatcher(database({rows,fail:'content_runs:1000'}))(args,'find_content_runs')
+  assert.equal(failed.result.isError,true); assert.match(JSON.stringify(failed),/read completely/)
+  const foreign=await dispatcher(database({rows:{content_runs:[{...ownRun,client_id:FOREIGN}]},ignoreRunFilter:true}))(args,'find_content_runs')
+  assert.match(JSON.stringify(foreign),/Cross-client/)
+})
+
+test('exact event/deliverable discovery cannot substitute an unrelated undated guideline', async () => {
+  const db=database({rows:{content_runs:[ownRun]}})
+  const found=result(await dispatcher(db)({context,run_date:'2026-12-01',calendar_event_id:'exact-event'},'find_content_runs'))
+  assert.deepEqual(found.undated_preparations,[])
+  assert.equal(db.reads.some(r=>r.table==='content_guidelines'),false)
 })

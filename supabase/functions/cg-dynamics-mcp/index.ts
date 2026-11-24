@@ -828,7 +828,27 @@ const handleFindContentRuns: ToolHandler = async (staff, input) => {
     if (!scope.allowed) return { error: scope.error }
   }
 
-  const detailed = await Promise.all((runs ?? []).map(async (run: Record<string, unknown>) => {
+  // Dates filter bookings, not the existence of script preparation. Keep undated
+  // documents separate so an assistant cannot mistake them for a dated shoot.
+  let undatedRuns: Array<Record<string, unknown>> = []
+  let undatedTotal: number | null = null
+  if (clientId && (input.run_date || input.from || input.to) && !input.calendar_event_id && !input.deliverable_id) {
+    const [planning, documents] = await Promise.all([
+      fetchAllRows<Record<string, unknown>>((from, to) => staff.supabase.from('content_runs')
+        .select('id, client_id, client_name, name, run_date, start_time, location, status, calendar_event_id')
+        .eq('client_id', clientId).is('run_date', null).neq('status', 'cancelled').order('id').range(from, to)),
+      fetchAllRows<Record<string, unknown>>((from, to) => staff.supabase.from('content_guidelines')
+        .select('id,client_id,content_run_id,status').eq('client_id', clientId).neq('status', 'archived').order('id').range(from, to)),
+    ])
+    if (planning.error || documents.error) return { error: 'Undated guideline history could not be read completely. Do not conclude that no guideline exists or create a replacement.' }
+    if ([...planning.data, ...documents.data].some(row => row.client_id !== clientId)) return { error: 'Cross-client guideline history refused.' }
+    const ids = new Set(documents.data.map(row => row.content_run_id))
+    const eligible = planning.data.filter(row => row.run_date === null && row.status !== 'cancelled' && ids.has(row.id))
+    undatedTotal = eligible.length
+    undatedRuns = eligible.slice(0, 25)
+  }
+
+  const detailed = await Promise.all([...(runs ?? []), ...undatedRuns].map(async (run: Record<string, unknown>) => {
     const runId = run.id as string
     const [guidelineRes, mappingRes, closeoutRes] = await Promise.all([
       staff.supabase.from('content_guidelines').select('id, title, month, status, client_id').eq('content_run_id', runId).eq('client_id', run.client_id).maybeSingle(),
@@ -900,9 +920,14 @@ const handleFindContentRuns: ToolHandler = async (staff, input) => {
   }))
 
   return {
-    runs: detailed,
+    runs: detailed.slice(0, (runs ?? []).length),
+    undated_preparations: detailed.slice((runs ?? []).length),
+    undated_preparation_count: undatedTotal,
+    undated_preparations_truncated: undatedTotal !== null && undatedTotal > undatedRuns.length,
     matched_by: input.deliverable_id ? 'deliverable_id' : input.calendar_event_id ? 'calendar_event_id' : input.run_date ? 'run_date' : clientId ? 'client' : 'recent',
-    note: detailed.length === 0
+    note: undatedTotal !== null && undatedTotal > 0
+      ? 'Saved undated guidelines appear separately in undated_preparations. They are not bookings or date matches. Inspect their saved videos and use get_content_guideline_share for the client review link; a shoot date, folder or package slot is not a prerequisite. Do not restore a cancelled booking or create another guideline just to share existing scripts.'
+      : detailed.length === 0
       ? 'No Content Run matched those exact criteria. Reported rather than guessed - never substitute a different client or date.'
       : 'One canonical Content Guideline per Content Run. Raw OneDrive identifiers and URLs are internal-only and withheld.',
   }

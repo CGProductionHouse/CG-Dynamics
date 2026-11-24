@@ -32,6 +32,7 @@ function fixture({runs=[],guides=[],fail=null,loseInsert=false,inactive=false}={
       reads.push({table,operation,from})
       if(db.fail===table||db.fail===`${table}:${from}`)return {data:null,error:{message:'Exact source unavailable'}}
       const rows=tables[table]??[]
+      if(table==='content_guidelines'&&operation==='update'&&db.monthWriteFailure)return {data:null,error:{message:'Month write interrupted'}}
       if(operation==='insert'){
         writes.push({table,payload})
         if(rows.some(r=>r.id===payload.id))return {data:null,error:{message:'duplicate key'}}
@@ -96,6 +97,14 @@ test('legacy exact-run contract still works without a month or a planning insert
   assert.equal(saved.guideline_id,GUIDE);assert.equal(db.writes.length,0)
 })
 
+test('existing unassigned published scripts are offered for exact reuse, never duplicated or relabelled',async()=>{
+  const db=fixture({runs:[run()],guides:[guide({month:null,status:'published'})]})
+  const before=JSON.stringify(db.tables),saved=await ensure(actor(db),{client_id:CLIENT,month:'2026-12'})
+  assert.match(saved.error,/Read these saved documents first/)
+  assert.equal(saved.candidates[0].content_run_id,RUN);assert.equal(saved.candidates[0].month,null)
+  assert.equal(JSON.stringify(db.tables),before);assert.equal(db.writes.length,0)
+})
+
 test('a real dated run is reused rather than inventing another booking',async()=>{
   const db=fixture({runs:[run({run_date:'2026-12-08'})]});const saved=await ensure(actor(db),{month:'2026-12',client_id:CLIENT})
   assert.equal(saved.content_run_id,RUN);assert.equal(saved.run_date,'2026-12-08');assert.equal(db.tables.content_runs.length,1)
@@ -149,5 +158,19 @@ test('an exact failed ensure recovers with the SAME key and upgrades only its fa
   const saved=await call(args,'ensure_content_guideline');assert.equal(saved.result.isError,false)
   assert.equal(payload(saved).guideline_id,GUIDE);assert.equal(db.tables.content_runs.length,1);assert.equal(db.tables.content_guidelines.length,1)
   assert.equal([...db.receipts.values()][0].result_status,'success')
+  assert.deepEqual(await call(args,'ensure_content_guideline'),saved)
+})
+
+test('interrupted month write recovers the same workspace/document instead of treating it as an unrelated legacy draft',async()=>{
+  const db=fixture();db.monthWriteFailure=true
+  const call=actualOperationalDispatcher(actor(db),{ensure_content_guideline:ensure})
+  const args={context:{context_kind:'client',client_id:CLIENT},month:'2026-12',idempotency_key:'recover-month-write'}
+  const first=await call(args,'ensure_content_guideline');assert.equal(first.result.isError,true)
+  assert.equal(db.tables.content_runs.length,1);assert.equal(db.tables.content_guidelines.length,1)
+  assert.equal(db.tables.content_guidelines[0].month,null)
+  db.monthWriteFailure=false
+  const saved=await call(args,'ensure_content_guideline');assert.equal(saved.result.isError,false)
+  assert.equal(payload(saved).guideline_id,GUIDE);assert.equal(payload(saved).month,'2026-12-01')
+  assert.equal(db.tables.content_runs.length,1);assert.equal(db.tables.content_guidelines.length,1)
   assert.deepEqual(await call(args,'ensure_content_guideline'),saved)
 })
