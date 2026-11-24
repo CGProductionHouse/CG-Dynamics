@@ -31,10 +31,15 @@ export interface ExistingVideoInput {
 }
 
 export function parseExistingFilmIdentity(identity: string): { clientCode: string; videoNumber: number | null } | null {
-  const match = /^\d{4}_\d{2}_([A-Z0-9]+(?:_[A-Z0-9]+)*)_VIDEO(?:_(\d{1,3})(?:_[A-Z0-9]+(?:_[A-Z0-9]+)*)?|_[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*)?$/.exec(identity)
-  if (!match || /_(?:R\d+|REVISION_\d+|REVIEW|FINAL)$/.test(identity)) return null
-  const number = match[2] === undefined ? null : Number(match[2])
-  return number === 0 ? null : { clientCode: match[1], videoNumber: number }
+  if (/_(?:R\d+|REVISION_\d+|REVIEW|FINAL)$/.test(identity)) return null
+  // Parse the numbered delimiter first. A concept containing the word VIDEO
+  // must not swallow the true number into the client code.
+  const numbered = /^\d{4}_\d{2}_([A-Z0-9]+(?:_[A-Z0-9]+)*?)_VIDEO_(\d{1,3})(?:_[A-Z0-9]+(?:_[A-Z0-9]+)*)?$/.exec(identity)
+  if (numbered) return Number(numbered[2]) > 0 ? { clientCode: numbered[1], videoNumber: Number(numbered[2]) } : null
+  // Old unnumbered names are accepted only when the delimiter is unambiguous.
+  if (identity.split('_').filter(part => part === 'VIDEO').length !== 1) return null
+  const legacy = /^\d{4}_\d{2}_([A-Z0-9]+(?:_[A-Z0-9]+)*)_VIDEO(?:_[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*)?$/.exec(identity)
+  return legacy ? { clientCode: legacy[1], videoNumber: null } : null
 }
 
 function validPrivateExportSource(input: ExistingVideoInput): boolean {

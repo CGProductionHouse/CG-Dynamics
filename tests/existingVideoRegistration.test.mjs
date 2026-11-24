@@ -76,6 +76,9 @@ test('actual legacy stems are retained, including one-digit numbers and unnumber
   for (const identity of ['2026_12_PRACTICE_VIDEO_0', '2026_12_PRACTICE_VIDEO_000', '2026_12_PRACTICE_VIDEO_1_FINAL']) {
     assert.equal(rules.parseExistingFilmIdentity(identity), null)
   }
+  assert.deepEqual(rules.parseExistingFilmIdentity('2026_12_PRACTICE_VIDEO_1_VIDEO_TIPS'), { clientCode: 'PRACTICE', videoNumber: 1 })
+  assert.deepEqual(rules.parseExistingFilmIdentity('2026_12_VIDEO_COMPANY_VIDEO_1_YEAR_END'), { clientCode: 'VIDEO_COMPANY', videoNumber: 1 })
+  assert.equal(rules.parseExistingFilmIdentity('2026_12_PRACTICE_VIDEO_XMAS_VIDEO'), null)
 })
 
 test('padded numbers/concept changes collide atomically instead of creating another film', async () => {
