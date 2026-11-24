@@ -30,13 +30,17 @@ export interface ExistingVideoInput {
   evidenceKind: keyof typeof EXISTING_VIDEO_EVIDENCE
 }
 
-export function parseExistingFilmIdentity(identity: string): { clientCode: string; videoNumber: number | null } | null {
-  if (/_(?:R\d+|REVISION_\d+|REVIEW|FINAL)$/.test(identity)) return null
+export function parseExistingFilmIdentity(identity: string): { clientCode: string | null; videoNumber: number | null } | null {
+  if (!/^\d{4}_\d{2}[_-][A-Z0-9][A-Z0-9 _&'().-]*$/.test(identity)
+    || /_(?:[RV]\d+|REVISION_\d+|REVIEW|FINAL)$/.test(identity) || /\(\d+\)$/.test(identity)) return null
   // Parse the numbered delimiter first. A concept containing the word VIDEO
   // must not swallow the true number into the client code.
-  const numbered = /^\d{4}_\d{2}_([A-Z0-9]+(?:_[A-Z0-9]+)*?)_VIDEO_(\d{1,3})(?:_[A-Z0-9]+(?:_[A-Z0-9]+)*)?$/.exec(identity)
+  const numbered = /^\d{4}_\d{2}[_-]([A-Z0-9]+(?:_[A-Z0-9]+)*?)_VIDEO_(\d{1,3})(?:_[A-Z0-9]+(?:_[A-Z0-9]+)*)?$/.exec(identity)
   if (numbered) return Number(numbered[2]) > 0 ? { clientCode: numbered[1], videoNumber: Number(numbered[2]) } : null
   // Old unnumbered names are accepted only when the delimiter is unambiguous.
+  // Ordinary historical names without a VIDEO delimiter are opaque film
+  // identities. Do not invent a client folder code or monthly video number.
+  if (!identity.split(/[ _-]/).includes('VIDEO')) return { clientCode: null, videoNumber: null }
   if (identity.split('_').filter(part => part === 'VIDEO').length !== 1) return null
   const legacy = /^\d{4}_\d{2}_([A-Z0-9]+(?:_[A-Z0-9]+)*)_VIDEO(?:_[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*)?$/.exec(identity)
   return legacy ? { clientCode: legacy[1], videoNumber: null } : null
@@ -56,12 +60,14 @@ export function validateExistingVideo(input: ExistingVideoInput): string | null 
   if (!/^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(input.clientId)) return 'Select an exact client.'
   if (!input.clientName.trim() || !input.title.trim()) return 'Client and film title are required.'
   if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(input.month)) return 'Enter the intended release month, not the source shoot month.'
-  if (!/^[A-Z0-9]+(?:_[A-Z0-9]+)*$/.test(input.identity) || input.identity.length > 200) return 'Enter the actual stable film identity in uppercase, without extension or revision.'
-  if (!input.identity.startsWith(input.month.replace('-', '_') + '_')) return 'The film identity must match its release month.'
+  if (input.identity.length > 200) return 'Enter the actual stable film identity in uppercase, without extension or revision.'
+  if (![input.month.replace('-', '_') + '_', input.month.replace('-', '_') + '-'].some(prefix => input.identity.startsWith(prefix))) return 'The film identity must match its release month.'
   if (!parseExistingFilmIdentity(input.identity)) return 'Use the actual established film identity, including its existing client code and video number where present.'
   if (/_(?:R\d+|REVISION_\d+|REVIEW|FINAL)$/.test(input.identity)) return 'Remove the revision, REVIEW or FINAL suffix from the stable identity.'
   if (!/\.mp4$/i.test(input.filename.trim()) || /[\\/\r\n]/.test(input.filename)) return 'Enter the exact MP4 filename, not a local path.'
-  if (!input.filename.toUpperCase().startsWith(input.identity + '.') && !input.filename.toUpperCase().startsWith(input.identity + '_')) return 'The filename must belong to this film identity.'
+  const stem = input.filename.trim().slice(0, -4).toUpperCase()
+  const suffix = stem.slice(input.identity.length)
+  if (stem !== input.identity && (!stem.startsWith(input.identity) || !/^_(?:(?:[RV]\d+|REVISION_\d+)(?:_(?:REVIEW|FINAL))?|REVIEW|FINAL)$/.test(suffix))) return 'Use the actual filename stem; only an explicit revision, REVIEW or FINAL suffix may be removed.'
   if (!/^[a-f0-9]{64}$/i.test(input.sha256)) return 'A complete SHA-256 identifies the exact revision.'
   if (!input.revision.trim() || !input.editorName.trim()) return 'Revision and responsible editor are required.'
   if (!isSafeHttpUrl(input.evidenceUrl) || !input.evidenceUrl.trim().startsWith('https://')) return 'Add an ordinary https reference for the handoff/approval evidence.'

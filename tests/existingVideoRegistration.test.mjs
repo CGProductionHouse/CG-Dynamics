@@ -81,6 +81,29 @@ test('actual legacy stems are retained, including one-digit numbers and unnumber
   assert.equal(rules.parseExistingFilmIdentity('2026_12_PRACTICE_VIDEO_XMAS_VIDEO'), null)
 })
 
+test('ordinary historical names retain spaces/hyphens without inventing folder codes or numbers', async () => {
+  for (const identity of ['2026_11_NOV_PRACTICE AUTO', '2026_11_NOV_PRACTICE_RUGBY']) {
+    const repo = repository()
+    const result = await rules.registerExistingVideoWith({ ...input, month: '2026-11', identity, filename: identity + '.mp4' }, 'actor', repo)
+    assert.equal(result.error, null)
+    assert.equal(result.data.canonical_name, identity)
+    assert.equal(result.data.folder_client_code, null)
+    assert.equal(result.data.video_number, null)
+  }
+  assert.deepEqual(rules.parseExistingFilmIdentity('2026_10-PRACTICE_AUTO_VIDEO_2'), { clientCode: 'PRACTICE_AUTO', videoNumber: 2 })
+})
+
+test('a filename cannot hide an extra film/number/concept as an arbitrary revision suffix', async () => {
+  for (const patch of [
+    { identity: '2026_12_PRACTICE_VIDEO', filename: '2026_12_PRACTICE_VIDEO_1.mp4' },
+    { identity: '2026_12_PRACTICE', filename: '2026_12_PRACTICE_ANOTHER_FILM.mp4' },
+    { identity: input.identity, filename: input.identity + '_ANOTHER_FILM.mp4' },
+    { identity: '2026_12_PRACTICE_VIDEO_1(1)', filename: '2026_12_PRACTICE_VIDEO_1(1).mp4' },
+    { identity: input.identity + '_V8', filename: input.identity + '_V8.mp4' },
+    { identity: '2026_12_../../PRIVATE', filename: '2026_12_../../PRIVATE.mp4' },
+  ]) { const repo = repository(); assert.ok((await rules.registerExistingVideoWith({ ...input, ...patch }, 'actor', repo)).error); assert.equal(repo.writes, 0) }
+})
+
 test('padded numbers/concept changes collide atomically instead of creating another film', async () => {
   const a = '2026_12_PRACTICE_VIDEO_1', b = '2026_12_PRACTICE_VIDEO_01_NEW_CONCEPT'
   assert.equal(await rules.existingVideoId(input.clientId, a), await rules.existingVideoId(input.clientId, b))
