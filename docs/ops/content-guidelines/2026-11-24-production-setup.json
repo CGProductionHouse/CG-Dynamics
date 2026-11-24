@@ -1,9 +1,9 @@
 {
   "captured_at": "2026-11-24T09:58:03.28205+00:00",
   "active_clients": 63,
-  "live_backend_version": 94,
-  "code_head": "fa425fc10ca0fafe2dd9639de3b3f344d577f098",
-  "backend_sha256": "3f54b38b5b9d2d2d6118b62496c18834606a50f068462d9bcc687eb6aeef6136",
+  "live_backend_version": 95,
+  "code_head": "4c083ca8ae9f35b5836053b927eddf2cee6bda7b",
+  "backend_sha256": "80a2f4db74ce835f5d65e7a7964c09b5cb07a7a1b09c68545d452beefc643264",
   "source_export_files": 30,
   "source_unique_films": 11,
   "matched_existing_before": 10,
@@ -815,7 +815,7 @@
           "schedule_ids": []
         }
       ],
-      "next_action": "Locate the real brief/commission/source; no film, run or posting date invented"
+      "next_action": "Reconcile those four real files against the production handoff, then register only the correct exact film identity/revision. Older October V8 remains historical owner-review evidence; do not revive it as current work."
     },
     {
       "client_id": "4424ed69-7270-4d30-a1ea-0b77d76912df",
@@ -981,7 +981,7 @@
           "schedule_ids": []
         }
       ],
-      "next_action": "Locate the real brief/commission/source; no film, run or posting date invented"
+      "next_action": "Reconcile and register the existing November export; do not commission or rename another film merely because Pipeline was empty. Separate Human Auto research gate remains unchanged."
     },
     {
       "client_id": "21300630-6755-4591-9a49-e22abbaf7e3d",
@@ -1043,7 +1043,7 @@
           "schedule_ids": []
         }
       ],
-      "next_action": "Locate the real brief/commission/source; no film, run or posting date invented"
+      "next_action": "Establish the real current work from its source. Do not use an August export as proof of a November/December assignment or invent a new shoot."
     },
     {
       "client_id": "e1cb958e-3f68-4a77-b5ea-b471ea62bdef",
@@ -1264,7 +1264,7 @@
           "schedule_ids": []
         }
       ],
-      "next_action": "Locate the real brief/commission/source; no film, run or posting date invented"
+      "next_action": "Resolve the cross-client filename/commission ambiguity before registering. Do not bind to both clients or substitute Supa Quick Centurion."
     },
     {
       "client_id": "a5eab798-3e00-44cc-947e-463386fdac39",
@@ -1733,7 +1733,7 @@
           "schedule_ids": []
         }
       ],
-      "next_action": "Locate the real brief/commission/source; no film, run or posting date invented"
+      "next_action": "Reconcile the existing three November film candidates and count VIDEO_2 once. Retain both source copies; no deletion, movement, approval or publication inferred."
     },
     {
       "client_id": "e2ad6d57-5b06-46e1-b75b-b67f017d57f1",
@@ -2266,5 +2266,321 @@
     "passed": 63,
     "failed": 0,
     "note": "v94 changed only the shared film parser; all context/auth/catalog sources unchanged"
+  },
+  "verification_head": "f240513d8be4b149094d961d4f903bd6727acaef",
+  "final_db_read_at": "2026-11-24T10:28:11.651707+00:00",
+  "source_reconciliation_packet": "2026-11-24-held-video-source-reconciliation.json",
+  "source_reconciliation_sha256": "3e6578a59e824ba26c79a9decf001e077238934065df621cc4941c9d13dbaa39",
+  "source_reconciliation": [
+    {
+      "client_name": "Emoya Estate Driving Range",
+      "finding": "Four real November files found: two VIDEO_1 variants and two VIDEO_2 variants. Each has a different provider SHA-256; not identical copies and not four new commissions.",
+      "required": [
+        "Exact responsible editor",
+        "Current intended variant/revision and its internal handoff/review state",
+        "Package-valid relationship of VIDEO_1 and VIDEO_2; confirmed capacity remains one professional video per month"
+      ],
+      "next_action": "Reconcile those four real files against the production handoff, then register only the correct exact film identity/revision. Older October V8 remains historical owner-review evidence; do not revive it as current work.",
+      "client_id": "217a547c-7b22-45cc-bf88-9d45a8e93dfe",
+      "can_register_now": false,
+      "pipeline_film_rows": 0,
+      "published_dynamics_video_assets": 0,
+      "existing_canonical_context": {
+        "id": "217a547c-7b22-45cc-bf88-9d45a8e93dfe",
+        "name": "Emoya Estate Driving Range",
+        "runs": [
+          {
+            "id": "81770145-a2e8-465c-abaa-00790a71e3cf",
+            "name": "CONTENT RUN - EMOYA DRIVING RANGE",
+            "status": "planning",
+            "run_date": "2026-11-10"
+          },
+          {
+            "id": "7f1ba74b-45c0-4e1a-9916-26cce7de542c",
+            "name": "CONTENT RUN - EMOYA DRIVING RANGE",
+            "status": "planning",
+            "run_date": "2026-09-28"
+          }
+        ],
+        "guidelines": [
+          {
+            "id": "1c643101-8e1b-42fb-bf11-c0ebb20d1496",
+            "month": "2026-11-01",
+            "status": "draft",
+            "content_run_id": "81770145-a2e8-465c-abaa-00790a71e3cf"
+          }
+        ]
+      }
+    },
+    {
+      "client_name": "Human Auto",
+      "finding": "Real November 157102825-byte export exists in the exact mapped client root, plus separate October files. The November file has a complete provider SHA-256.",
+      "required": [
+        "Exact responsible editor",
+        "Actual revision and internal delivery/review evidence"
+      ],
+      "next_action": "Reconcile and register the existing November export; do not commission or rename another film merely because Pipeline was empty. Separate Human Auto research gate remains unchanged.",
+      "client_id": "816c7f59-d56c-46a3-ba15-f76971d83769",
+      "can_register_now": false,
+      "pipeline_film_rows": 0,
+      "published_dynamics_video_assets": 0,
+      "existing_canonical_context": {
+        "id": "816c7f59-d56c-46a3-ba15-f76971d83769",
+        "name": "Human Auto",
+        "runs": [
+          {
+            "id": "cc796d34-fc83-4a32-b1f4-eaef1ca5bf8c",
+            "name": "CONTENT RUN - FORD",
+            "status": "planning",
+            "run_date": "2026-10-13"
+          },
+          {
+            "id": "adb40d6a-9c22-4a1c-9c83-da411507f2d5",
+            "name": "CONTENT RUN - HUMAN AUTO",
+            "status": "planning",
+            "run_date": "2026-11-16"
+          },
+          {
+            "id": "085a0d27-11cf-4825-b92f-5131ce037793",
+            "name": "CONTENT RUN - WELKOM HUMAN AUTO",
+            "status": "planning",
+            "run_date": "2026-06-25"
+          },
+          {
+            "id": "0b8b44a2-f9e7-437f-82c0-b6ceb7b5dd8a",
+            "name": "CONTENT RUN - HUMAN AUTO",
+            "status": "planning",
+            "run_date": "2026-08-28"
+          },
+          {
+            "id": "3996e222-de28-4e63-a457-1e7af730fadd",
+            "name": "CONTENT RUN - HUMAN AUTO",
+            "status": "planning",
+            "run_date": "2026-07-29"
+          }
+        ],
+        "guidelines": [
+          {
+            "id": "e431e0a1-e85a-49a5-b9b5-8827110cd373",
+            "month": "2026-11-01",
+            "status": "draft",
+            "content_run_id": "adb40d6a-9c22-4a1c-9c83-da411507f2d5"
+          }
+        ]
+      }
+    },
+    {
+      "client_name": "Hino Trucks",
+      "finding": "Inspected export year lists January through August; the inspected latest August folder has two real exports. No November/December commission was established in this bounded source set.",
+      "required": [
+        "Actual current commission/brief or an exact newer export with responsible editor, revision and handoff"
+      ],
+      "next_action": "Establish the real current work from its source. Do not use an August export as proof of a November/December assignment or invent a new shoot.",
+      "client_id": "1007e58b-3fea-4515-88b7-ddaa85763de6",
+      "can_register_now": false,
+      "pipeline_film_rows": 0,
+      "published_dynamics_video_assets": 0,
+      "existing_canonical_context": {
+        "id": "1007e58b-3fea-4515-88b7-ddaa85763de6",
+        "name": "Hino Trucks",
+        "runs": [
+          {
+            "id": "b60f2e2a-3ecf-4721-a8a9-e9dd8ecc7e31",
+            "name": "CONTENT RUN - HINO TRUCKS",
+            "status": "planning",
+            "run_date": "2026-06-24"
+          },
+          {
+            "id": "7bd673bc-a87d-437a-b902-e66324e8a46d",
+            "name": "CONTENT RUN - HINO",
+            "status": "planning",
+            "run_date": "2026-08-21"
+          }
+        ],
+        "guidelines": []
+      }
+    },
+    {
+      "client_name": "Supa Quick BFN",
+      "finding": "Real November export in exact mapped BFN root contains WISEMAN in its filename. WiseMan is another active client; folder filing alone does not establish the film's primary client or commission.",
+      "required": [
+        "Exact BFN/WISEMAN primary-client and commission identity",
+        "Responsible editor, actual revision and handoff evidence"
+      ],
+      "next_action": "Resolve the cross-client filename/commission ambiguity before registering. Do not bind to both clients or substitute Supa Quick Centurion.",
+      "client_id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+      "can_register_now": false,
+      "pipeline_film_rows": 0,
+      "published_dynamics_video_assets": 0,
+      "existing_canonical_context": {
+        "id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+        "name": "Supa Quick BFN",
+        "runs": [],
+        "guidelines": []
+      }
+    },
+    {
+      "client_name": "The Staffordshire",
+      "finding": "Three distinct November exports established by three distinct provider SHA-256 values. VIDEO_2 has two copies in different source folders with identical SHA-256 and byte count: one film candidate, not two.",
+      "required": [
+        "Responsible editor and actual revision/handoff for each real November film",
+        "Confirmed commissioning/package relationship; filename event labels do not establish current offers, dates or recurring commitments"
+      ],
+      "next_action": "Reconcile the existing three November film candidates and count VIDEO_2 once. Retain both source copies; no deletion, movement, approval or publication inferred.",
+      "client_id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+      "can_register_now": false,
+      "pipeline_film_rows": 0,
+      "published_dynamics_video_assets": 0,
+      "existing_canonical_context": {
+        "id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+        "name": "The Staffordshire",
+        "runs": [
+          {
+            "id": "31fc7981-bcab-469d-93b4-f8d130fd958f",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-06-11"
+          },
+          {
+            "id": "e1cad187-a8b4-4316-a2e0-e513e05f0384",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-06-12"
+          },
+          {
+            "id": "6bc00638-b828-41f3-86b9-b5ad3eccc9d3",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-06-15"
+          },
+          {
+            "id": "11e1eac9-e067-4298-83e0-bd05a9448c73",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "cancelled",
+            "run_date": "2026-07-04"
+          },
+          {
+            "id": "818b2e70-2402-4946-84c2-6fee93fb6498",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-06-23"
+          },
+          {
+            "id": "c73950a8-feda-4a70-8915-aff307b696c6",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-07-04"
+          },
+          {
+            "id": "d51b01ae-c9f1-4a00-ba78-754b04c7b350",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-11-10"
+          },
+          {
+            "id": "f8b1f609-b964-4e4c-90cc-f8d43d29e625",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-10-17"
+          },
+          {
+            "id": "75a25097-b66c-4e73-92e6-33226c208143",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-08-19"
+          },
+          {
+            "id": "37112ecc-eecc-468d-ad3e-e98613e36a34",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-10-07"
+          },
+          {
+            "id": "7f812695-6022-4e89-a1d7-0c1a8f23a424",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-10-09"
+          },
+          {
+            "id": "2095bbd5-8e7f-49fa-935e-a9e608d2679a",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-07-15"
+          },
+          {
+            "id": "9006bdd9-6647-425e-bc32-00e245d3fd73",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-07-21"
+          },
+          {
+            "id": "adf7ff10-5a7e-405e-887c-e734c1887c1f",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-07-24"
+          },
+          {
+            "id": "ce6e1b22-b864-472f-a8e7-30d53282cc01",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "cancelled",
+            "run_date": "2026-07-21"
+          }
+        ],
+        "guidelines": [
+          {
+            "id": "28862509-8b67-45a2-ad3a-80141211855b",
+            "month": "2026-11-01",
+            "status": "draft",
+            "content_run_id": "d51b01ae-c9f1-4a00-ba78-754b04c7b350"
+          }
+        ]
+      }
+    }
+  ],
+  "verification": {
+    "final_serial_tests": 184,
+    "final_serial_files": 14,
+    "final_serial_failures": 0,
+    "nearest_registration_tests": 48,
+    "build": "pass",
+    "scoped_lint": "pass",
+    "diff_check": "pass",
+    "official_edge_bundle": "pass",
+    "live_source_files_matched": 73,
+    "live_unchanged_from_v94": 72,
+    "anonymous_mcp_status": 401,
+    "public_metadata_status": 200
+  },
+  "post_release_readback": {
+    "read_at": "2026-11-24T10:34:57.322383+00:00",
+    "elcheck_rows": 1,
+    "client_assets": [
+      {
+        "client_id": "1007e58b-3fea-4515-88b7-ddaa85763de6",
+        "active_published_assets": 0,
+        "active_published_video_assets": 0
+      },
+      {
+        "client_id": "217a547c-7b22-45cc-bf88-9d45a8e93dfe",
+        "active_published_assets": 1,
+        "active_published_video_assets": 0
+      },
+      {
+        "client_id": "816c7f59-d56c-46a3-ba15-f76971d83769",
+        "active_published_assets": 1,
+        "active_published_video_assets": 0
+      },
+      {
+        "client_id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+        "active_published_assets": 1,
+        "active_published_video_assets": 0
+      },
+      {
+        "client_id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+        "active_published_assets": 1,
+        "active_published_video_assets": 0
+      }
+    ],
+    "pipeline_rows": 106
   }
 }

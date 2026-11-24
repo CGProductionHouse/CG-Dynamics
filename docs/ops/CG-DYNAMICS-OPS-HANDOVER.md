@@ -1,7 +1,7 @@
 ## 24 November — missing Elcheck film tracked; canonical connector registration LIVE
 
 CA's Studio screenshot exposed a real missing December R02, rather than another
-guideline permission issue. Same isolated PR1005; source checkpoints19873a97/fa425fc1.
+guideline permission issue. Same isolated PR1005; source checkpoints19873a97/4c083ca8.
 Exact Studio file/hash and19Nov18:50SAST internal delivery were independently
 verified read-only. New Pipeline record `eea0ac88-1f2c-8c85-8743-1f76d055b91f`
 preserves actual `2026_12_ELCHECK_VIDEO_1`, Nolan Claude Studio PC and R02 at
@@ -9,26 +9,39 @@ internal_review. Media filing remains pending, not approved/published. Normal
 installed ChatGPT action + identical retry return the same ID; independent DB and
 desktop/mobile staff UI readback pass. No fake run, monthly slot or posting date.
 
-MCPv94 ACTIVE, bundle3f54b38b5b9d2d2d6118b62496c18834606a50f068462d9bcc687eb6aeef6136.
+MCP v95 ACTIVE, bundle80a2f4db74ce835f5d65e7a7964c09b5cb07a7a1b09c68545d452beefc643264.
 All73 source files verified after fresh70file v92 preflight;67existing files remain
-byte-identical, including publishing. Later releases must preserve this v94
+byte-identical, including publishing. Later releases must preserve this v95
 preimage. `register_existing_internal_video` reuses canonical Pipeline registration,
 full archived-history scan, duplicate fences/readback and private full retry
 receipts. Company_admin + verified admin/manager only; no approvals/publication.
 Installed tools refreshed and action verified; all63active-client contexts pass.
-The final v94 parser edge-case correction changes only1of73v93 files; auth/context/
-catalog sources stay byte-identical. Exact v92/v93 rollbacks retained. Staff FORM improvement is source-
+The v94/v95 parser corrections each change only one shared registration file;
+fresh 73-file preflight/readback passed. v95 preserves real legacy spaces/hyphens,
+leaves unknown codes/numbers NULL, refuses ambiguous copies and prevents another
+film/number/concept masquerading as a revision suffix. Auth/context/catalog and
+parallel modules stay byte-identical. Exact v92/v93/v94 rollbacks retained. Staff FORM improvement is source-
 only until the next approved frontend release. No Vercel or migration.
 
 Exactly1film added;105existing film revisions,63packages and Nov–Jan schedule
 rows unchanged.30Studio send files/11film stems checked; only Elcheck was missing.
-183tests +46nearest follow-up tests/build/scoped lint/diff/official Edge bundle pass; live and local responsive
+Final 184 serial tests across 14 suites, 48 nearest registration tests, build,
+scoped lint/diff/official Edge bundle pass; live and local responsive
 checks pass. No other-agent/media/Teams/provider/OAuth/config/secret changes.
 
 All63clients have a production receipt, not an all-content-ready certificate.
-Five confirmed-video clients still need actual source/briefs: Emoya, Human Auto,
-Hino, Supa Quick BFN and Staffordshire. Existing Nov canonical drafts for Emoya,
-Human Auto and Staffordshire are identified; no new shoot is invented.3packages
+Five confirmed-video clients still have no Pipeline row. Follow-through inspected
+29 exact mapped cloud export/portal folders and 10 provider file hashes. Four
+already have current exports: Emoya has four different-hash November variants;
+Human Auto has a real November export; Supa Quick BFN has a WISEMAN-named November
+film needing exact primary-client resolution; Staffordshire has three distinct
+November films, with VIDEO_2 duplicated byte-for-byte in two folders (count once).
+Do not request new edits merely because Pipeline was empty. Exact editor/revision/
+handoff remains required before registration. Hino's inspected latest exports are
+August; no current commission was established. Older Emoya October V8 stays
+historical owner-review evidence; no approval/current assignment inferred.
+Existing Nov canonical drafts for Emoya, Human Auto and Staffordshire are retained.
+No additional cloud-source film or shoot/date was invented or registered.3packages
 remain unconfirmed;22confirmed packages remain video-unquantified. The current
 Nov–Jan schedule still has only8November Cape rows; no bulk monthly allocation
 was performed. Exact IDs/source gaps/verification are in

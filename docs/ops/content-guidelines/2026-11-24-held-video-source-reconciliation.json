@@ -1,0 +1,1282 @@
+{
+  "schema_version": 1,
+  "captured_at": "2026-11-24T10:31:54.232Z",
+  "read_only": true,
+  "source_basis": "Exact client_onedrive_mappings roots; official provider listing/get_drive_item metadata only",
+  "scope": {
+    "bounded_export_portal_folder_reads": 29,
+    "all_listings_complete_at_requested_level": true,
+    "not_a_full_raw_footage_or_archive_audit": true,
+    "provider_hashes_are_metadata_not_approval_or_media_quality_proof": true
+  },
+  "canonical_roots": [
+    {
+      "client": "Emoya Estate Driving Range",
+      "client_id": "217a547c-7b22-45cc-bf88-9d45a8e93dfe",
+      "drive_id": "A2AC9FE4B255F52F",
+      "root_item_id": "A2AC9FE4B255F52F!s600edfea4be64f0590253cf5418c64e3"
+    },
+    {
+      "client": "Human Auto",
+      "client_id": "816c7f59-d56c-46a3-ba15-f76971d83769",
+      "drive_id": "A2AC9FE4B255F52F",
+      "root_item_id": "A2AC9FE4B255F52F!se67a2b9f8d704687b3b077c22cbc5bee"
+    },
+    {
+      "client": "Hino Trucks",
+      "client_id": "1007e58b-3fea-4515-88b7-ddaa85763de6",
+      "drive_id": "A2AC9FE4B255F52F",
+      "root_item_id": "A2AC9FE4B255F52F!s3407425083924ae5979605196cb848c7"
+    },
+    {
+      "client": "Supa Quick BFN",
+      "client_id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+      "drive_id": "A2AC9FE4B255F52F",
+      "root_item_id": "A2AC9FE4B255F52F!s868ca17c3dab41959f63e59dd2fd520c"
+    },
+    {
+      "client": "The Staffordshire",
+      "client_id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+      "drive_id": "A2AC9FE4B255F52F",
+      "root_item_id": "A2AC9FE4B255F52F!s562a887bdae743e7a967a169e29b091e"
+    }
+  ],
+  "source_folders": [
+    {
+      "client": "Emoya Estate Driving Range",
+      "parent": "A_ClientPortal_Emoya_Estate_Driving_Range",
+      "parent_id": "A2AC9FE4B255F52F!s8620ffde88294f30a548be3a134826b1",
+      "next_page": false,
+      "error": null,
+      "items": [
+        {
+          "id": "A2AC9FE4B255F52F!s40a3789b73f144bab6f9da414ddee391",
+          "name": "Brand Identity",
+          "bytes": 599313,
+          "modified_at": "2026-10-02T19:24:49Z",
+          "child_count": 1
+        },
+        {
+          "id": "A2AC9FE4B255F52F!se3adac16aadc4211bff67431ccd3e4ca",
+          "name": "Graphic Design",
+          "bytes": 0,
+          "modified_at": "2026-10-02T19:24:50Z",
+          "child_count": 0
+        },
+        {
+          "id": "A2AC9FE4B255F52F!s305c032e3d574232832f27bf6bb90d87",
+          "name": "Video",
+          "bytes": 0,
+          "modified_at": "2026-10-02T19:24:51Z",
+          "child_count": 0
+        }
+      ]
+    },
+    {
+      "client": "Emoya Estate Driving Range",
+      "parent": "Final Exports",
+      "parent_id": "A2AC9FE4B255F52F!sb8f6b1610c204bea84acf2288cad7e18",
+      "next_page": false,
+      "error": null,
+      "items": [
+        {
+          "id": "A2AC9FE4B255F52F!s4c5157d61e7f411184d9d1bda46e95c5",
+          "name": "2026_07_JUL",
+          "bytes": 615591733,
+          "modified_at": "2026-07-08T12:02:52Z",
+          "child_count": 4
+        }
+      ]
+    },
+    {
+      "client": "Emoya Estate Driving Range",
+      "parent": "Final Video Exports",
+      "parent_id": "A2AC9FE4B255F52F!s5d85865544924dc3a01175ba08f88eba",
+      "next_page": false,
+      "error": null,
+      "items": [
+        {
+          "id": "A2AC9FE4B255F52F!see900906ae454e879357761e172c8eff",
+          "name": "2026",
+          "bytes": 124600360,
+          "modified_at": "2026-11-16T10:01:39Z",
+          "child_count": 1
+        },
+        {
+          "id": "A2AC9FE4B255F52F!sd1ef7b339f6a434d9b2429c3dc3791c9",
+          "name": "2026_09_EMOYA_DRIVING_RANGE_VIDEO_1(1).mp4",
+          "bytes": 80438853,
+          "modified_at": "2026-09-29T15:41:59Z",
+          "child_count": null
+        }
+      ]
+    },
+    {
+      "client": "Human Auto",
+      "parent": "A_ClientPortal_Human_Auto",
+      "parent_id": "A2AC9FE4B255F52F!s368a72730794408097c74459095edc59",
+      "next_page": false,
+      "error": null,
+      "items": [
+        {
+          "id": "A2AC9FE4B255F52F!sbfc801fe7c4b41118a93c7d47b41378a",
+          "name": "Brand Identity",
+          "bytes": 388966,
+          "modified_at": "2026-10-02T19:25:05Z",
+          "child_count": 1
+        },
+        {
+          "id": "A2AC9FE4B255F52F!s2bed25a61f694328b8aeb3e9ac4254aa",
+          "name": "Graphic Design",
+          "bytes": 0,
+          "modified_at": "2026-10-02T19:25:05Z",
+          "child_count": 0
+        },
+        {
+          "id": "A2AC9FE4B255F52F!s5ae5381ee9904e1eb3e3199b40c727b9",
+          "name": "Video",
+          "bytes": 254267335,
+          "modified_at": "2026-10-02T19:25:06Z",
+          "child_count": 3
+        }
+      ]
+    },
+    {
+      "client": "Human Auto",
+      "parent": "Final Video Exports",
+      "parent_id": "A2AC9FE4B255F52F!s38f910f5c757471ba18f75978ac20021",
+      "next_page": false,
+      "error": null,
+      "items": [
+        {
+          "id": "A2AC9FE4B255F52F!s3aa4f2a268194baa8404216f51a029d3",
+          "name": "2026",
+          "bytes": 1297639501,
+          "modified_at": "2025-12-15T06:26:13Z",
+          "child_count": 9
+        }
+      ]
+    },
+    {
+      "client": "Hino Trucks",
+      "parent": "A_ClientPortal_Hino_Trucks",
+      "parent_id": "A2AC9FE4B255F52F!sc5ad026a3f8a4ec6901dc09f05475346",
+      "next_page": false,
+      "error": null,
+      "items": [
+        {
+          "id": "A2AC9FE4B255F52F!sa2b65e3123fb458b8181d798115865f1",
+          "name": "Brand Identity",
+          "bytes": 0,
+          "modified_at": "2026-10-02T19:24:59Z",
+          "child_count": 0
+        },
+        {
+          "id": "A2AC9FE4B255F52F!se9a0911ef56c407282b5afbeb70197e5",
+          "name": "Graphic Design",
+          "bytes": 0,
+          "modified_at": "2026-10-02T19:25:00Z",
+          "child_count": 0
+        },
+        {
+          "id": "A2AC9FE4B255F52F!sd384bea62bda4a219b9e03679b1962ac",
+          "name": "Video",
+          "bytes": 0,
+          "modified_at": "2026-10-02T19:25:00Z",
+          "child_count": 0
+        }
+      ]
+    },
+    {
+      "client": "Hino Trucks",
+      "parent": "Final Exports",
+      "parent_id": "A2AC9FE4B255F52F!s780e998f4a0f4ce8b96a8d43a3d98363",
+      "next_page": false,
+      "error": null,
+      "items": [
+        {
+          "id": "A2AC9FE4B255F52F!s5eb9a33f4ee04db1be14db8b9920cfc7",
+          "name": "2026",
+          "bytes": 1011824378,
+          "modified_at": "2026-01-17T13:28:26Z",
+          "child_count": 8
+        }
+      ]
+    },
+    {
+      "client": "Hino Trucks",
+      "parent": "Final Video Exports",
+      "parent_id": "A2AC9FE4B255F52F!saf40c2b8d41d44fab8823f325fa37df8",
+      "next_page": false,
+      "error": null,
+      "items": []
+    },
+    {
+      "client": "Supa Quick BFN",
+      "parent": "A_ClientPortal_Supa_Quick_BFN",
+      "parent_id": "A2AC9FE4B255F52F!s6ef25bddff4341c9b045190fb0c494c7",
+      "next_page": false,
+      "error": null,
+      "items": [
+        {
+          "id": "A2AC9FE4B255F52F!s6b760fd597bb45fcb5631ebc68aaa3d7",
+          "name": "Brand Identity",
+          "bytes": 32049,
+          "modified_at": "2026-10-02T19:26:37Z",
+          "child_count": 1
+        },
+        {
+          "id": "A2AC9FE4B255F52F!s6194e94b47f04c01ac4c8b7fe913372d",
+          "name": "Graphic Design",
+          "bytes": 0,
+          "modified_at": "2026-10-02T19:26:39Z",
+          "child_count": 0
+        },
+        {
+          "id": "A2AC9FE4B255F52F!s59b4fb18d3fa4e27b4469c0b55c6a330",
+          "name": "Video",
+          "bytes": 0,
+          "modified_at": "2026-10-02T19:26:40Z",
+          "child_count": 0
+        }
+      ]
+    },
+    {
+      "client": "Supa Quick BFN",
+      "parent": "Final Video Exports",
+      "parent_id": "A2AC9FE4B255F52F!s1f2211e27ed74c9a85f4ad154cd7c961",
+      "next_page": false,
+      "error": null,
+      "items": [
+        {
+          "id": "A2AC9FE4B255F52F!s78763e9e9d674174b028ef2207515d88",
+          "name": "2026",
+          "bytes": 60281906,
+          "modified_at": "2026-11-19T10:50:40Z",
+          "child_count": 1
+        },
+        {
+          "id": "A2AC9FE4B255F52F!sb68e048f51d549a2a761675f19af0ce8",
+          "name": "2026_10_SUPA_QUICK_PRELLER_VIDEO.mp4",
+          "bytes": 34170100,
+          "modified_at": "2026-10-27T11:49:48Z",
+          "child_count": null
+        }
+      ]
+    },
+    {
+      "client": "The Staffordshire",
+      "parent": "A_ClientPortal_The_Staffordshire",
+      "parent_id": "A2AC9FE4B255F52F!scb172b10a0814826b5af1cd91c62fdda",
+      "next_page": false,
+      "error": null,
+      "items": [
+        {
+          "id": "A2AC9FE4B255F52F!s3a498d6cc5e7484e867fc151de312a1c",
+          "name": "Brand Identity",
+          "bytes": 330966,
+          "modified_at": "2026-10-02T19:26:04Z",
+          "child_count": 1
+        },
+        {
+          "id": "A2AC9FE4B255F52F!s28ad863687b44338a3045422c8e30728",
+          "name": "Graphic Design",
+          "bytes": 21389850,
+          "modified_at": "2026-10-02T19:26:04Z",
+          "child_count": 1
+        },
+        {
+          "id": "A2AC9FE4B255F52F!s1499ac31ef76460f9cf1ed3d5ce04528",
+          "name": "Video",
+          "bytes": 765841928,
+          "modified_at": "2026-10-02T19:26:05Z",
+          "child_count": 4
+        }
+      ]
+    },
+    {
+      "client": "The Staffordshire",
+      "parent": "Final Exports",
+      "parent_id": "A2AC9FE4B255F52F!s2d569407c6fe4190bff92f9901db8888",
+      "next_page": false,
+      "error": null,
+      "items": [
+        {
+          "id": "A2AC9FE4B255F52F!s80de54b53a0a47829f61ebdbf4a8574b",
+          "name": "2026",
+          "bytes": 2534479080,
+          "modified_at": "2026-06-17T18:15:38Z",
+          "child_count": 6
+        }
+      ]
+    },
+    {
+      "client": "The Staffordshire",
+      "parent": "Final Video Exports",
+      "parent_id": "A2AC9FE4B255F52F!s1514a3b781334beaa6f03e52722c22ce",
+      "next_page": false,
+      "error": null,
+      "items": [
+        {
+          "id": "A2AC9FE4B255F52F!sb38e8472aca848a1b3bf98a09726f2eb",
+          "name": "Adobe Premiere Pro Auto-Save",
+          "bytes": 23303,
+          "modified_at": "2026-10-09T14:25:01Z",
+          "child_count": 1
+        },
+        {
+          "id": "A2AC9FE4B255F52F!sf28fc9da8ae4471aa560fe342847bdf0",
+          "name": "2026_10_STAFFY_SOKKIE.prin",
+          "bytes": 58852,
+          "modified_at": "2026-10-09T14:44:32Z",
+          "child_count": null
+        },
+        {
+          "id": "A2AC9FE4B255F52F!sc2cde984968c4fc6a0226e5d0b45b0f1",
+          "name": "2026_10_STAFFY_SOKKIE.prproj",
+          "bytes": 23317,
+          "modified_at": "2026-10-09T14:44:32Z",
+          "child_count": null
+        }
+      ]
+    },
+    {
+      "client": "Emoya Estate Driving Range",
+      "parent": "Final Exports/2026_07_JUL",
+      "parent_id": "A2AC9FE4B255F52F!s4c5157d61e7f411184d9d1bda46e95c5",
+      "next_page": false,
+      "error": null,
+      "items": [
+        {
+          "id": "A2AC9FE4B255F52F!s473e7005f11342538f62f26eb58a0e45",
+          "name": "2026_06_DYLAN_VIDEO.mp4",
+          "bytes": 483231848,
+          "modified_at": "2026-06-19T09:07:16Z",
+          "child_count": null
+        },
+        {
+          "id": "A2AC9FE4B255F52F!s6145c0c8462941969557d4eb497d2ec9",
+          "name": "2026_06_EMOYA_ESTATE_VIDEO_1(1).mp4",
+          "bytes": 28609334,
+          "modified_at": "2026-06-17T12:50:41Z",
+          "child_count": null
+        },
+        {
+          "id": "A2AC9FE4B255F52F!sadf336c7891348f9b4e8a65639ba50a4",
+          "name": "2026_07_EMOYA DRIVING RANGE.mp4",
+          "bytes": 56760326,
+          "modified_at": "2026-07-08T12:02:46Z",
+          "child_count": null
+        },
+        {
+          "id": "A2AC9FE4B255F52F!sa7dadf444dd4468eb0443782e998fd2c",
+          "name": "2026_07_EMOYA DRIVING RANGE_FINAL.mp4",
+          "bytes": 46990225,
+          "modified_at": "2026-07-20T08:32:09Z",
+          "child_count": null
+        }
+      ]
+    },
+    {
+      "client": "Emoya Estate Driving Range",
+      "parent": "Final Video Exports/2026",
+      "parent_id": "A2AC9FE4B255F52F!see900906ae454e879357761e172c8eff",
+      "next_page": false,
+      "error": null,
+      "items": [
+        {
+          "id": "A2AC9FE4B255F52F!s28ce0d84748446fca706ef6b6e65defa",
+          "name": "2026_11_NOV",
+          "bytes": 124600360,
+          "modified_at": "2026-11-16T10:01:39Z",
+          "child_count": 4
+        }
+      ]
+    },
+    {
+      "client": "Human Auto",
+      "parent": "A_ClientPortal_Human_Auto/Video",
+      "parent_id": "A2AC9FE4B255F52F!s5ae5381ee9904e1eb3e3199b40c727b9",
+      "next_page": false,
+      "error": null,
+      "items": [
+        {
+          "id": "A2AC9FE4B255F52F!sc606a14e43754043af2fe9b9e5c210a1",
+          "name": "2026_10_HUMAN AUTO VIDEO_1.mp4",
+          "bytes": 60128597,
+          "modified_at": "2026-11-05T14:26:12Z",
+          "child_count": null
+        },
+        {
+          "id": "A2AC9FE4B255F52F!se2e09ffca0c24e5d99bea2ea1a3bcfa9",
+          "name": "2026_10_OCT_HUMAN AUTO_1.mp4",
+          "bytes": 37035913,
+          "modified_at": "2026-11-05T14:23:55Z",
+          "child_count": null
+        },
+        {
+          "id": "A2AC9FE4B255F52F!sfc60adfa3efa42979d0d174bc9c731d6",
+          "name": "2026_11_NOV_HUMAN AUTO.mp4",
+          "bytes": 157102825,
+          "modified_at": "2026-11-23T14:06:14Z",
+          "child_count": null
+        }
+      ]
+    },
+    {
+      "client": "Human Auto",
+      "parent": "Final Video Exports/2026",
+      "parent_id": "A2AC9FE4B255F52F!s3aa4f2a268194baa8404216f51a029d3",
+      "next_page": false,
+      "error": null,
+      "items": [
+        {
+          "id": "A2AC9FE4B255F52F!s752cb5da954147b3901cfd137fa49315",
+          "name": "2026_01_JAN",
+          "bytes": 200722525,
+          "modified_at": "2026-02-24T22:32:43Z",
+          "child_count": 3
+        },
+        {
+          "id": "A2AC9FE4B255F52F!s744eb22670d2494787aefe6a57f720ed",
+          "name": "2026_02_FEB",
+          "bytes": 125810281,
+          "modified_at": "2026-01-28T11:23:14Z",
+          "child_count": 5
+        },
+        {
+          "id": "A2AC9FE4B255F52F!s805ba3d79a0a4f9bb4eb3f4296a62ab6",
+          "name": "2026_03_MAR",
+          "bytes": 185622833,
+          "modified_at": "2026-03-20T07:27:49Z",
+          "child_count": 5
+        },
+        {
+          "id": "A2AC9FE4B255F52F!s27531b9b401845c188f0a4f0c106950e",
+          "name": "2026_04_APR",
+          "bytes": 110985751,
+          "modified_at": "2026-04-20T11:05:38Z",
+          "child_count": 4
+        },
+        {
+          "id": "A2AC9FE4B255F52F!s6b6e63bd9cdc42c5b2da65899810ab15",
+          "name": "2026_05_MAY",
+          "bytes": 119339054,
+          "modified_at": "2026-05-01T06:56:26Z",
+          "child_count": 2
+        },
+        {
+          "id": "A2AC9FE4B255F52F!s0a909841e52f4ab292c30566d94b17a8",
+          "name": "2026_06_JUNE",
+          "bytes": 194003257,
+          "modified_at": "2026-07-20T06:54:57Z",
+          "child_count": 4
+        },
+        {
+          "id": "A2AC9FE4B255F52F!s1eec0a3bc3c34d13a531410df4fbaa04",
+          "name": "2026_07_JULY",
+          "bytes": 225782951,
+          "modified_at": "2026-07-20T06:55:18Z",
+          "child_count": 4
+        },
+        {
+          "id": "A2AC9FE4B255F52F!s250158584181474ca3fe2d2af695b253",
+          "name": "2026_09_SEPT",
+          "bytes": 74739432,
+          "modified_at": "2026-09-09T11:13:38Z",
+          "child_count": 1
+        },
+        {
+          "id": "A2AC9FE4B255F52F!s91f4dc31431b4b9191e23cb7538621d4",
+          "name": "2026_10_OCT",
+          "bytes": 60633417,
+          "modified_at": "2026-10-29T14:06:14Z",
+          "child_count": 1
+        }
+      ]
+    },
+    {
+      "client": "Hino Trucks",
+      "parent": "Final Exports/2026",
+      "parent_id": "A2AC9FE4B255F52F!s5eb9a33f4ee04db1be14db8b9920cfc7",
+      "next_page": false,
+      "error": null,
+      "items": [
+        {
+          "id": "A2AC9FE4B255F52F!s2f2558301261400ea68cf349eeb7d2c7",
+          "name": "2026_01_JAN",
+          "bytes": 114171190,
+          "modified_at": "2026-01-19T06:05:55Z",
+          "child_count": 2
+        },
+        {
+          "id": "A2AC9FE4B255F52F!s9835ab4c7e514ef897fa12ad9b1d9981",
+          "name": "2026_02_FEB",
+          "bytes": 275612657,
+          "modified_at": "2026-02-06T04:23:12Z",
+          "child_count": 2
+        },
+        {
+          "id": "A2AC9FE4B255F52F!sa932a19f4d09427289c02d6836865589",
+          "name": "2026_03_MRT",
+          "bytes": 177637350,
+          "modified_at": "2026-03-18T13:32:33Z",
+          "child_count": 3
+        },
+        {
+          "id": "A2AC9FE4B255F52F!s9b1a93f50d3840bb927c7e2f4dea3f8e",
+          "name": "2026_04_APR",
+          "bytes": 104186257,
+          "modified_at": "2026-04-23T10:56:39Z",
+          "child_count": 1
+        },
+        {
+          "id": "A2AC9FE4B255F52F!s5b251a9da92b4bcf887a9c816aca2228",
+          "name": "2026_05_MAY",
+          "bytes": 30083383,
+          "modified_at": "2026-05-13T14:16:29Z",
+          "child_count": 1
+        },
+        {
+          "id": "A2AC9FE4B255F52F!s0483de4e252b489a87de2e759b4f5f6c",
+          "name": "2026_06_JUN",
+          "bytes": 65500729,
+          "modified_at": "2026-08-01T16:25:27Z",
+          "child_count": 2
+        },
+        {
+          "id": "A2AC9FE4B255F52F!s3920b7911fd04a9b902d141f74113d1d",
+          "name": "2026_07_JUL",
+          "bytes": 137034136,
+          "modified_at": "2026-07-06T13:17:38Z",
+          "child_count": 1
+        },
+        {
+          "id": "A2AC9FE4B255F52F!s8172e8b2df784b3182b172268197c48d",
+          "name": "2026_08_AUG",
+          "bytes": 107598676,
+          "modified_at": "2026-08-26T15:18:19Z",
+          "child_count": 2
+        }
+      ]
+    },
+    {
+      "client": "Supa Quick BFN",
+      "parent": "Final Video Exports/2026",
+      "parent_id": "A2AC9FE4B255F52F!s78763e9e9d674174b028ef2207515d88",
+      "next_page": false,
+      "error": null,
+      "items": [
+        {
+          "id": "A2AC9FE4B255F52F!s805d250ddb7a42e3b0e45fcc201b9464",
+          "name": "2026_11_NOV",
+          "bytes": 60281906,
+          "modified_at": "2026-11-19T10:50:40Z",
+          "child_count": 1
+        }
+      ]
+    },
+    {
+      "client": "The Staffordshire",
+      "parent": "A_ClientPortal_The_Staffordshire/Video",
+      "parent_id": "A2AC9FE4B255F52F!s1499ac31ef76460f9cf1ed3d5ce04528",
+      "next_page": false,
+      "error": null,
+      "items": [
+        {
+          "id": "A2AC9FE4B255F52F!s3244fe5e10a4459299732e0a68da1c95",
+          "name": "2026_08_AUG",
+          "bytes": 0,
+          "modified_at": "2026-11-06T15:11:54Z",
+          "child_count": 0
+        },
+        {
+          "id": "A2AC9FE4B255F52F!s97c94ce0d420413595dbd0123012f1b0",
+          "name": "2026_09_SEPT",
+          "bytes": 128255522,
+          "modified_at": "2026-10-22T06:59:33Z",
+          "child_count": 1
+        },
+        {
+          "id": "A2AC9FE4B255F52F!sc708dadab8b94f1899def49858163aa6",
+          "name": "2026_10_OCT",
+          "bytes": 377237553,
+          "modified_at": "2026-10-09T14:24:37Z",
+          "child_count": 7
+        },
+        {
+          "id": "A2AC9FE4B255F52F!sae31bfe14bbc4854a66ecb51e3f9fd1d",
+          "name": "2026_11_NOV",
+          "bytes": 260348853,
+          "modified_at": "2026-11-12T17:32:19Z",
+          "child_count": 3
+        }
+      ]
+    },
+    {
+      "client": "The Staffordshire",
+      "parent": "Final Exports/2026",
+      "parent_id": "A2AC9FE4B255F52F!s80de54b53a0a47829f61ebdbf4a8574b",
+      "next_page": false,
+      "error": null,
+      "items": [
+        {
+          "id": "A2AC9FE4B255F52F!s670aadd09c2c43ae9ecbbab455486e4a",
+          "name": "2026_06_JUN",
+          "bytes": 294349442,
+          "modified_at": "2026-06-17T18:15:42Z",
+          "child_count": 4
+        },
+        {
+          "id": "A2AC9FE4B255F52F!sf1774d5f4163410099fa5fc79409cbd2",
+          "name": "2026_07_JUL",
+          "bytes": 432752372,
+          "modified_at": "2026-07-17T15:45:57Z",
+          "child_count": 7
+        },
+        {
+          "id": "A2AC9FE4B255F52F!se66f3d061a7c43f2951455264db16ffa",
+          "name": "2026_08_AUG",
+          "bytes": 957408327,
+          "modified_at": "2026-10-29T14:02:32Z",
+          "child_count": 12
+        },
+        {
+          "id": "A2AC9FE4B255F52F!sc1530ed3bb0e4846bda7079d2c9829e4",
+          "name": "2026_09_SEPT",
+          "bytes": 691037837,
+          "modified_at": "2026-09-07T16:33:41Z",
+          "child_count": 9
+        },
+        {
+          "id": "A2AC9FE4B255F52F!s5f24439779e24af5af4fc6195251d6ad",
+          "name": "2026_10_OCT",
+          "bytes": 118031147,
+          "modified_at": "2026-10-29T14:02:33Z",
+          "child_count": 2
+        },
+        {
+          "id": "A2AC9FE4B255F52F!sf397514f8ed1409f96a3365128b0dfac",
+          "name": "2026_11_NOV",
+          "bytes": 40899955,
+          "modified_at": "2026-11-16T10:01:40Z",
+          "child_count": 1
+        }
+      ]
+    },
+    {
+      "client": "Emoya Estate Driving Range",
+      "parent": "Final Video Exports/2026/2026_11_NOV",
+      "parent_id": "A2AC9FE4B255F52F!s28ce0d84748446fca706ef6b6e65defa",
+      "next_page": false,
+      "error": null,
+      "items": [
+        {
+          "id": "A2AC9FE4B255F52F!s858aaf7355ac4e06a022400914f717c0",
+          "name": "2026_11_EMOYA_VIDEO_1(1).mp4",
+          "bytes": 26317124,
+          "modified_at": "2026-11-13T09:44:05Z",
+          "child_count": null
+        },
+        {
+          "id": "A2AC9FE4B255F52F!s7ce75ad039b34b7a842059f61bfeee12",
+          "name": "2026_11_EMOYA_VIDEO_1.mp4",
+          "bytes": 26893473,
+          "modified_at": "2026-11-13T09:15:56Z",
+          "child_count": null
+        },
+        {
+          "id": "A2AC9FE4B255F52F!se165f8e5f7274db288a63e3e31978cbd",
+          "name": "2026_11_EMOYA_VIDEO_2(1).mp4",
+          "bytes": 36149668,
+          "modified_at": "2026-11-18T12:35:16Z",
+          "child_count": null
+        },
+        {
+          "id": "A2AC9FE4B255F52F!s14b24f320be241afa8f55ceedaa7c109",
+          "name": "2026_11_EMOYA_VIDEO_2.mp4",
+          "bytes": 35240095,
+          "modified_at": "2026-11-18T12:33:22Z",
+          "child_count": null
+        }
+      ]
+    },
+    {
+      "client": "Human Auto",
+      "parent": "Final Video Exports/2026/2026_10_OCT",
+      "parent_id": "A2AC9FE4B255F52F!s91f4dc31431b4b9191e23cb7538621d4",
+      "next_page": false,
+      "error": null,
+      "items": [
+        {
+          "id": "A2AC9FE4B255F52F!sa4a4f82a83a84c5cb491e085b07fd1b9",
+          "name": "2026_10-HUMAN_AUTO_VIDEO_2.mp4",
+          "bytes": 60633417,
+          "modified_at": "2026-10-26T15:25:39Z",
+          "child_count": null
+        }
+      ]
+    },
+    {
+      "client": "Hino Trucks",
+      "parent": "Final Exports/2026/2026_08_AUG",
+      "parent_id": "A2AC9FE4B255F52F!s8172e8b2df784b3182b172268197c48d",
+      "next_page": false,
+      "error": null,
+      "items": [
+        {
+          "id": "A2AC9FE4B255F52F!s5df76a12ca1d4394a1cdb739628cb5a7",
+          "name": "2026_08_HINO_VIDEO_1.mp4",
+          "bytes": 66124934,
+          "modified_at": "2026-08-26T15:18:14Z",
+          "child_count": null
+        },
+        {
+          "id": "A2AC9FE4B255F52F!s2cdcb8638400421ab4c93671d2e97601",
+          "name": "2026_08_HINO_VIDEO_2.mp4",
+          "bytes": 41473742,
+          "modified_at": "2026-08-27T12:11:55Z",
+          "child_count": null
+        }
+      ]
+    },
+    {
+      "client": "Supa Quick BFN",
+      "parent": "Final Video Exports/2026/2026_11_NOV",
+      "parent_id": "A2AC9FE4B255F52F!s805d250ddb7a42e3b0e45fcc201b9464",
+      "next_page": false,
+      "error": null,
+      "items": [
+        {
+          "id": "A2AC9FE4B255F52F!s46ee67f600e24c44a1e24bec0fade741",
+          "name": "2026_11_WISEMAN_SUPAQUICK_BLOEM_VIDEO.mp4",
+          "bytes": 60281906,
+          "modified_at": "2026-11-09T14:38:48Z",
+          "child_count": null
+        }
+      ]
+    },
+    {
+      "client": "The Staffordshire",
+      "parent": "A_ClientPortal_The_Staffordshire/Video/2026_10_OCT",
+      "parent_id": "A2AC9FE4B255F52F!sc708dadab8b94f1899def49858163aa6",
+      "next_page": false,
+      "error": null,
+      "items": [
+        {
+          "id": "A2AC9FE4B255F52F!s2ea2defadf5a443e908edbfc08ca7c10",
+          "name": "2026_10_OCT_COFFEE SHOP.mp4",
+          "bytes": 133788034,
+          "modified_at": "2026-10-22T11:05:35Z",
+          "child_count": null
+        },
+        {
+          "id": "A2AC9FE4B255F52F!s37dfc1f9858f4b1baef6116b81bd75b1",
+          "name": "2026_10_STAFFY_SOKKIE.mp4",
+          "bytes": 91316957,
+          "modified_at": "2026-10-09T14:34:40Z",
+          "child_count": null
+        },
+        {
+          "id": "A2AC9FE4B255F52F!s1480ebec36f445f098777564e103f5a7",
+          "name": "2026_10_STAFFY_VIDEO_1(1).mp4",
+          "bytes": 67700794,
+          "modified_at": "2026-10-09T14:28:12Z",
+          "child_count": null
+        },
+        {
+          "id": "A2AC9FE4B255F52F!s4431928407484a6fb492df84073b7157",
+          "name": "2026_10_STAFFY_VIDEO_2.mp4",
+          "bytes": 62953653,
+          "modified_at": "2026-10-19T13:08:09Z",
+          "child_count": null
+        },
+        {
+          "id": "A2AC9FE4B255F52F!sf21edaa049a24631b836057e8504283f",
+          "name": "COVER PHOTO 1.png",
+          "bytes": 5836203,
+          "modified_at": "2026-10-09T14:43:58Z",
+          "child_count": null
+        },
+        {
+          "id": "A2AC9FE4B255F52F!s351ca1504e174c83a71816e30d1491f8",
+          "name": "COVER PHOTO 3.png",
+          "bytes": 10114482,
+          "modified_at": "2026-11-06T06:32:35Z",
+          "child_count": null
+        },
+        {
+          "id": "A2AC9FE4B255F52F!s763df6ee4d78435984f5c4d6503ab932",
+          "name": "COVER PHOTO.png",
+          "bytes": 5527430,
+          "modified_at": "2026-10-09T14:34:56Z",
+          "child_count": null
+        }
+      ]
+    },
+    {
+      "client": "The Staffordshire",
+      "parent": "A_ClientPortal_The_Staffordshire/Video/2026_11_NOV",
+      "parent_id": "A2AC9FE4B255F52F!sae31bfe14bbc4854a66ecb51e3f9fd1d",
+      "next_page": false,
+      "error": null,
+      "items": [
+        {
+          "id": "A2AC9FE4B255F52F!s10cf75ad63b842158f1082a452d5946a",
+          "name": "2026_11_NOV_STAFFY_RUGBY.mp4",
+          "bytes": 94143596,
+          "modified_at": "2026-11-23T10:28:17Z",
+          "child_count": null
+        },
+        {
+          "id": "A2AC9FE4B255F52F!s119d035745a8416dbee990e69fff4741",
+          "name": "2026_11_NOV_STAFFY_SOKKIE.mp4",
+          "bytes": 125305302,
+          "modified_at": "2026-11-19T13:26:02Z",
+          "child_count": null
+        },
+        {
+          "id": "A2AC9FE4B255F52F!se6c11997e2f34db79e9b747875af37a4",
+          "name": "2026_11_STAFFY_VIDEO_2.mp4",
+          "bytes": 40899955,
+          "modified_at": "2026-11-12T17:34:22Z",
+          "child_count": null
+        }
+      ]
+    },
+    {
+      "client": "The Staffordshire",
+      "parent": "Final Exports/2026/2026_10_OCT",
+      "parent_id": "A2AC9FE4B255F52F!s5f24439779e24af5af4fc6195251d6ad",
+      "next_page": false,
+      "error": null,
+      "items": [
+        {
+          "id": "A2AC9FE4B255F52F!s32610f2156bd45c99b063cf9023d53e4",
+          "name": "2026_10_STAFFY_ANIMATED_POSTER_VIDEO.mp4",
+          "bytes": 15606821,
+          "modified_at": "2026-10-22T08:50:16Z",
+          "child_count": null
+        },
+        {
+          "id": "A2AC9FE4B255F52F!s2b49bd76fdc843a0848bec6e707684cb",
+          "name": "2026_10_STAFFY_FIGHT_NIGHT_VIDEO.mp4",
+          "bytes": 102424326,
+          "modified_at": "2026-10-26T13:56:11Z",
+          "child_count": null
+        }
+      ]
+    },
+    {
+      "client": "The Staffordshire",
+      "parent": "Final Exports/2026/2026_11_NOV",
+      "parent_id": "A2AC9FE4B255F52F!sf397514f8ed1409f96a3365128b0dfac",
+      "next_page": false,
+      "error": null,
+      "items": [
+        {
+          "id": "A2AC9FE4B255F52F!s1070eff19ff444698ff8b8b5cd8ec5da",
+          "name": "2026_11_STAFFY_VIDEO_2.mp4",
+          "bytes": 40899955,
+          "modified_at": "2026-11-11T14:34:13Z",
+          "child_count": null
+        }
+      ]
+    }
+  ],
+  "exact_revision_metadata": [
+    {
+      "client": "Emoya Estate Driving Range",
+      "id": "A2AC9FE4B255F52F!s858aaf7355ac4e06a022400914f717c0",
+      "name": "2026_11_EMOYA_VIDEO_1(1).mp4",
+      "bytes": 26317124,
+      "sha256": "1def175337df0c215566f0489747d31c0558b0757d0a6bbe267bd1f2769fc03c",
+      "modified_at": "2026-11-13T09:44:05Z"
+    },
+    {
+      "client": "Emoya Estate Driving Range",
+      "id": "A2AC9FE4B255F52F!s7ce75ad039b34b7a842059f61bfeee12",
+      "name": "2026_11_EMOYA_VIDEO_1.mp4",
+      "bytes": 26893473,
+      "sha256": "310db6b5f9eb12183a0c838234fc4b505d9be433521e030bc47ce8a213732533",
+      "modified_at": "2026-11-13T09:15:56Z"
+    },
+    {
+      "client": "Emoya Estate Driving Range",
+      "id": "A2AC9FE4B255F52F!se165f8e5f7274db288a63e3e31978cbd",
+      "name": "2026_11_EMOYA_VIDEO_2(1).mp4",
+      "bytes": 36149668,
+      "sha256": "824727632f9f61f81fd2d6e3b3735e25929e9e3d017603fef2645343fa3dc4fa",
+      "modified_at": "2026-11-18T12:35:16Z"
+    },
+    {
+      "client": "Emoya Estate Driving Range",
+      "id": "A2AC9FE4B255F52F!s14b24f320be241afa8f55ceedaa7c109",
+      "name": "2026_11_EMOYA_VIDEO_2.mp4",
+      "bytes": 35240095,
+      "sha256": "63a6b1434d9c7ff62a495392329590af11e67966a6d45572667fa24f0e1f17fd",
+      "modified_at": "2026-11-18T12:33:22Z"
+    },
+    {
+      "client": "Human Auto",
+      "id": "A2AC9FE4B255F52F!sfc60adfa3efa42979d0d174bc9c731d6",
+      "name": "2026_11_NOV_HUMAN AUTO.mp4",
+      "bytes": 157102825,
+      "modified_at": "2026-11-23T14:06:14Z",
+      "sha256": "56010627f56bfc4adb3070c632f4f4c9cf702e851d925692ba284e3f75c14fa5"
+    },
+    {
+      "client": "The Staffordshire",
+      "parent": "A_ClientPortal_The_Staffordshire/Video/2026_11_NOV",
+      "id": "A2AC9FE4B255F52F!se6c11997e2f34db79e9b747875af37a4",
+      "bytes": 40899955,
+      "sha256": "0eaaa09c0cded0f1f6cc060e78555f46d30ce6920b54ca0221f862cda12e2685",
+      "modified": "2026-11-12T17:34:22Z",
+      "name": "2026_11_STAFFY_VIDEO_2.mp4",
+      "modified_at": "2026-11-12T17:34:22Z"
+    },
+    {
+      "client": "The Staffordshire",
+      "parent": "Final Exports/2026/2026_11_NOV",
+      "id": "A2AC9FE4B255F52F!s1070eff19ff444698ff8b8b5cd8ec5da",
+      "bytes": 40899955,
+      "sha256": "0eaaa09c0cded0f1f6cc060e78555f46d30ce6920b54ca0221f862cda12e2685",
+      "modified": "2026-11-11T14:34:13Z",
+      "name": "2026_11_STAFFY_VIDEO_2.mp4",
+      "modified_at": "2026-11-11T14:34:13Z"
+    },
+    {
+      "client": "Supa Quick BFN",
+      "parent": "Final Video Exports/2026/2026_11_NOV",
+      "id": "A2AC9FE4B255F52F!s46ee67f600e24c44a1e24bec0fade741",
+      "name": "2026_11_WISEMAN_SUPAQUICK_BLOEM_VIDEO.mp4",
+      "bytes": 60281906,
+      "sha256": "5cf70579273020e8af2627779897504df492be01cfc564113003abe9763e8e7e",
+      "modified_at": "2026-11-09T14:38:48Z"
+    },
+    {
+      "client": "The Staffordshire",
+      "parent": "A_ClientPortal_The_Staffordshire/Video/2026_11_NOV",
+      "id": "A2AC9FE4B255F52F!s10cf75ad63b842158f1082a452d5946a",
+      "name": "2026_11_NOV_STAFFY_RUGBY.mp4",
+      "bytes": 94143596,
+      "sha256": "355da455fa53d1364cf72b2c7579aaf9d27fed593534cb9f62d20c980c6b781a",
+      "modified_at": "2026-11-23T10:28:17Z"
+    },
+    {
+      "client": "The Staffordshire",
+      "parent": "A_ClientPortal_The_Staffordshire/Video/2026_11_NOV",
+      "id": "A2AC9FE4B255F52F!s119d035745a8416dbee990e69fff4741",
+      "name": "2026_11_NOV_STAFFY_SOKKIE.mp4",
+      "bytes": 125305302,
+      "sha256": "37b0ca05c4a1d623aac4bca3361c9c824a05cb76dd1cb996f9b63a09139c3ea2",
+      "modified_at": "2026-11-19T13:26:02Z"
+    }
+  ],
+  "client_holds": [
+    {
+      "client_name": "Emoya Estate Driving Range",
+      "finding": "Four real November files found: two VIDEO_1 variants and two VIDEO_2 variants. Each has a different provider SHA-256; not identical copies and not four new commissions.",
+      "required": [
+        "Exact responsible editor",
+        "Current intended variant/revision and its internal handoff/review state",
+        "Package-valid relationship of VIDEO_1 and VIDEO_2; confirmed capacity remains one professional video per month"
+      ],
+      "next_action": "Reconcile those four real files against the production handoff, then register only the correct exact film identity/revision. Older October V8 remains historical owner-review evidence; do not revive it as current work.",
+      "client_id": "217a547c-7b22-45cc-bf88-9d45a8e93dfe",
+      "can_register_now": false,
+      "pipeline_film_rows": 0,
+      "published_dynamics_video_assets": 0,
+      "existing_canonical_context": {
+        "id": "217a547c-7b22-45cc-bf88-9d45a8e93dfe",
+        "name": "Emoya Estate Driving Range",
+        "runs": [
+          {
+            "id": "81770145-a2e8-465c-abaa-00790a71e3cf",
+            "name": "CONTENT RUN - EMOYA DRIVING RANGE",
+            "status": "planning",
+            "run_date": "2026-11-10"
+          },
+          {
+            "id": "7f1ba74b-45c0-4e1a-9916-26cce7de542c",
+            "name": "CONTENT RUN - EMOYA DRIVING RANGE",
+            "status": "planning",
+            "run_date": "2026-09-28"
+          }
+        ],
+        "guidelines": [
+          {
+            "id": "1c643101-8e1b-42fb-bf11-c0ebb20d1496",
+            "month": "2026-11-01",
+            "status": "draft",
+            "content_run_id": "81770145-a2e8-465c-abaa-00790a71e3cf"
+          }
+        ]
+      }
+    },
+    {
+      "client_name": "Human Auto",
+      "finding": "Real November 157102825-byte export exists in the exact mapped client root, plus separate October files. The November file has a complete provider SHA-256.",
+      "required": [
+        "Exact responsible editor",
+        "Actual revision and internal delivery/review evidence"
+      ],
+      "next_action": "Reconcile and register the existing November export; do not commission or rename another film merely because Pipeline was empty. Separate Human Auto research gate remains unchanged.",
+      "client_id": "816c7f59-d56c-46a3-ba15-f76971d83769",
+      "can_register_now": false,
+      "pipeline_film_rows": 0,
+      "published_dynamics_video_assets": 0,
+      "existing_canonical_context": {
+        "id": "816c7f59-d56c-46a3-ba15-f76971d83769",
+        "name": "Human Auto",
+        "runs": [
+          {
+            "id": "cc796d34-fc83-4a32-b1f4-eaef1ca5bf8c",
+            "name": "CONTENT RUN - FORD",
+            "status": "planning",
+            "run_date": "2026-10-13"
+          },
+          {
+            "id": "adb40d6a-9c22-4a1c-9c83-da411507f2d5",
+            "name": "CONTENT RUN - HUMAN AUTO",
+            "status": "planning",
+            "run_date": "2026-11-16"
+          },
+          {
+            "id": "085a0d27-11cf-4825-b92f-5131ce037793",
+            "name": "CONTENT RUN - WELKOM HUMAN AUTO",
+            "status": "planning",
+            "run_date": "2026-06-25"
+          },
+          {
+            "id": "0b8b44a2-f9e7-437f-82c0-b6ceb7b5dd8a",
+            "name": "CONTENT RUN - HUMAN AUTO",
+            "status": "planning",
+            "run_date": "2026-08-28"
+          },
+          {
+            "id": "3996e222-de28-4e63-a457-1e7af730fadd",
+            "name": "CONTENT RUN - HUMAN AUTO",
+            "status": "planning",
+            "run_date": "2026-07-29"
+          }
+        ],
+        "guidelines": [
+          {
+            "id": "e431e0a1-e85a-49a5-b9b5-8827110cd373",
+            "month": "2026-11-01",
+            "status": "draft",
+            "content_run_id": "adb40d6a-9c22-4a1c-9c83-da411507f2d5"
+          }
+        ]
+      }
+    },
+    {
+      "client_name": "Hino Trucks",
+      "finding": "Inspected export year lists January through August; the inspected latest August folder has two real exports. No November/December commission was established in this bounded source set.",
+      "required": [
+        "Actual current commission/brief or an exact newer export with responsible editor, revision and handoff"
+      ],
+      "next_action": "Establish the real current work from its source. Do not use an August export as proof of a November/December assignment or invent a new shoot.",
+      "client_id": "1007e58b-3fea-4515-88b7-ddaa85763de6",
+      "can_register_now": false,
+      "pipeline_film_rows": 0,
+      "published_dynamics_video_assets": 0,
+      "existing_canonical_context": {
+        "id": "1007e58b-3fea-4515-88b7-ddaa85763de6",
+        "name": "Hino Trucks",
+        "runs": [
+          {
+            "id": "b60f2e2a-3ecf-4721-a8a9-e9dd8ecc7e31",
+            "name": "CONTENT RUN - HINO TRUCKS",
+            "status": "planning",
+            "run_date": "2026-06-24"
+          },
+          {
+            "id": "7bd673bc-a87d-437a-b902-e66324e8a46d",
+            "name": "CONTENT RUN - HINO",
+            "status": "planning",
+            "run_date": "2026-08-21"
+          }
+        ],
+        "guidelines": []
+      }
+    },
+    {
+      "client_name": "Supa Quick BFN",
+      "finding": "Real November export in exact mapped BFN root contains WISEMAN in its filename. WiseMan is another active client; folder filing alone does not establish the film's primary client or commission.",
+      "required": [
+        "Exact BFN/WISEMAN primary-client and commission identity",
+        "Responsible editor, actual revision and handoff evidence"
+      ],
+      "next_action": "Resolve the cross-client filename/commission ambiguity before registering. Do not bind to both clients or substitute Supa Quick Centurion.",
+      "client_id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+      "can_register_now": false,
+      "pipeline_film_rows": 0,
+      "published_dynamics_video_assets": 0,
+      "existing_canonical_context": {
+        "id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+        "name": "Supa Quick BFN",
+        "runs": [],
+        "guidelines": []
+      }
+    },
+    {
+      "client_name": "The Staffordshire",
+      "finding": "Three distinct November exports established by three distinct provider SHA-256 values. VIDEO_2 has two copies in different source folders with identical SHA-256 and byte count: one film candidate, not two.",
+      "required": [
+        "Responsible editor and actual revision/handoff for each real November film",
+        "Confirmed commissioning/package relationship; filename event labels do not establish current offers, dates or recurring commitments"
+      ],
+      "next_action": "Reconcile the existing three November film candidates and count VIDEO_2 once. Retain both source copies; no deletion, movement, approval or publication inferred.",
+      "client_id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+      "can_register_now": false,
+      "pipeline_film_rows": 0,
+      "published_dynamics_video_assets": 0,
+      "existing_canonical_context": {
+        "id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+        "name": "The Staffordshire",
+        "runs": [
+          {
+            "id": "31fc7981-bcab-469d-93b4-f8d130fd958f",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-06-11"
+          },
+          {
+            "id": "e1cad187-a8b4-4316-a2e0-e513e05f0384",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-06-12"
+          },
+          {
+            "id": "6bc00638-b828-41f3-86b9-b5ad3eccc9d3",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-06-15"
+          },
+          {
+            "id": "11e1eac9-e067-4298-83e0-bd05a9448c73",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "cancelled",
+            "run_date": "2026-07-04"
+          },
+          {
+            "id": "818b2e70-2402-4946-84c2-6fee93fb6498",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-06-23"
+          },
+          {
+            "id": "c73950a8-feda-4a70-8915-aff307b696c6",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-07-04"
+          },
+          {
+            "id": "d51b01ae-c9f1-4a00-ba78-754b04c7b350",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-11-10"
+          },
+          {
+            "id": "f8b1f609-b964-4e4c-90cc-f8d43d29e625",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-10-17"
+          },
+          {
+            "id": "75a25097-b66c-4e73-92e6-33226c208143",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-08-19"
+          },
+          {
+            "id": "37112ecc-eecc-468d-ad3e-e98613e36a34",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-10-07"
+          },
+          {
+            "id": "7f812695-6022-4e89-a1d7-0c1a8f23a424",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-10-09"
+          },
+          {
+            "id": "2095bbd5-8e7f-49fa-935e-a9e608d2679a",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-07-15"
+          },
+          {
+            "id": "9006bdd9-6647-425e-bc32-00e245d3fd73",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-07-21"
+          },
+          {
+            "id": "adf7ff10-5a7e-405e-887c-e734c1887c1f",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-07-24"
+          },
+          {
+            "id": "ce6e1b22-b864-472f-a8e7-30d53282cc01",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "cancelled",
+            "run_date": "2026-07-21"
+          }
+        ],
+        "guidelines": [
+          {
+            "id": "28862509-8b67-45a2-ad3a-80141211855b",
+            "month": "2026-11-01",
+            "status": "draft",
+            "content_run_id": "d51b01ae-c9f1-4a00-ba78-754b04c7b350"
+          }
+        ]
+      }
+    }
+  ],
+  "guards": [
+    "Re-resolve active client and canonical root before later action",
+    "Re-read exact item ID/hash/size and stop on source drift",
+    "Full canonical Pipeline history/duplicate scan before registration",
+    "Register through existing supported UI/connector only after all required fields are evidenced",
+    "Do not infer revision/editor/status/client binding/package allocation from folder or filename alone",
+    "No file changes, strategy/report publication, provider sync, new shoot/date or package write"
+  ],
+  "dynamics_readback": {
+    "read_at": "2026-11-24T10:34:57.322383+00:00",
+    "elcheck_rows": 1,
+    "client_assets": [
+      {
+        "client_id": "1007e58b-3fea-4515-88b7-ddaa85763de6",
+        "active_published_assets": 0,
+        "active_published_video_assets": 0
+      },
+      {
+        "client_id": "217a547c-7b22-45cc-bf88-9d45a8e93dfe",
+        "active_published_assets": 1,
+        "active_published_video_assets": 0
+      },
+      {
+        "client_id": "816c7f59-d56c-46a3-ba15-f76971d83769",
+        "active_published_assets": 1,
+        "active_published_video_assets": 0
+      },
+      {
+        "client_id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+        "active_published_assets": 1,
+        "active_published_video_assets": 0
+      },
+      {
+        "client_id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+        "active_published_assets": 1,
+        "active_published_video_assets": 0
+      }
+    ],
+    "pipeline_rows": 106
+  }
+}

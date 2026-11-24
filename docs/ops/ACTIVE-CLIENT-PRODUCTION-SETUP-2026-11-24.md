@@ -56,9 +56,10 @@ receipts use the existing private MCP log, including both audit principals.
 ## Backend release and source protection
 
 Initial code checkpoint `19873a97a1d806e8d4959f6b9e682066ce45990a`;
-final parser checkpoint `fa425fc10ca0fafe2dd9639de3b3f344d577f098`.
-MCPv94 ACTIVE, bundle
-`3f54b38b5b9d2d2d6118b62496c18834606a50f068462d9bcc687eb6aeef6136`.
+final parser checkpoint `4c083ca8ae9f35b5836053b927eddf2cee6bda7b`;
+navigation-test checkpoint `f240513d8be4b149094d961d4f903bd6727acaef`.
+MCP v95 ACTIVE, bundle
+`80a2f4db74ce835f5d65e7a7964c09b5cb07a7a1b09c68545d452beefc643264`.
 Fresh preflight matched all70v92 sources. All73 deployed candidate files matched
 independent readback;67 original files are byte-identical, including the parallel
 publishing lane. Only index/projectContext/toolCatalog changed and three runtime
@@ -71,7 +72,16 @@ Final review caught an additional parser edge case when a concept contains the
 word VIDEO. Its correction keeps the true numbered delimiter and refuses ambiguous
 unnumbered names. Fresh preflight matched all73v93 files; v94 changes only that
 shared parser file and all73files were independently verified again. Elcheck's
-identity/deterministic ID is unchanged. Exact v92/v93 rollback sources are retained.
+identity/deterministic ID is unchanged.
+
+The exact cloud-source follow-through found genuine older export names containing
+spaces/hyphens or no VIDEO delimiter. The v95 correction preserves those names
+without inventing a folder code or video number. It rejects ambiguous copy suffixes
+and prevents a different film/number/concept being hidden as a revision suffix.
+Fresh v94 preflight matched all 73 files; only the shared registration parser
+changed and all 73 v95 files matched independent readback. All other 72 files,
+including auth, catalog and parallel publishing code, are byte-identical. Exact
+v92/v93/v94 rollback sources are retained.
 
 The installed account initially retained the old action snapshot. Its normal
 Refresh tools action was used; app details then exposed32reads/33writes, including
@@ -79,7 +89,7 @@ the new action. Genuine company-admin action/retry succeeded in normal ChatGPT
 mode, without starting a coding worker or modifying another agent's conversation.
 The desktop's original Codex mode/view was restored afterward. All63 active-client
 contexts also passed genuine installed-connector resolution after the release.
-v94 preserves the exact v93 auth/context/catalog sources from that acceptance.
+v95 preserves the exact v93 auth/context/catalog sources from that acceptance.
 
 All105 pre-existing Pipeline row revisions are unchanged;106 total after the one
 new film. All63 active-client package settings and all Nov–Jan schedule rows are
@@ -100,8 +110,12 @@ Root/other worktrees remain untouched.
 guideline reads/authoring, client isolation, paging and existing Pipeline rules.
 Tests cover row1001, failed page/readback, inactive/foreign client, unfiled sources,
 legacy identity, alias collision, approval refusal and changed-payload retry.
-After the parser edge-case correction, all46nearest registration/handler/Pipeline
-tests passed again; no assertion was removed or weakened. Final production
+After the parser edge-case corrections, all 48 nearest registration/handler/Pipeline
+tests passed. The final broader serial check passed all 184 tests across 14 suites.
+It also exposed an older navigation-test adapter missing the real client-isolation
+dependency. That adapter now injects the actual guard and runs in exact-client
+context; its original same-client/foreign-guideline assertions remain intact.
+No assertion was removed or weakened. Final production
 TypeScript/Vite build, scoped ESLint, diff check and official local
 Supabase Edge Runtime bundle pass. Local real-component browser save/readback
 passed against memory only; no fake production task/film was used. The local form
@@ -114,16 +128,34 @@ confirmed;38 have a confirmed positive fixed monthly video quantity. After this
 repair33 of those38 have at least one active Pipeline record. This is existence
 coverage, not proof that their monthly package has been completed.
 
-Five fixed-video clients still have no Pipeline film; no real export was found
-for them in the inspected Studio send-folder source set:
+Five fixed-video clients still have no Pipeline film. The Studio send-folder
+inventory did not contain their work, so a separate read-only follow-through used
+their exact canonical OneDrive mappings. That check found real current exports for
+four of the five clients. These are source reconciliation holds, not evidence that
+the clients need new edits or have no footage.
+
+All 29 bounded export/legacy-portal folder reads completed without a continuation
+or read error. This was not a full raw-footage/archive audit. Ten exact provider
+file-metadata reads supplied SHA-256/size/modified evidence; provider hashes prove
+file identity, not approval, current commissioning or creative quality.
 
 | Client | Existing source state | Exact next action |
 | --- | --- | --- |
-| Emoya Estate Driving Range |10Nov real run; canonical draft `1c643101-8e1b-42fb-bf11-c0ebb20d1496`, no saved video | Add the actual supplied brief/scripts to that document; record a finished film only against its real source |
-| Human Auto |16Nov real run; canonical draft `e431e0a1-e85a-49a5-b9b5-8827110cd373`, no saved video | Use the existing draft/real brief; the separate research gate is unchanged |
-| Hino Trucks | Existing24June/21August runs only; no current guideline/film | Establish the real current commission or existing export; historical shoots are not a new December booking |
-| Supa Quick BFN | No canonical run/guideline/film | Establish the real brief/commission; do not substitute Supa Quick Centurion |
-| The Staffordshire |10Nov real run; canonical draft `28862509-8b67-45a2-ad3a-80141211855b`, no saved video | Use the existing draft and confirmed current content; historical offers/menu/stock remain historical |
+| Emoya Estate Driving Range | Four November exports: VIDEO_1 and VIDEO_2 each have two different-hash variants; 10 November run and existing canonical draft remain | Establish responsible editor, current revision/internal handoff and the package-valid relationship between the two numbered films. Confirmed capacity stays one video per month; variants are not four commissions. Older October V8 is historical owner-review evidence, not current work |
+| Human Auto | Exact November export `2026_11_NOV_HUMAN AUTO.mp4`, 157,102,825 bytes with provider SHA-256; separate October exports; 16 November run and existing draft | Establish actual editor, revision and handoff, then track the existing film. Do not request another edit or rename it. The separate research gate remains unchanged |
+| Hino Trucks | Inspected export year lists January–August; two real August exports; historical June/August runs only | Establish the current commission/brief or exact newer export with editor, revision and handoff. The bounded source set does not establish a November/December assignment |
+| Supa Quick BFN | November export `2026_11_WISEMAN_SUPAQUICK_BLOEM_VIDEO.mp4` in the exact BFN root, 60,281,906 bytes with provider SHA-256 | Resolve primary-client/commission identity because WISEMAN is another active client, plus editor/revision/handoff. Do not bind to both clients or substitute Centurion |
+| The Staffordshire | Three November film candidates with distinct SHA-256 values: RUGBY, SOKKIE and VIDEO_2. VIDEO_2 appears in two folders with identical SHA-256/40,899,955 bytes | Count VIDEO_2 once; retain both source copies. Establish editor, revision and handoff for each film and its confirmed commissioning relationship. Event filenames do not establish current offers, dates or recurring commitments |
+
+No additional films were registered from these held sources. The five clients have
+no active/published Dynamics video assets in the inspected asset inventory; a legacy
+OneDrive folder called ClientPortal does not establish Dynamics publication or
+client access. No file was moved, copied, deleted, renamed, shared or published.
+
+Exact source IDs, canonical roots, hashes, independent read timestamps, existing
+run/guideline identities and one-by-one stop conditions are retained in the
+[read-only source reconciliation packet](content-guidelines/2026-11-24-held-video-source-reconciliation.json),
+SHA-256 `3e6578a59e824ba26c79a9decf001e077238934065df621cc4941c9d13dbaa39`.
 
 Agape Compliance, Jodrico Killian and LHP Student Village & Block still have no
 confirmed package receipt. Do not infer an allocation from an export or blank
