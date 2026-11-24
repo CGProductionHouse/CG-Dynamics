@@ -1,3 +1,31 @@
+## 24 November — staff connector101 and fresh Microsoft reconciliation
+
+Same isolated draft PR1005,code755d0d26. MCP101 ACTIVE,75source files independently
+matched;hosted bundle c22711f875e2a14a10a6c96e3f85c4b9aa9d718fe82d5cd3c41e4ab638259931.
+Preserve this preimage including70unchanged files/parallel publishing modules.
+Existing custom OAuth/auth gates unchanged. New shared policy removes the staff
+instruction to invoke admin-only reconciliation;automatic worker plus exact-task
+readback/pending state are required. Lifecycle and mirror freshness are separate.
+
+CA-authorised normal UI resumed paused collection. Existing worker completed the
+same exact job/run e874ca5e-7ce4-49d0-8b91-3af9e2fb2ddb at20:23:11SAST:
+35applied/1680skipped/0failed/82conflicts/0remaining,6449protected schedule exclusions.
+All6configured sources enumerated8163records;protected detail/package completeness
+is not inferred. Status is ACTIVE + fresh PARTIAL,not healthy.82journal rows match.
+78unknown-client cards/4ambiguous Supa branch cards remain held for exact owner
+confirmation. No package changes or upstream Microsoft writes.
+
+Six staff Day/Hours read checks pass. Installed company ChatGPT catalogue refreshed;
+new real Franco Project chat read bootstrap/Day/Hours/status with correct identity
+and2026.11.24-scoped-reconciliation-6 policy. One exact real Teams100%/Dynamics done
+task readback matches.460/460 focused serial tests incl disposable SQL,build/app
+bundle,scoped lint/diff,official Edge bundle/helper native check pass. No fake writes.
+Frontend recovery/banner/forms remain SOURCE ONLY;NO VERCEL or migration.
+Native company Gmail requires owner re-auth before existing sender/signature
+verification;no aliases/permissions/mail changed. Other agent/worktrees untouched.
+Exact receipt/held bucket inventory:[staff readiness](STAFF-CONNECTOR-READINESS-2026-11-24.md).
+Google Control Centre destination still unidentified;no guessed tracker write.
+
 ## 24 November — guideline preparation and date-filtered discovery LIVE
 
 Same isolated PR1005. MCP100 ACTIVE,74 independently verified files, bundle
