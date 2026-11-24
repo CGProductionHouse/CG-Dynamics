@@ -1,3 +1,40 @@
+## 24 November — missing Elcheck film tracked; canonical connector registration LIVE
+
+CA's Studio screenshot exposed a real missing December R02, rather than another
+guideline permission issue. Same isolated PR1005; source checkpoints19873a97/fa425fc1.
+Exact Studio file/hash and19Nov18:50SAST internal delivery were independently
+verified read-only. New Pipeline record `eea0ac88-1f2c-8c85-8743-1f76d055b91f`
+preserves actual `2026_12_ELCHECK_VIDEO_1`, Nolan Claude Studio PC and R02 at
+internal_review. Media filing remains pending, not approved/published. Normal
+installed ChatGPT action + identical retry return the same ID; independent DB and
+desktop/mobile staff UI readback pass. No fake run, monthly slot or posting date.
+
+MCPv94 ACTIVE, bundle3f54b38b5b9d2d2d6118b62496c18834606a50f068462d9bcc687eb6aeef6136.
+All73 source files verified after fresh70file v92 preflight;67existing files remain
+byte-identical, including publishing. Later releases must preserve this v94
+preimage. `register_existing_internal_video` reuses canonical Pipeline registration,
+full archived-history scan, duplicate fences/readback and private full retry
+receipts. Company_admin + verified admin/manager only; no approvals/publication.
+Installed tools refreshed and action verified; all63active-client contexts pass.
+The final v94 parser edge-case correction changes only1of73v93 files; auth/context/
+catalog sources stay byte-identical. Exact v92/v93 rollbacks retained. Staff FORM improvement is source-
+only until the next approved frontend release. No Vercel or migration.
+
+Exactly1film added;105existing film revisions,63packages and Nov–Jan schedule
+rows unchanged.30Studio send files/11film stems checked; only Elcheck was missing.
+183tests +46nearest follow-up tests/build/scoped lint/diff/official Edge bundle pass; live and local responsive
+checks pass. No other-agent/media/Teams/provider/OAuth/config/secret changes.
+
+All63clients have a production receipt, not an all-content-ready certificate.
+Five confirmed-video clients still need actual source/briefs: Emoya, Human Auto,
+Hino, Supa Quick BFN and Staffordshire. Existing Nov canonical drafts for Emoya,
+Human Auto and Staffordshire are identified; no new shoot is invented.3packages
+remain unconfirmed;22confirmed packages remain video-unquantified. The current
+Nov–Jan schedule still has only8November Cape rows; no bulk monthly allocation
+was performed. Exact IDs/source gaps/verification are in
+[the production receipt](ACTIVE-CLIENT-PRODUCTION-SETUP-2026-11-24.md).
+#381 cross-lane release notice7128179836. Root/PR910 worktrees stay untouched.
+
 ## 24 November — all63 client guideline contexts verified;13missing drafts prepared
 
 CA asked to extend the RC repair to all clients. Same isolated PR1005, no new
