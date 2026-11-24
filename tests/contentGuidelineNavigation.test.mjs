@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
 import ts from 'typescript'
 import { buildGuidelineNavigation, shapeGuidelineClientReviews } from '../supabase/functions/cg-dynamics-mcp/contentGuidelineActions.ts'
+import { assertRecordClientMatchesContext } from '../supabase/functions/cg-dynamics-mcp/projectContext.ts'
 
 const source = readFileSync('supabase/functions/cg-dynamics-mcp/index.ts', 'utf8')
 const GUIDE = 'e4a541a8-e730-478c-812e-feb043d0ed71'
@@ -123,9 +124,10 @@ test('Content Run discovery returns the exact guide link and refuses a mismatche
       return query
     }
     const find = handler('const handleFindContentRuns:', 'const handleLinkContentRunDeliverables:', {
-      buildGuidelineNavigation, classifyOneDriveReadiness: () => ({ status: 'unverified' }),
+      buildGuidelineNavigation, assertRecordClientMatchesContext,
+      classifyOneDriveReadiness: () => ({ status: 'unverified' }),
     })
-    const result = await find({ supabase: { from } }, {})
+    const result = await find({ supabase: { from }, contextKind: 'client', effectiveClientId: CLIENT }, {})
     if (guideClient === CLIENT) {
       assert.equal(new URL(result.runs[0].content_guideline.guideline_url).searchParams.get('guideline'), GUIDE)
     } else {
