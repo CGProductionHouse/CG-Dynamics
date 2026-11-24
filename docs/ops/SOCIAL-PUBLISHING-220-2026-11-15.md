@@ -1,5 +1,45 @@
 # Social publishing — 15 November 2026
 
+## 24 November — exact approved runtime installed; no publishing activation
+
+CA's reply "Approved please finisg" explicitly approved the preceding three-part
+disabled-runtime request for9f61eb90. Fresh worker65 source/16files and49function
+inventory matched the reviewed3ba39e72 closure. All77 configuration digests captured;
+publishing/photo/confirmation/release settings absent; social jobs0. Released once
+each: status social-publication1(9files), authorization1(28files), worker66(36files).
+All73 per-function hosted files independently matched their exact payload bytes;
+worker15 helpers preserved;48 other function metadata records and all77 config
+digests unchanged. Two new endpoints now exist, inventory51. Exact version/bundle/
+payload/file hashes and acceptance receipt:
+approvals/FACEBOOK-RUNTIME-2026-11-24-RECEIPT.json. Do not repeat the release.
+
+Anonymous POST to each new staff endpoint returns401/no-store and OPTIONS200.
+Authenticated exact-review inspection/status is unverified because no genuine
+approved future creative/caption/time tuple exists. Manager/current-profile gates
+are preserved. The earlier39SQL+147focused/packet/build/bundle/lint/native-Deno
+qualification applies to unchanged exact source; no repeated full suite claimed.
+No publication, provider upload/schedule, social job, content approval, migration,
+account/mapping/permission/config/key/Microsoft/Vercel change. Social jobs after0.
+
+EXCEPTION / reproduced pre-existing security defect: one anonymous POST to the
+worker was mistakenly expected to refuse. It returned200 and ran the existing
+housekeeping, processed0 jobs and reported2 Meta freshness items enqueued in batch
+b8968a76-6d9b-4870-ab05-20e3150ade88. Preserve that audit evidence; no repeated
+worker probe, cancellation, deletion or cleanup. Baseline65 already accepts all
+requests without checking authentication, and cron job1/cg-background-worker runs
+every minute without Authorization/worker headers or a Vault reference. This is
+not introduced by the social patch. Public worker calls are executable and must
+not be used as read-only health checks. Source inspection should precede probes.
+Any auth hardening must coordinate the exact cron caller; changing only the worker
+would break existing background operations. No unapproved security/config/cron
+repair made. Record the gate in existing #236/#381; no competing scheduler/mission.
+
+First native-post gate still needs exact approved content/time, fresh Teams and
+native duplicate/app-review evidence, the coordinated worker-auth follow-up, then
+separate exact-account activation/ONE-post authority and independent receipt.
+No new login/consent, token copy/refresh or Microsoft-hold workaround. Same PR991;
+other-agent lanes preserved and Google tracker exact target still unidentified.
+
 ## 24 November — runtime packet refreshed and Cape content gap narrowed
 
 Prepared against fresh background-worker65/16files and49function inventory;

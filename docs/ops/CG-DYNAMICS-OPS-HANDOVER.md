@@ -1,3 +1,38 @@
+## 24 November — approved runtime LIVE, publishing OFF; existing worker auth gap
+
+CA's "Approved please finisg" consumed the exact disabled-runtime request for
+PR991/9f61eb90. Fresh65/16file worker and49function inventory matched the frozen
+3ba39e72 packet;77 config digests captured and all publishing/confirmation/release
+gates absent; social jobs0. Released ONE each in order: social-publication1/9files,
+social-publication-authorization1/28files, background-worker66/36files. Every
+hosted byte matches; worker15 existing helpers preserved,48 other functions and
+all77 configuration digests unchanged. Receipt:
+approvals/FACEBOOK-RUNTIME-2026-11-24-RECEIPT.json. DO NOT redeploy this packet.
+
+Both new endpoints: anonymous POST401/no-store; OPTIONS200. Authenticated exact
+review acceptance is NOT run: no genuine approved future image/caption/time.
+No post/provider upload/schedule, content approval, social job, migration,
+account/mapping/permission/config/key, Microsoft or Vercel change. Social jobs
+remain0; publishing switches remain absent. Existing186 local checks/build/
+native Deno qualify the exact source; no unnecessary unchanged suite rerun.
+
+IMPORTANT EXCEPTION: one attempted anonymous worker refusal probe returned200
+and invoked normal housekeeping. It processed0 jobs but reported a Meta fleet
+batch with2 items enqueued (exact batch in receipt). The refusal assumption was
+wrong; do NOT repeat or treat the worker as a read-only health endpoint. Source65
+already had Deno.serve(async () => ...) with no request authentication; this
+release preserved it. Live cron job1/cg-background-worker ticks every minute and
+has no Authorization/worker header or Vault reference. A unilateral auth change
+would break existing scheduling; hardening requires a coordinated reviewed
+worker+exact-cron change and separate approval. No such change or destructive
+job cleanup was attempted. This existing security gate must be resolved before
+calling the publishing system production-ready. Record is on #991/#220/#236/#381.
+
+Next remains the exact approved content tuple/fresh Teams/native duplicates,
+coordinated worker-auth follow-up, then separately approved activation/ONE native
+post with an independent receipt. Other-owner lanes and Microsoft hold preserved.
+Google Control Centre exact target unidentified; no guessed write.
+
 ## 24 November — Cape content evidence and refreshed runtime prepared; no release
 
 Continued SAME draft #991/#220/#236; main b524a9f9 remains an ancestor. Native
