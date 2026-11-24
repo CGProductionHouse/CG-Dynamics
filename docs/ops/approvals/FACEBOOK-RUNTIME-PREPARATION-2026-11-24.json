@@ -1,0 +1,165 @@
+{
+  "status": "PREPARED_NOT_AUTHORIZED_NOT_DEPLOYED",
+  "source_sha": "3ba39e72c9f952e23d45e96f9d9de42e57d43520",
+  "project_id": "ehtjfntukiwbgptqgbzy",
+  "baseline_worker_version": 65,
+  "baseline_hosted_source_sha256": "92e77be14cff304b152746e422181fa3c30f5e57241cb55107cc54699d1077ae",
+  "inventory_sha256": "d7b4329a296e1a8458b3ca16b8891257ad7101a8917e91a55146c5b3cf6e17f8",
+  "functions": [
+    {
+      "name": "background-worker",
+      "file_count": 36,
+      "payload_sha256": "bcde11f963242e5ee5bb632c2f89c01f4e5c15937bd2d9b51d88391af4d7e87f",
+      "modified": [
+        "supabase/functions/background-worker/index.ts"
+      ],
+      "preserved_hosted_files": 15,
+      "added": [
+        "supabase/functions/_shared/socialPublishingQueue.ts",
+        "supabase/functions/_shared/socialPublishingExecution.ts",
+        "supabase/functions/_shared/socialPublishing.ts",
+        "supabase/functions/_shared/instagramPublishingCaption.ts",
+        "supabase/functions/_shared/socialPublicationAuthorization.ts",
+        "supabase/functions/_shared/facebookPublicationRuntime.ts",
+        "supabase/functions/_shared/facebookPublishingProvider.ts",
+        "supabase/functions/_shared/metaPublishingCredential.ts",
+        "supabase/functions/_shared/metaTokenStorage.ts",
+        "supabase/functions/_shared/metaTokenDiagnostics.ts",
+        "supabase/functions/_shared/facebookPublishing.ts",
+        "supabase/functions/_shared/facebookPublishingTransport.ts",
+        "supabase/functions/_shared/socialPublishingMedia.ts",
+        "supabase/functions/_shared/facebookPhotoMedia.ts",
+        "supabase/functions/_shared/facebookPublicationMedia.ts",
+        "supabase/functions/_shared/publicationJpeg.ts",
+        "supabase/functions/_shared/publicationJpegCodec.ts",
+        "supabase/functions/_shared/socialPublicationPreparation.ts",
+        "supabase/functions/_shared/socialPublicationRuntimeSource.ts",
+        "supabase/functions/_shared/socialPublicationAuthorizationStore.ts"
+      ],
+      "external_runtime_imports": [
+        "https://esm.sh/@supabase/supabase-js@2",
+        "jsr:@supabase/supabase-js@2",
+        "npm:jpeg-js@0.4.4",
+        "npm:web-push@3.6.7"
+      ],
+      "local_check_only_files": []
+    },
+    {
+      "name": "social-publication",
+      "file_count": 9,
+      "payload_sha256": "5fe52b6d11b8490cc08aee6c59e58d6cba56d64aa2fd67cc3506efe5d016de4f",
+      "modified": [],
+      "preserved_hosted_files": 0,
+      "added": [
+        "supabase/functions/social-publication/index.ts",
+        "supabase/functions/_shared/auth.ts",
+        "supabase/functions/_shared/cors.ts",
+        "supabase/functions/_shared/socialPublicationManagement.ts",
+        "supabase/functions/_shared/socialPublicationAuthorization.ts",
+        "supabase/functions/_shared/socialPublishing.ts",
+        "supabase/functions/_shared/instagramPublishingCaption.ts",
+        "supabase/functions/_shared/socialPublicationAuthorizationStore.ts"
+      ],
+      "external_runtime_imports": [
+        "https://esm.sh/@supabase/supabase-js@2"
+      ],
+      "local_check_only_files": []
+    },
+    {
+      "name": "social-publication-authorization",
+      "file_count": 28,
+      "payload_sha256": "ad4b1c295a506f245b633df9b0af0f3a77ae4c8b09106f863e3d95334ac7019c",
+      "modified": [],
+      "preserved_hosted_files": 0,
+      "added": [
+        "supabase/functions/social-publication-authorization/index.ts",
+        "supabase/functions/_shared/auth.ts",
+        "supabase/functions/_shared/cors.ts",
+        "supabase/functions/_shared/facebookPublicationRuntime.ts",
+        "supabase/functions/_shared/facebookPublishingProvider.ts",
+        "supabase/functions/_shared/metaPublishingCredential.ts",
+        "supabase/functions/_shared/metaTokenStorage.ts",
+        "supabase/functions/_shared/metaTokenDiagnostics.ts",
+        "supabase/functions/_shared/facebookPublishing.ts",
+        "supabase/functions/_shared/socialPublishing.ts",
+        "supabase/functions/_shared/instagramPublishingCaption.ts",
+        "supabase/functions/_shared/facebookPublishingTransport.ts",
+        "supabase/functions/_shared/socialPublishingMedia.ts",
+        "supabase/functions/_shared/facebookPhotoMedia.ts",
+        "supabase/functions/_shared/facebookPublicationMedia.ts",
+        "supabase/functions/_shared/publicationJpeg.ts",
+        "supabase/functions/_shared/publicationJpegCodec.ts",
+        "supabase/functions/_shared/socialPublicationPreparation.ts",
+        "supabase/functions/_shared/socialPublicationAuthorization.ts",
+        "supabase/functions/_shared/socialPublicationRuntimeSource.ts",
+        "supabase/functions/_shared/socialPublicationAuthorizationStore.ts",
+        "supabase/functions/_shared/facebookPublicationInspection.ts",
+        "supabase/functions/_shared/facebookPublicationStaff.ts"
+      ],
+      "external_runtime_imports": [
+        "https://esm.sh/@supabase/supabase-js@2",
+        "npm:jpeg-js@0.4.4"
+      ],
+      "local_check_only_files": [
+        "supabase/functions/_shared/socialPublishingQueue.ts",
+        "supabase/functions/_shared/socialPublishingExecution.ts"
+      ]
+    }
+  ],
+  "configuration_change": false,
+  "configuration_values_read": false,
+  "required_before_release": "Fresh exact source/inventory and absence of publishing/confirmation gates/release tuple; separately approved full packet, rollback and native acceptance.",
+  "no_authority": "No deployment, flag, secret, account, permission, SQL, content, schedule, Microsoft, Vercel or publication authority. Two new staff endpoints require separate review/approval. Existing custom active-manager JWT validation remains mandatory.",
+  "runtime_gates": [
+    "SOCIAL_PUBLISHING_ENABLED",
+    "SOCIAL_FACEBOOK_PHOTO_ENABLED",
+    "SOCIAL_FACEBOOK_PHOTO_CONFIRMATION_ENABLED",
+    "SOCIAL_FACEBOOK_PHOTO_RELEASE"
+  ],
+  "live_test": "Not run; requires native exact Page/permission proof, genuinely approved unscheduled asset/caption/future time, fresh Teams capture, native duplicate review and exact CA approval.",
+  "rollback": "Restore captured worker v65 only under separate approval; preserve all 15 hosted helpers and durable audit/job/provider receipts. Do not replay ambiguous jobs or restore old data.",
+  "prepared_at": "2026-11-24T12:00:15.982Z",
+  "payload_directory": "C:/Users/chris/.codex/artifacts/social-publishing-991/2026-11-24/runtime-preparation/candidate-3ba39e72",
+  "native_access_receipt": "docs/ops/approvals/META-ZERO-EXPIRY-2026-11-24-RECEIPT.json",
+  "production_state": {
+    "worker_version": 65,
+    "status_endpoint_present": false,
+    "authorization_endpoint_present": false,
+    "facebook_migrations_applied": [
+      "20261115104948",
+      "20261116085815"
+    ],
+    "later_migrations_absent": [
+      "20261115104950",
+      "20261116102019"
+    ]
+  },
+  "qualification": {
+    "postgres": {
+      "tests": 39,
+      "pass": 39,
+      "fail": 0,
+      "skipped": 0,
+      "provider": "synthetic Graph/Storage ports; actual isolated PostgreSQL",
+      "added": "bounded native-zero JPEG ChatGPT journey and lost-response no-replay journey"
+    },
+    "focused": {
+      "tests": 147,
+      "pass": 147,
+      "fail": 0,
+      "skipped": 0,
+      "includes_packet_checks": 5
+    },
+    "native_deno": {
+      "version": "2.9.8",
+      "entries": 3,
+      "status": "pass",
+      "note": "Checker resolved existing public JSR/npm dependencies into its private cache; no package or lockfile changes."
+    },
+    "build": "PASS: tsc -b + Vite7.3.6; app-bearing bundle and scoped lint/diff checked separately",
+    "browser": "Read-only company WhatsApp source inspection, not native scheduling/publication or phone acceptance",
+    "live_publication": "NOT_RUN",
+    "security": "Actual PostgreSQL role and cross-client/source/receipt fences passed; no production permissions changed. Manager/admin gate retained.",
+    "review": "Self-review of two fixture changes and exact source-safe packet; no independent review or real publication claimed."
+  }
+}

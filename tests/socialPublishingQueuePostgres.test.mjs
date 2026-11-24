@@ -186,6 +186,12 @@ test('real PostgreSQL: queue, source/role fences, crash recovery, receipts and O
   await t.test('ChatGPT MCP preview, exact confirmation and status reuse the real SQL queue and one due provider attempt', async () => {
     await facebookPostgresJourney({ server, sql, q, actor, rpcClient, mcpBridge: true })
   })
+  await t.test('ChatGPT original JPEG with bounded native zero expiry uses the real SQL queue and one independent receipt', async () => {
+    await facebookPostgresJourney({ server, sql, q, actor, rpcClient, mcpBridge: true, mediaType: 'image/jpeg', tokenExpiry: 'explicit_zero' })
+  })
+  await t.test('bounded native zero expiry and a lost provider response remain uncertain without a second submission', async () => {
+    await facebookPostgresJourney({ server, sql, q, actor, rpcClient, mode: 'timeout', tokenExpiry: 'explicit_zero' })
+  })
   // Facebook must work with ONLY its queue + captured-source migrations.
   // Rehearse the two later-platform migrations afterwards, on the same database.
   sql(readFileSync('supabase/migrations/20261115104950_tiktok_business_oauth.sql', 'utf8'))

@@ -5,8 +5,9 @@ import { readFileSync } from 'node:fs'
 
 // Isolated SQL integration, not a live provider acceptance. No network escapes:
 // native Graph and Storage are explicit synthetic ports; SQL is real PostgreSQL.
-export async function facebookPostgresJourney({ server, sql, q, actor, rpcClient, mode = 'success', mediaType = 'image/png', admitReview, mcpBridge = false }) {
+export async function facebookPostgresJourney({ server, sql, q, actor, rpcClient, mode = 'success', mediaType = 'image/png', admitReview, mcpBridge = false, tokenExpiry = 'fixed' }) {
   assert.ok(['image/png', 'image/jpeg'].includes(mediaType))
+  assert.ok(['fixed', 'explicit_zero'].includes(tokenExpiry))
   let filename = mediaType === 'image/jpeg' ? 'approved.jpg' : 'approved.png'
   const modules = await Promise.all(['facebookPublicationRuntime', 'facebookPublicationStaff', 'socialPublicationAuthorizationStore',
     'socialPublishingQueue', 'socialPublicationManagement', 'metaTokenStorage', 'facebookPublicationInspection'].map(name => server.ssrLoadModule(`/supabase/functions/_shared/${name}.ts`)))
@@ -77,7 +78,7 @@ export async function facebookPostgresJourney({ server, sql, q, actor, rpcClient
   globalThis.fetch = async (raw, options = {}) => {
     const url = new URL(raw); assert.equal(url.origin, 'https://graph.facebook.com')
     const path = url.pathname.replace('/v27.0', '')
-    if (path === '/debug_token') return Response.json({ data: { app_id: '789', is_valid: true, type: 'USER', expires_at: Math.floor(Date.now() / 1000) + 3600,
+    if (path === '/debug_token') return Response.json({ data: { app_id: '789', is_valid: true, type: 'USER', expires_at: tokenExpiry === 'explicit_zero' ? 0 : Math.floor(Date.now() / 1000) + 3600,
       data_access_expires_at: Math.floor(Date.now() / 1000) + 7200, scopes: ['pages_show_list', 'pages_manage_posts', 'pages_read_engagement'] } })
     if (path === '/me/permissions') return Response.json({ data: ['pages_show_list', 'pages_manage_posts', 'pages_read_engagement'].map(permission => ({ permission, status: 'granted' })) })
     if (path === '/me/accounts') return Response.json({ data: [{ id: '123', access_token: 'fixture-page-token', tasks: ['CREATE_CONTENT'] }] })

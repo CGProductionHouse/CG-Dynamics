@@ -1,3 +1,38 @@
+## 24 November — Cape content evidence and refreshed runtime prepared; no release
+
+Continued SAME draft #991/#220/#236; main b524a9f9 remains an ancestor. Native
+Cape Page acceptance/MCP97/callback76 and completed approvals below are retained;
+no repeat consent, binding repair, deploy or token/config change. Fresh worker
+inventory is65/16files (same hosted source closure as64); both publishing staff
+endpoints still absent. Refreshed held packet from runtime source3ba39e72:
+worker36files (one index changed,15hosted helpers preserved,20added), status9,
+authorization28. Current bounded-zero lifetime helpers included and exact parity
+checked. Manifest: approvals/FACEBOOK-RUNTIME-PREPARATION-2026-11-24.json.
+Prepared only; future release must recheck full source/inventory/config drift.
+
+Actual exact-client schedule24Nov–31Dec yields only25Nov old-video repost;
+zero content_review_versions. Company OneDrive portal has seven past JPEG/text
+pairs through18Nov; scoped December search empty. Company WhatsApp identifies
+Sydney's18Nov July-video repost file/caption, but not a verified exact approval;
+it is outside the image pilot. January images have unresolved staff feedback.
+Canva main DAGVuJURh6I/rev3212 includes December/January creative, but no verified
+original/caption/future-time/approval tuple. No personal Chrome or provider
+publishing action. Exact bounded evidence/next content step:
+approvals/CAPE-FACEBOOK-PILOT-CONTENT-2026-11-24.md. Do not call missing immutable
+reviews proof that all Teams/Canva/client work is empty or approve drafts silently.
+
+Fresh39actual isolated PostgreSQL +147focused/packet tests all PASS/no skips,
+including ChatGPT original JPEG/native-zero proof and lost-response/no-replay
+journeys. Graph/Storage are synthetic; this is NOT native publishing acceptance.
+Three assembled native Deno entrypoints pass; build/bundle/lint receipt is in
+the manifest. Only tests and records change; no runtime source/schema change.
+Facebook migration pair confirmed present; TikTok/Instagram pair remains absent.
+Publishing, staff confirmation and controlled live test require exact separate
+authority. Fresh Teams/native duplicate evidence and exact approved image/time
+remain; preserve Microsoft hold, other agents and current role boundaries.
+Task-owned QA container stopped after tests. No production writes or Vercel.
+Google Control Centre exact target remains unidentified; no guessed update.
+
 ## 24 November — Cape native Facebook account acceptance PASSES; MCP97/callback76 LIVE
 
 CA approved "Approve exact bounded-expiry release" for f66de2b7. Immediate fresh

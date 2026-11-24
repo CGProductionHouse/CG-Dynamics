@@ -1,5 +1,49 @@
 # Social publishing — 15 November 2026
 
+## 24 November — runtime packet refreshed and Cape content gap narrowed
+
+Prepared against fresh background-worker65/16files and49function inventory;
+worker source closure equals prior64, so existing source-safe patch still applies.
+No hosted changes made. Current3ba39e72 runtime closure includes the verified
+bounded native-zero lifetime code. Immutable private candidate36/9/28files:
+one worker entry changed/15helpers preserved/20added; status and authorization
+remain new, undeployed endpoints. Exact payload hashes/source/inventory/checker/
+rollback manifest: approvals/FACEBOOK-RUNTIME-PREPARATION-2026-11-24.json.
+Five offline checks cover hashes, preservation, source/version/auth/inventory
+drift refusal, overwrite/path escape and lifetime-helper parity. Native Deno2.9.8
+checks all THREE actual assembled entrypoints. Public existing SDK dependencies
+resolved to private checker cache; no dependency or lockfile edits.
+
+Added two actual PostgreSQL journey regressions through the existing shared
+ChatGPT/queue path: original JPEG with native explicit-zero proof reaches exactly
+one synthetic submission and a separately verified receipt; lost response stays
+unknown with no automatic replay. Fresh39SQL +147focused/packet tests PASS,
+0fail/0skip. Includes existing source/role/duplicate/late-receipt/recovery cases;
+provider/Storage ports remain synthetic. No live-post or phone acceptance claim.
+Build/bundle/scoped lint results are attached to the manifest, not inferred from
+test fixtures. Task-owned network-none QA container stopped; laptop capacity
+sampled and only one heavy job run at a time, no hardware/thermal guarantee.
+
+Read-only exact Cape evidence recorded in
+approvals/CAPE-FACEBOOK-PILOT-CONTENT-2026-11-24.md: zero immutable content reviews;
+future dated scan24Nov–31Dec only25Nov repost. Company OneDrive portal's seven
+JPEG/caption pairs end18Nov. WhatsApp resolves Sydney's18Nov selected July-video
+repost/caption; no adjacent exact approval established, and video is not the first
+image pathway. January images have17Nov change requests. Existing Canva main
+DAGVuJURh6I/rev3212 has December creative, but no verified exact page/original/
+caption/future SAST time/approval tuple. No draft approval, new schedule, file
+duplication, personal Chrome or staff/client message. Coverage is bounded; do
+not claim all upcoming work is absent or infer approval from Canva headings.
+
+Fresh production receipt read confirms Facebook20261115104948/20261116085815
+already applied; TikTok20261115104950/Instagram20261116102019 absent. Do not replay
+the pair. MCP97/callback76 and Cape binding/native rights remain completed below.
+No new deploy, consent, config/key/token/account/mapping/permission, SQL/data,
+approval/content/job/Microsoft or Vercel change. Next: exact approved original
+image/caption/time through existing review flow, fresh Teams/native duplicates,
+then separately authorized exact runtime/activation/ONE-post test with independent
+receipt. Draft #991 and other-owner lanes preserved; Google target unidentified.
+
 ## 24 November — real Cape Page verification PASS; approved release97/76 complete
 
 Exact f66de2b7 approval consumed: fresh96/75 baselines matched; ONE deploy each
