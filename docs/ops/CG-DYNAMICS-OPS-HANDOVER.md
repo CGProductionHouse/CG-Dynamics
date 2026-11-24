@@ -1,3 +1,39 @@
+## 24 November — Cape native Facebook account acceptance PASSES; MCP97/callback76 LIVE
+
+CA approved "Approve exact bounded-expiry release" for f66de2b7. Immediate fresh
+full-source baselines96/73files and75/8files matched both qualified overlays.
+ONE deploy each: MCP97(2changed/71preserved) and callback76(3changed/5preserved),
+no added/removed hosted files. Every hosted byte independently matched, preserving
+all #1005/#995 work. Auth/import-map settings and all77 configuration digests
+unchanged; publishing/submission/confirmation/exact-release settings still absent.
+Anonymous MCP401; missing-state callback302 refuses before consent consumption.
+Exact per-function hashes and readback in
+approvals/META-ZERO-EXPIRY-2026-11-24-RECEIPT.json. DO NOT redeploy/repeat completed
+diagnostic96/callback75 or bounded-expiry97/76 packets or regenerate setup links.
+
+ACTUAL company-admin get_facebook_post_readiness(account_only:true), checked
+24Nov11:25:42.149Z (13:25 SAST), now AVAILABLE for exact Cape client
+42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa / Page262645554440912 / Cape Lumber Marketing:
+native_access_verified=true, required_permissions_verified=true,
+create_content_task_verified=true. Existing encrypted grant reused; no new consent,
+credential copy/refresh/replacement, mappings, permissions, jobs, content or posting.
+This is real provider/Page evidence, not the synthetic fixture. canConfirm/canPublish
+remain false. It does NOT prove app-review/release eligibility or actual publication.
+
+Fresh complete exact-client future approved PNG/JPEG review scan11:27:08.461Z:
+0 candidates, has_more=false. Next first-path gates are one real approved future
+original image/caption/time in canonical review flow, fresh Teams/native-duplicate
+evidence, separately authorized held worker/status/authorization runtime + account
+activation/controlled post, then independent native receipt. Do not invent/approve
+creative, dates or quantity, weaken the Microsoft hold or call queued=published.
+Refresh held runtime packet helpers with the now-qualified lifetime code before
+any future release; old frozen packets may carry the previous strict-null reader.
+
+202 focused tests/build/app bundle/lint/diff/native Deno receipts remain qualified;
+no extra unchanged full-suite/SQL rerun. Physical phone/client-role publication
+acceptance is not claimed. No Vercel/Microsoft/config/schema/campaign change.
+Existing #991/#220/#236/#381 ownership; Google Control Centre target unidentified.
+
 ## 24 November — explicit-zero lifetime correction qualified LOCALLY; no further consent
 
 Existing deployed state remains MCP96 / callback75. Owner's ONE request is used;

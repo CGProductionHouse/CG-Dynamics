@@ -1,5 +1,33 @@
 # Social publishing — 15 November 2026
 
+## 24 November — real Cape Page verification PASS; approved release97/76 complete
+
+Exact f66de2b7 approval consumed: fresh96/75 baselines matched; ONE deploy each
+to MCP97(73files:2changed/71preserved) and callback76(8files:3changed/5preserved).
+All hosted bytes match,0 additions/deletions; settings/auth and77 config digests
+unchanged. Publishing/submission/confirmation/exact-release settings absent.
+Anonymous MCP401; missing-state callback302. Receipt:
+approvals/META-ZERO-EXPIRY-2026-11-24-RECEIPT.json. No repeat deployment or consent.
+
+Real company-admin account_only now AVAILABLE24Nov11:25:42.149Z for Cape's exact
+Page262645554440912 / Cape Lumber Marketing: native access, required permissions
+and CREATE_CONTENT verified. Existing encrypted grant works with the bounded
+native-zero proof. No new setup link, credential replacement/refresh/export,
+mapping/scope/permission, content/date/job, Microsoft or Vercel write. The earlier
+one setup request remains consumed; do not ask owner to reconnect again.
+
+This is actual Page access acceptance, not publication or app-review/release proof.
+canConfirm/canPublish false. Fresh complete future approved image review listing
+11:27:08.461Z returns0, has_more=false. First real-post test still needs a canonical
+approved future original image/caption/time, fresh Teams/native duplicate evidence,
+separately authorized held worker/status/authorization/account activation and an
+independent provider receipt. Existing frozen runtime packets must carry current
+lifetime helpers before any release. No creative/date approval is inferred.
+
+202 focused checks, build/app bundle, lint/diff and native Deno remain the local
+qualification; no repeated unchanged full suite/SQL/browser/phone proof claimed.
+Same #991/#220/#236/#381 lane and all other ownership/holds preserved.
+
 ## 24 November — native-zero expiry support qualified locally; existing grant retained
 
 No more consent requested: callback75/MCP96 stay live, the one owner setup is used,
