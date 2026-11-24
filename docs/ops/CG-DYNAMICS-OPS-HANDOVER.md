@@ -1,22 +1,30 @@
-## 24 November — RC client-Project guideline repair in progress (#896 / PR1005)
+## 24 November — RC client-Project guidelines fixed LIVE (#896 / PR1005)
 
 Owner requested ordinary script preparation and review sharing from RC-Polypipe's
 internal client ChatGPT Project. Isolated branch `fix/rc-guideline-project-workflow`.
-Discovery gate was incorrectly staff-only; exact-client discovery is live as MCPv91
-with all70 source files read back. Existing active-staff OAuth and foreign-client
-denials remain enforced. Genuine authoring acceptance then exposed injected routing
-`client_id` being rejected as an editable video field; the narrow add/update handler
-correction is locally green, not yet live. Track the complete receipt in
+Discovery was incorrectly staff-only; add/update also rejected the dispatcher's
+proven routing `client_id` as an editable video field. Both are fixed LIVE as MCPv92,
+with all70 exact source files read back and existing active-staff OAuth/isolation
+preserved. Other69 files are byte-identical to v91, including the publishing lane.
+Code checkpoint `678626da`; draft PR1005. Track the complete acceptance receipt in
 `docs/ops/RC-GUIDELINE-PROJECT-WORKFLOW-2026-11-24.md` and PR1005.
 
 Actual bounded preparation created one undated planning run and canonical draft
 guideline from the intact24Nov eight-script source. No shoot/calendar/month/package
 allocation was invented. Existing cancelled runs and unrelated pipeline films stay
-unchanged. Script save/retry/publication-for-review acceptance remains in progress.
+unchanged by exact hash. All eight original scripts/directions/technical checks
+were saved/read back through the actual installed connector in RC's client Project;
+successful retries returned original records, eight unique videos total. Published
+for review24Nov08:31:05UTC; same link re-read. Anonymous read sees exactRC/eight
+videos; wrong-token/foreign-slug denied, foreign-client MCP denied, anonymousMCP401.
+Company Chrome rendered the real eight-script review and per-video controls;
+no fake client response, phone acceptance, client approval or shoot booking claimed.
 154 focused tests,58 live-candidate tests, production build, scoped lint, diff and
 official local Edge bundle pass. No Vercel, migration, provider/config/secret change.
 Live includes other-agent publishing modules: patch the exact live bundle only;
-never replace it wholesale with main. Other worktrees remain untouched.
+never replace it wholesale with main. Other worktrees remain untouched. RC's short
+code/folder readiness remains unconfigured; no invented OneDrive naming. Exact
+Google Control Centre target remains unavailable; no guessed tracker write.
 
 ## 16 November — authorised brand panel merge reconciliation (#984)
 
