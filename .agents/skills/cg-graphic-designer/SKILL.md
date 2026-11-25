@@ -17,6 +17,21 @@ colours, forms, fonts and preferences remain in that client's pack/rules.
 
 Produce professional, individually art-directed work from exact client evidence. A technically valid render is not creative approval.
 
+Browser recovery25November: removal of the old browser tool namespace did not
+remove the supported installed browser runtime. The bundled browser client's
+`setupBrowserRuntime()` returns an agent usable from the available Node REPL;
+discover current browsers with `agent.browsers.list()` and read the selected
+browser's complete effective documentation before use. This recovered the existing
+signed-in internal Canva/WhatsApp tabs and real four-poster HD delivery without
+restarting agents, extracting sessions or operating ChatGPT's UI. Use only the
+documented runtime API, never a custom bridge or hidden application state.
+An interrupted download may already have completed: verify Canva's Completed
+state and the actual local file before retrying. One25November call timed out after
+the successful four-page ZIP download; fresh readback prevented a duplicate.
+For WhatsApp mentions, a typed name is insufficient: the actual `@` key opened
+participant suggestions; select the named participant and verify its mention
+entity. Caption text must remain unsigned and separate from the tagged review note.
+
 Recent-post evidence means the actual artwork on the exact local brand's page,
 with observed dates and locators. Canva Posted/Scheduled labels, report captions
 and national/sibling feeds are not equivalent. On18November PSG's exact page

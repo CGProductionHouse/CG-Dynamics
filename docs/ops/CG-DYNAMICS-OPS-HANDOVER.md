@@ -1,4 +1,27 @@
-## 25 November — four Bloem drafts saved, HD delivery still open
+## 25 November — Bloem four HD review posters delivered
+
+Existing #948/draft#956 lane. Supported installed Node browser runtime recovered
+the original signed-in internal Canva/WhatsApp tabs after the old namespace was
+removed. No restart, session extraction or other-agent interruption. A bounded
+Chrome Computer Use check found Canva login and was stopped there; actual exports
+and sends used the recovered browser controls, without desktop editing.
+
+DAHb7QiRBhw: four genuine Canva PNG High2x2160x2700 originals visually inspected;
+metadata-clean upload derivatives prove identical decoded pixels. Four unique
+unsigned-caption HD2048x2560 photo messages confirmed Delivered in CG Picasso
+Approvals16:20–16:23SAST25November. Separate review note with actual Amonique
+Fourie/Ger-Marie mentions Delivered16:25. Private submitted/confirmed receipts
+prevent duplicate replay. Dynamics update5fe5b8b0-4568-4a33-a417-5e16721f9647 recorded,
+unreviewed; staff guide and canonical Januaryv2 unchanged.
+
+No final approval/publication/scheduling/portal filing. Master insertion remains
+pending its earlier exact-operation approval; all73existing pages untouched.
+Reviewed pack, broader history/source publication clearance and dated schedule
+remain separate. No private upload to anonymously shared OneDrive folder.
+R0; no deployment/schema/SQL/new dependencies or Nolan ownership change.
+Control Centre target remains ungrounded; no guessed write.
+
+## Earlier 25 November checkpoint — four Bloem drafts saved
 
 Same #948/draft#956 lane. Current R3 DAHb7QiRBhw: four material-reference drafts,
 52native elements/21live Gotham/Inter texts/four exact logos. All four unsigned

@@ -2,8 +2,30 @@
 
 25 November 2026. Existing #948 / draft #956 lane. Owner authorised selecting
 the next January client after the Cape/PSG review deliveries. **Four internal
-drafts saved together; no creative approval, completed HD delivery package,
-schedule, final filing or WhatsApp send.**
+drafts saved together and delivered in HD for internal review; no creative
+approval, schedule or final filing.**
+
+## 25 November — HD review delivery confirmed
+
+Supported browser access recovered through the installed browser runtime in Node
+REPL; the old tool namespace's absence did not mean the browser was disconnected.
+The original signed-in internal Canva/WhatsApp tabs were reused and preserved.
+Canva PNG High2x exported all four actual2160x2700 originals. All four were visually
+inspected; separate metadata-clean PNG upload files have identical decoded pixels.
+Catalogue source limitations below remain, with no invented resolution or ICC claim.
+
+Four unique photo+allocated unsigned caption messages were confirmed **Delivered**
+to CG Picasso Approvals in DP01–DP04 order at16:20,16:21,16:22,16:23SAST.
+Each attachment's HD option reported2048x2560 before Send. A separate concise
+review note was Delivered16:25 with actual Amonique Fourie/Ger-Marie mentions.
+Submitted/confirmed receipts and file hashes live privately in `full-four-r2/hd-r3/`.
+No media replay, signature, client publication or final approval claim.
+
+Dynamics append-only update `5fe5b8b0-4568-4a33-a417-5e16721f9647` records this
+delivery, unreviewed. The complete reviewed Brand Pack, broader history/publication
+clearance, exact master insertion and dated schedule remain separate open items.
+The owner explicitly requested this internal review delivery; it does not turn the
+observed-reference research package into a new structured-runtime qualification.
 
 Exact client `89e0ad6d-e08c-4a75-8b8e-abea71af581c`. Fresh monthly brief confirms
 4 designed posters and 2 professional videos; Nolan retains video ownership.
@@ -20,8 +42,8 @@ legacy due-date-only work and does not prove that no staff work exists.
 [DAHb7QiRBhw](https://www.canva.com/design/DAHb7QiRBhw/edit): four1080x1350pages,
 52native elements,21live Gotham/Inter texts, four exact logos. Four unsigned captions
 exactly match saved page notes and pass the caption guard. Important-frame check
-passes21texts/four explicit logo IDs at64px. Actual phone previews/grid inspected;
-**no new R3 HD export or full-resolution qualification is claimed**.
+passes21texts/four explicit logo IDs at64px. Actual phone previews/grid and the
+four genuine HD exports were inspected; human creative acceptance remains open.
 
 | Working item | Execution |
 | --- | --- |
@@ -51,11 +73,10 @@ all73existing pages; actual Drafts36/Posted37 protected. The earlier36/37/38 bou
 note was off by one; native text/stable IDs were reconciled with page indices.
 No merge occurred. Wait for the pending answer, not another repeated request.
 
-App update removed this chat's browser-control namespace; native Canva tools still
-work but expose no HD export or WhatsApp send. Last signed-in tabs were online.
-Do not diagnose a disconnected laptop, restart other agents, extract sessions or
-upscale previews as HD. Genuine Canva PNG High2x/actual HD QA and serialized review
-delivery remain open. Original user tabs were preserved before the update.
+Earlier browser-control interruption is resolved by the current delivery above.
+Native Canva tools still expose no HD export or WhatsApp send. Do not diagnose a
+disconnected laptop from a missing namespace, restart other agents, extract sessions
+or upscale previews as HD. The supported browser runtime supplied the real exports.
 
 Private current evidence is in `full-four-r2/`: R3 scene/HTML, four native pages,
 four captions/guards, actual previews, safe-area report, current receipt/export
@@ -183,11 +204,10 @@ preserves the staff strategy and records the actual proof/holds. Guide unchanged
 
 ## Next work and holds — current R3
 
-Use the current four-page R3, not the earlier one-proof checkpoint. Wait for exact
-insertion approval, then preserve all73existing master IDs/order and verify the four
-transferred pages. Restore the supported browser capability when the host exposes
-it; export genuine Canva PNG High2x and inspect all four actual files before review
-delivery. Reviewed Brand Pack, source/publication rights, current relevant approval
+Use the current four-page R3, not the earlier one-proof checkpoint. Do not resend
+the delivered set without new feedback. Wait for exact insertion approval, then
+preserve all73existing master IDs/order and verify the four transferred pages.
+Reviewed Brand Pack, source/publication rights, current relevant approval
 coverage and staff month allocation are still separate checks. Dates, final portal
 filing and publication stay unallocated. No new structured-runtime or normal-company-
 ChatGPT qualification is claimed. Never send the rejected rough drafts or thumbnails.
