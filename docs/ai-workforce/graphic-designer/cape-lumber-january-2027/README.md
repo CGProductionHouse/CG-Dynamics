@@ -1,5 +1,44 @@
 # Cape Lumber — January 2027 working production
 
+## 25 November — four feedback amendments delivered
+
+Actual17November Ger-Marie feedback and its DP01 annotation were retrieved from
+CG Picasso Approvals. DP01's support now fits its outline and arbitrary drops are
+removed; DP02 uses a sharp genuine timber-section source; DP03 explicitly says
+"We source decking timber. Send your specification." with integrated neutral light
+control instead of the arch; DP04 uses clear genuine machined profiles rather than
+the rough/weathered image. Native type, exact logos and independent layers remain.
+
+Source0351 was excluded after a real match to historical page056. Accepted0356 and
+2837 sources were checked against234 historical previews,106 retained social/queue
+images and actual newer Cape feed artwork observed25November. No detected accepted
+source match; bounded evidence is not lifetime or same-shoot non-use certification.
+Originals remain private/read-only, separate colour-managed derivatives retained.
+2837 used its verified full-resolution embedded camera JPEG, not RAW development.
+
+Existing master **DAGVuJURh6I** now has243pages from intervening staff additions.
+Only our existing In Progress pages27–30 were targeted. Same four page IDs and
+surrounding dividers remain; no page deletion/reordering. Native connector editing
+was unsupported at243pages, so reversible browser element transfers were used.
+All four saved400x500 master/source previews are pixel-identical. This does not
+certify every historical page's pixels or constitute master-HD export evidence.
+
+Genuine current Canva PNG High2x2160x2700 exports inspected. Exact allocated
+unsigned captions retained/read back; fresh root-scope Dynamics footer is ready.
+Four individual HD-selected photo/caption messages **delivered11:43–11:45SAST**
+25November to CG Picasso Approvals. DO NOT RESEND without fresh feedback.
+No client approval, schedule/portal final/publication inferred. Private current
+evidence: job `amendments-20261125/`, including `delivery-manifest.private.json`,
+`master-equivalence.private.json`, feedback/source/finishing/legacy review receipts
+and `HD/`. Earlier16November delivery remains historical and must not be replayed.
+
+The new structured PICASSO runtime packet/migration remains unreleased. Its
+preflight held on the legacy pack shape; no pass or live enforcement is claimed.
+Existing owner-authorised amendments were manually reviewed against current real
+legacy branding/guide and all applicable evidence checks. This is not a migrated
+pack or ordinary-company-ChatGPT qualification. R0; no deployment, SQL/schema or
+other-agent production changes.
+
 ## 16 November delivery complete — current authority
 
 The owner accepted the artwork and explicitly authorised HD export/checks and

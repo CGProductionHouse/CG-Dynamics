@@ -1,5 +1,52 @@
 # PSG Bloemfontein — January 2027 working production
 
+## 25 November — current R11 review delivered
+
+Used the user's existing signed-in internal Canva/WhatsApp tabs; retained both.
+Refreshed actual local Facebook artwork through19November and selected the exact
+PSG Kit **kAGn0ETkyhE**. Its rendered palette now verified:
+`#9C906E #00AEEF #353E43 #241F21 #FFFFFF #D4055C #FFDE21 #0054FF`.
+Literal font labels are Gabriel Sans / "Monsterrat". Existing actual Montserrat
+source/licence and native refs are retained in line with current local direction;
+the historical IBM Plex guideline is not silently substituted. Three live emphasis
+colours corrected from muted sampled cyan to exact Kit `#00AEEF`; quiet raster
+accents remain intentional existing tones. No global Apply style was invoked.
+
+Full current Dynamics history exposed the October business-growth film; actual
+staff queue also repeated growth/new-premises concepts. Those intermediate DP02
+hooks are superseded, never delivered. Current DP02 is **WORK STOPS. COSTS DON'T.**
+with business-interruption planning, evidenced by exact-client master53 plus
+[PSG service information](https://www.psg.co.za/for-my-business/commercial-property-and-assets).
+Real empty-office photo supports the idea; no cover guarantee. Revised allocated
+caption is saved/read back in notes. An actual preview exposed narrow headline
+clearance; reducing to120 restored comfortable visible-ink margin before export.
+
+Same existing **DAHbRapxiLM**, now labelled R11; all3page IDs,58top-level elements,
+19live texts, source photographs, exact logos and registered masks retained.
+DP01/03 changes are headline cyan only. DP02 changes are specific type, spacing,
+one independent underline's position and matching caption. No circle through type.
+Official199-page master read-only; no insertion or staff/history mutation.
+
+Actual19queued artworks retained and compared against4current sources: zero read
+errors/detected source matches. Four current social references compared similarly;
+prior199-page/six-post evidence retained. Picasso group PSG search returned no
+messages. Bounded coverage, not global non-use, biometric or January-date clearance.
+
+Genuine PNG High2x2160x2700 exports inspected at HD and as a batch. DP02's later
+single-page R11 export supersedes its R10. Separate lossless upload PNGs strip
+Canva document XMP/EXIF; decoded pixels verified identical. Untagged colour remains
+uncertified. Fresh exact-client caption transport checks pass; footer optional and
+omitted. Three unsigned HD-selected photo/caption messages **delivered12:09–12:10
+SAST25November** to CG Picasso Approvals. DO NOT RESEND without new feedback.
+
+Private current evidence: `review-20261125/`, `HD-upload/`,
+`delivery-manifest.private.json`, native target diff, current social/queue images,
+metadata-cleaning/legacy evidence reviews and individual message receipts.
+No human/client creative approval, official insert, posting date, portal final,
+publication or ordinary-company-ChatGPT proof. New structured runtime gate remains
+unreleased, not represented as passed by these manual legacy-workflow checks.
+R0; no production schema/deployment/dependency change; Nolan/photo lanes untouched.
+
 Owner request16November: continue with PSG, with fresh January concepts.
 Same #948 / draft#956 lane and isolated worktree. No new agent or branch.
 

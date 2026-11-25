@@ -24,7 +24,42 @@ and national/sibling feeds are not equivalent. On18November PSG's exact page
 six actual posters showed a broader photo-led/secondary-accent range than the
 earlier navy/cyan-only interpretation. Save bounded visual evidence and coverage
 limits; do not copy its photos, headlines or corner mechanisms into every draft.
-After a tool update, test read and write capabilities separately. Canva's new
+25 November capability refresh: native `edit_design` now actually supports
+`replace_text`, `format_text`, `update_fill`, `position_element`,
+`resize_element` and `delete_element`. Supply **page_index** and **locator_id**;
+`format_text` uses `formatting: {color, font_size}` and photo replacement uses
+`update_fill` with `asset_id`, `asset_type: "image"`, and `alt_text`.
+Every applied operation remains unverified until its actual returned preview and
+native document are inspected. Keep the transaction open for corrections, then
+commit once; saved readback must prove the intended diff. Cape and PSG production
+amendments proved this interface. Older failed calls below are historical.
+
+Read the full relevant current guide updates and actual queued artwork **before**
+settling a concept, not only before sending. PSG's October business-growth film
+and current staff queue invalidated both growth and new-premises drafts; the final
+business-interruption concept used separately evidenced service information and
+matching empty-workplace photography. A different headline is not clearance of a
+repeated underlying message. Keep abandoned candidates out of delivery selectors.
+
+For a large master unsupported by native editing, browser copying of native
+elements into an existing owned working page was proven without deleting pages.
+Select an actual image/text element, Ctrl+A, confirm the element-selection toolbar,
+then copy. Selecting only the page can copy an empty page instead. After paste,
+inspect the result before leaving; an uncertain empty paste was undone twice
+(paste, then element deletion) and restoration verified before retry. Preserve the
+page background, IDs, notes, count and protected history. On25November all four
+Cape master/source previews matched exactly at400x500 after transfer. This is
+preview equivalence, not an HD/whole-history pixel identity certificate.
+
+Use real Canva PNG High2x exports. Remove embedded document XMP/private metadata
+into a separate lossless upload derivative, prove decoded pixels identical and
+rebind the final file hashes. Untagged exports are not an sRGB certificate; do not
+guess a profile. In WhatsApp, verify caption paragraph content with normalised
+line endings: rendered innerText can double paragraph breaks. Select HD per photo,
+send serially and read back a unique message ID/state before continuing. Preserve
+the user's explicitly retained signed-in Canva/WhatsApp tabs.
+
+After a tool update, test read and write capabilities separately. Canva's earlier
 `read_design` restored native layer/notes transactions while `edit_design` still
 returned INVALID_ARGUMENT for the temporary text test. Verify unchanged state,
 cancel the transaction, and do not claim an editable amendment succeeded merely

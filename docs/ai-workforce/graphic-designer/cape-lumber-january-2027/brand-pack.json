@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "status": "internal-working-brand-pack",
-  "observedAt": "2026-11-16",
+  "status": "four-feedback-amendments-delivered-internal-review",
+  "observedAt": "2026-11-25",
   "clientId": "42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa",
   "clientName": "Cape Lumber",
   "publicName": "Cape Lumber Marketing",
@@ -13,7 +13,7 @@
   "canva": {
     "brandKit": "kAGaDGQTAW4",
     "officialMaster": "DAGVuJURh6I",
-    "pageCount": 238,
+    "pageCount": 243,
     "workingDesign": "DAHbFhGSrvg",
     "workbenchOnly": true,
     "workingPageIds": [
@@ -23,10 +23,26 @@
       "PBy5BC33jZT9gQM5"
     ],
     "officialDraftPages": [
-      { "poster": "DP04", "page": 27, "id": "PB65QD8ZhnwZcs9Y" },
-      { "poster": "DP03", "page": 28, "id": "PBGq4Z2X18Lw6qTF" },
-      { "poster": "DP02", "page": 29, "id": "PBPTK2pHzmMGmGPS" },
-      { "poster": "DP01", "page": 30, "id": "PBxD2jwDZwrKsRZ4" }
+      {
+        "poster": "DP04",
+        "page": 27,
+        "id": "PB65QD8ZhnwZcs9Y"
+      },
+      {
+        "poster": "DP03",
+        "page": 28,
+        "id": "PBGq4Z2X18Lw6qTF"
+      },
+      {
+        "poster": "DP02",
+        "page": 29,
+        "id": "PBPTK2pHzmMGmGPS"
+      },
+      {
+        "poster": "DP01",
+        "page": 30,
+        "id": "PBxD2jwDZwrKsRZ4"
+      }
     ],
     "fontFamily": "Zing Rust Base Rough",
     "fontEvidence": "Exact standalone Brand Kit; retained native Canva typography; no local licensed font file claimed",
@@ -72,21 +88,61 @@
     "newHosting": false
   },
   "deliverableState": {
-    "DP01": "Saved R4 native; genuine 2160x2700 HD checked; delivered internal review",
-    "DP02": "Saved R3; genuine 2160x2700 HD checked",
-    "DP03": "Saved R3; genuine 2160x2700 HD checked",
-    "DP04": "Saved R3; genuine 2160x2700 HD checked",
-    "humanCreativeApproval": true,
-    "approvalScope": "Owner accepted for internal review; client approval pending",
+    "DP01": "Feedback amendment: fitted callout, removed drops; delivered",
+    "DP02": "Sharp genuine0356 source; delivered",
+    "DP03": "Clear sourcing copy/neutral integrated light control; delivered",
+    "DP04": "Clear genuine2837 machined profiles; delivered",
+    "humanCreativeApproval": false,
+    "approvalScope": "Owner authorised amendments and internal review delivery; current creative/client approval pending",
     "clientApproval": false,
     "masterInserted": true,
     "messagesSent": 4,
     "messagesDelivered": 4,
-    "deliveryDate": "2026-11-16",
-    "deliveryTimesSAST": ["18:36", "18:37", "18:38", "18:39"],
+    "deliveryDate": "2026-11-25",
+    "deliveryTimesSAST": [
+      "11:43",
+      "11:44",
+      "11:44",
+      "11:45"
+    ],
     "deliveryGroup": "CG Picasso Approvals",
     "captionSignatures": false,
-    "whatsappMediaDimensions": [2048, 2560],
-    "deliveryReplay": "DO NOT RESEND; await actual feedback"
+    "whatsappMediaDimensions": [
+      2048,
+      2560
+    ],
+    "deliveryReplay": "DO NOT RESEND WITHOUT FRESH FEEDBACK",
+    "priorDelivery20261116": {
+      "DP01": "Saved R4 native; genuine 2160x2700 HD checked; delivered internal review",
+      "DP02": "Saved R3; genuine 2160x2700 HD checked",
+      "DP03": "Saved R3; genuine 2160x2700 HD checked",
+      "DP04": "Saved R3; genuine 2160x2700 HD checked",
+      "humanCreativeApproval": true,
+      "approvalScope": "Owner accepted for internal review; client approval pending",
+      "clientApproval": false,
+      "masterInserted": true,
+      "messagesSent": 4,
+      "messagesDelivered": 4,
+      "deliveryDate": "2026-11-16",
+      "deliveryTimesSAST": [
+        "18:36",
+        "18:37",
+        "18:38",
+        "18:39"
+      ],
+      "deliveryGroup": "CG Picasso Approvals",
+      "captionSignatures": false,
+      "whatsappMediaDimensions": [
+        2048,
+        2560
+      ],
+      "deliveryReplay": "DO NOT RESEND; await actual feedback"
+    },
+    "currentEvidence": "Private job amendments-20261125/"
+  },
+  "directionUpdate": {
+    "id": "226e39e4-a60e-452f-b3a1-086190bdaa86",
+    "state": "unreviewed",
+    "guideRewritten": false
   }
 }

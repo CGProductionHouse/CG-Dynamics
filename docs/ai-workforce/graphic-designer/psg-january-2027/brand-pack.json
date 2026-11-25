@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "status": "r8-circle-correction-hd-internal-review-not-for-delivery",
-  "observedAt": "2026-11-18",
+  "status": "r11-three-drafts-delivered-internal-review",
+  "observedAt": "2026-11-25",
   "clientId": "29a28efd-c998-45e2-a57c-4a751e779e66",
   "clientName": "PSG Bloemfontein",
   "aliases": [
@@ -37,7 +37,8 @@
       ],
       "workingChoice": "Actual local Kit Montserrat; owner calls rebuilt photo-led direction closer",
       "resolved": false,
-      "finalBrandApproval": false
+      "finalBrandApproval": false,
+      "latestEvidence": "Exact kit25November literal labels Gabriel Sans/Monsterrat; current native font refs and actual local Montserrat source retained under owner-supported local direction. No silent national IBM Plex substitution."
     },
     "secondaryPalette": [
       "#0054FF",
@@ -53,8 +54,8 @@
       "humanNewYear": 38
     },
     "officialInsertExecuted": false,
-    "officialPageCountObservedAt": "2026-11-16",
-    "currentOfficialCountVerified": false,
+    "officialPageCountObservedAt": "2026-11-25",
+    "currentOfficialCountVerified": true,
     "historicalGuidelinePalette": [
       "#00AEEF",
       "#353E43",
@@ -68,11 +69,21 @@
       "#D4055C",
       "#FFDE21"
     ],
-    "workingPaletteEvidence": "Existing secondary palette reconciled visually with six actual local Facebook posters; exact Kit token readback remains open.",
-    "exactKitPaletteVerified": false,
+    "workingPaletteEvidence": "Selected exact PSG kit rendered palette observed25November; headline emphasis00AEEF. Existing quiet raster accents and photo-light-control navy are retained source tones, not claimed as exact Kit tokens.",
+    "exactKitPaletteVerified": true,
     "supersededR6WorkingDesign": "DAHbJ6mIth4",
-    "currentRevision": "R8",
-    "amendedExistingDraftInPlace": true
+    "currentRevision": "R11",
+    "amendedExistingDraftInPlace": true,
+    "exactKitPalette": [
+      "#9C906E",
+      "#00AEEF",
+      "#353E43",
+      "#241F21",
+      "#FFFFFF",
+      "#D4055C",
+      "#FFDE21",
+      "#0054FF"
+    ]
   },
   "mediaAuthority": "OneDrive Clients/PSG",
   "oneDrive": {
@@ -98,9 +109,9 @@
     "emojiAllowed": false,
     "maxHashtags": 5,
     "footerRequirement": "optional",
-    "packetObserved": "2026-11-16",
+    "packetObserved": "2026-11-25",
     "mutableValuesLastVerified": "2026-09-10",
-    "freshnessVerifiedNow": false,
+    "freshnessVerifiedNow": true,
     "notesMatchCanonical": true,
     "currentFooterIncluded": false,
     "notesMatchMeaning": "All three R7 presenter notes read back and exactly match unsigned allocated captions."
@@ -152,7 +163,7 @@
   "ownerResume": {
     "observedAt": "2026-11-17",
     "pausedNow": false,
-    "feedback": "This direction is closer—continue refining",
+    "feedback": "This direction is closer\u00e2\u20ac\u201dcontinue refining",
     "meaning": "Directional feedback on R4 only; no final approval of R7 set"
   },
   "directionUpdate": {
@@ -208,13 +219,22 @@
     "pageUrl": "https://www.facebook.com/psgbloem",
     "pageName": "PSG Insure Bloemfontein Donald Murray",
     "actualStillArtworksViewed": 6,
-    "visibleDateWindow": "24 September–12 November",
+    "visibleDateWindow": "24 September\u00e2\u20ac\u201c12 November",
     "fullSizeReferencesRetained": 3,
     "retainedReferenceSourceComparisons": 12,
     "comparisonReadErrors": 0,
     "suspectedMatches": 0,
     "actualQueuedApprovalCoverageComplete": false,
-    "globalUnusedCertified": false
+    "globalUnusedCertified": false,
+    "latestRefresh20261125": {
+      "pageUrl": "https://www.facebook.com/psgbloem",
+      "newestActualPostObserved": "2026-11-19",
+      "retainedCurrentSocialArtworks": 4,
+      "currentQueuedArtworks": 19,
+      "comparisonErrors": 0,
+      "suspectedMatches": 0,
+      "globalUnusedCertified": false
+    }
   },
   "supersededR7Verification": {
     "currentVersion": "R7",
@@ -249,6 +269,84 @@
     "officialMasterChangedByThisRun": false
   },
   "verification": {
+    "currentVersion": "R11",
+    "nativeLiveTexts": 19,
+    "nativeIndependentImageFills": 36,
+    "importantTextLogoFrames": 22,
+    "importantInsetPx": 64,
+    "nativeFrameChecksPassedWithinHalfPixelRounding": true,
+    "savedNotesReadbackVerified": true,
+    "nativeCanvaElementReadbackVerified": true,
+    "nativeApiTextAmendmentVerified": true,
+    "browserLayerDeletionVerified": true,
+    "removedOnly": [
+      "R8decorativecircle/yellowtick remain absent"
+    ],
+    "allOtherNativeElementsExact": false,
+    "allCaptionNotesExact": true,
+    "pageIdsOrderPreserved": true,
+    "genuineCanvaHdExportVerified": true,
+    "actualCanvaHdPixels": [
+      2160,
+      2700
+    ],
+    "actualCanvaHdFilesInspected": 3,
+    "canvaExportEmbeddedIcc": false,
+    "canvaExportExifColourSpace": "OriginalDP01/03untagged65535; DP02notag; uploadmetadataremoved",
+    "exportColourAssumedOrRetagged": false,
+    "zipCrcPassed": true,
+    "actualSocialApprovalCoverageComplete": false,
+    "humanFinalCreativeApproval": false,
+    "whatsappSent": true,
+    "officialMasterChangedByThisRun": false,
+    "normalCompanyChatgptInvocationVerified": false,
+    "currentRelevantCoverage": "Actual local recent posts through19November,19current staff queue artworks and prior199page history; source comparisons0matches. Not a lifetime certificate.",
+    "intendedNativeDiff": "DP01/03 emphasis colours; DP02specificcopy,fontsize/position andoneunderlineposition. Allphoto/logo/maskrecords exact.",
+    "importantFramesCurrentChecked": true,
+    "importantFramesEvidence": "Baseline22framechecks retained; newDP02actualvisibleink margin corrected/inspected. Current recomputation recorded privately.",
+    "metadataCleanUploadPixelsIdentical": true,
+    "uploadMetadataKeys": [],
+    "newStructuredRuntimeQualified": false
+  },
+  "ownerCompositionCorrection": {
+    "directionUpdateId": "46921972-0850-48b7-961a-b7d16e6f1353",
+    "directionReadbackVerified": true,
+    "directionReviewState": "unreviewed",
+    "observedAt": "2026-11-18",
+    "scope": "PSG January; generalised into reusable skill",
+    "direction": "Reject decorative circle through typography. Every poster needs a distinct concept-led composition; colour swaps and logo moves alone are insufficient.",
+    "implemented": "Only business arc/yellow segment removed from existing current draft; other accepted work preserved.",
+    "creativeApproval": false
+  },
+  "compositionReview": {
+    "DP01": "Inventory photographic flatlay; right-hand title plane, upper-left logo; source-record concept.",
+    "DP02": "Real empty workplace supports WORK STOPS. COSTS DONT. Business-interruption planning, perspective/grid/light-control depth and compact live type. Earlier growth/premises hooks superseded after current history/queue audit.",
+    "DP03": "Real person over photographic route; upper-right logo, top headline and lower-left CTA; changed-routine concept.",
+    "Shared": "Brand type/colours only; no shared photograph, repeated person or single repeated page skeleton."
+  },
+  "delivery20261125": {
+    "group": "CG Picasso Approvals",
+    "sent": 3,
+    "delivered": 3,
+    "timesSAST": [
+      "12:09",
+      "12:09",
+      "12:10"
+    ],
+    "captionsSigned": false,
+    "hdSelectedPerPhoto": true,
+    "clientApproval": false,
+    "publication": false,
+    "doNotReplay": true,
+    "privateEvidence": "review-20261125/",
+    "officialMasterChanged": false
+  },
+  "directionUpdate20261125": {
+    "id": "7d3cfe6d-30a1-4df3-a612-0b4e0f051680",
+    "state": "unreviewed",
+    "guideRewritten": false
+  },
+  "supersededR8Verification": {
     "currentVersion": "R8",
     "nativeLiveTexts": 19,
     "nativeIndependentImageFills": 36,
@@ -281,21 +379,5 @@
     "whatsappSent": false,
     "officialMasterChangedByThisRun": false,
     "normalCompanyChatgptInvocationVerified": false
-  },
-  "ownerCompositionCorrection": {
-    "directionUpdateId": "46921972-0850-48b7-961a-b7d16e6f1353",
-    "directionReadbackVerified": true,
-    "directionReviewState": "unreviewed",
-    "observedAt": "2026-11-18",
-    "scope": "PSG January; generalised into reusable skill",
-    "direction": "Reject decorative circle through typography. Every poster needs a distinct concept-led composition; colour swaps and logo moves alone are insufficient.",
-    "implemented": "Only business arc/yellow segment removed from existing current draft; other accepted work preserved.",
-    "creativeApproval": false
-  },
-  "compositionReview": {
-    "DP01": "Inventory photographic flatlay; right-hand title plane, upper-left logo; source-record concept.",
-    "DP02": "Workplace photo and large type; lower-right logo; growth and commercial review concept. Decorative circle and yellow arc removed entirely.",
-    "DP03": "Real person over photographic route; upper-right logo, top headline and lower-left CTA; changed-routine concept.",
-    "Shared": "Brand type/colours only; no shared photograph, repeated person or single repeated page skeleton."
   }
 }

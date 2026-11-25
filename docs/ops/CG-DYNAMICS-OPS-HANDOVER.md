@@ -1,3 +1,35 @@
+## 25 November — Cape feedback amendments and PSG review delivered
+
+Same #948/draft#956 lane, main b524a9f9. User-retained signed-in internal Canva
+and WhatsApp tabs used/kept open; no Windows desktop takeover or session restart.
+Cape: all four actual17Nov feedback items addressed; genuine new source/finishing,
+history/actual social checks, true2160x2700 exports and unsigned allocated captions.
+Existing master DAGVuJURh6I243pages, only own27–30 targeted, stable IDs/dividers;
+four400x500 source/master previews exactly match. Four HD-selected photo/caption
+messages delivered11:43–11:45SAST to CG Picasso Approvals.
+
+PSG: exact local Kit palette refreshed, actual recent social and19staff queued
+artworks checked; October growth/current premises concepts detected and excluded.
+Current same3-page DAHbRapxiLM R11: inventory, business-interruption planning and
+changed vehicle use. Native fonts/photos/logos/masks retained; exact cyan emphasis,
+specific DP02 type/underline/caption amended. Actual current HD and pixel-identical
+metadata-clean uploads verified. Three HD-selected unsigned photo/caption messages
+delivered12:09–12:10SAST to same group. Official199-page master read-only.
+
+No replay of these7messages; await real feedback. No approval/schedule/portal final/
+publication inferred. Private receipts remain outside Git. Skills now record proven
+native edit arguments, actual-preview validation, safe large-master transfer,
+concept checks before assembly and serialized unsigned delivery. Source-only new
+structured runtime/migration still HELD: existing legacy pack failed new-shape
+preflight; no new-system pass/live ChatGPT enforcement claimed. Owner-authorised
+existing workflow used current verified legacy brand/guide and explicit manual
+evidence review. No production SQL/schema/deployment, new service/spend or other
+agent work changed. Two authorised append-only exact-client content-direction
+updates recorded: Cape226e39e4-a60e-452f-b3a1-086190bdaa86 and
+PSG7d3cfe6d-30a1-4df3-a612-0b4e0f051680, both unreviewed; guides unchanged.
+Google Control Centre exact target remains ungrounded; no
+guessed tracker write. Client READMEs and private delivery selectors are current.
+
 ## 25 November — official PICASSO design system, source qualified; rollout held
 
 Owner requested shared graphic-design rules/checklist for every model and human
