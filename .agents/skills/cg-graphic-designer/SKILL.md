@@ -84,6 +84,14 @@ documented runtime API, never a custom bridge or hidden application state.
 An interrupted download may already have completed: verify Canva's Completed
 state and the actual local file before retrying. One25November call timed out after
 the successful four-page ZIP download; fresh readback prevented a duplicate.
+For a numeric browser amendment, AX focus on a virtual canvas image may not
+select the actual element. Select from an observed screenshot, confirm the
+selection toolbar and inspect Position values. A numeric `fill` appended to
+Cape's existing X value; AX `setValue` corrected it, verified before saving.
+Inspect the real HD export when Canva's cached thumbnail remains stale. The Cape
+logo-only export differed solely in the old/new logo area; other pixels matched.
+Canva's limited-media-playback warning is expected for an intentional still PNG;
+read the actual tip rather than assuming a resolution problem.
 For WhatsApp mentions, a typed name is insufficient: the actual `@` key opened
 participant suggestions; select the named participant and verify its mention
 entity. Caption text must remain unsigned and separate from the tagged review note.

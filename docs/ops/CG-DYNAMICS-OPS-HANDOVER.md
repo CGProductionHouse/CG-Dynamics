@@ -1,4 +1,25 @@
-## 25 November latest — Bloem DP01 R8 working art complete; source-scope pending
+## 25 November22:04 — Cape DP03 logo amendment sent; Bloem source scope pending
+
+Same #948/draft#956 lane. Cape's existing master28 DP03 logo now bottom-left
+78,1120,220x143.4.243pages and owned IDs/notes preserved; no page operations.
+Actual master PNG High2x2160x2700 inspected. Previous/new HD pixels differ only
+within old/new logo area [156,1440,714,2527]. Clean-file SHA256
+d9a346c072eab77763d74276521cd00c46b76ab9a9df839cc3a455ba237da118.
+Only changed DP03 sent HD/unchanged unsigned caption to CG Picasso Approvals,
+22:02SAST message3EB02DC73245791D9A1518; separate actual Amonique/Ger-Marie
+mentions22:03 message3EB027D7E38A0CAC76C094. Both read back **Sent**, not yet
+Delivered/approved. Do not replay. Dynamics append-only unreviewed update
+8c944d5d-389e-4b58-8e18-f247e58e711a; private receipts in Cape's
+`amendments-20261125/logo-alignment/`. Native source unchanged except logo;
+cached thumbnail was stale but actual master HD proves placement. Existing
+legacy amendment evidence applies; no new structured-runtime pass claimed.
+
+Bloem R8/R6/R7/R4 working set below remains saved, not newly sent. Required owner
+clarification is pending: unused original within a previously featured kitchen
+versus wholly unseen projects. Do not infer an answer from elapsed time.
+No production deployment, SQL, spend, new dependency or Nolan lane change.
+
+## Earlier 25 November — Bloem DP01 R8 working art complete; source-scope pending
 
 Same #948/draft#956 lane, same DAHb7sgsbpk workbench. DP01 now SEE IT / IN YOUR /
 LIGHT using original0L8A5635 installed stone, conservative colour preparation,

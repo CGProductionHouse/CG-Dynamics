@@ -1,15 +1,32 @@
 # Cape Lumber — January 2027 working production
 
-## 25 November — new DP03 logo feedback
+## 25 November22:03 — DP03 logo correction saved, HD sent
 
 Ger-Marie16:25 requests the floating logo either above a larger heading or in the
 bottom-left. Only the exact existing DP03 source logo was moved to78,1120,
 220x143.368, in DAHbFhGSrvg page3; every other native element and allocated caption
-preserved. Actual draft preview inspected and source saved. Master target remains
-owned working page28 PBGq4Z2X18Lw6qTF in DAGVuJURh6I243pages. Native editing again
-explicitly unsupported at243pages. **Master alignment transfer, final HD export and
-new DP03 delivery are not yet completed.** Do not claim the existing master or its
-earlier delivered export includes this new one-logo correction.
+preserved. The same placement is now saved in owned master page28
+PBGq4Z2X18Lw6qTF, DAGVuJURh6I. Native editing remains unsupported at243pages;
+the supported headless browser changed only the selected logo's numeric Position
+fields. Page count, four owned IDs and captions are unchanged. No page operations.
+
+Actual master PNG High2x2160x2700 exported and visually inspected. Compared with
+the previous HD, all changed pixels are confined to the old/new logo area
+[156,1440,714,2527]; pixels elsewhere are identical. Metadata-clean derivative
+also preserves decoded pixels exactly; Canva export is untagged, not sRGB-certified.
+SHA256 d9a346c072eab77763d74276521cd00c46b76ab9a9df839cc3a455ba237da118.
+Canva's download tip concerned animation playback in a still PNG, not resolution.
+The first cached master thumbnail remained stale after save; actual final export
+and numeric readback, not that thumbnail, establish the correction.
+
+Only this changed DP03 was sent to CG Picasso Approvals with its unchanged unsigned
+caption and visually verified HD selection:22:02SAST,3EB02DC73245791D9A1518.
+Separate real Amonique/Ger-Marie mention note:22:03,3EB027D7E38A0CAC76C094.
+Fresh readback **Sent**, not yet Delivered/read/approved. Do not replay either.
+Prior actual social/queue/source evidence remains applicable to this logo-only
+amendment. No new photograph, date, publication or client-final promotion.
+Private receipt directory: `amendments-20261125/logo-alignment/`.
+Append-only Dynamics update8c944d5d-389e-4b58-8e18-f247e58e711a is unreviewed.
 
 ## 25 November — four feedback amendments delivered
 
