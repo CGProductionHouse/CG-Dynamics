@@ -23,7 +23,7 @@ export function PublicGuidelineReview({ data, slug, token }: { data: SharedConte
   const error = state.error ?? (state.data && !reviews ? 'This guideline has been updated. Refresh this page to review the latest version.' : null)
   const reviewed = reviews?.videos.filter(v => v.decision !== 'pending').length ?? 0
   return <ContentGuidelineDocument guide={data.guide} client={data.client} selected
-    clientPath={`/guidelines/${slug}/${token}?v=cg2-${Date.parse(data.guide.published_at)}`} linkAccess="public"
+    clientPath={`/guidelines/${slug}/${token}?v=cg3-${Date.parse(data.guide.published_at)}`} linkAccess="public"
     reviewSummary={<div className="mt-6 border-t border-white/10 pt-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p role="status" className="text-sm font-semibold text-[#2dd4bf]">{reviews ? `${reviewed} of ${data.guide.videos.length} ideas reviewed` : error ? 'Reviews unavailable' : 'Loading reviews…'}</p>

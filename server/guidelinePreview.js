@@ -11,7 +11,7 @@ export function guidelinePreviewTarget(url) {
     && /^[a-f0-9]{64}$/.test(token ?? '') ? { slug, token } : null
 }
 
-function metadata(snapshot, target, logoForClient) {
+async function metadata(snapshot, target, logoForClient) {
   const name = snapshot?.client?.name
   const guide = snapshot?.guide
   if (typeof name !== 'string' || !name.trim() || name.length > 250 || !Array.isArray(guide?.videos) || !guide.videos.length) return null
@@ -21,9 +21,9 @@ function metadata(snapshot, target, logoForClient) {
   const count = guide.videos.length
   const description = `${period ? `${period} · ` : ''}${count} video${count === 1 ? '' : 's'}. Ready for your review.`
   const published = Date.parse(guide.published_at)
-  const canonical = `${origin}/guidelines/${target.slug}/${target.token}?v=cg2${Number.isFinite(published) ? `-${published}` : ''}`
-  const logo = logoForClient(name)
-  return { title, description, canonical, image: typeof logo === 'string' && /^\/client-logos\/[a-z0-9-]+\.(png|jpe?g|webp)$/.test(logo) ? `${origin}${logo}` : null, name }
+  const canonical = `${origin}/guidelines/${target.slug}/${target.token}?v=cg3${Number.isFinite(published) ? `-${published}` : ''}`
+  const logo = await logoForClient(name)
+  return { title, description, canonical, image: typeof logo === 'string' && /^\/client-preview-logos\/[a-z0-9-]+-[a-f0-9]{16}\.png$/.test(logo) ? `${origin}${logo}` : null, name }
 }
 
 export function renderGuidelinePreview(template, meta) {
@@ -33,7 +33,7 @@ export function renderGuidelinePreview(template, meta) {
     tags.push(tag('description', meta.description), tag('og:title', title, true), tag('og:description', meta.description, true),
       tag('og:type', 'website', true), tag('og:site_name', 'CG Production House', true), tag('og:url', meta.canonical, true),
       tag('twitter:card', meta.image ? 'summary_large_image' : 'summary'), tag('twitter:title', title), tag('twitter:description', meta.description))
-    if (meta.image) tags.push(tag('og:image', meta.image, true), tag('og:image:alt', `${meta.name} logo`, true), tag('twitter:image', meta.image))
+    if (meta.image) tags.push(tag('og:image', meta.image, true), tag('og:image:type', 'image/png', true), tag('og:image:width', '1200', true), tag('og:image:height', '630', true), tag('og:image:alt', `${meta.name} logo`, true), tag('twitter:image', meta.image))
   }
   // Keep the exact built app shell/assets. No video scripts or staff data are embedded.
   return template.replace(/<title>[\s\S]*?<\/title>/i, `<title>${escape(title)}</title>`)
@@ -50,7 +50,7 @@ export function createGuidelinePreviewHandler({ loadTemplate, fetchSnapshot, log
     try {
       if (target) {
         const snapshot = await fetchSnapshot(target)
-        meta = metadata(snapshot, target, logoForClient)
+        meta = await metadata(snapshot, target, logoForClient)
         if (!meta) status = 404
       }
     } catch {

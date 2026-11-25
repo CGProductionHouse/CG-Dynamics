@@ -1,3 +1,18 @@
+## 25 November — RC WhatsApp image contrast prepared; release HELD
+
+CA's actual RC WhatsApp large preview hid white transparent artwork on white.
+Same isolated PR1005 now prepares45 source-bound opaque public-logo preview
+assets,original artwork unchanged,RC dark matte,fine-lettering contrast checks,
+strict no-raw/missing/stale/foreign image fallback andcg3share-version code.
+38/38focused tests,production build/app code,scoped lint/diff and local visual
+sheet pass. No WhatsApp/phone or production acceptance claimed before release.
+Standing NO VERCEL respected:no upload/build/promote,MCP release,republish,data,
+permissions/provider or other-agent change. #679 current budget/serving reserve
+and exact active-domain rollback/source parity still need verification;delayed
+partial billing is not headroom. Do NOT release whole unmerged staff frontend
+or deploy new link version before corrected images are live. Exact receipt:
+[preview contrast](GUIDELINE-PREVIEW-CONTRAST-2026-11-25.md).
+
 ## 24 November — staff connector101 and fresh Microsoft reconciliation
 
 Same isolated draft PR1005,code755d0d26. MCP101 ACTIVE,75source files independently

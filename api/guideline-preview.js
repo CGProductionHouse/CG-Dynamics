@@ -2,6 +2,7 @@ import { readFile, readdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import { clientLogoCandidates } from '../src/lib/clientLogo.js'
 import { createGuidelinePreviewHandler } from '../server/guidelinePreview.js'
+import { verifiedClientPreview } from '../server/clientLogoPreview.js'
 
 async function fetchSnapshot({ slug, token }) {
   const base = process.env.VITE_SUPABASE_URL, key = process.env.VITE_SUPABASE_PUBLISHABLE_KEY
@@ -17,10 +18,14 @@ async function fetchSnapshot({ slug, token }) {
 // Resolve only existing public logo assets; never fetch a private/custom URL.
 export async function GET(request) {
   const paths = new Set((await readdir(join(process.cwd(), 'public/client-logos'))).map(file => `/client-logos/${file}`))
+  const manifest = await readFile(join(process.cwd(), 'public/client-preview-logos/manifest.json'), 'utf8').then(JSON.parse).catch(() => null)
   return createGuidelinePreviewHandler({
     loadTemplate: () => readFile(join(process.cwd(), 'dist/index.html'), 'utf8'),
     fetchSnapshot,
-    logoForClient: name => clientLogoCandidates({ name }).find(path => paths.has(path)),
+    logoForClient: async name => {
+      const source = clientLogoCandidates({ name }).find(path => paths.has(path))
+      return verifiedClientPreview(source, manifest, path => readFile(join(process.cwd(), 'public', path.slice(1))))
+    },
   })(request)
 }
 

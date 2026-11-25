@@ -4,7 +4,7 @@ import {pathToFileURL} from 'node:url'
 import {createHash} from 'node:crypto'
 
 const hash=path=>createHash('sha256').update(readFileSync(path)).digest('hex')
-const safe=path=>/^(dist\/index\.html|public\/client-logos\/[a-z0-9-]+\.(png|jpe?g|webp|svg))$/.test(path)
+const safe=path=>/^(dist\/index\.html|public\/client-logos\/[a-z0-9-]+\.(png|jpe?g|webp|svg)|public\/client-preview-logos\/(manifest\.json|[a-z0-9-]+-[a-f0-9]{16}\.png))$/.test(path)
 
 // vercel build can emit filePathMap references outside .func. dist is correctly
 // excluded from source uploads, so these reviewed resources must be inside the

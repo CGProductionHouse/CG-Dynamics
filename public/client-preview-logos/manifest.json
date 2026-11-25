@@ -1,0 +1,545 @@
+{
+  "version": 3,
+  "assets": {
+    "/client-logos/action-sport.png": {
+      "path": "/client-preview-logos/action-sport-cc9a973b62860277.png",
+      "sourceSha256": "f660fd3027baff1acfbf374c2fff28781a3ee985a15059844595348a2dce0caa",
+      "outputSha256": "cc9a973b6286027723922b563f69126671d8b78d677317d498954b3c8f833a93",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        8,
+        20,
+        16
+      ]
+    },
+    "/client-logos/av-event-life.png": {
+      "path": "/client-preview-logos/av-event-life-4998d201d541d153.png",
+      "sourceSha256": "f6fe84b59163db008f75d11d9fda9fca34b8e4c75dbadbdf4511e9708f80a777",
+      "outputSha256": "4998d201d541d1530f2e29ced095d7433cbcc62e794ea4106c8d927b15587c58",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        248,
+        249,
+        247
+      ]
+    },
+    "/client-logos/bloem-action-sport.png": {
+      "path": "/client-preview-logos/bloem-action-sport-cc9a973b62860277.png",
+      "sourceSha256": "f660fd3027baff1acfbf374c2fff28781a3ee985a15059844595348a2dce0caa",
+      "outputSha256": "cc9a973b6286027723922b563f69126671d8b78d677317d498954b3c8f833a93",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        8,
+        20,
+        16
+      ]
+    },
+    "/client-logos/bloem-marble-granite.png": {
+      "path": "/client-preview-logos/bloem-marble-granite-8d9370dfc0272b38.png",
+      "sourceSha256": "43c4cd0ff25d58334c234ca81ba481511721985ab996f9dde3817596ce60c0e5",
+      "outputSha256": "8d9370dfc0272b383306253eb5309d5d786ddd6f1273eec765da925c362ad1d5",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        248,
+        249,
+        247
+      ]
+    },
+    "/client-logos/bloem-marble-marketing.png": {
+      "path": "/client-preview-logos/bloem-marble-marketing-8d9370dfc0272b38.png",
+      "sourceSha256": "43c4cd0ff25d58334c234ca81ba481511721985ab996f9dde3817596ce60c0e5",
+      "outputSha256": "8d9370dfc0272b383306253eb5309d5d786ddd6f1273eec765da925c362ad1d5",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        248,
+        249,
+        247
+      ]
+    },
+    "/client-logos/bohemia-04.png": {
+      "path": "/client-preview-logos/bohemia-04-71464d52417f1591.png",
+      "sourceSha256": "6f7700457a4c3dbafbbf3ebe38d4bece595009ef373c8f10a2895c506278b7c6",
+      "outputSha256": "71464d52417f15910ddc482b0a6a4d5b1b02ea955fc7c06cdbc620ebb335cf65",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        8,
+        20,
+        16
+      ]
+    },
+    "/client-logos/bohemia.png": {
+      "path": "/client-preview-logos/bohemia-71464d52417f1591.png",
+      "sourceSha256": "6f7700457a4c3dbafbbf3ebe38d4bece595009ef373c8f10a2895c506278b7c6",
+      "outputSha256": "71464d52417f15910ddc482b0a6a4d5b1b02ea955fc7c06cdbc620ebb335cf65",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        8,
+        20,
+        16
+      ]
+    },
+    "/client-logos/bouwer-coetzee-attorneys.png": {
+      "path": "/client-preview-logos/bouwer-coetzee-attorneys-587b03affd865099.png",
+      "sourceSha256": "bd754762b8476fa57c73bcb3bb9d14b136e4c64d10ec1e49c47bf0d7f735287a",
+      "outputSha256": "587b03affd865099313f61925dcb98501f2cf1acafb2386d8aa4c70cd8cfd50f",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        8,
+        20,
+        16
+      ]
+    },
+    "/client-logos/braize-promotions.png": {
+      "path": "/client-preview-logos/braize-promotions-6a15a7778a6f9347.png",
+      "sourceSha256": "d5a5838701cc316935efe44d523fd520ad1f1894fceaec4926744b79f2bc4aba",
+      "outputSha256": "6a15a7778a6f9347a07ee1731d942a1ca7ea26dcd9ed6421f3ed344c82614ae6",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        8,
+        20,
+        16
+      ]
+    },
+    "/client-logos/braize.png": {
+      "path": "/client-preview-logos/braize-6a15a7778a6f9347.png",
+      "sourceSha256": "d5a5838701cc316935efe44d523fd520ad1f1894fceaec4926744b79f2bc4aba",
+      "outputSha256": "6a15a7778a6f9347a07ee1731d942a1ca7ea26dcd9ed6421f3ed344c82614ae6",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        8,
+        20,
+        16
+      ]
+    },
+    "/client-logos/c-l-innovations.png": {
+      "path": "/client-preview-logos/c-l-innovations-cecdd8b15d6a7669.png",
+      "sourceSha256": "373180a5ff2b926ec8a0792a324ec8a7e381fd6eca23c0ac652a1a2bfb287cd0",
+      "outputSha256": "cecdd8b15d6a76690f2fb4618e9094bcabe1ab62b254a15343884a40b0400f06",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        8,
+        20,
+        16
+      ]
+    },
+    "/client-logos/cape-lumber.png": {
+      "path": "/client-preview-logos/cape-lumber-94a8c86693974675.png",
+      "sourceSha256": "75d19010436cf0912d25f1a28f7b1220e29fa3b44e314f6441575b5d85ba1eed",
+      "outputSha256": "94a8c8669397467544985064c770f5f3d12b064a81260e6b99a950544096e958",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        248,
+        249,
+        247
+      ]
+    },
+    "/client-logos/central-canvas.png": {
+      "path": "/client-preview-logos/central-canvas-cde34b2060ec4004.png",
+      "sourceSha256": "8799416563ac15eee5facd0288d4a10a029f00c7c00a45ac320a28534843af68",
+      "outputSha256": "cde34b2060ec40046250803deb9f8bd5119a511f70e8ea676ff77094856897f2",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        248,
+        249,
+        247
+      ]
+    },
+    "/client-logos/cg-production-house.png": {
+      "path": "/client-preview-logos/cg-production-house-0d896ab671077aef.png",
+      "sourceSha256": "ffdd82b6bcadb04f9c6ea0d3ee9334a23a25efd3116c2d943a8415b185303c70",
+      "outputSha256": "0d896ab671077aef3403072f58c5168ed44f49652bc2ebb4305161429c69abe4",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        8,
+        20,
+        16
+      ]
+    },
+    "/client-logos/daisy-co.png": {
+      "path": "/client-preview-logos/daisy-co-9dd40592cf65f864.png",
+      "sourceSha256": "853b4c9b0058ceef53a1841b6d2648bce72dd22d326030233fa5e20fd75ab5f4",
+      "outputSha256": "9dd40592cf65f864cbeeaed627bb182224953645f64b1e2726f18981b2300358",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        8,
+        20,
+        16
+      ]
+    },
+    "/client-logos/delta-gas.png": {
+      "path": "/client-preview-logos/delta-gas-fa552e0289339cb5.png",
+      "sourceSha256": "599585ec5ad58ac2dce697a1c769bba3faae867297642d55f7648ecf10afdc4d",
+      "outputSha256": "fa552e0289339cb579980d29323881369351395d379919f91c30a731614c358e",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        8,
+        20,
+        16
+      ]
+    },
+    "/client-logos/dulux-bloemfontein.png": {
+      "path": "/client-preview-logos/dulux-bloemfontein-82b6abea2c192ee4.png",
+      "sourceSha256": "80856c6dc5c0aca721bb4048178376f32922b8095d942787ac87689c61a76997",
+      "outputSha256": "82b6abea2c192ee47dcd8c1a888638901916e695f5c1f8521e3a055727bcb8fa",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        8,
+        20,
+        16
+      ]
+    },
+    "/client-logos/dulux-paint-bloemfontein.png": {
+      "path": "/client-preview-logos/dulux-paint-bloemfontein-82b6abea2c192ee4.png",
+      "sourceSha256": "80856c6dc5c0aca721bb4048178376f32922b8095d942787ac87689c61a76997",
+      "outputSha256": "82b6abea2c192ee47dcd8c1a888638901916e695f5c1f8521e3a055727bcb8fa",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        8,
+        20,
+        16
+      ]
+    },
+    "/client-logos/ehrlich-park-butchery.png": {
+      "path": "/client-preview-logos/ehrlich-park-butchery-8ec98b0480ce7ef1.png",
+      "sourceSha256": "3ee920820a84bd65b62c1244c69b112fef6143ae06ec9953b3eeea7694b53af0",
+      "outputSha256": "8ec98b0480ce7ef1d30c8f66a0ab6797ebddfca1ab1d8a499e1ece6630f15688",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        148,
+        156,
+        151
+      ]
+    },
+    "/client-logos/emmanuel-funerals.png": {
+      "path": "/client-preview-logos/emmanuel-funerals-423b98f82d7340f2.png",
+      "sourceSha256": "91886da84ef4605f818a77f679e1df7248ef69bd9d0df9ec24b9f0c7361774bb",
+      "outputSha256": "423b98f82d7340f27d68be6a84751cd01bda1984cbd89489de7ace2e927e6331",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        248,
+        249,
+        247
+      ]
+    },
+    "/client-logos/first-tech.png": {
+      "path": "/client-preview-logos/first-tech-0c9deab9a6cee77e.png",
+      "sourceSha256": "9244188615a3708ee3554222fef2e006c77676cc479623712b15677be1164e17",
+      "outputSha256": "0c9deab9a6cee77ebe7e226c687d45da648b740930f049e0cd37ec060dbbc3f6",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        8,
+        20,
+        16
+      ]
+    },
+    "/client-logos/germoparts.png": {
+      "path": "/client-preview-logos/germoparts-ce162f701e96645b.png",
+      "sourceSha256": "2bd1a14077802f1b77a928b27c0bb06764eaf95a7da83c60026a4d880e3861e4",
+      "outputSha256": "ce162f701e96645b855a709551610cb48d37709939cef4e016da537d53263595",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        8,
+        20,
+        16
+      ]
+    },
+    "/client-logos/hmh-attorneys.png": {
+      "path": "/client-preview-logos/hmh-attorneys-d040e9c8f20b40c5.png",
+      "sourceSha256": "47a20d241b828ff332555fa7634362d71e95c511c8a74ece62a7e194d282bd02",
+      "outputSha256": "d040e9c8f20b40c56f39d0098b5c839505089d0fb4a4407f8659083f4eb0153e",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        248,
+        249,
+        247
+      ]
+    },
+    "/client-logos/hmh.png": {
+      "path": "/client-preview-logos/hmh-d040e9c8f20b40c5.png",
+      "sourceSha256": "47a20d241b828ff332555fa7634362d71e95c511c8a74ece62a7e194d282bd02",
+      "outputSha256": "d040e9c8f20b40c56f39d0098b5c839505089d0fb4a4407f8659083f4eb0153e",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        248,
+        249,
+        247
+      ]
+    },
+    "/client-logos/jenkor.png": {
+      "path": "/client-preview-logos/jenkor-845bbe73cf2c7dbd.png",
+      "sourceSha256": "1cd85efb6a096a43f0b1c081f99583909d0a194791e1a4b7ad31cbeee14ec428",
+      "outputSha256": "845bbe73cf2c7dbd0b4642e1a02fb918edb02af0aec3460d0087f5ae2550531b",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        8,
+        20,
+        16
+      ]
+    },
+    "/client-logos/local-deli.png": {
+      "path": "/client-preview-logos/local-deli-714a062476c21cfc.png",
+      "sourceSha256": "fb7cf90133b4e5172b81ec430573837086ce476a45ca665d690bd627a06f750b",
+      "outputSha256": "714a062476c21cfc240921dd4d1902263da8a1132c609fd07c2583456002fbe0",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        8,
+        20,
+        16
+      ]
+    },
+    "/client-logos/local-meat-deli.png": {
+      "path": "/client-preview-logos/local-meat-deli-714a062476c21cfc.png",
+      "sourceSha256": "fb7cf90133b4e5172b81ec430573837086ce476a45ca665d690bd627a06f750b",
+      "outputSha256": "714a062476c21cfc240921dd4d1902263da8a1132c609fd07c2583456002fbe0",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        8,
+        20,
+        16
+      ]
+    },
+    "/client-logos/loraclox.png": {
+      "path": "/client-preview-logos/loraclox-9b45fb5ddad11b4b.png",
+      "sourceSha256": "af6e2c58a0f0652d2f94be8c5eedb83f6294dc252fc76353598fff840a875626",
+      "outputSha256": "9b45fb5ddad11b4b17cec2b92481c7dd79a7a884fc90878f5dd26959c712635b",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        8,
+        20,
+        16
+      ]
+    },
+    "/client-logos/madison-wear.png": {
+      "path": "/client-preview-logos/madison-wear-ca7907bc820f99ed.png",
+      "sourceSha256": "62de07e15f6d111cd546213b1852371079f6e4346d8e6c8e73d899496bccf2c2",
+      "outputSha256": "ca7907bc820f99ed166cc386b58b9bb38b420df7a116f2898e01807166366d61",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        248,
+        249,
+        247
+      ]
+    },
+    "/client-logos/madisons.png": {
+      "path": "/client-preview-logos/madisons-ca7907bc820f99ed.png",
+      "sourceSha256": "62de07e15f6d111cd546213b1852371079f6e4346d8e6c8e73d899496bccf2c2",
+      "outputSha256": "ca7907bc820f99ed166cc386b58b9bb38b420df7a116f2898e01807166366d61",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        248,
+        249,
+        247
+      ]
+    },
+    "/client-logos/novus-steel.png": {
+      "path": "/client-preview-logos/novus-steel-54126a42592e4d49.png",
+      "sourceSha256": "ee8c88216cc5e578af4d57435d0ed6bc76b5f50569c2b1e013437fefb433abc8",
+      "outputSha256": "54126a42592e4d49689ec52ac320dbe2c2e4dbf695e35ea0199ea97aa41473f6",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        248,
+        249,
+        247
+      ]
+    },
+    "/client-logos/peyper-bonds.png": {
+      "path": "/client-preview-logos/peyper-bonds-52f776691ab42c7d.png",
+      "sourceSha256": "87f9dc0bc2c3ab3055c799d1a55694abaae8b81a7c120e775dd0196d0478def0",
+      "outputSha256": "52f776691ab42c7d7f0866584cb0a25f5b36708f5af6975e6316a3aff82a7cfe",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        8,
+        20,
+        16
+      ]
+    },
+    "/client-logos/piek-group.png": {
+      "path": "/client-preview-logos/piek-group-bacc36d9f95921eb.png",
+      "sourceSha256": "53e75711fcb0b48024c2d05db9049009ce6c56f1dfcedc95132f0b2bd5c533e1",
+      "outputSha256": "bacc36d9f95921eb277af020cad6c83494c256499a0498c3bc4260ffd0e7c550",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        8,
+        20,
+        16
+      ]
+    },
+    "/client-logos/psg-wit.png": {
+      "path": "/client-preview-logos/psg-wit-77b1d564d1f63d35.png",
+      "sourceSha256": "0fb84d449e701e2892e0dff5ea400be350ddcfb278bfb46a1d432d0b8c160ca3",
+      "outputSha256": "77b1d564d1f63d35c56b6826ea30f9125029891f27ea3dfec950720d3544c2ee",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        8,
+        20,
+        16
+      ]
+    },
+    "/client-logos/psg.png": {
+      "path": "/client-preview-logos/psg-77b1d564d1f63d35.png",
+      "sourceSha256": "0fb84d449e701e2892e0dff5ea400be350ddcfb278bfb46a1d432d0b8c160ca3",
+      "outputSha256": "77b1d564d1f63d35c56b6826ea30f9125029891f27ea3dfec950720d3544c2ee",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        8,
+        20,
+        16
+      ]
+    },
+    "/client-logos/rc-polypipe.png": {
+      "path": "/client-preview-logos/rc-polypipe-b3139dd5c9433ec2.png",
+      "sourceSha256": "abd48d686af6802d10f5184ff15bbb4fd1ef95a8c867f4491db3229f6e64e922",
+      "outputSha256": "b3139dd5c9433ec24c60098766117c2d28d222af63a100ade41ed1462f37f0b6",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        8,
+        20,
+        16
+      ]
+    },
+    "/client-logos/red-oak.png": {
+      "path": "/client-preview-logos/red-oak-286e8fe9b1776d5d.png",
+      "sourceSha256": "233ded46056ed21b01cf594bce9063aeea7b7c2cb1783bdbdfc333bd36c5b25e",
+      "outputSha256": "286e8fe9b1776d5d1ace5548441d278248a80b83ef63196bd00863cd0a69fa1d",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        248,
+        249,
+        247
+      ]
+    },
+    "/client-logos/securiforce.png": {
+      "path": "/client-preview-logos/securiforce-42177c953ffb94de.png",
+      "sourceSha256": "8786c6484d2b6fef9e85983d81a8ab863b720cf2d4e32ec00fa686f00ff13e16",
+      "outputSha256": "42177c953ffb94de5aa06d6bb6776a5c12f1cbec9c45bb80ced48a9014e33ac6",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        8,
+        20,
+        16
+      ]
+    },
+    "/client-logos/tbs-brokers.png": {
+      "path": "/client-preview-logos/tbs-brokers-dbf01bc70ee1e781.png",
+      "sourceSha256": "dcb2ad6ee9ff896009e01359b7b9f1828988c0318cd5a2ce9758252231cf5487",
+      "outputSha256": "dbf01bc70ee1e781da2e2ef65a8367887204421fd9692e3ea0dc7c5a8f71e9ff",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        8,
+        20,
+        16
+      ]
+    },
+    "/client-logos/tbs.png": {
+      "path": "/client-preview-logos/tbs-dbf01bc70ee1e781.png",
+      "sourceSha256": "dcb2ad6ee9ff896009e01359b7b9f1828988c0318cd5a2ce9758252231cf5487",
+      "outputSha256": "dbf01bc70ee1e781da2e2ef65a8367887204421fd9692e3ea0dc7c5a8f71e9ff",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        8,
+        20,
+        16
+      ]
+    },
+    "/client-logos/the-staffy.png": {
+      "path": "/client-preview-logos/the-staffy-021c0bcc2bf53ba3.png",
+      "sourceSha256": "eef17460437a3ff31c3ac2a4da21e280a78889bbe9d0e8180fc324defb90ec4f",
+      "outputSha256": "021c0bcc2bf53ba32f188133db5a3929a7a8d00aba968bd87c99fe155f5f3a15",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        20,
+        20,
+        20
+      ]
+    },
+    "/client-logos/tobich-optics.png": {
+      "path": "/client-preview-logos/tobich-optics-aafe95c3395be856.png",
+      "sourceSha256": "51711e721757e038e355e5de354cb813054bd2fa530df11c4fbe0ba72780dc3e",
+      "outputSha256": "aafe95c3395be85670cdbdb3b81c44726d1b19a5a9726ddc102d3841ee7bc0aa",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        248,
+        249,
+        247
+      ]
+    },
+    "/client-logos/watch-addict.png": {
+      "path": "/client-preview-logos/watch-addict-796c73b5c2633167.png",
+      "sourceSha256": "af2164ebc98888142ef51b7a6c8ed449c684567b7dbbd6b0f6cc66219da63646",
+      "outputSha256": "796c73b5c2633167f55ec620f4b68b7d4a0135ea76224521405b46ec9bebd115",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        8,
+        20,
+        16
+      ]
+    },
+    "/client-logos/we-ar-fuels.png": {
+      "path": "/client-preview-logos/we-ar-fuels-7546a5b053c8f928.png",
+      "sourceSha256": "9c354e4c8cc5778821d5b27fb63936ce7c202e88a34f544eb5d7a090dec7a834",
+      "outputSha256": "7546a5b053c8f928126741f8d35a3fdd2e5b40edf2b9cca4f9203f7f1ed113cc",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        8,
+        20,
+        16
+      ]
+    },
+    "/client-logos/wiseman-group.png": {
+      "path": "/client-preview-logos/wiseman-group-480c8c717018100b.png",
+      "sourceSha256": "9420e1f449ed6cba65abf49db72d194083f6214781d609ceb0c1ca86ac536e25",
+      "outputSha256": "480c8c717018100b4d903141dcd7578fa80d7ff0f8a813873d6c9d2ff90f6a91",
+      "width": 1200,
+      "height": 630,
+      "background": [
+        8,
+        20,
+        16
+      ]
+    }
+  }
+}
