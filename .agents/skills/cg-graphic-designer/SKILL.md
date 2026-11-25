@@ -399,6 +399,22 @@ For the proven WhatsApp photo route, upload one true-HD file through the browser
 - Finish the background asset and crop before measuring foreground registration. Canva may change internal crop on asset replacement even when native element dimensions stay identical. Re-measure against the new background preview, then insert the aligned cutout; reject doubled edges and halos before review.
 - Verify footer/background bleed in the rendered image, not only element dimensions. Raster assets can contain transparent padding. Extend the exact background colour without distorting logos or covering lettering; inspect both side edges and the complete bottom row. Disclose thumbnail-only verification when a full-resolution export is unavailable.
 
+Verify working dividers by native text/stable ID matched to `get_design_pages`
+immediately before insertion. Old screenshot labels can be off by one: Bloem's
+actual In Progress35 precedes Drafts36/Posted37. Preserve protected pages by ID.
+
+Committed native fields and rendered previews are distinct evidence. Bloem R2's
+editing preview showed a repair while saved thumbnails showed the old layout.
+Fresh source-authored R3 previews actually contained it. Retain the discrepancy;
+inspect real final exports instead of inventing a cause or full-resolution match.
+A browser tool disappearing after a host update does not prove the laptop or
+authenticated Chrome disconnected. Do not restart other agents to guess a fix.
+
+Inspect effective inherited permissions before private-source backup. An existing
+company folder can have anonymous edit links. Do not upload a private client ZIP
+there under an assumed-private label, expose sharing tokens, or change shared
+permissions as a workaround. Local ZIP/Canva save is not a verified OneDrive backup.
+
 ## Quality gate
 
 ### Implementing review feedback

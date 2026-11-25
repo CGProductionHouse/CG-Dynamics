@@ -1,3 +1,29 @@
+## 25 November — four Bloem drafts saved, HD delivery still open
+
+Same #948/draft#956 lane. Current R3 DAHb7QiRBhw: four material-reference drafts,
+52native elements/21live Gotham/Inter texts/four exact logos. All four unsigned
+captions equal saved notes; actual saved phone grid inspected.21text/four-logo64px
+frames and caption guards pass. Current private source/preview ZIP CRC checked,
+not an HD package. Client README identifies rejected/superseded drafts and sources.
+Staff Januaryv2,73-page master, human pages and Nolan unchanged.
+
+One pending exact insertion approval: source DAHb7QiRBhw1–4 after actual divider35
+PBxyWvZr4s9nkdXR; Drafts36/Posted37 protected. Earlier boundary note was off by one,
+corrected by actual text/ID/index read. No merge/send. App update interrupted work
+and removed browser control; native Canva still works, but genuine HD export/QA
+and WhatsApp delivery cannot be claimed. Last signed-in tabs were online: no laptop
+disconnection diagnosis, restart of other jobs, credential or host setting change.
+
+Private OneDrive backup not completed. Folder-create failed/readback showed no
+creation; candidate company Posters folder inherits anonymous edit links, so no
+private source/archive was uploaded and no permissions changed. Native drafts are
+cloud-saved in Canva; local source archive is not a verified remote backup.
+Reviewed pack/history/HD/creative approval/final schedule gates remain. R0; no
+deployment/schema/SQL/dependency/client publication or other-agent change.
+Control Centre target remains ungrounded; no guessed mutation.
+Exact-client update3bc546ed-d851-4451-bc75-6498145bdad4 recorded/read back,
+unreviewed; guide and canonical January strategy unchanged.
+
 ## 25 November — Bloem material proof and reuse-check repair
 
 Existing #948/draft#956 lane; main b524a9f9 still current. Corrected initial

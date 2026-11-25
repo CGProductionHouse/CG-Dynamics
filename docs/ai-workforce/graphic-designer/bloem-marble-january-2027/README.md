@@ -1,9 +1,9 @@
 # Bloem Marble & Granite — January 2027 working proofs
 
 25 November 2026. Existing #948 / draft #956 lane. Owner authorised selecting
-the next January client after the Cape/PSG review deliveries. **One saved material-
-reference working proof; no creative approval, completed four-poster package,
-schedule, final filing or send.**
+the next January client after the Cape/PSG review deliveries. **Four internal
+drafts saved together; no creative approval, completed HD delivery package,
+schedule, final filing or WhatsApp send.**
 
 Exact client `89e0ad6d-e08c-4a75-8b8e-abea71af581c`. Fresh monthly brief confirms
 4 designed posters and 2 professional videos; Nolan retains video ownership.
@@ -15,7 +15,62 @@ identification/reference direction. Do not overwrite it or infer approval.
 Current scheduled-date January read returned zero rows; this excludes undated and
 legacy due-date-only work and does not prove that no staff work exists.
 
-## Current actual proof
+## Current four-draft set — R3
+
+[DAHb7QiRBhw](https://www.canva.com/design/DAHb7QiRBhw/edit): four1080x1350pages,
+52native elements,21live Gotham/Inter texts, four exact logos. Four unsigned captions
+exactly match saved page notes and pass the caption guard. Important-frame check
+passes21texts/four explicit logo IDs at64px. Actual phone previews/grid inspected;
+**no new R3 HD export or full-resolution qualification is claimed**.
+
+| Working item | Execution |
+| --- | --- |
+| DP01 Not just light | Named New Kashmir White granite catalogue reference, separate contact shadow, live name tab; light editorial composition |
+| DP02 Keep the code | Original Galaxy sample plus enlarged actual label detail on charcoal; no numeric code or material category invented |
+| DP03 Three names, one shortlist | Independent Black Vermont/Chinese Juperana/Blue Pearl planes, soft shadows/live labels; foreground lifted clear of logo |
+| DP04 Save the name | Original Calacatta Fine sample/cutout, separate shadow and live type; single proof incorporated into complete set |
+
+Four granite swatches are exact assets from the current official
+[client catalogue](https://bloemmg.co.za/granite/), not new project photographs or
+stock/availability evidence. Originals550x376; inspect actual HD source quality
+before release. Internal reference use only; publication/rights and reviewed Brand
+Pack remain separate. The code concept shows why references matter; its actual
+photographed label is a name, not a claimed numeric code.
+
+Catalogue sources checked against73master/138actual social images: no read errors
+or suspected exact matches, not global non-use clearance. Storefront2477 matched
+master7/61 and was excluded. New9434/9435 stills repeat a current queued kitchen and
+were excluded. List-heavy rough DAHb7AUqv4Y is rejected. DAHb7WkjsVM is superseded R2:
+edit preview/native fields and saved thumbnails disagreed. Fresh source-authored
+R3 saved previews actually show the repair. Final2px/1px frame fixes preserve glyphs,
+sources and captions; no full-resolution pixel equivalence is inferred.
+
+**Exact-operation insertion approval pending**, asked once: source DAHb7QiRBhw
+pages1–4 after verified In Progress35 `PBxyWvZr4s9nkdXR` in DAHLTyYy75o. Preserve
+all73existing pages; actual Drafts36/Posted37 protected. The earlier36/37/38 boundary
+note was off by one; native text/stable IDs were reconciled with page indices.
+No merge occurred. Wait for the pending answer, not another repeated request.
+
+App update removed this chat's browser-control namespace; native Canva tools still
+work but expose no HD export or WhatsApp send. Last signed-in tabs were online.
+Do not diagnose a disconnected laptop, restart other agents, extract sessions or
+upscale previews as HD. Genuine Canva PNG High2x/actual HD QA and serialized review
+delivery remain open. Original user tabs were preserved before the update.
+
+Private current evidence is in `full-four-r2/`: R3 scene/HTML, four native pages,
+four captions/guards, actual previews, safe-area report, current receipt/export
+handoff. CRC-checked local source/preview archive
+`BLOEM-MARBLE-JAN2027-R3-WORKING-HANDOFF.zip` is15,436,707bytes; SHA256
+`f994aab618d8b101fdee7c540939ee6b4911611eec3767946a52957c95f46f87`.
+It is **not four HD posters**. Native drafts are saved in Canva; source archive is
+not remotely backed up. OneDrive folder creation failed and fresh readback confirmed
+no new folder. Candidate company Posters storage inherits anonymous edit sharing;
+no client archive was uploaded and no permissions changed.
+
+Exact-client R3 continuation update `3bc546ed-d851-4451-bc75-6498145bdad4`
+recorded/read back25November, unreviewed; guide and canonical strategy unchanged.
+
+## Earlier single-proof checkpoint — superseded
 
 - [Material-reference working design](https://www.canva.com/design/DAHb7PIRKwg/edit),
   one page, internal R1a: genuine original `199A2404.JPG`, with its actual Calacatta
@@ -83,8 +138,9 @@ evidence, delivery hold and mixed image format inventory. No deployed runtime pa
 ## Actual discovery
 
 - Existing Canva master `DAHLTyYy75o`, 73 pages, read only. Retained all 73 actual
-  400x500 previews and current queue board. Page 13 approvals divider, 36 In
-  Progress/Templates, 37 Drafts, 38 Posted/Scheduled. All staff/history protected.
+  400x500 previews and current queue board. Working divider35, Drafts36,
+  Posted/Scheduled37 verified by native text/stable ID on final read. The original
+  screenshot-number interpretation was superseded. All staff/history protected.
 - Current queue contains a New Year greeting, kitchen, vanity, material and
   detail concepts. Page labels inspected around 14–18 are unallocated "Add page
   title"; do not invent their content month or mark January uncovered.
@@ -125,17 +181,16 @@ Corrective proof/status update `f876ab88-b9b2-4e83-a704-7fe571babb32` recorded a
 read back25November, unreviewed. It supersedes the initial no-draft interpretation,
 preserves the staff strategy and records the actual proof/holds. Guide unchanged.
 
-## Next work and holds
+## Next work and holds — current R3
 
-Complete exact brand-pack provenance/kit availability, actual social/approval
-artwork and source/project freshness checks. Resolve existing staff month coverage,
-then use the existing staff-amended January plan, not a competing four-item strategy.
-Obtain a clearly identified fresh granite/sample-range source for its remaining
-items; no category/code guessed from appearance and no used2412 display. Continue
-distinct compositions and actual HD inspection. The current sample proof is not
-creative approval or a finished package. Dates, final portal filing and publication
-stay unallocated. The new structured PICASSO rollout remains separately held; no
-live preflight or ordinary-company-ChatGPT qualification is claimed.
+Use the current four-page R3, not the earlier one-proof checkpoint. Wait for exact
+insertion approval, then preserve all73existing master IDs/order and verify the four
+transferred pages. Restore the supported browser capability when the host exposes
+it; export genuine Canva PNG High2x and inspect all four actual files before review
+delivery. Reviewed Brand Pack, source/publication rights, current relevant approval
+coverage and staff month allocation are still separate checks. Dates, final portal
+filing and publication stay unallocated. No new structured-runtime or normal-company-
+ChatGPT qualification is claimed. Never send the rejected rough drafts or thumbnails.
 
 R0. No master mutation, production SQL/schema/deployment, new dependency, hosting,
 paid API or interference with Nolan/Picasso photography lanes.

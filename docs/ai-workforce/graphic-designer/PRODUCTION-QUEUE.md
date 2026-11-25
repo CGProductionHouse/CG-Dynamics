@@ -8,7 +8,17 @@ Delivered12:26–12:27SAST, with actual Amonique Fourie and Ger-Marie mentions.
 Owner's standing rule: use that concise separate review note after every batch;
 keep artwork captions unsigned. Preserve the user's internal WhatsApp/Canva tabs.
 
-Next selected client: [Bloem Marble & Granite](bloem-marble-january-2027/README.md),
+Current Bloem R3 DAHb7QiRBhw: **all four internal drafts saved**,52native elements,
+21live texts/four exact logos, exact unsigned notes/captions and actual phone grid.
+Frame/caption checks pass. Rough DAHb7AUqv4Y and superseded DAHb7WkjsVM must not be
+sent. Local source/preview archive prepared; no R3 HD or send. Exact insertion
+approval pending: source1–4 after actual master In Progress35 PBxyWvZr4s9nkdXR;
+Drafts36/Posted37 protected, all73existing pages preserved. App update removed browser
+control; genuine HD export/QA and WhatsApp delivery remain open, not a disconnected
+laptop diagnosis. Private OneDrive backup skipped because effective destination
+permissions include inherited anonymous edit links; no permission change/upload.
+
+Earlier discovery checkpoint (superseded by R3): [Bloem Marble & Granite](bloem-marble-january-2027/README.md),
 confirmed4DP/2videos, videos remain Nolan's lane. Existing73-page master read only;
 complete Kit/reviewed pack unresolved. **Correction:** January staff-amended draftv2
 already exists; use its material-reference direction, not a competing strategy.
