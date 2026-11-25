@@ -1,4 +1,49 @@
-## 25 November — Bloem rejection/correction; PSG logo amendment
+## 25 November latest — Bloem architectural-luxury owner pivot
+
+Actual2x Canva DP02/03 exports inspected; DP03 unsigned caption matches saved
+notes and its final logo anchor is beside the lower conversation block. Saved
+DP01/04 unchanged and DP02 matches its final hand-clear R6 state. A subsequent
+full-bleed fabrication DP01 trial was cancelled after visual critique as too
+industrial; original DP01 restored. Selected additional library kitchen/craft/
+bathroom images positively match master history and are excluded. DP01 needs a
+new cleared spatial story; full batch is not ready. No R6/R7 media sent. Latest
+append-only Dynamics recordfa542d88-f8c5-45e1-82f8-4458027b259f, unreviewed.
+
+CA requests a varied architectural/specifier-facing campaign, not repeated stone
+panels. Hold further sends while refining; R6 DP02 saved but not sent, R5 rejected,
+positively received DP04 preserved. Actual SAOTA, Studio Masson and WOMAG visuals
+inspected. Exact Bloem Facebook history contains a past SAIA FSNC factory-visit
+invitation; no January programme/year/current stock inferred. Research and distinct
+four-story grid recorded under the Bloem January documentation.
+
+Same DAHb7sgsbpk DP03 now saved as R7 ROOM FOR / YOUR NEXT / BIG IDEA, replacing
+the held catalogue shortlist. Independent abstract illustration, texture, exact
+logo and five live text elements; not a real client project. Redundant audience
+footer removed after final safe-area review; important frame insets at least78px.
+Actual native preview
+inspected; HD/caption/sibling checks tracked privately, no R7 WhatsApp send.
+Dynamics record7b40bf61-0f49-4279-98eb-fc09d02d0143 unreviewed. Existing #948/#956 lane,
+no new branch, production/dependency/hosting spend or Nolan changes. All master
+history and retained signed-in tabs preserved. Current Control Centre target
+remains ungrounded; do not guess a write.
+
+## Earlier 25 November — Bloem DP02 concept rejection and replacement
+
+CA17:28 rejected the R5 reference-name concept and explicitly requested a different
+idea. It is **rejected**, not pending acceptance. Same workbench DAHb7sgsbpk DP02
+now saved/read back as R6 YOUR PLANS / TAKING SHAPE / PERSONALISED KITCHEN TOPS,
+using verified actual service, real colour-prepared199A2341 photograph, separate
+warm textured header, registered original stone cap and native type/exact logo.
+Actual HD rejected angular/halo head masks; both removed. Full real head preserved
+below the header; material-edge fragments clear both hands. New
+unsigned caption saved/read back exactly; all other native pages unchanged.
+Actual HD/send status lives in private current receipt; do not promote a preview
+or old R5 delivery into R6 completion. Existing DP03 stock hold/positive DP04 intact.
+Dynamics updateb1960c5e-55eb-4eb7-b991-4a5e8c3757a2 unreviewed, guide/strategy unchanged.
+Existing #948/draft#956 lane only; R0, no deployment/SQL/new dependencies or other
+agent changes. Preserve signed-in tabs and protected master/history sections.
+
+## Earlier 25 November — Bloem rejection/correction; PSG logo amendment
 
 Same #948/draft#956 lane. Earlier R3 delivery below was creatively rejected by
 CA/Ger-Marie; do not merge it or treat its pending insertion request as current.

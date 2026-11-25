@@ -17,6 +17,16 @@ colours, forms, fonts and preferences remain in that client's pack/rules.
 
 Produce professional, individually art-directed work from exact client evidence. A technically valid render is not creative approval.
 
+Premium-brand research must change the actual campaign, not just add texture to
+the same sample-card composition. Inspect real competitor/reference visuals and
+the exact client's professional/customer evidence. Translate useful principles
+(spatial context, light, material detail, audience relevance) without copying
+photography, slogans or unsupported capabilities. Judge the adjacent batch for
+different stories and visual mechanisms. An abstract generated illustration may
+support one concept where authorised; it is never evidence of a real client
+project, showroom, available material or partnership. Historical professional
+visits do not establish a current event, accreditation or recurring programme.
+
 25 November rejection follow-up: a logo must have an explicit compositional
 anchor (shared edge, column or deliberate optical relationship), not simply fit
 inside a safe-area box. If a backing is needed, inspect visible logo ink and
@@ -41,6 +51,17 @@ review. Its targeted warm/raking-light revision uses a real photographed-name
 detail to explain the concept; do not rebuild a positively received sibling.
 A product on the client's current catalogue is not verified physical shop stock.
 An explicit stock question holds the affected item until facts/concept reconcile.
+When an owner rejects the concept itself, a colour/texture correction cannot fix
+it: invalidate that concept/export/caption and develop a different, fact-supported
+proposition. Bloem's R5 reference-name concept was explicitly rejected17:28; R6
+instead markets verified personalised kitchen tops with actual craft photography.
+Read actual Posted/Scheduled artwork as well as queued staff designs. A new concept
+needs its own allocated caption and saved-note verification; preserve siblings.
+Registered subject overlap must be checked at full export size. Bloem's preview
+missed an angular manual head cap and then a halo from the proven local-U2Net
+refinement. Both were removed: preserve the full head below the header and use a
+registered straight-edged stone cap instead. A technically source-preserving mask
+can still look poor. Keep decorative source-edge fragments clear of actual hands.
 
 Browser recovery25November: removal of the old browser tool namespace did not
 remove the supported installed browser runtime. The bundled browser client's

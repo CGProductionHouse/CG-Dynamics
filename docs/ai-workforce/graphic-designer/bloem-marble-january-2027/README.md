@@ -1,5 +1,69 @@
 # Bloem Marble & Granite — January 2027 working proofs
 
+## Current owner pivot — architectural luxury and campaign variety
+
+CA requests a stronger architectural/specifier-facing identity and genuinely
+different stories, not four repeated stone panels. All further media sends are
+held during this refinement. R6 DP02 remains a saved craft candidate, **not sent**.
+R5 DP02 remains rejected. Positively received DP04 is preserved.
+
+Research and the four-item direction are in
+[ARCHITECTURAL-LUXURY-RESEARCH-2026-11-25.md](ARCHITECTURAL-LUXURY-RESEARCH-2026-11-25.md).
+Actual company Facebook search found a historical SAIA FSNC factory-visit
+invitation. Its year/permalink and any January programme remain unverified.
+Do not promote it into a current event or stock claim.
+
+DP03's held catalogue concept is replaced in the **same** four-page workbench
+DAHb7sgsbpk with R7 **ROOM FOR / YOUR NEXT / BIG IDEA**: independent architectural
+illustration, warm light texture, exact logo and five live Gotham/Inter text
+elements. This removes the unsupported shop-stock implication. Illustration is
+explicitly abstract, not a real Bloem installation. Saved after actual native
+preview inspection. Unsigned caption-note readback matches exactly; original
+2160x2700 Canva PNG High2x exports of DP02/03 inspected. DP03's subsequent isolated
+logo-anchor refinement is tracked in the final private export receipt. Saved
+DP01/04 match before-state exactly; DP02 matches its final saved hand-clear state.
+Final safe-area check removed redundant audience footer copy that sat too close
+to the edge; the audience remains explicit in the allocated caption. All remaining
+important native text/logo frames have at least78px inset (64px review convention).
+This is a working direction, not human approval.
+Master DAHLTyYy75o and all73 historical/staff pages remain untouched.
+
+Append-only Dynamics owner-direction record
+7b40bf61-0f49-4279-98eb-fc09d02d0143 is unreviewed; guide/January strategy unchanged.
+The current private selector supersedes older R3 insertion/readiness language below.
+
+## Latest owner change — DP02 concept replaced, R6
+
+CA17:28 explicitly rejected the warm R5 concept as unclear and requested a different
+idea. R5 is rejected, not awaiting approval. Do not resend its reference-name caption
+or export. The checkpoint below is retained as history, not current DP02 readiness.
+
+Only DP02 replaced in the same DAHb7sgsbpk: **YOUR PLANS / TAKING SHAPE / PERSONALISED
+KITCHEN TOPS**. Current official home page verifies kitchen tops and personalised
+designs/quotes; the new concept markets this actual service without product-code,
+stock, installation or performance promises. This owner-directed concept change
+does not rewrite/approve the canonical staff strategy or allocate a dated slot.
+
+Uses genuine colour-prepared199A2341 workshop photograph, separate warm textured
+header, exact original logo, native Gotham/Inter type and an independently masked
+original stone cap registered to the photograph. Actual HD exposed an angular
+manual head edge, then a halo in the local-U2Net refinement. **Both head masks were
+removed.** Final proportional photo placement preserves the whole actual head
+below the header; restrained material-edge fragments explicitly clear both hands.
+No face reconstruction/reshaping or generated client material.
+Preserves actual hands and stone, proportional full-width photograph and native
+support type contained within the material area. All other pages exact in saved
+readback;13DP02 native elements retained. Actual posted references40/48/56/64 also
+visually inspected, not just the newer queue. Fresh five-photo November selection
+was excluded as alternate views of queued kitchen/vanity projects; no bulk hydration.
+
+New unsigned R6 caption saved to DP02 notes and read back exactly; canonical hash
+f1bc982e82bbcc75a670648566a8723af1557c3a6b8427f0ccbfd3ed122e3546.
+Caption transport and native text/logo insets pass. Actual HD export and delivery
+status remain in the private current receipt; do not infer them from the preview.
+Dynamics rejection/replacement recordb1960c5e-55eb-4eb7-b991-4a5e8c3757a2, unreviewed.
+DP03 stock hold and positively received DP04 remain unchanged.
+
 ## Current correction — R3 rejected; R4 review and targeted R5
 
 Four R4 photo/caption messages sent serially to CG Picasso Approvals17:12–17:16,
@@ -267,11 +331,17 @@ Corrective proof/status update `f876ab88-b9b2-4e83-a704-7fe571babb32` recorded a
 read back25November, unreviewed. It supersedes the initial no-draft interpretation,
 preserves the staff strategy and records the actual proof/holds. Guide unchanged.
 
-## Next work and holds — current R3
+## Next work and holds — current architectural refinement
 
-Use the current four-page R3, not the earlier one-proof checkpoint. Do not resend
-the delivered set without new feedback. Wait for exact insertion approval, then
-preserve all73existing master IDs/order and verify the four transferred pages.
+R3 is rejected; its old insertion request is obsolete. Current working design is
+DAHb7sgsbpk, DP02 R6 and DP03 R7, with DP01 still requiring a new cleared spatial
+story. A full-bleed fabrication DP01 test was actually inspected and cancelled:
+too industrial for this brief, despite successful native edits. Do not promote
+that prototype or a repeated material-panel mechanism as the final campaign.
+Additional selected library kitchen/craft/bathroom originals yielded positive
+master-history matches (10/47,8/46,31 respectively); exclude them. Same-project
+alternate kitchen angles are not fresh source clearance. No new artwork sent
+during this owner pivot; no full-set replay or master insertion.
 Reviewed Brand Pack, source/publication rights, current relevant approval
 coverage and staff month allocation are still separate checks. Dates, final portal
 filing and publication stay unallocated. No new structured-runtime or normal-company-
