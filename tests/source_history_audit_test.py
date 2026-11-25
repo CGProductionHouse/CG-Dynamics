@@ -11,6 +11,14 @@ spec.loader.exec_module(module)
 
 
 class HistoryMatchTests(unittest.TestCase):
+    def test_mixed_image_formats_are_counted_and_report_is_not_a_preview(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for name in ['a.png', 'b.JPG', 'c.jpeg', 'd.webp', 'receipt.json']:
+                (root / name).write_bytes(b'fixture')
+            (root / 'subfolder.png').mkdir()
+            self.assertEqual([p.name for p in module.preview_files(root)], ['a.png', 'b.JPG', 'c.jpeg', 'd.webp'])
+
     def test_resized_photo_in_poster_is_found_and_unrelated_texture_is_rejected(self):
         rng = np.random.default_rng(82)
         source = rng.integers(0, 256, (600, 800), dtype=np.uint8)

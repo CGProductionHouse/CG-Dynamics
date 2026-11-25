@@ -9,12 +9,17 @@ Owner's standing rule: use that concise separate review note after every batch;
 keep artwork captions unsigned. Preserve the user's internal WhatsApp/Canva tabs.
 
 Next selected client: [Bloem Marble & Granite](bloem-marble-january-2027/README.md),
-confirmed4DP/2videos, videos remain Nolan's lane. Discovery only: existing73-page
-master read only, Gotham/Inter observed, complete kit/reviewed pack unresolved.
-Four apparent new originals excluded after actual queued-project review despite
-negative exact-image matching; 114 small workshop previews retained. Actual
-social/approval coverage, staff-month allocation and fresh briefs remain open.
-No new poster/send or January date invented; no new-system runtime qualification.
+confirmed4DP/2videos, videos remain Nolan's lane. Existing73-page master read only;
+complete Kit/reviewed pack unresolved. **Correction:** January staff-amended draftv2
+already exists; use its material-reference direction, not a competing strategy.
+One source-faithful material working proof DAHb7PIRKwg saved, genuine2160x2700 export,
+six live texts/exact logo/independent sample mask/shadow, isolated amendment verified.
+Workshop DAHb7M0hi_4 is an off-brief technical study, not monthly DP01. Four previous
+project views, smiling2241 and used display2412 excluded. JPEG/WebP history scan fixed;
+73master/138actual social images checked with explicit coverage limits. No creative
+approval, completed batch, WhatsApp send, January date or new-system runtime pass.
+Remaining fresh source identity, full Brand Pack, approval history and staff-month
+alignment hold delivery. See current client README; do not replay Cape/PSG media.
 
 Current25November: owner prioritised official shared PICASSO standards inside
 Dynamics for every model, human designers and still/motion work. Same #948/#956

@@ -41,6 +41,31 @@ business-interruption concept used separately evidenced service information and
 matching empty-workplace photography. A different headline is not clearance of a
 repeated underlying message. Keep abandoned candidates out of delivery selectors.
 
+Read `canonical_draft` and its **staff-amended actionPlan**, not only the monthly
+brief's ready state or source windows. On25November a checkpoint incorrectly said
+Bloem had no January draft although version2 already existed. The workshop proof
+was retained as a technical study, not counted toward January's material-reference
+brief. Pin the exact strategy ID/version and item alignment before assembly; a
+successful render cannot make an unrelated concept fulfil the package.
+
+The local history matcher accepts PNG, JPEG and WebP previews (case-insensitive).
+Compare retained-file inventory with the report's reviewedCount/errors. An older
+PNG-only scan silently skipped137 actual social JPEGs; that receipt was superseded
+by a138-image run. No match still cannot clear alternate views of a used project,
+repeated people/concepts or absent approval history. Reject actual positive matches.
+
+For research-only native proofs when a Kit is unavailable, the local packager's
+`observed-native-reference` mode pins exact client/design/page/font/colour evidence
+by contained-file SHA256 and keeps an explicit delivery hold. It never creates a
+reviewed Brand Pack, new-system preflight pass or authority to send. Do not mark
+another client's Kit verified to make the importer accept a draft.
+
+Resizing an existing media frame after `update_fill` can retain a wrong internal
+crop. Reinspect native imageBox and the rendered overlay, then reapply that exact
+asset to the resized frame if needed. On25November this repaired two full-page
+transparent overlays; element geometry alone had hidden a large misplaced logo
+plate. Preserve source/mask registration when correcting full-frame bleed.
+
 For a large master unsupported by native editing, browser copying of native
 elements into an existing owned working page was proven without deleting pages.
 Select an actual image/text element, Ctrl+A, confirm the element-selection toolbar,

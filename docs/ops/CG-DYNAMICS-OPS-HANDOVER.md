@@ -1,3 +1,24 @@
+## 25 November — Bloem material proof and reuse-check repair
+
+Existing #948/draft#956 lane; main b524a9f9 still current. Corrected initial
+checkpoint: Bloem January has an existing staff-amended canonical draftv2; its
+material-reference direction governs, not a new workshop campaign. One current
+internal material proof DAHb7PIRKwg saved, actual2160x2700 Canva export inspected,
+six live texts/exact original logo/source mask/shadow; isolated one-text amendment
+and exact saved readback verified. Workshop DAHb7M0hi_4 remains technical study only.
+No master mutation, completed4DP claim, creative approval, send or schedule.
+
+Fixed PNG-only source-history scan to count JPEG/WebP; retained138actual social
+images/73master previews, positive reuse excluded. Added hash/client/page-pinned
+observed-native-reference **internal** packaging with explicit delivery hold, no
+reviewed pack or production preflight bypass.8Node/2Python focused tests pass and
+app build passes. Actual brand/approval coverage/staff-month/source-identity gates
+remain; see Bloem README. R0, no deployment/schema/SQL/new dependency or change to
+Nolan, shared production agents or user's retained browser sessions.
+Append-only exact-client correction f876ab88-b9b2-4e83-a704-7fe571babb32 recorded/
+read back, unreviewed; client guide and canonical strategy unchanged.
+Control Centre target remains ungrounded; no guessed write.
+
 ## 25 November — tagged review follow-up and next-client discovery
 
 Existing #948/draft#956 lane. Cape4/PSG3 media deliveries below remain current;
@@ -9,8 +30,9 @@ Original user-retained internal Canva/WhatsApp tabs remain open; no desktop take
 
 Owner authorised choosing the next January client. Bloem Marble discovery selected:
 exact89e0ad6d-e08c-4a75-8b8e-abea71af581c, confirmed4DP/2videos (Nolan untouched),
-published strategy/report and guide recovered. No January dated rows/canonical
-draft; no missing-month or allocation claim. Existing73-page master read only,
+published strategy/report and guide recovered. No January dated rows; initial
+no-canonical-draft claim was incorrect and is superseded by the v2 readback above.
+No missing-month/allocation claim. Existing73-page master read only,
 all previews retained; actual Gotham/Inter/native red observed. Exact kit/reviewed
 pack unresolved. Four new-shoot candidates excluded by manual same-project queue
 review even though SIFT found no exact suspected reuse.114/137 small workshop

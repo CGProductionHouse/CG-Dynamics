@@ -22,6 +22,33 @@ function id(value, name) {
   if (!/^[a-zA-Z0-9_-]+$/.test(required(value, name))) throw new Error(`${name} must be a stable safe identifier`)
   return value
 }
+function brandReference(scope, root, clientId) {
+  if (scope?.authority === 'verified-canva-kit') return { authority: scope.authority }
+  if (scope?.authority !== 'observed-native-reference') throw new Error('An exact verified Canva brand scope is required')
+  // A working reference is not an approved Brand Pack or permission to deliver.
+  const ref = scope.referenceEvidence
+  if (!ref || !/^DA[\w-]+$/.test(ref.designId ?? '') || !/^PB[\w-]+$/.test(ref.pageId ?? '')
+      || !/^[0-9a-f]{64}$/.test(ref.sha256 ?? '') || !ref.clientId || !ref.path) {
+    throw new Error('Native reference needs exact client/design/page and a pinned local evidence file')
+  }
+  const contained = (file) => {
+    const rel = relative(root, file)
+    if (rel === '..' || rel.startsWith('../') || rel.startsWith('..\\') || isAbsolute(rel)) throw new Error('Native reference escapes job directory')
+  }
+  if (isAbsolute(ref.path)) throw new Error('Native reference escapes job directory')
+  const candidate = resolve(root, ref.path)
+  contained(candidate) // Reject lexical escapes before touching another directory.
+  const file = realpathSync(candidate)
+  contained(file) // A symlink cannot grant access outside the private job.
+  const bytes = readFileSync(file)
+  if (hash(bytes) !== ref.sha256) throw new Error('Native reference evidence hash changed')
+  const observed = JSON.parse(bytes.toString('utf8'))
+  if (clientId !== ref.clientId || observed.clientId !== ref.clientId || observed.designId !== ref.designId || observed.pageId !== ref.pageId
+      || !scope.fonts.every((font) => observed.fonts?.includes(font)) || !scope.colours.every((colour) => observed.colours?.includes(colour))) {
+    throw new Error('Native reference client, page or tokens do not match the working document')
+  }
+  return { authority: scope.authority, clientId: ref.clientId, designId: ref.designId, pageId: ref.pageId, sha256: ref.sha256, deliveryHold: 'Working native reference only; reviewed Brand Pack and delivery checks still required' }
+}
 function colour(value, scope) {
   if (!/^#[a-f0-9]{6}$/i.test(value ?? '')) throw new Error('An explicit six-digit colour is required')
   if (!scope.colours.map((entry) => entry.toUpperCase()).includes(value.toUpperCase())) throw new Error(`Unverified colour ${value} for ${scope.key}`)
@@ -116,7 +143,8 @@ export function buildNativeCanvaPackage(document, jobDirectory, { maxBytes = LIM
     if (pageIds.has(pageId)) throw new Error('Duplicate page ID')
     pageIds.add(pageId)
     const scope = scopes.get(page.brandScope)
-    if (!scope || scope.authority !== 'verified-canva-kit' || !scope.fonts?.length || !scope.colours?.length) throw new Error('An exact verified Canva brand scope is required')
+    if (!scope || !scope.fonts?.length || !scope.colours?.length) throw new Error('An exact verified Canva brand scope is required')
+    const brandEvidence = brandReference(scope, root, document.clientId)
     const notes = required(page.notes, 'accurate internal page notes')
     const ids = new Set()
     const records = []
@@ -171,7 +199,7 @@ export function buildNativeCanvaPackage(document, jobDirectory, { maxBytes = LIM
       }
       throw new Error(`Unsupported layer type ${layer.type}; do not flatten silently`)
     }).join('')
-    manifest.pages.push({ id: pageId, index: index + 1, brandScope: page.brandScope, label: required(page.label, 'page.label'), notes, layers: records })
+    manifest.pages.push({ id: pageId, index: index + 1, brandScope: page.brandScope, brandEvidence, label: required(page.label, 'page.label'), notes, layers: records })
     return `<section data-document-role="page" data-label="${escape(page.label)}" data-speaker-notes="${escape(notes)}" style="position:relative;width:${width}px;height:${height}px;background:${colour(page.background, scope)};overflow:hidden;">${layers}</section>`
   }).join('')
   const html = `<!doctype html><html><head><meta charset="utf-8"><title>${escape(title)}</title><style>*{box-sizing:border-box}body{margin:0}img{display:block}</style></head><body>${pages}</body></html>`

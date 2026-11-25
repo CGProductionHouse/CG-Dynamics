@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import { mkdtempSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { resolve } from 'node:path'
+import { createHash } from 'node:crypto'
 import { buildNativeCanvaPackage, verifyNativeBindings } from '../scripts/poster-studio/canva-native-package.mjs'
 
 const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScLbtAAAAABJRU5ErkJggg==', 'base64')
@@ -19,6 +20,30 @@ function fixture() {
     ] }],
   } }
 }
+
+test('observed native references remain held and require unchanged contained evidence', () => {
+  const { root, scene } = fixture()
+  scene.clientId = 'synthetic-client'
+  const evidence = Buffer.from(JSON.stringify({ clientId: scene.clientId, designId: 'DATest', pageId: 'PBTest', fonts: ['Anton', 'Barlow'], colours: ['#FFFFFF', '#0B1629'] }))
+  writeFileSync(resolve(root, 'reference.json'), evidence)
+  const scope = scene.brandScopes[0]
+  scope.authority = 'observed-native-reference'
+  assert.throws(() => buildNativeCanvaPackage(scene, root), /pinned local evidence/)
+  scope.referenceEvidence = { clientId: 'synthetic-client', designId: 'DATest', pageId: 'PBTest', path: 'reference.json', sha256: createHash('sha256').update(evidence).digest('hex') }
+  const built = buildNativeCanvaPackage(scene, root)
+  assert.match(built.manifest.pages[0].brandEvidence.deliveryHold, /reviewed Brand Pack/)
+  assert.equal(built.manifest.qualityApproval, false)
+  scene.clientId = 'different-client'
+  assert.throws(() => buildNativeCanvaPackage(scene, root), /do not match/)
+  scene.clientId = 'synthetic-client'
+  scope.referenceEvidence.path = resolve(root, 'reference.json')
+  assert.throws(() => buildNativeCanvaPackage(scene, root), /escapes/)
+  scope.referenceEvidence.path = '../nonexistent-outside-reference.json'
+  assert.throws(() => buildNativeCanvaPackage(scene, root), /escapes/)
+  scope.referenceEvidence.path = 'reference.json'
+  writeFileSync(resolve(root, 'reference.json'), 'changed')
+  assert.throws(() => buildNativeCanvaPackage(scene, root), /hash changed/)
+})
 
 test('native package preserves source bytes and live text, then isolates an amendment', () => {
   const { root, scene } = fixture()

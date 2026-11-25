@@ -17,6 +17,11 @@ def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def preview_files(history):
+    return sorted(path for path in history.iterdir()
+                  if path.is_file() and path.suffix.lower() in {'.png', '.jpg', '.jpeg', '.webp'})
+
+
 def features(path, detector, maximum=1600):
     pixels = cv2.imread(str(path), cv2.IMREAD_GRAYSCALE)
     if pixels is None:
@@ -70,7 +75,7 @@ def audit(sources, history):
     detector = cv2.SIFT_create(nfeatures=2400)
     cached = [(path, features(path, detector), digest(path)) for path in sources]
     rows, errors = [], []
-    previews = sorted(history.glob("*.png"))
+    previews = preview_files(history)
     for path in previews:
         try:
             target = features(path, detector)
@@ -105,7 +110,7 @@ def main():
     parser.add_argument("--history", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
-    inputs = [*args.source, *args.history.glob("*.png")]
+    inputs = [*args.source, *preview_files(args.history)]
     if args.out.resolve() in [path.resolve() for path in inputs]:
         raise ValueError("Report must not overwrite a source or preview")
     result = audit(args.source, args.history)
