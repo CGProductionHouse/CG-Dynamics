@@ -22,7 +22,10 @@ test('real server grant is accepted by the strict frontend transport projection 
 })
 
 async function fixture(run) {
-  const server=await createServer({configFile:false,server:{middlewareMode:true,hmr:false},optimizeDeps:{noDiscovery:true}})
+  const server=await createServer({configFile:false,server:{middlewareMode:true,hmr:false},optimizeDeps:{noDiscovery:true},define:{
+    'import.meta.env.VITE_SUPABASE_URL':JSON.stringify('http://127.0.0.1:1'),
+    'import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY':JSON.stringify('fixture-only'),
+  }})
   try {
     const {supabase}=await server.ssrLoadModule('/src/lib/supabase.ts')
     const api=await server.ssrLoadModule('/src/features/client-portal-library/api.ts')

@@ -1,11 +1,12 @@
 // CG Assistant durable background worker (DEPLOYED, verify_jwt=false).
 // Drains the background_jobs queue server-side using the injected service role,
-// so jobs continue after the app closes. Invoked on a schedule (pg_cron ->
-// pg_net) and opportunistically by the app. verify_jwt is false because it only
-// drains the durable queue with its own service role; it performs no action on
-// behalf of the caller and trusts nothing from the request body.
+// so jobs continue after the app closes. Invoked by signed pg_cron -> pg_net
+// requests. verify_jwt=false is paired with the private HMAC guard BEFORE any
+// privileged client/housekeeping. Browser nudges have no private key and refuse;
+// the minute cron is the durable caller. Request bodies grant no authority.
 import { createClient, type SupabaseClient } from 'jsr:@supabase/supabase-js@2'
 import webpush from 'npm:web-push@3.6.7'
+import { authorizeBackgroundWorkerInvocation } from '../_shared/backgroundWorkerInvocation.ts'
 import { SOCIAL_PUBLICATION_JOB, runClaimedSocialPublication } from '../_shared/socialPublishingQueue.ts'
 import { facebookPublicationRuntime, readFacebookPublicationConfiguration } from '../_shared/facebookPublicationRuntime.ts'
 import { dispatchMetaWorker } from '../_shared/metaWorkerDispatch.ts'
@@ -62,7 +63,9 @@ interface JobResult extends Record<string, unknown> {
   progress?: number
 }
 
-Deno.serve(async () => {
+Deno.serve(async request => {
+  const refusal = await authorizeBackgroundWorkerInvocation(request, name => Deno.env.get(name))
+  if (refusal) return refusal
   const url = Deno.env.get('SUPABASE_URL')
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   if (!url || !serviceKey) {
