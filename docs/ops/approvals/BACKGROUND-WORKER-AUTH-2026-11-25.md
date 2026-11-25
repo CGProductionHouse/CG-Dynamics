@@ -1,3 +1,5 @@
+> APPROVAL CONSUMED: worker68 is live and verified. See BACKGROUND-WORKER-AUTH-2026-11-25-RECEIPT.json for the supported cron compatibility correction, exact hashes and natural execution evidence. The plan below is historical; do not redeploy or regenerate keys. Publishing remains OFF.
+
 # Worker authentication — exact local review packet, 25 November 2026
 
 Prepared only for PR #991. No new live key, cron, permissions or worker release is authorized by the prior disabled-runtime approval. Publishing and confirmation remain OFF.

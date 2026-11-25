@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { before, test } from 'node:test'
-import { execFileSync } from 'node:child_process'
+import { execFileSync, spawn } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import { createHash, createHmac, randomUUID, webcrypto } from 'node:crypto'
 import vm from 'node:vm'
@@ -9,15 +9,16 @@ import ts from 'typescript'
 const container = process.env.CG_SOCIAL_QA_CONTAINER
 const enabled = container === 'cg-dynamics-social-220-qa'
 const database = `qa_worker_auth_${randomUUID().replaceAll('-', '')}`
+const invoker = `qa_worker_invoker_${randomUUID().replaceAll('-', '')}`
 const original = "select net.http_post('fixture-existing-worker')"
 const quote = value => `'${String(value).replaceAll("'", "''")}'`
 const source = readFileSync('docs/ops/approvals/BACKGROUND-WORKER-AUTH-CRON-2026-11-24.sql', 'utf8')
 // Only substitute the production command fingerprint for our synthetic baseline.
 // Cron, Vault and HTTP fixtures below stay inside actual isolated PostgreSQL.
 const packet = source.replace('a432533625dcb8db3cd10c3c7e518e69', createHash('md5').update(original).digest('hex'))
-function sql(query) {
+function sql(query, role) {
   return execFileSync('docker', ['exec', '-i', container, 'psql', '-X', '-U', 'postgres', '-d', database, '-v', 'ON_ERROR_STOP=1', '-Atq'], {
-    input: query, encoding: 'utf8', timeout: 30000, stdio: ['pipe', 'pipe', 'pipe'],
+    input: (role ? `set role ${role};\n` : '') + query, encoding: 'utf8', timeout: 30000, stdio: ['pipe', 'pipe', 'pipe'],
   }).trim()
 }
 before(() => {
@@ -35,14 +36,17 @@ before(() => {
     create table requests(url text,headers jsonb,body jsonb,timeout_ms integer);
     create table mutation_mode(value text);
     insert into mutation_mode values('normal');
-    create function cron.alter_job(job_id bigint,command text) returns void language plpgsql as $$
+    create function cron.alter_job(job_id bigint,command text) returns void language plpgsql security definer set search_path=pg_catalog,pg_temp as $$
     begin
+      if (select value from public.mutation_mode)='pause' then raise notice 'BEFORE_CRON_UPDATE'; perform pg_sleep(3); end if;
       update cron.job j set command=alter_job.command where j.jobid=job_id;
-      if (select value from mutation_mode)='other' then update cron.job set active=false where jobid=2; end if;
-      if (select value from mutation_mode)='identity' then update cron.job set schedule='0 * * * *' where jobid=job_id; end if;
+      if (select value from public.mutation_mode)='other' then update cron.job set active=false where jobid=2; end if;
+      if (select value from public.mutation_mode)='identity' then update cron.job set schedule='0 * * * *' where jobid=job_id; end if;
     end $$;
     create function net.http_post(url text,headers jsonb,body jsonb,timeout_milliseconds integer) returns bigint language plpgsql as $$
-    begin insert into requests values(url,headers,body,timeout_milliseconds); return 1; end $$;`)
+    begin insert into requests values(url,headers,body,timeout_milliseconds); return 1; end $$;
+    create role ${invoker}; grant usage on schema cron,vault,extensions,net to ${invoker};
+    grant select on cron.job,vault.secrets,vault.decrypted_secrets to ${invoker};`)
 })
 function reset() {
   sql(`truncate cron.job,vault.secrets,requests; update mutation_mode set value='normal';
@@ -100,5 +104,30 @@ test('real PostgreSQL: coordinated worker cron capability guards and transaction
     reset(); sql(`update mutation_mode set value=${quote(mode)}`); const before = state()
     assert.throws(() => sql(packet)); assert.equal(state(), before)
     assert.equal(sql('select count(*) from requests'), '0')
+  })
+  await t.test('restricted caller cannot lock protected table directly but can apply exact update through existing cron API', () => {
+    reset()
+    assert.throws(()=>sql('begin;select * from cron.job where jobid=1 for update;rollback;',invoker),/permission denied/)
+    const before=JSON.parse(state());sql(packet,invoker);const after=JSON.parse(state())
+    assert.deepEqual(after[1],before[1]);assert.deepEqual({...after[0],command:original},before[0])
+    assert.equal(sql('select count(*) from requests'),'0')
+    assert.equal(sql(`select has_table_privilege('${invoker}','cron.job','UPDATE')`),'f','no privilege grant was used')
+  })
+  await t.test('serializable actual packet refuses a concurrent command change instead of overwriting it', async () => {
+    reset();sql("update mutation_mode set value='pause'")
+    const p=spawn('docker',['exec','-i',container,'psql','-X','-U','postgres','-d',database,'-v','ON_ERROR_STOP=1','-Atq'])
+    let errors='',changed=false
+    const finished=new Promise((resolve,reject)=>{
+      p.on('error',reject);p.on('close',code=>resolve(code))
+      p.stderr.on('data',value=>{
+        errors+=value
+        if(!changed&&errors.includes('BEFORE_CRON_UPDATE')){changed=true;sql("update cron.job set command='concurrent-owner-change' where jobid=1")}
+      })
+    })
+    p.stdin.end(`set role ${invoker};\n`+packet)
+    assert.notEqual(await finished,0);assert.equal(changed,true)
+    assert.match(errors,/could not serialize access/)
+    assert.equal(sql('select command from cron.job where jobid=1'),'concurrent-owner-change')
+    assert.equal(sql('select count(*) from requests'),'0')
   })
 })

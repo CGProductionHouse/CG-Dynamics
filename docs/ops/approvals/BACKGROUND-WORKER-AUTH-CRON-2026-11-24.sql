@@ -2,14 +2,17 @@
 -- FIRST privately configure matching BACKGROUND_WORKER_INVOCATION_SECRET in Edge
 -- and cg_background_worker_invocation_secret in Vault (new 256-bit random key).
 -- THEN apply this exact transaction, THEN release the reviewed worker auth guard.
-begin;
+-- Supabase protects direct row locks on cron.job. Serializable isolation keeps
+-- the read/alter compare safe through the supported cron.alter_job API without
+-- granting UPDATE, assuming its extension owner or overwriting concurrent edits.
+begin isolation level serializable;
 set local lock_timeout = '3s';
 set local statement_timeout = '30s';
 do $guard$
 declare target cron.job; valid_keys integer; unrelated_before text; unrelated_after text;
 begin
   perform pg_advisory_xact_lock(hashtext('cg-background-worker-auth-2026-11-24'));
-  select * into strict target from cron.job where jobid=1 and jobname='cg-background-worker' for update;
+  select * into strict target from cron.job where jobid=1 and jobname='cg-background-worker';
   if target.schedule is distinct from '* * * * *' or target.active is distinct from true
      or md5(target.command) is distinct from 'a432533625dcb8db3cd10c3c7e518e69' then
     raise exception 'Exact existing worker cron fingerprint required; do not replay';

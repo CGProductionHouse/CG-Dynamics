@@ -1,5 +1,5 @@
 {
-  "status": "LOCALLY_QUALIFIED_PENDING_EXACT_APPROVAL",
+  "status": "APPROVAL_CONSUMED_ROLLED_OUT_SEE_RECEIPT",
   "pr": 991,
   "branch": "codex/social-publishing-220",
   "base_revision": "5372506db3db9334eea99831d4743c2f90d8785e",
@@ -137,5 +137,9 @@
   "previous_static_header_packet": "REJECTED_DO_NOT_RELEASE; retained privately",
   "remaining_native_gate": "Exact approved future Cape original JPEG/caption/SAST time, fresh Teams/native duplicate and app-review evidence; separate account activation and ONE-post approval",
   "google_control_centre": "Exact target unidentified; no guessed write",
-  "hash_scope": "sha256 is qualified working/payload bytes; repository_lf_sha256 accounts for Git text normalization. Frozen private payload SHA is authoritative for any approved release; never normalize preserved hosted files."
+  "hash_scope": "sha256 is qualified working/payload bytes; repository_lf_sha256 accounts for Git text normalization. Frozen private payload SHA is authoritative for any approved release; never normalize preserved hosted files.",
+  "historical_qualification_revision": "f9425e8c82795e3af549684b224ca03e8e53854d",
+  "actual_release_receipt": "BACKGROUND-WORKER-AUTH-2026-11-25-RECEIPT.json",
+  "compatibility_note": "Historical proposal hashes retained. Actual runtime payload unchanged; protected-cron serializable compatibility correction and15-test receipt are recorded in the live receipt.",
+  "historical_record_notice": "Original live_worker, protocol, qualification, proposal_files and preserved fields are the pre-approval f9425e8c snapshot, not current production state. Use actual_release_receipt for current key/cron/worker state; do not regenerate or redeploy."
 }
