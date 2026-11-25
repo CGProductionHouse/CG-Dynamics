@@ -1,0 +1,2586 @@
+{
+  "captured_at": "2026-11-24T09:58:03.28205+00:00",
+  "active_clients": 63,
+  "live_backend_version": 95,
+  "code_head": "4c083ca8ae9f35b5836053b927eddf2cee6bda7b",
+  "backend_sha256": "80a2f4db74ce835f5d65e7a7964c09b5cb07a7a1b09c68545d452beefc643264",
+  "source_export_files": 30,
+  "source_unique_films": 11,
+  "matched_existing_before": 10,
+  "added_exact_existing_film": "eea0ac88-1f2c-8c85-8743-1f76d055b91f",
+  "existing_pipeline_rows_unchanged": 105,
+  "pipeline_rows_after": 106,
+  "all_client_packages_unchanged": true,
+  "months_are_release_months_not_guessed_shoot_dates": true,
+  "client_matrix": [
+    {
+      "client_id": "3c20fae1-8e91-41d5-98eb-1c331600e6e3",
+      "client_name": "Neshora Oxygen",
+      "package_status": "confirmed",
+      "package_hash": "715f23ed5cab26920f34f81aaacd892b44bc230d89460e9971cd954b166f0ad2",
+      "source_references": [
+        "https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5801092086"
+      ],
+      "video_quantity": 1,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 2,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [
+            "f8c2a557-9edb-4768-95d5-ccf6b7727ad5"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "5dfdf4bd-9d94-4cc6-9dee-0e480a2234cb",
+      "client_name": "Bohemia Quick Stop",
+      "package_status": "confirmed",
+      "package_hash": "d9859b0324db1c1c285c226774de09650ffba112e067708849ac889b91b3dea9",
+      "source_references": [
+        "client_package:408aae34-9754-4b4f-8ba1-763172ac399c (Monthly Content Package; current from 2026-06-30)",
+        "package_template:9d2aa2a7-c6a7-4d51-adb1-b805f27165a6 (DP1; 1/month)"
+      ],
+      "video_quantity": null,
+      "video_quantity_state": "unknown",
+      "active_pipeline_rows": 0,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "29a28efd-c998-45e2-a57c-4a751e779e66",
+      "client_name": "PSG Bloemfontein",
+      "package_status": "confirmed",
+      "package_hash": "a7abd2f4076d743fba2fbb674ea9d8202b594160b62f4ca4bdc47db98e749ef3",
+      "source_references": [
+        "client_package:854c0a99-b882-4e13-93b0-ffd6afb5788f (Monthly Content Package; current from 2026-06-30)",
+        "package_template:4a1bf959-ee2d-444b-9d93-14e4c9f6a67d (Video 1; 1/month)"
+      ],
+      "video_quantity": 1,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 3,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [
+            "f240aa62-95e2-813a-bfb8-977e93e7fcbe",
+            "77381ebd-eb40-4be2-9c73-4d030603b975"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "fd16ebae-a50b-4920-afe0-94c2631f8f06",
+      "client_name": "All Around PVC",
+      "package_status": "confirmed",
+      "package_hash": "c9fce259e785f0fb30fe7d391b0737ec807c633b5e267ef79ca0879a3ac22bfb",
+      "source_references": [
+        "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+      ],
+      "video_quantity": 1,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 2,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [
+            "7fabe0c7-1846-4178-87f5-bcda0b9fbb25"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "3b85973f-bcad-49eb-b8f1-c27f7c7f1aba",
+      "client_name": "AV Event Life",
+      "package_status": "confirmed",
+      "package_hash": "17cae50c474c69c9669d1c05b140eee91f6451fcbc23068e5bedc4127f4902a7",
+      "source_references": [
+        "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+      ],
+      "video_quantity": null,
+      "video_quantity_state": "unknown",
+      "active_pipeline_rows": 0,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "1a6d6c62-7e5e-4e1e-93e6-21d9157f0a01",
+      "client_name": "LHP Student Village & Block",
+      "package_status": "unverified",
+      "package_hash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "source_references": [],
+      "video_quantity": null,
+      "video_quantity_state": "unknown",
+      "active_pipeline_rows": 0,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Confirm the actual package before allocating work"
+    },
+    {
+      "client_id": "7b7d244f-77b4-4b2a-88f0-8ce3f7e1c202",
+      "client_name": "Elcheck",
+      "package_status": "confirmed",
+      "package_hash": "9c173eacebd13ebf5dcba06d40f48c85ba547756483a1e265fbb0a01986062bd",
+      "source_references": [
+        "CA direct CG Dynamics package instruction in this chat, 9 October 2026: Elcheck — 3 posters, 3 photos, 1 video."
+      ],
+      "video_quantity": 1,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 1,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [
+            "eea0ac88-1f2c-8c85-8743-1f76d055b91f"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "89e0ad6d-e08c-4a75-8b8e-abea71af581c",
+      "client_name": "Bloem Marble & Granite",
+      "package_status": "confirmed",
+      "package_hash": "a9a4a2d2753ab092afb40e7602e011c76628544144391a9b7633ff611e8d7dda",
+      "source_references": [
+        "client_package:034ead66-eecd-4460-9df1-2e7f36c48e57 (Monthly Content Package; current from 2026-06-30)",
+        "package_template:2423db26-deb0-4ad1-8a66-fe28a299b2cf (DP1; 1/month)"
+      ],
+      "video_quantity": 2,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 4,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [
+            "54164c3c-4448-402f-9630-b59015a514ba"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [
+            "eb7fe25a-8327-4968-a56f-b6f99159c8a7"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "8e448cf9-1534-4ba1-89a4-93e4c8b83d2f",
+      "client_name": "Bouwer & Coetzee Attorneys",
+      "package_status": "confirmed",
+      "package_hash": "56ffe276e908780b11183f604897de627f87d7912af7d89957b3091d14f29f81",
+      "source_references": [
+        "client_package:696f943f-48e9-40f0-98f9-cfa5526dbf96 (Monthly Content Package; current from 2026-06-30)",
+        "package_template:a7a69b3a-7945-4b52-baf6-b0f735cd56f8 (Video 1; 1/month)"
+      ],
+      "video_quantity": 1,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 1,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [
+            "3bcdfbc7-570c-8edb-9642-5ae24d887e97"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "6b67a2df-e2ab-418b-bcee-03aef5963d37",
+      "client_name": "Braize",
+      "package_status": "confirmed",
+      "package_hash": "5ff0e266ba88627a680311f5f8293814f2adec95318e33c6542fdf0d0a24cef4",
+      "source_references": [
+        "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+      ],
+      "video_quantity": null,
+      "video_quantity_state": "unknown",
+      "active_pipeline_rows": 0,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "6b313cac-283e-48c4-9df6-ba43af2f7353",
+      "client_name": "Central Canvas",
+      "package_status": "confirmed",
+      "package_hash": "d70815ce21257b487997a5bcecc9c8dbfe7bb4c40976ee835f873f4b731ef18e",
+      "source_references": [
+        "client_package:b7b61ffb-6622-4d1e-8911-ff13314d07b1 (Monthly Content Package; current from 2026-06-30)",
+        "package_template:da761269-e37e-4422-8ce5-45b60dc1a65f (Video 1; 1/month)"
+      ],
+      "video_quantity": 1,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 2,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [
+            "0b5b0e5f-40e0-4df7-a507-7852ded7dafe"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [
+            "ae0dbfc4-da19-4fe8-b333-aa4cbcdf4711"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "d53d8e62-9e6a-4bb9-be3f-554f40942d45",
+      "client_name": "Emmanuel Funerals",
+      "package_status": "confirmed",
+      "package_hash": "3fa7e45a1d512b5f5dbaa68e9d03c219f5b6350c41ec9615c746eb4c4cb24eaf",
+      "source_references": [
+        "client_package:48a6faff-b2e8-484f-9f16-de117d92e9b6 (Monthly Content Package; current from 2026-06-30)",
+        "package_template:31830afc-ba31-4e78-806e-2e0712a72c18 (Video 1; 1/month)"
+      ],
+      "video_quantity": 1,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 1,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [
+            "b6bbd595-fd86-4ab8-9673-7aa07cf049f6"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "3404f726-a693-4b2d-8c13-c9d3dfd17bbc",
+      "client_name": "Daisy & Co",
+      "package_status": "confirmed",
+      "package_hash": "1f9724d75f2f494c4d6eb9b0bd10d7ca98de7e05300dec12066d979a91cd20c4",
+      "source_references": [
+        "client_package:dbc25597-c053-4b3e-9ef9-660828d645a9 (Monthly Content Package; current from 2026-06-30)",
+        "package_template:384d7ad1-8276-437f-b9cc-00da5ec5faec (Video 1; 1/month)"
+      ],
+      "video_quantity": 1,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 1,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [
+            "90193f0c-6f48-837a-9d90-c54d29c603b8"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "4236a60a-990f-484f-8d19-13d2f92fbe3b",
+      "client_name": "Novus Steel",
+      "package_status": "confirmed",
+      "package_hash": "bb74beba8fd8a374d87ab777014e1fe62168fe121099b898e379e4e14afff90c",
+      "source_references": [
+        "client_package:d9a89a21-b228-400c-8285-da0cff95a62d (Monthly Content Package; current from 2026-06-30)",
+        "package_template:29860009-877b-4cb0-bc0b-1ad5c4ffd847 (Video 1; 1/month)"
+      ],
+      "video_quantity": 1,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 1,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [
+            "09a5b177-2752-87c7-bcb3-d356bba9852c"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "32bd9db3-5339-4404-825b-5a615cadec6a",
+      "client_name": "Bat Hill Royale",
+      "package_status": "confirmed",
+      "package_hash": "b2f4c8675fae242d419fea03acf129171fe04031e9e55ffa051e1e5eeb84ee88",
+      "source_references": [
+        "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
+        "https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5798269510"
+      ],
+      "video_quantity": null,
+      "video_quantity_state": "unknown",
+      "active_pipeline_rows": 0,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "bbd1629e-79fb-4c41-b1e4-88a1f160bd34",
+      "client_name": "VCS Cleaning Solutions",
+      "package_status": "confirmed",
+      "package_hash": "708765b6c5dad14dcfd81e91aa9a6d6e8409da104c5713396717b17bfddadca9",
+      "source_references": [
+        "CA direct CG Dynamics package instruction in this chat, 9 October 2026: VCS Cleaning Solutions — 8 posters, 1 video."
+      ],
+      "video_quantity": 1,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 1,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [
+            "888f750c-d246-839f-8fd1-724f261de1d0"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "06b20bb1-ed4a-4aa1-9f48-8c6cb0531aba",
+      "client_name": "Delta Gas",
+      "package_status": "confirmed",
+      "package_hash": "cfe23ebdc26e72f5cb57c3e2e28cafc41a152eeae154808911d61131216cd289",
+      "source_references": [
+        "client_package:b611663c-6fb6-4fd6-ad66-1bcab7178359 (Monthly Content Package; current from 2026-06-30)",
+        "package_template:1acc867e-6b81-4a94-b98e-32824e9c3ee7 (Video 1; 1/month)"
+      ],
+      "video_quantity": 1,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 2,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [
+            "10a1c1a8-a63b-45f2-b27b-42d0e3f4b7d3"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "61acf81b-1011-404e-9fae-2e209be65fca",
+      "client_name": "Econofoods",
+      "package_status": "confirmed",
+      "package_hash": "8f2c1a52bb85fa78a9d53b817cc495ca661c72985b2f6041e68ddc4184e4754a",
+      "source_references": [
+        "client_package:aa027f56-e4b7-485f-bcad-f0724c272e46 (Monthly Content Package; current from 2026-06-30)",
+        "package_template:5a820d37-d86b-45e6-bbf7-3fbcc70ebfc9 (Video 1; 1/month)"
+      ],
+      "video_quantity": 5,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 3,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "2aed8a31-bd53-4ad1-a3dc-432865adfb3d",
+      "client_name": "Dulux Paint & Paper Bloemfontein",
+      "package_status": "confirmed",
+      "package_hash": "fc64ec55b30a0bf43de39668030cf9842bd46ba51607533c6233fa4f56ac7f9a",
+      "source_references": [
+        "client_package:9516420d-38ee-4e53-aacf-b3633f4d7783 (Monthly Content Package; current from 2026-06-30)",
+        "package_template:3ffa2c3a-bd6c-4534-9829-ee3d12571a6f (DP1; 1/month)"
+      ],
+      "video_quantity": 2,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 6,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [
+            "a5cc3aeb-5e1c-464d-9ddc-977b3930b6e5",
+            "b46124d9-4f06-43c9-a16d-5a2d96740dfe",
+            "dd86bd4c-dcfe-4ec6-bb4d-fefad0661104",
+            "39d608b4-df2d-4e75-b136-6a6c869e83bd"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "aece5a86-c962-4234-a1fe-7904c20f03ff",
+      "client_name": "JFJ Electrical",
+      "package_status": "confirmed",
+      "package_hash": "a1bccf4ea8b1b9f5b1c96f2833c9ad9c53c18d8e377aa46723a31e03bc5ac0ff",
+      "source_references": [
+        "CA direct CG Dynamics package instruction in this chat, 9 October 2026: JFJ Electrical — 3 posters, 3 photos, 1 video."
+      ],
+      "video_quantity": 1,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 1,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [
+            "48c3e0c4-7b7f-82c6-abf2-a8505a707867"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "f322151b-bdab-4fc4-951b-7fa8e9fd6bb1",
+      "client_name": "Jodrico Killian",
+      "package_status": "unverified",
+      "package_hash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "source_references": [],
+      "video_quantity": null,
+      "video_quantity_state": "unknown",
+      "active_pipeline_rows": 0,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Confirm the actual package before allocating work"
+    },
+    {
+      "client_id": "079df21e-783a-4648-b3fa-0acae6e68867",
+      "client_name": "Case Bloemfontein",
+      "package_status": "confirmed",
+      "package_hash": "08365d9fcf42ee3a3594d9dd47fe2bfea21347947cb29a4e6092d2b1b1cac239",
+      "source_references": [
+        "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+      ],
+      "video_quantity": 2,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 3,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [
+            "b1852983-302a-40ca-8c28-a5662e672421"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "c27d2185-08e4-4c49-be48-2572564ceecf",
+      "client_name": "CG Production House",
+      "package_status": "confirmed",
+      "package_hash": "420c45955b98b53dc20e8482fb9aa337a6669cba136af3bfd10f3f6ffec780c4",
+      "source_references": [
+        "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+      ],
+      "video_quantity": 4,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 2,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [
+            "11833c8d-0ec5-44ae-a99d-b27d2fc25ff6",
+            "740b3fe5-64e0-814f-bacb-6c4c481bacae"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "ec643c75-51f5-4839-829f-3f5b7f48829a",
+      "client_name": "Ehrlich Park Butchery",
+      "package_status": "confirmed",
+      "package_hash": "4fa1f53530e2c12aa7425a7055302397d38d904ea64f6ace3fffa16183dde199",
+      "source_references": [
+        "client_package:3940a4cf-d2ce-4c2d-91aa-06810c117680 (Monthly Content Package; current from 2026-06-30)",
+        "package_template:b744afe8-a203-45f7-8ae0-322138abd586 (Video 1; 1/month)"
+      ],
+      "video_quantity": 1,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 2,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [
+            "7bc9d417-e6e6-8e02-8b35-8fb7e57ac3dd"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [
+            "6cd22cc9-ddc6-4f79-8d1f-8c20c0e61e20"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "217a547c-7b22-45cc-bf88-9d45a8e93dfe",
+      "client_name": "Emoya Estate Driving Range",
+      "package_status": "confirmed",
+      "package_hash": "3dfc6a7c64b522c90fec732b6392552838897cb8ae94793553f1d31fa20a5b4a",
+      "source_references": [
+        "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+      ],
+      "video_quantity": 1,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 0,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Reconcile those four real files against the production handoff, then register only the correct exact film identity/revision. Older October V8 remains historical owner-review evidence; do not revive it as current work."
+    },
+    {
+      "client_id": "4424ed69-7270-4d30-a1ea-0b77d76912df",
+      "client_name": "Forklift Trucks",
+      "package_status": "confirmed",
+      "package_hash": "06657efa569efb5351e21d7b573396e9190bb48cf3b26f5582f14c9e6487e2c0",
+      "source_references": [
+        "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+      ],
+      "video_quantity": 1,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 1,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [
+            "179dd127-e74d-4163-b419-5c46fd7d208f"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "7b47afb0-fa55-4916-85f6-09c57e5905b9",
+      "client_name": "Madison Wear",
+      "package_status": "confirmed",
+      "package_hash": "8f07a031e53dfcc37bd3d0c932259abc9c222d872d9a52ef2b80291e019f76f1",
+      "source_references": [
+        "client_package:d50bc06e-bd52-42eb-82a1-12cd82994add (Monthly Content Package; current from 2026-06-30)",
+        "package_template:c86ebf9c-519f-48e5-ae64-4c9aadcb7bfa (F1; 1/month)"
+      ],
+      "video_quantity": 2,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 4,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [
+            "30254573-bfab-42b3-afbf-792afcd9f534"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [
+            "f2776095-078e-4cef-87e6-ea3132a15a84"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "2e643855-e2ad-481f-a6c6-3d934b9f4a50",
+      "client_name": "Ipopeng Office Supplies",
+      "package_status": "confirmed",
+      "package_hash": "1fe4ebb727a7a00da98629e0b5be31a881c188dd0537093abef9d2417e2a156f",
+      "source_references": [
+        "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
+        "https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5798269510"
+      ],
+      "video_quantity": null,
+      "video_quantity_state": "unknown",
+      "active_pipeline_rows": 0,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "b6052710-417d-4b3b-8348-0f126bfea671",
+      "client_name": "Germoparts",
+      "package_status": "confirmed",
+      "package_hash": "938b702fa006430f43b9be73c1569441e2d512211026dc5a787df6033e9a3384",
+      "source_references": [
+        "client_package:431228d2-ddbf-404a-a8a5-b7331821488d (Monthly Content Package; current from 2026-06-30)",
+        "package_template:320b6d2e-68b2-4ce3-86f8-b673c93393a8 (Video 1; 1/month)"
+      ],
+      "video_quantity": 2,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 5,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [
+            "81c3f2d1-ea2b-44c6-a869-fd73e7558e98",
+            "4fba5d97-9b69-484e-9c5b-bf96fa6826c7",
+            "73d7568b-6e63-4d56-80ec-c11694f4306d",
+            "b3e56534-f5b8-4a75-81dc-0c303d8bcd1d"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [
+            "8fb2ab52-fac1-4839-8044-6a0a9856a556"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "816c7f59-d56c-46a3-ba15-f76971d83769",
+      "client_name": "Human Auto",
+      "package_status": "confirmed",
+      "package_hash": "3459e78cafb3e91aa693a572b8d752663a06c6d0c89fa50a178255cfbbe439ed",
+      "source_references": [
+        "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+      ],
+      "video_quantity": 3,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 0,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Reconcile and register the existing November export; do not commission or rename another film merely because Pipeline was empty. Separate Human Auto research gate remains unchanged."
+    },
+    {
+      "client_id": "21300630-6755-4591-9a49-e22abbaf7e3d",
+      "client_name": "Loraclox",
+      "package_status": "confirmed",
+      "package_hash": "005be0af37e0b461e5f56f5841fcef6aaa16cff9416fbc997780980d5260c8cd",
+      "source_references": [
+        "client_package:5a2839ee-a0d9-4c55-a013-b05079fa636b (Monthly Content Package; current from 2026-06-30)",
+        "package_template:e878ea27-22e2-40b3-b857-06e336849118 (F1; 1/month)"
+      ],
+      "video_quantity": null,
+      "video_quantity_state": "unknown",
+      "active_pipeline_rows": 0,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "1007e58b-3fea-4515-88b7-ddaa85763de6",
+      "client_name": "Hino Trucks",
+      "package_status": "confirmed",
+      "package_hash": "725908b95091d8eb5ae2e4b9c700ef31897fcf472ca456ec5fae31e71081f919",
+      "source_references": [
+        "client_package:f9ecd2e7-fa2d-47c8-a7d3-444cf47e20a2 (Monthly Content Package; current from 2026-06-30)",
+        "package_template:7978d77a-7b6b-40a8-b977-7bbddb2f463b (Video 1; 1/month)"
+      ],
+      "video_quantity": 2,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 0,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Establish the real current work from its source. Do not use an August export as proof of a November/December assignment or invent a new shoot."
+    },
+    {
+      "client_id": "e1cb958e-3f68-4a77-b5ea-b471ea62bdef",
+      "client_name": "Watch Addict",
+      "package_status": "confirmed",
+      "package_hash": "569e1823a8674ffdee5d184a484abbdd293709dd279a6777229f0c963df1a438",
+      "source_references": [
+        "client_package:929dd709-e00d-47bc-9967-ba30cec6e517 (Monthly Content Package; current from 2026-06-30)",
+        "package_template:1fe23a9f-e7b4-4c29-b852-8c79f94ad747 (Video 1; 1/month)"
+      ],
+      "video_quantity": 1,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 2,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [
+            "8fe0ebf6-a7b4-41cf-b044-45e23cedf1d9"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [
+            "7ebe75d8-5388-45bd-9b61-a84d8afd28b1"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "afb62c53-d6d3-4ef8-9393-def88ed899d8",
+      "client_name": "C&L Innovations",
+      "package_status": "confirmed",
+      "package_hash": "7ccfad639e57eb75ffff4f9bb17df890ea777b73a8e7730e163dbf9d731f2169",
+      "source_references": [
+        "client_package:6dcbab0b-5049-4794-a16f-78fbb08b3288 (Monthly Content Package; current from 2026-06-30)",
+        "package_template:1e0b3aac-6b47-4f2b-9219-67315e3de5cc (Video 1; 1/month)"
+      ],
+      "video_quantity": null,
+      "video_quantity_state": "unknown",
+      "active_pipeline_rows": 0,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "5e4e3335-a89c-4629-9efc-b6a194bec80c",
+      "client_name": "Kundedienste",
+      "package_status": "confirmed",
+      "package_hash": "0bfe72899db55ca65c64d40ba04fdd11032743f3ebd048da231b9c1720621aaa",
+      "source_references": [
+        "client_package:90e2d435-10d0-40ab-b8dd-1bdb1f59dacf (Monthly Content Package; current from 2026-06-30)",
+        "package_template:020ff1ae-1559-4aec-b6db-528c10b03ab0 (DP1; 1/month)"
+      ],
+      "video_quantity": null,
+      "video_quantity_state": "unknown",
+      "active_pipeline_rows": 0,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "572555e0-d4d0-404a-8d67-beeeeed6a1f2",
+      "client_name": "HMHI",
+      "package_status": "confirmed",
+      "package_hash": "dcdc177cd9ba3dfc6a1d5e44b2240fee0c651a7cb09c43e6b0c4ff69ca7394d8",
+      "source_references": [
+        "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+      ],
+      "video_quantity": null,
+      "video_quantity_state": "unknown",
+      "active_pipeline_rows": 0,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b",
+      "client_name": "Peyper Bonds",
+      "package_status": "confirmed",
+      "package_hash": "768fed42403a06316787b9e99b3939176b7adb9087d810d3e30c5d2605caa9bb",
+      "source_references": [
+        "client_package:c8a87ca5-179d-4068-9528-09a4c0fba868 (Monthly Content Package; current from 2026-06-30)",
+        "package_template:77c6ae3a-2b45-4965-b48c-37e04346697d (Video 1; 1/month)"
+      ],
+      "video_quantity": 1,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 2,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [
+            "17ce407c-5d75-8192-aab7-2b6b95290f0b"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "ac4c5e0c-c5d3-4512-8472-fe59192abeca",
+      "client_name": "Rusoord Farmstay",
+      "package_status": "confirmed",
+      "package_hash": "2d688a80063397038b5cabb75a6ac5f237b5bc8def9282bb6c91451c21f37454",
+      "source_references": [
+        "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+      ],
+      "video_quantity": null,
+      "video_quantity_state": "unknown",
+      "active_pipeline_rows": 0,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+      "client_name": "Supa Quick BFN",
+      "package_status": "confirmed",
+      "package_hash": "7b673a60ad089f9684ce81102f98e816738591b1b8e4af8ade6d0a611539efd2",
+      "source_references": [
+        "client_package:5b15c7e9-49b4-403e-9bca-70d43801a868 (Monthly Content Package; current from 2026-06-30)",
+        "package_template:612f76a0-c7dc-4c2f-9bce-83b0a68e841e (Video 1; 1/month)"
+      ],
+      "video_quantity": 1,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 0,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Resolve the cross-client filename/commission ambiguity before registering. Do not bind to both clients or substitute Supa Quick Centurion."
+    },
+    {
+      "client_id": "a5eab798-3e00-44cc-947e-463386fdac39",
+      "client_name": "Jenkor",
+      "package_status": "confirmed",
+      "package_hash": "5f57358370e69ae5c70eed4dd34a7b0748cca8057aaf7a70796ab4de502c5d9a",
+      "source_references": [
+        "client_package:4e05ce5c-8b5c-47c5-8cb9-bc55efababc9 (Monthly Content Package; current from 2026-06-30)",
+        "package_template:b5b585d1-4bf8-40cc-b9d7-59cd414cee90 (Video 1; 1/month)"
+      ],
+      "video_quantity": 1,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 2,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [
+            "0d4c5a74-a01a-4aec-bd63-3c4793a0f8d0"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [
+            "e3cc8431-f680-81df-8620-166af24b52fc"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "a36ba938-e9dc-4ecf-bb67-4853608b1c01",
+      "client_name": "TBS Brokers",
+      "package_status": "confirmed",
+      "package_hash": "898ab79984f761691eeb1f146db793e3450925de9f96bb0d71b666b2b4b174d0",
+      "source_references": [
+        "client_package:cc3cc3cf-ad7e-42f2-b565-042cfe96f495 (Monthly Content Package; current from 2026-06-30)",
+        "package_template:43c9b8de-bb98-4cba-8a39-05c7e307851d (Video 1; 1/month)"
+      ],
+      "video_quantity": null,
+      "video_quantity_state": "unknown",
+      "active_pipeline_rows": 2,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [
+            "3cea8b5c-0ce7-84f7-b7e2-3c799fca2163",
+            "29765277-ae4a-8abc-9f7e-77afbdd77781"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "c8d34a97-8400-4f52-8b0d-843491fe3d3b",
+      "client_name": "First Technology Central",
+      "package_status": "confirmed",
+      "package_hash": "8e531a6c3d9db279f83a1f9efbf9fa14f37c39d2cd6a1a5c9a89ed1760433b14",
+      "source_references": [
+        "client_package:5571fd87-7911-454e-9acc-2084f04e8319 (Monthly Content Package; current from 2026-06-30)",
+        "package_template:42659647-c8cb-46c7-83bc-61ae3e71eab4 (Video 1; 1/month)"
+      ],
+      "video_quantity": null,
+      "video_quantity_state": "unknown",
+      "active_pipeline_rows": 1,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "1f0406bb-d643-4b83-bc3e-b1ebe87eeb89",
+      "client_name": "Vrystaat Kunstefees",
+      "package_status": "confirmed",
+      "package_hash": "1aec0e05b8c5e60b873d56edcfeba373cdb02a262c341b79965dad681f820b15",
+      "source_references": [
+        "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
+        "https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5798269510"
+      ],
+      "video_quantity": null,
+      "video_quantity_state": "unknown",
+      "active_pipeline_rows": 0,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
+      "client_name": "Piek Group",
+      "package_status": "confirmed",
+      "package_hash": "bd77f33f4f27eb58cae73e46456fefc1e6295c3e0601d28bd1a0ec0cc7f161db",
+      "source_references": [
+        "client_package:fb9bacfb-e1d4-4ed4-a25a-cbdca71e7331 (Monthly Content Package; current from 2026-06-30)",
+        "package_template:d7962eeb-ea33-4a72-9e3d-73ff717bdfe0 (Video 1; 1/month)"
+      ],
+      "video_quantity": 4,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 1,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [
+            "0ed565fb-3c56-89da-b0bd-dc520527f1eb"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "204f4f22-14c7-42ed-a956-da57af102706",
+      "client_name": "Tobich Optics",
+      "package_status": "confirmed",
+      "package_hash": "eec1ff9314712167bfae07572cdc6d69712d6d02149cf54ee67fe22c93c8c51e",
+      "source_references": [
+        "client_package:cb7f2931-a433-4f02-975b-2c58c8782a74 (Monthly Content Package; current from 2026-06-30)",
+        "package_template:876349dd-18f2-49ba-8322-1e8dbb5f8e08 (DP1; 1/month)"
+      ],
+      "video_quantity": null,
+      "video_quantity_state": "unknown",
+      "active_pipeline_rows": 4,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [
+            "307e7743-e0d8-8ea3-b60b-f63d4a8c38fc",
+            "3d7bca9d-1f4b-8e52-84b3-eb6d101708db",
+            "da7fdb5a-5775-8423-bfbd-2a943d689211",
+            "65d07ce2-11c7-8c2f-8e08-0576b07c2415"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "2a5ea019-64f5-4f8e-8a61-61a28940aa6e",
+      "client_name": "Local Deli",
+      "package_status": "confirmed",
+      "package_hash": "ad2ed6b4ca30b313417ccae50691262a2e58790101a41a9c592b0a6d0a1a1f3a",
+      "source_references": [
+        "client_package:09edc18c-1cc6-4245-abe4-bb0780fb386b (Monthly Content Package; current from 2026-06-30)",
+        "package_template:161bb6ae-88a2-4b8a-9586-80ff63ca766f (F1; 1/month)"
+      ],
+      "video_quantity": null,
+      "video_quantity_state": "unknown",
+      "active_pipeline_rows": 0,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "4f6106de-c437-404e-8cef-fbe848de0665",
+      "client_name": "RC-Polypipe",
+      "package_status": "confirmed",
+      "package_hash": "ad837f274e4d7b287d2a070f734fd285d31334ded65c520d7aced696e49e9ab0",
+      "source_references": [
+        "client_package:55f59d3f-0177-403a-841b-ae49c11d8d9d (Monthly Content Package; current from 2026-06-30)",
+        "package_template:e6ceec60-46ea-4f74-a2d5-d594274e2506 (Video 1; 1/month)"
+      ],
+      "video_quantity": 1,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 10,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [
+            "8e040eba-b042-42e6-be61-7694dbd0981f"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [
+            "e8184de9-eb50-47ad-96cb-5c4895b2990e"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "917d6f7c-1c2a-4c20-82f0-daa41b9062f5",
+      "client_name": "SecuriForce",
+      "package_status": "confirmed",
+      "package_hash": "531a809e206721a772d9df9cb3ef370120cc35c64252420fba5820b8df949d62",
+      "source_references": [
+        "client_package:c039a1ff-351b-48f1-9459-2568fd435f40 (Monthly Content Package; current from 2026-06-30)",
+        "package_template:353a6414-0c5b-4150-83a5-772b05028f69 (Video 1; 1/month)"
+      ],
+      "video_quantity": 4,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 5,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [
+            "c61b0f36-ea14-408f-a09a-57bfa8ef4e54",
+            "adbad5d7-b9ba-4be9-8cf3-8583045e3036",
+            "d155bd84-3058-4240-8ef6-40b9df023389",
+            "b4791b03-9511-48e6-9dd6-df66090bae32"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "2b953772-e791-4dff-a278-d4dd3521f02e",
+      "client_name": "We Ar Fuels",
+      "package_status": "confirmed",
+      "package_hash": "fe2defc59deb03f6cd73b76262d3bcfc27290ce7bd36c76fdb62e9235d8681de",
+      "source_references": [
+        "client_package:a8442aab-1f23-4cbb-a4a2-f4594de34a74 (Monthly Content Package; current from 2026-06-30)",
+        "package_template:9d83988d-4e09-4939-9478-aea61a802d7a (Video 1; 1/month)"
+      ],
+      "video_quantity": 1,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 3,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [
+            "ff08e950-d3b3-4a2f-919c-8864ace7e2c4",
+            "13b17c65-b0f1-4909-bf48-9b03488eafaa"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "0c01d90f-ba5e-4251-a597-bf3c83f990fa",
+      "client_name": "Zooz Lifestyle WFF",
+      "package_status": "confirmed",
+      "package_hash": "7b417021516038ba9c8a30e96e1f597f67926663b678abdc3b9b7b1596e7420b",
+      "source_references": [
+        "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
+        "https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5798269510"
+      ],
+      "video_quantity": null,
+      "video_quantity_state": "unknown",
+      "active_pipeline_rows": 0,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "cdb11a82-339e-4b46-9b09-bde1a23efeaf",
+      "client_name": "Red Oak",
+      "package_status": "confirmed",
+      "package_hash": "08ac87715bf4263a3405208ed1826fea15ab12d47d0502573c0fc24688a5ccfe",
+      "source_references": [
+        "client_package:f05c337d-cdfd-41af-9c83-4cc468b3979a (Monthly Content Package; current from 2026-06-30)",
+        "package_template:2f80513e-5f2f-482e-bd33-38b5f76d5422 (Video 1; 1/month)"
+      ],
+      "video_quantity": 8,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 4,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [
+            "f6fcf5ac-c660-4dc4-8825-d2ccff777291"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [
+            "baff7233-c67d-4e83-914d-3dda9b804e72",
+            "e36e0e14-6790-4c1b-b8de-31911935ba3b",
+            "895561a7-c8ac-40af-aac8-0216af14ea4d"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "e2870110-930c-4e63-b2fe-c858030f7258",
+      "client_name": "Supa Quick Centurion",
+      "package_status": "confirmed",
+      "package_hash": "9cb4bfac913a08846918e0d73dfcef8b4661707bde3dcabac678ff20da2ef81e",
+      "source_references": [
+        "client_package:f7388335-7104-4fa1-98b9-02dde13021e5 (Monthly Content Package; current from 2026-06-30)",
+        "package_template:8c4ddbab-d8aa-48c3-a0bc-7ab970d53bd0 (Video 1; 1/month)"
+      ],
+      "video_quantity": 1,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 2,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [
+            "7e40d9ec-4ce5-489a-ba15-d29f3cfc87dc"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [
+            "83654b2d-0ed4-47e9-9609-82878e6be3a8"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+      "client_name": "The Staffordshire",
+      "package_status": "confirmed",
+      "package_hash": "56d42bfaeee5486533dff136a1ca2307bf59366b8644e32e34ca2059121b46f1",
+      "source_references": [
+        "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+      ],
+      "video_quantity": 4,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 0,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Reconcile the existing three November film candidates and count VIDEO_2 once. Retain both source copies; no deletion, movement, approval or publication inferred."
+    },
+    {
+      "client_id": "e2ad6d57-5b06-46e1-b75b-b67f017d57f1",
+      "client_name": "Toyota Bloemfontein",
+      "package_status": "confirmed",
+      "package_hash": "a748b554502c8743db607ff43d238f894b5b3a948b2b7319dcb514f1ce54d94a",
+      "source_references": [
+        "client_package:c3cb4d60-bd41-4f30-bbed-757c18c780d3 (Monthly Content Package; current from 2026-06-30)",
+        "package_template:8bd9130c-2ff6-4735-b695-95a920da9a20 (Video 1; 1/month)"
+      ],
+      "video_quantity": 4,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 4,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
+      "client_name": "Wiseman Group",
+      "package_status": "confirmed",
+      "package_hash": "372c0a6ab6b0bb545fdb157c642131a3d36eda8e1d168be69f840a257c3407be",
+      "source_references": [
+        "client_package:fa845073-ba79-4632-aa63-75d51bb2bf25 (Monthly Content Package; current from 2026-06-30)",
+        "package_template:28150e2e-0f1f-4565-b505-00163fc84301 (Video 1; 1/month)"
+      ],
+      "video_quantity": 1,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 6,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "33db54da-405a-4a48-acd7-29fe815a19b5",
+      "client_name": "Agape Compliance",
+      "package_status": "unverified",
+      "package_hash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "source_references": [],
+      "video_quantity": null,
+      "video_quantity_state": "unknown",
+      "active_pipeline_rows": 1,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [
+            "938a3a8e-996d-4c1e-ab99-321a50e9e5f0"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Confirm the actual package before allocating work"
+    },
+    {
+      "client_id": "504113ee-fba9-4993-807e-a86066615212",
+      "client_name": "WiseRide",
+      "package_status": "confirmed",
+      "package_hash": "9b88a36209204819a3d19cb049bb42b2c6ead8b7d883290b7480388ccac00373",
+      "source_references": [
+        "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+      ],
+      "video_quantity": null,
+      "video_quantity_state": "unknown",
+      "active_pipeline_rows": 1,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [
+            "359cc90d-cea9-89a1-bfbf-a61e34823a24"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "893992a5-23cd-4ee6-b5d9-ccf7b17fe071",
+      "client_name": "Agri-Secure",
+      "package_status": "confirmed",
+      "package_hash": "1fe4ebb727a7a00da98629e0b5be31a881c188dd0537093abef9d2417e2a156f",
+      "source_references": [
+        "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
+        "https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5798269510"
+      ],
+      "video_quantity": null,
+      "video_quantity_state": "unknown",
+      "active_pipeline_rows": 0,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "2d16262d-8450-458d-ae7e-084ef9ff662d",
+      "client_name": "Bloem Vascular",
+      "package_status": "confirmed",
+      "package_hash": "d3482ed535bebd80ead9b53b74044a27d69e4c5360083d475db990a7a36c0e25",
+      "source_references": [
+        "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
+        "https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5798269510"
+      ],
+      "video_quantity": null,
+      "video_quantity_state": "unknown",
+      "active_pipeline_rows": 0,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "e276f019-a580-44c5-a7ab-e43840c33a64",
+      "client_name": "Mimosa Mall",
+      "package_status": "confirmed",
+      "package_hash": "dd16c19e262537f88912ddadd1ffa23daca1c04697a8ee3a1f32478dd919ae53",
+      "source_references": [
+        "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
+        "https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5798269510"
+      ],
+      "video_quantity": null,
+      "video_quantity_state": "unknown",
+      "active_pipeline_rows": 0,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "94fe2568-3cf1-47dc-801e-d8d5396a0965",
+      "client_name": "NCNA",
+      "package_status": "confirmed",
+      "package_hash": "d3482ed535bebd80ead9b53b74044a27d69e4c5360083d475db990a7a36c0e25",
+      "source_references": [
+        "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
+        "https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5798269510"
+      ],
+      "video_quantity": null,
+      "video_quantity_state": "unknown",
+      "active_pipeline_rows": 0,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa",
+      "client_name": "Cape Lumber",
+      "package_status": "confirmed",
+      "package_hash": "f19b959c7417445531e9644980cca49c5cddc091de19bf3ee9d62598beb43a30",
+      "source_references": [
+        "CA current instruction, 2 November 2026: Cape Lumber has no video planned anymore; posts and ads only; supersedes earlier video allowance",
+        "client_package:2ccfb9ee-4f13-4fe9-8a01-67c677140746; preserve 4 design + 3 photo allocation"
+      ],
+      "video_quantity": 0,
+      "video_quantity_state": "explicit_zero",
+      "active_pipeline_rows": 0,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [],
+          "schedule_ids": [
+            "a2e3616e-0114-430c-be97-45b48abf338e",
+            "33eef546-c869-440d-811b-59a51442a584",
+            "45905c81-703e-420e-b89b-01333eb302d0",
+            "a9c5e00f-b53a-4510-a319-aa5db0b3f5e9",
+            "cc0d4c5f-9b67-402e-b00c-85bf3fea172f",
+            "ce31b89c-aa98-43eb-950e-843e0e99fa2c",
+            "e48f8935-88a9-488f-9c88-7a1a137c571f",
+            "c0ac02d5-6fb7-42e5-8616-23c418085792"
+          ]
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    },
+    {
+      "client_id": "b28af30a-3d44-490a-8290-1e56dac7b127",
+      "client_name": "Bloem Action Sports",
+      "package_status": "confirmed",
+      "package_hash": "f4725ce7a20d1d83336786b738759f7885355a071be9be478262eabf592705a5",
+      "source_references": [
+        "client_package:059ed2ef-0d27-460e-bdb4-a7598e9611ee (Monthly Content Package; current from 2026-06-30)",
+        "package_template:268303a0-500b-41f1-90ce-af5d876e1336 (Video 1; 1/month)"
+      ],
+      "video_quantity": 1,
+      "video_quantity_state": "known",
+      "active_pipeline_rows": 4,
+      "months": [
+        {
+          "month": "2026-11",
+          "pipeline_ids": [
+            "a3b57459-b979-43d8-a67a-5709ae650c36"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2026-12",
+          "pipeline_ids": [
+            "0d0201c5-9ef7-8ae0-9a2c-3d081a9d6568"
+          ],
+          "schedule_ids": []
+        },
+        {
+          "month": "2027-01",
+          "pipeline_ids": [],
+          "schedule_ids": []
+        }
+      ],
+      "next_action": "Use existing exact film/guideline rows; capacity is not completion or approval"
+    }
+  ],
+  "schedule_rows_unchanged": true,
+  "remaining_source_gaps": [
+    {
+      "id": "217a547c-7b22-45cc-bf88-9d45a8e93dfe",
+      "name": "Emoya Estate Driving Range",
+      "runs": [
+        {
+          "id": "81770145-a2e8-465c-abaa-00790a71e3cf",
+          "name": "CONTENT RUN - EMOYA DRIVING RANGE",
+          "status": "planning",
+          "run_date": "2026-11-10"
+        },
+        {
+          "id": "7f1ba74b-45c0-4e1a-9916-26cce7de542c",
+          "name": "CONTENT RUN - EMOYA DRIVING RANGE",
+          "status": "planning",
+          "run_date": "2026-09-28"
+        }
+      ],
+      "guidelines": [
+        {
+          "id": "1c643101-8e1b-42fb-bf11-c0ebb20d1496",
+          "month": "2026-11-01",
+          "status": "draft",
+          "content_run_id": "81770145-a2e8-465c-abaa-00790a71e3cf"
+        }
+      ]
+    },
+    {
+      "id": "1007e58b-3fea-4515-88b7-ddaa85763de6",
+      "name": "Hino Trucks",
+      "runs": [
+        {
+          "id": "b60f2e2a-3ecf-4721-a8a9-e9dd8ecc7e31",
+          "name": "CONTENT RUN - HINO TRUCKS",
+          "status": "planning",
+          "run_date": "2026-06-24"
+        },
+        {
+          "id": "7bd673bc-a87d-437a-b902-e66324e8a46d",
+          "name": "CONTENT RUN - HINO",
+          "status": "planning",
+          "run_date": "2026-08-21"
+        }
+      ],
+      "guidelines": []
+    },
+    {
+      "id": "816c7f59-d56c-46a3-ba15-f76971d83769",
+      "name": "Human Auto",
+      "runs": [
+        {
+          "id": "cc796d34-fc83-4a32-b1f4-eaef1ca5bf8c",
+          "name": "CONTENT RUN - FORD",
+          "status": "planning",
+          "run_date": "2026-10-13"
+        },
+        {
+          "id": "adb40d6a-9c22-4a1c-9c83-da411507f2d5",
+          "name": "CONTENT RUN - HUMAN AUTO",
+          "status": "planning",
+          "run_date": "2026-11-16"
+        },
+        {
+          "id": "085a0d27-11cf-4825-b92f-5131ce037793",
+          "name": "CONTENT RUN - WELKOM HUMAN AUTO",
+          "status": "planning",
+          "run_date": "2026-06-25"
+        },
+        {
+          "id": "0b8b44a2-f9e7-437f-82c0-b6ceb7b5dd8a",
+          "name": "CONTENT RUN - HUMAN AUTO",
+          "status": "planning",
+          "run_date": "2026-08-28"
+        },
+        {
+          "id": "3996e222-de28-4e63-a457-1e7af730fadd",
+          "name": "CONTENT RUN - HUMAN AUTO",
+          "status": "planning",
+          "run_date": "2026-07-29"
+        }
+      ],
+      "guidelines": [
+        {
+          "id": "e431e0a1-e85a-49a5-b9b5-8827110cd373",
+          "month": "2026-11-01",
+          "status": "draft",
+          "content_run_id": "adb40d6a-9c22-4a1c-9c83-da411507f2d5"
+        }
+      ]
+    },
+    {
+      "id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+      "name": "Supa Quick BFN",
+      "runs": [],
+      "guidelines": []
+    },
+    {
+      "id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+      "name": "The Staffordshire",
+      "runs": [
+        {
+          "id": "31fc7981-bcab-469d-93b4-f8d130fd958f",
+          "name": "CONTENT RUN - STAFFY",
+          "status": "planning",
+          "run_date": "2026-06-11"
+        },
+        {
+          "id": "e1cad187-a8b4-4316-a2e0-e513e05f0384",
+          "name": "CONTENT RUN - STAFFY",
+          "status": "planning",
+          "run_date": "2026-06-12"
+        },
+        {
+          "id": "6bc00638-b828-41f3-86b9-b5ad3eccc9d3",
+          "name": "CONTENT RUN - STAFFY",
+          "status": "planning",
+          "run_date": "2026-06-15"
+        },
+        {
+          "id": "11e1eac9-e067-4298-83e0-bd05a9448c73",
+          "name": "CONTENT RUN - STAFFY",
+          "status": "cancelled",
+          "run_date": "2026-07-04"
+        },
+        {
+          "id": "818b2e70-2402-4946-84c2-6fee93fb6498",
+          "name": "CONTENT RUN - STAFFY",
+          "status": "planning",
+          "run_date": "2026-06-23"
+        },
+        {
+          "id": "c73950a8-feda-4a70-8915-aff307b696c6",
+          "name": "CONTENT RUN - STAFFY",
+          "status": "planning",
+          "run_date": "2026-07-04"
+        },
+        {
+          "id": "d51b01ae-c9f1-4a00-ba78-754b04c7b350",
+          "name": "CONTENT RUN - STAFFY",
+          "status": "planning",
+          "run_date": "2026-11-10"
+        },
+        {
+          "id": "f8b1f609-b964-4e4c-90cc-f8d43d29e625",
+          "name": "CONTENT RUN - STAFFY",
+          "status": "planning",
+          "run_date": "2026-10-17"
+        },
+        {
+          "id": "75a25097-b66c-4e73-92e6-33226c208143",
+          "name": "CONTENT RUN - STAFFY",
+          "status": "planning",
+          "run_date": "2026-08-19"
+        },
+        {
+          "id": "37112ecc-eecc-468d-ad3e-e98613e36a34",
+          "name": "CONTENT RUN - STAFFY",
+          "status": "planning",
+          "run_date": "2026-10-07"
+        },
+        {
+          "id": "7f812695-6022-4e89-a1d7-0c1a8f23a424",
+          "name": "CONTENT RUN - STAFFY",
+          "status": "planning",
+          "run_date": "2026-10-09"
+        },
+        {
+          "id": "2095bbd5-8e7f-49fa-935e-a9e608d2679a",
+          "name": "CONTENT RUN - STAFFY",
+          "status": "planning",
+          "run_date": "2026-07-15"
+        },
+        {
+          "id": "9006bdd9-6647-425e-bc32-00e245d3fd73",
+          "name": "CONTENT RUN - STAFFY",
+          "status": "planning",
+          "run_date": "2026-07-21"
+        },
+        {
+          "id": "adf7ff10-5a7e-405e-887c-e734c1887c1f",
+          "name": "CONTENT RUN - STAFFY",
+          "status": "planning",
+          "run_date": "2026-07-24"
+        },
+        {
+          "id": "ce6e1b22-b864-472f-a8e7-30d53282cc01",
+          "name": "CONTENT RUN - STAFFY",
+          "status": "cancelled",
+          "run_date": "2026-07-21"
+        }
+      ],
+      "guidelines": [
+        {
+          "id": "28862509-8b67-45a2-ad3a-80141211855b",
+          "month": "2026-11-01",
+          "status": "draft",
+          "content_run_id": "d51b01ae-c9f1-4a00-ba78-754b04c7b350"
+        }
+      ]
+    }
+  ],
+  "client_context_acceptance": {
+    "version": 93,
+    "passed": 63,
+    "failed": 0,
+    "note": "v94 changed only the shared film parser; all context/auth/catalog sources unchanged"
+  },
+  "verification_head": "f240513d8be4b149094d961d4f903bd6727acaef",
+  "final_db_read_at": "2026-11-24T10:28:11.651707+00:00",
+  "source_reconciliation_packet": "2026-11-24-held-video-source-reconciliation.json",
+  "source_reconciliation_sha256": "3e6578a59e824ba26c79a9decf001e077238934065df621cc4941c9d13dbaa39",
+  "source_reconciliation": [
+    {
+      "client_name": "Emoya Estate Driving Range",
+      "finding": "Four real November files found: two VIDEO_1 variants and two VIDEO_2 variants. Each has a different provider SHA-256; not identical copies and not four new commissions.",
+      "required": [
+        "Exact responsible editor",
+        "Current intended variant/revision and its internal handoff/review state",
+        "Package-valid relationship of VIDEO_1 and VIDEO_2; confirmed capacity remains one professional video per month"
+      ],
+      "next_action": "Reconcile those four real files against the production handoff, then register only the correct exact film identity/revision. Older October V8 remains historical owner-review evidence; do not revive it as current work.",
+      "client_id": "217a547c-7b22-45cc-bf88-9d45a8e93dfe",
+      "can_register_now": false,
+      "pipeline_film_rows": 0,
+      "published_dynamics_video_assets": 0,
+      "existing_canonical_context": {
+        "id": "217a547c-7b22-45cc-bf88-9d45a8e93dfe",
+        "name": "Emoya Estate Driving Range",
+        "runs": [
+          {
+            "id": "81770145-a2e8-465c-abaa-00790a71e3cf",
+            "name": "CONTENT RUN - EMOYA DRIVING RANGE",
+            "status": "planning",
+            "run_date": "2026-11-10"
+          },
+          {
+            "id": "7f1ba74b-45c0-4e1a-9916-26cce7de542c",
+            "name": "CONTENT RUN - EMOYA DRIVING RANGE",
+            "status": "planning",
+            "run_date": "2026-09-28"
+          }
+        ],
+        "guidelines": [
+          {
+            "id": "1c643101-8e1b-42fb-bf11-c0ebb20d1496",
+            "month": "2026-11-01",
+            "status": "draft",
+            "content_run_id": "81770145-a2e8-465c-abaa-00790a71e3cf"
+          }
+        ]
+      }
+    },
+    {
+      "client_name": "Human Auto",
+      "finding": "Real November 157102825-byte export exists in the exact mapped client root, plus separate October files. The November file has a complete provider SHA-256.",
+      "required": [
+        "Exact responsible editor",
+        "Actual revision and internal delivery/review evidence"
+      ],
+      "next_action": "Reconcile and register the existing November export; do not commission or rename another film merely because Pipeline was empty. Separate Human Auto research gate remains unchanged.",
+      "client_id": "816c7f59-d56c-46a3-ba15-f76971d83769",
+      "can_register_now": false,
+      "pipeline_film_rows": 0,
+      "published_dynamics_video_assets": 0,
+      "existing_canonical_context": {
+        "id": "816c7f59-d56c-46a3-ba15-f76971d83769",
+        "name": "Human Auto",
+        "runs": [
+          {
+            "id": "cc796d34-fc83-4a32-b1f4-eaef1ca5bf8c",
+            "name": "CONTENT RUN - FORD",
+            "status": "planning",
+            "run_date": "2026-10-13"
+          },
+          {
+            "id": "adb40d6a-9c22-4a1c-9c83-da411507f2d5",
+            "name": "CONTENT RUN - HUMAN AUTO",
+            "status": "planning",
+            "run_date": "2026-11-16"
+          },
+          {
+            "id": "085a0d27-11cf-4825-b92f-5131ce037793",
+            "name": "CONTENT RUN - WELKOM HUMAN AUTO",
+            "status": "planning",
+            "run_date": "2026-06-25"
+          },
+          {
+            "id": "0b8b44a2-f9e7-437f-82c0-b6ceb7b5dd8a",
+            "name": "CONTENT RUN - HUMAN AUTO",
+            "status": "planning",
+            "run_date": "2026-08-28"
+          },
+          {
+            "id": "3996e222-de28-4e63-a457-1e7af730fadd",
+            "name": "CONTENT RUN - HUMAN AUTO",
+            "status": "planning",
+            "run_date": "2026-07-29"
+          }
+        ],
+        "guidelines": [
+          {
+            "id": "e431e0a1-e85a-49a5-b9b5-8827110cd373",
+            "month": "2026-11-01",
+            "status": "draft",
+            "content_run_id": "adb40d6a-9c22-4a1c-9c83-da411507f2d5"
+          }
+        ]
+      }
+    },
+    {
+      "client_name": "Hino Trucks",
+      "finding": "Inspected export year lists January through August; the inspected latest August folder has two real exports. No November/December commission was established in this bounded source set.",
+      "required": [
+        "Actual current commission/brief or an exact newer export with responsible editor, revision and handoff"
+      ],
+      "next_action": "Establish the real current work from its source. Do not use an August export as proof of a November/December assignment or invent a new shoot.",
+      "client_id": "1007e58b-3fea-4515-88b7-ddaa85763de6",
+      "can_register_now": false,
+      "pipeline_film_rows": 0,
+      "published_dynamics_video_assets": 0,
+      "existing_canonical_context": {
+        "id": "1007e58b-3fea-4515-88b7-ddaa85763de6",
+        "name": "Hino Trucks",
+        "runs": [
+          {
+            "id": "b60f2e2a-3ecf-4721-a8a9-e9dd8ecc7e31",
+            "name": "CONTENT RUN - HINO TRUCKS",
+            "status": "planning",
+            "run_date": "2026-06-24"
+          },
+          {
+            "id": "7bd673bc-a87d-437a-b902-e66324e8a46d",
+            "name": "CONTENT RUN - HINO",
+            "status": "planning",
+            "run_date": "2026-08-21"
+          }
+        ],
+        "guidelines": []
+      }
+    },
+    {
+      "client_name": "Supa Quick BFN",
+      "finding": "Real November export in exact mapped BFN root contains WISEMAN in its filename. WiseMan is another active client; folder filing alone does not establish the film's primary client or commission.",
+      "required": [
+        "Exact BFN/WISEMAN primary-client and commission identity",
+        "Responsible editor, actual revision and handoff evidence"
+      ],
+      "next_action": "Resolve the cross-client filename/commission ambiguity before registering. Do not bind to both clients or substitute Supa Quick Centurion.",
+      "client_id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+      "can_register_now": false,
+      "pipeline_film_rows": 0,
+      "published_dynamics_video_assets": 0,
+      "existing_canonical_context": {
+        "id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+        "name": "Supa Quick BFN",
+        "runs": [],
+        "guidelines": []
+      }
+    },
+    {
+      "client_name": "The Staffordshire",
+      "finding": "Three distinct November exports established by three distinct provider SHA-256 values. VIDEO_2 has two copies in different source folders with identical SHA-256 and byte count: one film candidate, not two.",
+      "required": [
+        "Responsible editor and actual revision/handoff for each real November film",
+        "Confirmed commissioning/package relationship; filename event labels do not establish current offers, dates or recurring commitments"
+      ],
+      "next_action": "Reconcile the existing three November film candidates and count VIDEO_2 once. Retain both source copies; no deletion, movement, approval or publication inferred.",
+      "client_id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+      "can_register_now": false,
+      "pipeline_film_rows": 0,
+      "published_dynamics_video_assets": 0,
+      "existing_canonical_context": {
+        "id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+        "name": "The Staffordshire",
+        "runs": [
+          {
+            "id": "31fc7981-bcab-469d-93b4-f8d130fd958f",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-06-11"
+          },
+          {
+            "id": "e1cad187-a8b4-4316-a2e0-e513e05f0384",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-06-12"
+          },
+          {
+            "id": "6bc00638-b828-41f3-86b9-b5ad3eccc9d3",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-06-15"
+          },
+          {
+            "id": "11e1eac9-e067-4298-83e0-bd05a9448c73",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "cancelled",
+            "run_date": "2026-07-04"
+          },
+          {
+            "id": "818b2e70-2402-4946-84c2-6fee93fb6498",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-06-23"
+          },
+          {
+            "id": "c73950a8-feda-4a70-8915-aff307b696c6",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-07-04"
+          },
+          {
+            "id": "d51b01ae-c9f1-4a00-ba78-754b04c7b350",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-11-10"
+          },
+          {
+            "id": "f8b1f609-b964-4e4c-90cc-f8d43d29e625",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-10-17"
+          },
+          {
+            "id": "75a25097-b66c-4e73-92e6-33226c208143",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-08-19"
+          },
+          {
+            "id": "37112ecc-eecc-468d-ad3e-e98613e36a34",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-10-07"
+          },
+          {
+            "id": "7f812695-6022-4e89-a1d7-0c1a8f23a424",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-10-09"
+          },
+          {
+            "id": "2095bbd5-8e7f-49fa-935e-a9e608d2679a",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-07-15"
+          },
+          {
+            "id": "9006bdd9-6647-425e-bc32-00e245d3fd73",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-07-21"
+          },
+          {
+            "id": "adf7ff10-5a7e-405e-887c-e734c1887c1f",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "planning",
+            "run_date": "2026-07-24"
+          },
+          {
+            "id": "ce6e1b22-b864-472f-a8e7-30d53282cc01",
+            "name": "CONTENT RUN - STAFFY",
+            "status": "cancelled",
+            "run_date": "2026-07-21"
+          }
+        ],
+        "guidelines": [
+          {
+            "id": "28862509-8b67-45a2-ad3a-80141211855b",
+            "month": "2026-11-01",
+            "status": "draft",
+            "content_run_id": "d51b01ae-c9f1-4a00-ba78-754b04c7b350"
+          }
+        ]
+      }
+    }
+  ],
+  "verification": {
+    "final_serial_tests": 184,
+    "final_serial_files": 14,
+    "final_serial_failures": 0,
+    "nearest_registration_tests": 48,
+    "build": "pass",
+    "scoped_lint": "pass",
+    "diff_check": "pass",
+    "official_edge_bundle": "pass",
+    "live_source_files_matched": 73,
+    "live_unchanged_from_v94": 72,
+    "anonymous_mcp_status": 401,
+    "public_metadata_status": 200
+  },
+  "post_release_readback": {
+    "read_at": "2026-11-24T10:34:57.322383+00:00",
+    "elcheck_rows": 1,
+    "client_assets": [
+      {
+        "client_id": "1007e58b-3fea-4515-88b7-ddaa85763de6",
+        "active_published_assets": 0,
+        "active_published_video_assets": 0
+      },
+      {
+        "client_id": "217a547c-7b22-45cc-bf88-9d45a8e93dfe",
+        "active_published_assets": 1,
+        "active_published_video_assets": 0
+      },
+      {
+        "client_id": "816c7f59-d56c-46a3-ba15-f76971d83769",
+        "active_published_assets": 1,
+        "active_published_video_assets": 0
+      },
+      {
+        "client_id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+        "active_published_assets": 1,
+        "active_published_video_assets": 0
+      },
+      {
+        "client_id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+        "active_published_assets": 1,
+        "active_published_video_assets": 0
+      }
+    ],
+    "pipeline_rows": 106
+  }
+}

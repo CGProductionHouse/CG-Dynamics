@@ -1,0 +1,3332 @@
+{
+  "schema_version": "guideline_fleet_setup_receipt_v1",
+  "observed_at": "2026-11-24T09:03:12Z",
+  "observed_at_sast": "24 November 2026, 11:03 SAST",
+  "scope": "Active-client Content Guideline connector/setup acceptance, not all-app launch or all-client content publication",
+  "branch": "fix/rc-guideline-project-workflow",
+  "source_code_commit": "678626daa67dc8fd125c82f0225d0da3b1b55e5a",
+  "runtime": {
+    "version": 92,
+    "bundle": "68ee05746f22f834b0b9bb6fc8eaffbd191411a9166f9fba666fa8db73b2f317",
+    "files": 70
+  },
+  "counts": {
+    "active_clients": 63,
+    "verified_client_contexts": 63,
+    "verified_foreign_denials": 63,
+    "canonical_runs": 166,
+    "canonical_guidelines": 41,
+    "clients_with_guidelines": 27,
+    "new_draft_guidelines": 13,
+    "new_draft_clients": 11,
+    "guidelines_with_full_scripts": 13,
+    "full_script_count": 39,
+    "verified_published_review_links": 4,
+    "published_review_videos": 22,
+    "unverified_packages": [
+      "Agape Compliance",
+      "Jodrico Killian",
+      "LHP Student Village & Block"
+    ],
+    "clients_with_no_runs": 23,
+    "confirmed_video_clients_without_runs": [
+      "CG Production House",
+      "Ehrlich Park Butchery",
+      "JFJ Electrical",
+      "Supa Quick BFN",
+      "VCS Cleaning Solutions"
+    ],
+    "clients_without_configured_short_code": 62,
+    "clients_with_no_client_guide": [
+      "Agape Compliance",
+      "Agri-Secure",
+      "Elcheck",
+      "JFJ Electrical",
+      "Jodrico Killian",
+      "Kundedienste",
+      "LHP Student Village & Block",
+      "Neshora Oxygen",
+      "Rusoord Farmstay",
+      "VCS Cleaning Solutions",
+      "Zooz Lifestyle WFF"
+    ],
+    "existing_protected_rows_unchanged": 627
+  },
+  "production_actions": {
+    "existing_run_drafts_prepared": [
+      {
+        "client_id": "89e0ad6d-e08c-4a75-8b8e-abea71af581c",
+        "client_name": "Bloem Marble & Granite",
+        "run_id": "4544f399-ebfe-43d3-91bd-d7ba60602a08",
+        "guideline_id": "07009680-b8b9-4dce-b1dc-f0cce297e200",
+        "created": true,
+        "status": "draft",
+        "video_count": 0
+      },
+      {
+        "client_id": "89e0ad6d-e08c-4a75-8b8e-abea71af581c",
+        "client_name": "Bloem Marble & Granite",
+        "run_id": "4ff8ad56-4111-4c6a-9581-8706d6fa4a97",
+        "guideline_id": "af35c699-e3a1-4e4c-b7f8-d9968aaf50b7",
+        "created": true,
+        "status": "draft",
+        "video_count": 0
+      },
+      {
+        "client_id": "3404f726-a693-4b2d-8c13-c9d3dfd17bbc",
+        "client_name": "Daisy & Co",
+        "run_id": "b0459476-c616-45d0-bb35-09b5f012b31d",
+        "guideline_id": "4cae6e8c-5d2c-4373-9e1d-54788aeb6049",
+        "created": true,
+        "status": "draft",
+        "video_count": 0
+      },
+      {
+        "client_id": "61acf81b-1011-404e-9fae-2e209be65fca",
+        "client_name": "Econofoods",
+        "run_id": "6812f6cf-4b57-4a6e-8ef7-4ea3b73c9de2",
+        "guideline_id": "b8e73a17-08dd-4b2c-9c16-c755db17c64d",
+        "created": true,
+        "status": "draft",
+        "video_count": 0
+      },
+      {
+        "client_id": "61acf81b-1011-404e-9fae-2e209be65fca",
+        "client_name": "Econofoods",
+        "run_id": "dfa2cbc2-051b-412c-8f6d-041e7c9a0024",
+        "guideline_id": "cfef78d4-1f2f-46be-9a72-1be51afa97f2",
+        "created": true,
+        "status": "draft",
+        "video_count": 0
+      },
+      {
+        "client_id": "7b7d244f-77b4-4b2a-88f0-8ce3f7e1c202",
+        "client_name": "Elcheck",
+        "run_id": "14e22d25-1222-401c-91b4-e32d4c950f42",
+        "guideline_id": "2123025e-7589-4aab-8fe9-3112c9d39f29",
+        "created": true,
+        "status": "draft",
+        "video_count": 0
+      },
+      {
+        "client_id": "217a547c-7b22-45cc-bf88-9d45a8e93dfe",
+        "client_name": "Emoya Estate Driving Range",
+        "run_id": "81770145-a2e8-465c-abaa-00790a71e3cf",
+        "guideline_id": "1c643101-8e1b-42fb-bf11-c0ebb20d1496",
+        "created": true,
+        "status": "draft",
+        "video_count": 0
+      },
+      {
+        "client_id": "4424ed69-7270-4d30-a1ea-0b77d76912df",
+        "client_name": "Forklift Trucks",
+        "run_id": "626886c7-dbda-4f3f-b94c-0419c5701192",
+        "guideline_id": "d92f893a-08d3-4da6-9457-1a7df8337581",
+        "created": true,
+        "status": "draft",
+        "video_count": 0
+      },
+      {
+        "client_id": "816c7f59-d56c-46a3-ba15-f76971d83769",
+        "client_name": "Human Auto",
+        "run_id": "adb40d6a-9c22-4a1c-9c83-da411507f2d5",
+        "guideline_id": "e431e0a1-e85a-49a5-b9b5-8827110cd373",
+        "created": true,
+        "status": "draft",
+        "video_count": 0
+      },
+      {
+        "client_id": "f322151b-bdab-4fc4-951b-7fa8e9fd6bb1",
+        "client_name": "Jodrico Killian",
+        "run_id": "2b3eb53d-691c-4821-a7b5-a14e895e80b5",
+        "guideline_id": "111616ab-904f-4e38-94fa-268993170bec",
+        "created": true,
+        "status": "draft",
+        "video_count": 0
+      },
+      {
+        "client_id": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
+        "client_name": "Piek Group",
+        "run_id": "77d16013-7e7b-42cf-9b1e-438bfa300a55",
+        "guideline_id": "bac70bf1-b684-46e8-ab20-2ed0313ed9d1",
+        "created": true,
+        "status": "draft",
+        "video_count": 0
+      },
+      {
+        "client_id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+        "client_name": "The Staffordshire",
+        "run_id": "d51b01ae-c9f1-4a00-ba78-754b04c7b350",
+        "guideline_id": "28862509-8b67-45a2-ad3a-80141211855b",
+        "created": true,
+        "status": "draft",
+        "video_count": 0
+      },
+      {
+        "client_id": "e2ad6d57-5b06-46e1-b75b-b67f017d57f1",
+        "client_name": "Toyota Bloemfontein",
+        "run_id": "7d25df5d-73ab-4e70-a82a-baa7e75ba6ab",
+        "guideline_id": "b025f1d0-2e3d-4ba6-b604-74f125eaf6ec",
+        "created": true,
+        "status": "draft",
+        "video_count": 0
+      }
+    ],
+    "script_edits": 0,
+    "new_runs": 0,
+    "new_calendar_events": 0,
+    "new_publications": 0,
+    "provider_or_permission_changes": 0,
+    "migrations": 0,
+    "deployments": 0,
+    "vercel_actions": 0
+  },
+  "protected_existing_rows": {
+    "count": 627,
+    "changed": 0
+  },
+  "notes": [
+    "Active clients are defined only by clients.active=true.",
+    "All 63 exact contexts/discovery reads and real foreign-client denials passed.",
+    "All 41 canonical guidelines were read through the installed connector.",
+    "The four existing review shares passed anonymous read, invalid token and foreign slug denial.",
+    "The 13 new documents are empty staff drafts for 13 existing non-cancelled November runs; no script or booking was invented.",
+    "One new Bloem Action Sports guideline was created outside this agent before the protected snapshot; it was preserved.",
+    "Historical video codes are evidence candidates, not authority to mutate client.short_code.",
+    "Package unknowns, evidence gates, current publication decisions and other-agent work remain protected."
+  ],
+  "clients": [
+    {
+      "client_id": "33db54da-405a-4a48-acd7-29fe815a19b5",
+      "client_name": "Agape Compliance",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 0
+      },
+      "package": {
+        "status": "unverified",
+        "professional_videos_per_month": null,
+        "reels_per_month": null,
+        "social_context": "unresolved",
+        "source_references": []
+      },
+      "canonical_client_guide": {
+        "present": false,
+        "runtime_readiness": null
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [
+          "AGAPE_COMPLIANCE"
+        ],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "Confirm package scope and a real brief; connector access already passes."
+    },
+    {
+      "client_id": "893992a5-23cd-4ee6-b5d9-ccf7b17fe071",
+      "client_name": "Agri-Secure",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 0
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": null,
+        "reels_per_month": null,
+        "social_context": "excluded",
+        "source_references": [
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5798269510"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": false,
+        "runtime_readiness": null
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "No run or script is recorded; keep the schedule unchanged until real work is commissioned."
+    },
+    {
+      "client_id": "fd16ebae-a50b-4920-afe0-94c2631f8f06",
+      "client_name": "All Around PVC",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 1
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 1,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [
+        {
+          "id": "ec340824-8b93-4a24-bef1-e5fd69aac731",
+          "content_run_id": "b232f633-7520-476a-88d5-d9fa9645754c",
+          "status": "draft",
+          "saved_videos": 1,
+          "full_scripts": 1,
+          "read_verified": true,
+          "prepared_this_pass": false
+        }
+      ],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [
+          "ALL_AROUND_PVC"
+        ],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "Staff review the existing saved scripts before any explicit review publication."
+    },
+    {
+      "client_id": "3b85973f-bcad-49eb-b8f1-c27f7c7f1aba",
+      "client_name": "AV Event Life",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 0
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": null,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "No run or script is recorded; keep the schedule unchanged until real work is commissioned."
+    },
+    {
+      "client_id": "32bd9db3-5339-4404-825b-5a615cadec6a",
+      "client_name": "Bat Hill Royale",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 0
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": null,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5798269510"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "No run or script is recorded; keep the schedule unchanged until real work is commissioned."
+    },
+    {
+      "client_id": "b28af30a-3d44-490a-8290-1e56dac7b127",
+      "client_name": "Bloem Action Sports",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 3
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 1,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "client_package:059ed2ef-0d27-460e-bdb4-a7598e9611ee (Monthly Content Package; current from 2026-06-30)",
+          "package_template:268303a0-500b-41f1-90ce-af5d876e1336 (Video 1; 1/month)",
+          "package_template:7c5396d7-d069-4443-90e4-1332287a4dd0 (F1; 1/month)",
+          "package_template:ae251144-b047-4d2a-ac55-9a478a641082 (F2; 1/month)",
+          "package_template:2e9b4757-25b7-4dee-947c-577b8bad23b5 (F3; 1/month)",
+          "package_template:bc61f533-5d7d-447c-82a3-f6712b862767 (F4; 1/month)",
+          "package_template:78748579-70c4-4862-89e9-2112ba7d8937 (DP1; 1/month)",
+          "package_template:e44ced21-853e-435a-a433-4f576c5a2df8 (DP2; 1/month)",
+          "package_template:9db2ac31-a1f9-4888-8a6c-153757e9502d (DP3; 1/month)",
+          "package_template:1eccd500-f5d6-4def-a4ae-eaad90a5a727 (DP4; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [
+        {
+          "id": "509612ef-5e04-4c1a-aa40-3a8132da0ce6",
+          "content_run_id": "6ac0a8b7-386d-40aa-ae59-bbe35cbedb75",
+          "status": "draft",
+          "saved_videos": 1,
+          "full_scripts": 0,
+          "read_verified": true,
+          "prepared_this_pass": false
+        },
+        {
+          "id": "b50c5d2f-a4ee-4819-b36e-487b2593f8f2",
+          "content_run_id": "24a6ca2c-0635-4f0e-8e1a-884c4ff9a8a9",
+          "status": "draft",
+          "saved_videos": 1,
+          "full_scripts": 1,
+          "read_verified": true,
+          "prepared_this_pass": false
+        }
+      ],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": "ACTION_SPORTS",
+        "recorded_video_codes": [
+          "ACTION_SPORTS"
+        ],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "Staff review the existing saved scripts before any explicit review publication."
+    },
+    {
+      "client_id": "89e0ad6d-e08c-4a75-8b8e-abea71af581c",
+      "client_name": "Bloem Marble & Granite",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 7
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 2,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "client_package:034ead66-eecd-4460-9df1-2e7f36c48e57 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:2423db26-deb0-4ad1-8a66-fe28a299b2cf (DP1; 1/month)",
+          "package_template:1c15a692-6369-4d26-87d1-8c6b09df3870 (DP2; 1/month)",
+          "package_template:74020854-8bcb-470c-9359-171c1e652071 (DP3; 1/month)",
+          "package_template:39f5f0af-ec5f-4ab9-ba02-1865a4caeb3a (DP4; 1/month)",
+          "package_template:4ffcc02f-6559-44b1-bb02-05088b65842a (Video 1; 1/month)",
+          "package_template:b8cc1291-25e4-47d4-a920-09c52db5d80f (Video 2; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [
+        {
+          "id": "07009680-b8b9-4dce-b1dc-f0cce297e200",
+          "content_run_id": "4544f399-ebfe-43d3-91bd-d7ba60602a08",
+          "status": "draft",
+          "saved_videos": 0,
+          "full_scripts": 0,
+          "read_verified": true,
+          "prepared_this_pass": true
+        },
+        {
+          "id": "48b1809e-fba3-4d8d-81a2-d10f56651c26",
+          "content_run_id": "864bc9d9-f357-455c-8b1e-fea07a787204",
+          "status": "draft",
+          "saved_videos": 2,
+          "full_scripts": 0,
+          "read_verified": true,
+          "prepared_this_pass": false
+        },
+        {
+          "id": "af35c699-e3a1-4e4c-b7f8-d9968aaf50b7",
+          "content_run_id": "4ff8ad56-4111-4c6a-9581-8706d6fa4a97",
+          "status": "draft",
+          "saved_videos": 0,
+          "full_scripts": 0,
+          "read_verified": true,
+          "prepared_this_pass": true
+        }
+      ],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [
+          "BLOEM_MARBLE"
+        ],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [
+        {
+          "id": "29c94df1-3b82-4aca-81ba-47f08e316e4a",
+          "title": "Nolan PC — November Before the Cut R05 ready for CA review",
+          "review_state": "unreviewed",
+          "record_hash": "0ecb005d152c7ce574aecdcb7855e4a3"
+        }
+      ],
+      "next_action": "Author the real scripts in the canonical draft; no automatic publication."
+    },
+    {
+      "client_id": "2d16262d-8450-458d-ae7e-084ef9ff662d",
+      "client_name": "Bloem Vascular",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 0
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": null,
+        "reels_per_month": null,
+        "social_context": "excluded",
+        "source_references": [
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5798269510"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "No run or script is recorded; keep the schedule unchanged until real work is commissioned."
+    },
+    {
+      "client_id": "5dfdf4bd-9d94-4cc6-9dee-0e480a2234cb",
+      "client_name": "Bohemia Quick Stop",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 0
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": null,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "client_package:408aae34-9754-4b4f-8ba1-763172ac399c (Monthly Content Package; current from 2026-06-30)",
+          "package_template:9d2aa2a7-c6a7-4d51-adb1-b805f27165a6 (DP1; 1/month)",
+          "package_template:8bc1d570-88d8-49f8-a679-7f37458a108c (DP2; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "No run or script is recorded; keep the schedule unchanged until real work is commissioned."
+    },
+    {
+      "client_id": "8e448cf9-1534-4ba1-89a4-93e4c8b83d2f",
+      "client_name": "Bouwer & Coetzee Attorneys",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 1
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 1,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "client_package:696f943f-48e9-40f0-98f9-cfa5526dbf96 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:a7a69b3a-7945-4b52-baf6-b0f735cd56f8 (Video 1; 1/month)",
+          "package_template:bf8d0718-51bf-4514-b46e-a2f29b283d63 (DP1; 1/month)",
+          "package_template:1940d0ad-fdec-44fa-91b3-8056d8b1dbc3 (DP2; 1/month)",
+          "package_template:a7982a04-329b-4cd5-a076-144469820379 (DP3; 1/month)",
+          "package_template:a0b04e76-9751-42b3-a797-25df37cbe102 (DP4; 1/month)",
+          "package_template:cb622eda-4b06-43a3-8734-a027d6ff50aa (DP5; 1/month)",
+          "package_template:578ae351-a71b-49a7-b587-114d9cbc6515 (DP6; 1/month)",
+          "package_template:302d3936-08e2-419b-a27a-aea0b471ad85 (DP7; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [
+          "BOUWER_COETZEE"
+        ],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "Select the exact commissioned run when authoring; historical runs are not current bookings."
+    },
+    {
+      "client_id": "6b67a2df-e2ab-418b-bcee-03aef5963d37",
+      "client_name": "Braize",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 0
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": null,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "No run or script is recorded; keep the schedule unchanged until real work is commissioned."
+    },
+    {
+      "client_id": "afb62c53-d6d3-4ef8-9393-def88ed899d8",
+      "client_name": "C&L Innovations",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 0
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": null,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "client_package:6dcbab0b-5049-4794-a16f-78fbb08b3288 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:1e0b3aac-6b47-4f2b-9219-67315e3de5cc (Video 1; 1/month)",
+          "package_template:3ee7414b-d58d-4753-a937-e17785ef13f9 (DP1; 1/month)",
+          "package_template:cf1eb80b-5843-4b61-96d4-381a717637a2 (DP2; 1/month)",
+          "package_template:4e1bace5-6daa-4790-a4e1-4428567f9f18 (DP3; 1/month)",
+          "package_template:e04e7f46-ed40-4454-9d17-7e43bc2dd268 (DP4; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "No run or script is recorded; keep the schedule unchanged until real work is commissioned."
+    },
+    {
+      "client_id": "42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa",
+      "client_name": "Cape Lumber",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 1
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 0,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "CA current instruction, 2 November 2026: Cape Lumber has no video planned anymore; posts and ads only; supersedes earlier video allowance",
+          "client_package:2ccfb9ee-4f13-4fe9-8a01-67c677140746; preserve 4 design + 3 photo allocation",
+          "Owner-supplied Invoice INV-CLM2610.pdf and INV-CLM2609.pdf: historical posts and Google Ads evidence; video line superseded by current CA instruction"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "Select the exact commissioned run when authoring; historical runs are not current bookings."
+    },
+    {
+      "client_id": "079df21e-783a-4648-b3fa-0acae6e68867",
+      "client_name": "Case Bloemfontein",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 7
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 2,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [
+        {
+          "id": "83400100-a4e8-4953-ab13-8f5caac0dcc8",
+          "content_run_id": "a3569fdd-b2c0-4e1a-a019-c5be63c15801",
+          "status": "draft",
+          "saved_videos": 0,
+          "full_scripts": 0,
+          "read_verified": true,
+          "prepared_this_pass": false
+        },
+        {
+          "id": "85743a32-8080-4eb5-bc9e-9ca89a533c53",
+          "content_run_id": "6adc6edb-7cb6-4523-a81d-540c54e9b9f7",
+          "status": "draft",
+          "saved_videos": 2,
+          "full_scripts": 2,
+          "read_verified": true,
+          "prepared_this_pass": false
+        }
+      ],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [
+          "CASE"
+        ],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "Staff review the existing saved scripts before any explicit review publication."
+    },
+    {
+      "client_id": "6b313cac-283e-48c4-9df6-ba43af2f7353",
+      "client_name": "Central Canvas",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 4
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 1,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "client_package:b7b61ffb-6622-4d1e-8911-ff13314d07b1 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:da761269-e37e-4422-8ce5-45b60dc1a65f (Video 1; 1/month)",
+          "package_template:0ff0b9d8-cfee-4e2a-ad57-3578c47543ed (F1; 1/month)",
+          "package_template:18c1640a-69f1-4f64-80b6-26927eae8716 (F2; 1/month)",
+          "package_template:505a36af-0ae5-4733-8069-b685414e2abb (F3; 1/month)",
+          "package_template:427a1e4c-f3be-405b-8aeb-2d932c076e12 (F4; 1/month)",
+          "package_template:f6274776-5c39-4dce-9f95-c4806b67804e (DP1; 1/month)",
+          "package_template:dc12c3d7-a079-484a-a0b5-af5e0ceee44b (DP2; 1/month)",
+          "package_template:4b82a530-18a3-4f91-9cd0-a74bb4df900b (DP3; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [
+          "CENTRAL_CANVAS"
+        ],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "Select the exact commissioned run when authoring; historical runs are not current bookings."
+    },
+    {
+      "client_id": "c27d2185-08e4-4c49-be48-2572564ceecf",
+      "client_name": "CG Production House",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 0
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 4,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [
+          "CGPH"
+        ],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [
+        {
+          "id": "78f7067e-68a9-40dd-84f6-52857fdd296b",
+          "title": "Owner operating rule — CA-only accounting, Amonique invoices, real work only",
+          "review_state": "unreviewed",
+          "record_hash": "2e5846c5855c9a5f6d311d7d864a8aa7"
+        }
+      ],
+      "next_action": "Record the real brief and exact run before authoring; do not invent a shoot or script."
+    },
+    {
+      "client_id": "3404f726-a693-4b2d-8c13-c9d3dfd17bbc",
+      "client_name": "Daisy & Co",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 4
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 1,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "client_package:dbc25597-c053-4b3e-9ef9-660828d645a9 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:384d7ad1-8276-437f-b9cc-00da5ec5faec (Video 1; 1/month)",
+          "package_template:aa55aa38-d668-4913-9b92-02bb625b7883 (DP1; 1/month)",
+          "package_template:319078dc-f069-4423-93c3-d049c994e603 (DP2; 1/month)",
+          "package_template:bd99cc25-f7f5-43ac-9efc-1378b18e5c0f (DP3; 1/month)",
+          "package_template:6e388f74-e703-48dd-9755-0502420effd5 (F1; 1/month)",
+          "package_template:c54f1ddc-b0c7-426d-9cec-d6fac605f14b (F2; 1/month)",
+          "package_template:00fcb2a8-7564-452b-a6d4-1d7cf4e12c69 (F3; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [
+        {
+          "id": "4cae6e8c-5d2c-4373-9e1d-54788aeb6049",
+          "content_run_id": "b0459476-c616-45d0-bb35-09b5f012b31d",
+          "status": "draft",
+          "saved_videos": 0,
+          "full_scripts": 0,
+          "read_verified": true,
+          "prepared_this_pass": true
+        }
+      ],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [
+          "DAISY"
+        ],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [
+        {
+          "id": "95507cf8-65f3-400d-9e99-c640796c917e",
+          "title": "24 Nov 2026 | Christmas gifts video guideline draft | one presenter",
+          "review_state": "unreviewed",
+          "record_hash": "6fe7625b7e02dd44c73878efc5a812f8"
+        },
+        {
+          "id": "a30f6744-8596-4cdb-88f5-86f2d3bdd207",
+          "title": "MSI video register | November 2026 | Se dankie R05",
+          "review_state": "unreviewed",
+          "record_hash": "00826f5ee15502a695f8a7b7270f54f3"
+        }
+      ],
+      "next_action": "Author the real scripts in the canonical draft; no automatic publication."
+    },
+    {
+      "client_id": "06b20bb1-ed4a-4aa1-9f48-8c6cb0531aba",
+      "client_name": "Delta Gas",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 3
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 1,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "client_package:b611663c-6fb6-4fd6-ad66-1bcab7178359 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:1acc867e-6b81-4a94-b98e-32824e9c3ee7 (Video 1; 1/month)",
+          "package_template:a9ab3113-00fb-4219-8d67-2e5a24ac3cf2 (DP1; 1/month)",
+          "package_template:2474a105-3dbd-4420-bdd5-022d0ad961e4 (DP2; 1/month)",
+          "package_template:75d6ef41-b4f0-4119-97a3-2226bbbb5078 (DP3; 1/month)",
+          "package_template:b72d7bc7-b462-4b50-8d5d-0602dcded121 (F1; 1/month)",
+          "package_template:7c60afd3-6759-4852-8de0-9b70d56bc53d (F2; 1/month)",
+          "package_template:d7e9ce2c-5037-46eb-8e77-824c35d02459 (F3; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [
+        {
+          "id": "564417c2-b6dd-4cdf-8b29-c3b19966ebbe",
+          "content_run_id": "de65f3cc-b93b-4db1-a2db-2cd419281579",
+          "status": "draft",
+          "saved_videos": 1,
+          "full_scripts": 0,
+          "read_verified": true,
+          "prepared_this_pass": false
+        },
+        {
+          "id": "c20bc07e-b557-4e73-9d6c-bd0fc3a1540c",
+          "content_run_id": "168b1bb1-f07a-42d5-87ec-71e894c0bece",
+          "status": "draft",
+          "saved_videos": 0,
+          "full_scripts": 0,
+          "read_verified": true,
+          "prepared_this_pass": false
+        }
+      ],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [
+          "DELTA_GAS"
+        ],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "Author the real scripts in the canonical draft; no automatic publication."
+    },
+    {
+      "client_id": "2aed8a31-bd53-4ad1-a3dc-432865adfb3d",
+      "client_name": "Dulux Paint & Paper Bloemfontein",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 5
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 2,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "client_package:9516420d-38ee-4e53-aacf-b3633f4d7783 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:3ffa2c3a-bd6c-4534-9829-ee3d12571a6f (DP1; 1/month)",
+          "package_template:baf64f14-e43f-4ba4-a505-b4ef6db9acb1 (DP2; 1/month)",
+          "package_template:5c9d658f-ae83-4cd8-96f0-aa66b1559488 (DP3; 1/month)",
+          "package_template:7aa6e476-028b-4bef-8637-36941b23bfda (DP4; 1/month)",
+          "package_template:83c4f807-eb38-463e-b521-26803ab32123 (Video 1; 1/month)",
+          "package_template:da0343b7-b0c9-4871-a02a-f7f74ad5a9ad (Video 2; 1/month)",
+          "package_template:e860eafe-dd2b-4f91-946c-59f68617b68f (F1; 1/month)",
+          "package_template:6c395cda-f1ee-4be4-a024-80f1571a2823 (F2; 1/month)",
+          "package_template:2389cee1-5a26-44ab-b442-1eb00fca8c52 (F3; 1/month)",
+          "package_template:3f5902e5-a35c-4306-852d-4e8bd16487da (F4; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [
+        {
+          "id": "132a143c-5121-4c54-8f6b-b6cab5d03ace",
+          "content_run_id": "0020d8dc-19c2-496b-a028-e4d7e5353ef3",
+          "status": "published",
+          "saved_videos": 4,
+          "full_scripts": 4,
+          "read_verified": true,
+          "prepared_this_pass": false
+        },
+        {
+          "id": "b4dea651-f8d1-4699-8610-bedc8f1ac3e8",
+          "content_run_id": "72fb8d85-c69f-46e6-85e3-65371de5c559",
+          "status": "draft",
+          "saved_videos": 2,
+          "full_scripts": 0,
+          "read_verified": true,
+          "prepared_this_pass": false
+        },
+        {
+          "id": "ca24ca71-0b57-4528-94b3-ca3e55f49469",
+          "content_run_id": "cc3ab1e5-06ff-4682-94db-89f6170094a0",
+          "status": "draft",
+          "saved_videos": 0,
+          "full_scripts": 0,
+          "read_verified": true,
+          "prepared_this_pass": false
+        }
+      ],
+      "published_review": {
+        "state": "verified",
+        "video_count": 4,
+        "invalid_token_denied": true,
+        "foreign_client_denied": true
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [
+        {
+          "id": "45a1f64c-3e55-46d2-8aac-708f2bffd33d",
+          "title": "CA assigns Video 01 The Paint Translator to studio PC | intake underway",
+          "review_state": "unreviewed",
+          "record_hash": "9c771543ed8264a9b105dd4254444837"
+        }
+      ],
+      "next_action": "Published review link verified; retain the current reviewed snapshot."
+    },
+    {
+      "client_id": "61acf81b-1011-404e-9fae-2e209be65fca",
+      "client_name": "Econofoods",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 11
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 5,
+        "reels_per_month": null,
+        "social_context": "excluded",
+        "source_references": [
+          "client_package:aa027f56-e4b7-485f-bcad-f0724c272e46 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:5a820d37-d86b-45e6-bbf7-3fbcc70ebfc9 (Video 1; 1/month)",
+          "package_template:909de892-ffa0-4386-98f2-84c30f54d617 (Video 2; 1/month)",
+          "package_template:8be41fe2-d61c-4265-891b-51a5c54185cc (Video 3; 1/month)",
+          "package_template:1f228ac3-d2b9-412d-98b3-f8178c137a2a (Video 4; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [
+        {
+          "id": "b8e73a17-08dd-4b2c-9c16-c755db17c64d",
+          "content_run_id": "6812f6cf-4b57-4a6e-8ef7-4ea3b73c9de2",
+          "status": "draft",
+          "saved_videos": 0,
+          "full_scripts": 0,
+          "read_verified": true,
+          "prepared_this_pass": true
+        },
+        {
+          "id": "cfef78d4-1f2f-46be-9a72-1be51afa97f2",
+          "content_run_id": "dfa2cbc2-051b-412c-8f6d-041e7c9a0024",
+          "status": "draft",
+          "saved_videos": 0,
+          "full_scripts": 0,
+          "read_verified": true,
+          "prepared_this_pass": true
+        },
+        {
+          "id": "d6ce907e-f452-49e5-ab07-c40916940278",
+          "content_run_id": "735ebb47-5c56-4679-b56f-834d9d6216d1",
+          "status": "draft",
+          "saved_videos": 3,
+          "full_scripts": 3,
+          "read_verified": true,
+          "prepared_this_pass": false
+        }
+      ],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "Staff review the existing saved scripts before any explicit review publication."
+    },
+    {
+      "client_id": "ec643c75-51f5-4839-829f-3f5b7f48829a",
+      "client_name": "Ehrlich Park Butchery",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 0
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 1,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "client_package:3940a4cf-d2ce-4c2d-91aa-06810c117680 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:b744afe8-a203-45f7-8ae0-322138abd586 (Video 1; 1/month)",
+          "package_template:1344b048-8cc1-46e5-9587-2755e890a31b (DP1; 1/month)",
+          "package_template:feb3e77f-fb2d-4cd1-9958-3b2a2fd251e7 (DP2; 1/month)",
+          "package_template:5b242a3d-c673-42f7-8e89-9443ce0f20f6 (DP3; 1/month)",
+          "package_template:3b0b6fc0-8f2e-486b-a1e0-d2aa94e17146 (DP4; 1/month)",
+          "package_template:50be2ac2-e4da-4b11-8ae6-88553fa03446 (DP5; 1/month)",
+          "package_template:77084360-416e-42f5-a426-0007e4ae9145 (DP6; 1/month)",
+          "package_template:274a86bf-9e1c-434a-b53a-b539df4d172f (DP7; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [
+          "EHRLICH_PARK"
+        ],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "Record the real brief and exact run before authoring; do not invent a shoot or script."
+    },
+    {
+      "client_id": "7b7d244f-77b4-4b2a-88f0-8ce3f7e1c202",
+      "client_name": "Elcheck",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 2
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 1,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "CA direct CG Dynamics package instruction in this chat, 9 October 2026: Elcheck — 3 posters, 3 photos, 1 video."
+        ]
+      },
+      "canonical_client_guide": {
+        "present": false,
+        "runtime_readiness": null
+      },
+      "guidelines": [
+        {
+          "id": "2123025e-7589-4aab-8fe9-3112c9d39f29",
+          "content_run_id": "14e22d25-1222-401c-91b4-e32d4c950f42",
+          "status": "draft",
+          "saved_videos": 0,
+          "full_scripts": 0,
+          "read_verified": true,
+          "prepared_this_pass": true
+        }
+      ],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "Author the real scripts in the canonical draft; no automatic publication."
+    },
+    {
+      "client_id": "d53d8e62-9e6a-4bb9-be3f-554f40942d45",
+      "client_name": "Emmanuel Funerals",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 1
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 1,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "client_package:48a6faff-b2e8-484f-9f16-de117d92e9b6 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:31830afc-ba31-4e78-806e-2e0712a72c18 (Video 1; 1/month)",
+          "package_template:0a91c194-7333-48e7-893f-8b6a82c750b4 (DP1; 1/month)",
+          "package_template:a256f152-9f43-42cb-90a5-1e0ae2fe471f (DP2; 1/month)",
+          "package_template:55bb8cab-de3f-4d93-86ed-3c19abaaa535 (DP3; 1/month)",
+          "package_template:03a6b040-7a8c-47e4-b70d-c7a4f844fa41 (DP4; 1/month)",
+          "package_template:e82fd416-fee7-4da2-a2ba-070fe127da7d (DP5; 1/month)",
+          "package_template:edfa9e98-f9e7-4fe2-b133-fe4ec73828f0 (DP6; 1/month)",
+          "package_template:ec56417c-3bfc-4888-8459-e3d1c14f3e11 (DP7; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [
+          "EMMANUEL_FUNERALS"
+        ],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "Select the exact commissioned run when authoring; historical runs are not current bookings."
+    },
+    {
+      "client_id": "217a547c-7b22-45cc-bf88-9d45a8e93dfe",
+      "client_name": "Emoya Estate Driving Range",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 2
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 1,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [
+        {
+          "id": "1c643101-8e1b-42fb-bf11-c0ebb20d1496",
+          "content_run_id": "81770145-a2e8-465c-abaa-00790a71e3cf",
+          "status": "draft",
+          "saved_videos": 0,
+          "full_scripts": 0,
+          "read_verified": true,
+          "prepared_this_pass": true
+        }
+      ],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "Author the real scripts in the canonical draft; no automatic publication."
+    },
+    {
+      "client_id": "c8d34a97-8400-4f52-8b0d-843491fe3d3b",
+      "client_name": "First Technology Central",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 2
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": null,
+        "reels_per_month": null,
+        "social_context": "excluded",
+        "source_references": [
+          "client_package:5571fd87-7911-454e-9acc-2084f04e8319 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:42659647-c8cb-46c7-83bc-61ae3e71eab4 (Video 1; 1/month)",
+          "package_template:b213791c-74c4-4e4c-8690-5b538270eacb (DP1; 1/month)",
+          "package_template:0a9b8148-9ad9-49bf-9ee9-558f8672560f (DP2; 1/month)",
+          "package_template:1fd7ae9e-92cb-46eb-ab0d-d7876f572e97 (DP3; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [
+        {
+          "id": "4470bae6-8001-47c8-b7c5-4788d24c9bca",
+          "content_run_id": "3a110f77-835c-4ad5-8f72-9a696eaf2bea",
+          "status": "draft",
+          "saved_videos": 1,
+          "full_scripts": 1,
+          "read_verified": true,
+          "prepared_this_pass": false
+        }
+      ],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "Staff review the existing saved scripts before any explicit review publication."
+    },
+    {
+      "client_id": "4424ed69-7270-4d30-a1ea-0b77d76912df",
+      "client_name": "Forklift Trucks",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 3
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 1,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [
+        {
+          "id": "d92f893a-08d3-4da6-9457-1a7df8337581",
+          "content_run_id": "626886c7-dbda-4f3f-b94c-0419c5701192",
+          "status": "draft",
+          "saved_videos": 0,
+          "full_scripts": 0,
+          "read_verified": true,
+          "prepared_this_pass": true
+        }
+      ],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [
+          "FORKLIFT_TRUCKS"
+        ],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "Author the real scripts in the canonical draft; no automatic publication."
+    },
+    {
+      "client_id": "b6052710-417d-4b3b-8348-0f126bfea671",
+      "client_name": "Germoparts",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 3
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 2,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "client_package:431228d2-ddbf-404a-a8a5-b7331821488d (Monthly Content Package; current from 2026-06-30)",
+          "package_template:320b6d2e-68b2-4ce3-86f8-b673c93393a8 (Video 1; 1/month)",
+          "package_template:1feece59-18db-4fa2-a637-0aaa61b4f927 (Video 2; 1/month)",
+          "package_template:d7c03c87-c8af-4cdf-b2ac-55b67f138f7c (DP1; 1/month)",
+          "package_template:251e4b6e-d78b-465c-bdbb-1c18eb95c7cf (DP2; 1/month)",
+          "package_template:e5e55772-19e6-454d-aa07-7ee85d5180e1 (DP3; 1/month)",
+          "package_template:1b6a4cb0-a018-46b6-ae0f-46bfe687c5f9 (DP4; 1/month)",
+          "package_template:946ab7ae-4688-47f4-b36a-316487f216e2 (DP5; 1/month)",
+          "package_template:ed1920da-793d-46d1-a4ff-a147f295da8e (DP6; 1/month)",
+          "package_template:ef2af768-6f51-47a8-a699-ece914d8b690 (DP7; 1/month)",
+          "package_template:af1e4113-8572-4e75-b3d6-74556af72c05 (DP8; 1/month)",
+          "package_template:c5ef70d8-afb6-4611-9693-4f633ac0f1fc (DP9; 1/month)",
+          "package_template:3018cf07-baa3-48ae-a659-cae140d84445 (DP10; 1/month)",
+          "package_template:c2ce23e2-263d-4859-a24f-8b4cc66fc3f1 (DP11; 1/month)",
+          "package_template:9a326d04-37dd-4eb4-a1be-873c915b5959 (DP12; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [
+        {
+          "id": "e4a541a8-e730-478c-812e-feb043d0ed71",
+          "content_run_id": "72624865-e13d-4d98-af5d-211f6c837d21",
+          "status": "published",
+          "saved_videos": 4,
+          "full_scripts": 4,
+          "read_verified": true,
+          "prepared_this_pass": false
+        }
+      ],
+      "published_review": {
+        "state": "verified",
+        "video_count": 4,
+        "invalid_token_denied": true,
+        "foreign_client_denied": true
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [
+          "GERMOPARTS"
+        ],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [
+        {
+          "id": "44156463-05ed-456d-8e2f-82e1710f2629",
+          "title": "All Germoparts video guidelines must be official CG Dynamics Content Guidelines",
+          "review_state": "unreviewed",
+          "record_hash": "00b67b5f149a6342f4cfcdc92ace31de"
+        }
+      ],
+      "next_action": "Published review link verified; retain the current reviewed snapshot."
+    },
+    {
+      "client_id": "1007e58b-3fea-4515-88b7-ddaa85763de6",
+      "client_name": "Hino Trucks",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 2
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 2,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "client_package:f9ecd2e7-fa2d-47c8-a7d3-444cf47e20a2 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:7978d77a-7b6b-40a8-b977-7bbddb2f463b (Video 1; 1/month)",
+          "package_template:9502effd-403d-4c24-81fc-7889d98c8523 (Video 2; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "Select the exact commissioned run when authoring; historical runs are not current bookings."
+    },
+    {
+      "client_id": "572555e0-d4d0-404a-8d67-beeeeed6a1f2",
+      "client_name": "HMHI",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 1
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": null,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "Select the exact commissioned run when authoring; historical runs are not current bookings."
+    },
+    {
+      "client_id": "816c7f59-d56c-46a3-ba15-f76971d83769",
+      "client_name": "Human Auto",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 5
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 3,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [
+        {
+          "id": "e431e0a1-e85a-49a5-b9b5-8827110cd373",
+          "content_run_id": "adb40d6a-9c22-4a1c-9c83-da411507f2d5",
+          "status": "draft",
+          "saved_videos": 0,
+          "full_scripts": 0,
+          "read_verified": true,
+          "prepared_this_pass": true
+        }
+      ],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "Author the real scripts in the canonical draft; no automatic publication."
+    },
+    {
+      "client_id": "2e643855-e2ad-481f-a6c6-3d934b9f4a50",
+      "client_name": "Ipopeng Office Supplies",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 0
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": null,
+        "reels_per_month": null,
+        "social_context": "excluded",
+        "source_references": [
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5798269510"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "No run or script is recorded; keep the schedule unchanged until real work is commissioned."
+    },
+    {
+      "client_id": "a5eab798-3e00-44cc-947e-463386fdac39",
+      "client_name": "Jenkor",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 1
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 1,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "client_package:4e05ce5c-8b5c-47c5-8cb9-bc55efababc9 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:b5b585d1-4bf8-40cc-b9d7-59cd414cee90 (Video 1; 1/month)",
+          "package_template:8fec65ae-b3d8-4d27-9fa7-de5db320df64 (DP1; 1/month)",
+          "package_template:edd85c0c-4adc-4393-a381-f6b7a077d1d6 (DP2; 1/month)",
+          "package_template:5b406d10-61f5-40e9-a00b-97f4b53d330d (DP3; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [
+          "JENKOR"
+        ],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [
+        {
+          "id": "a0dc3862-0d56-4795-9103-378461c68f5a",
+          "title": "9 November client amendments — fuller truck surroundings and no sweeping workers",
+          "review_state": "unreviewed",
+          "record_hash": "f83605ab7b5354526c88313a9b211f9e"
+        }
+      ],
+      "next_action": "Select the exact commissioned run when authoring; historical runs are not current bookings."
+    },
+    {
+      "client_id": "aece5a86-c962-4234-a1fe-7904c20f03ff",
+      "client_name": "JFJ Electrical",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 0
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 1,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "CA direct CG Dynamics package instruction in this chat, 9 October 2026: JFJ Electrical — 3 posters, 3 photos, 1 video."
+        ]
+      },
+      "canonical_client_guide": {
+        "present": false,
+        "runtime_readiness": null
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [
+          "JFJ"
+        ],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "Record the real brief and exact run before authoring; do not invent a shoot or script."
+    },
+    {
+      "client_id": "f322151b-bdab-4fc4-951b-7fa8e9fd6bb1",
+      "client_name": "Jodrico Killian",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 2
+      },
+      "package": {
+        "status": "unverified",
+        "professional_videos_per_month": null,
+        "reels_per_month": null,
+        "social_context": "unresolved",
+        "source_references": []
+      },
+      "canonical_client_guide": {
+        "present": false,
+        "runtime_readiness": null
+      },
+      "guidelines": [
+        {
+          "id": "111616ab-904f-4e38-94fa-268993170bec",
+          "content_run_id": "2b3eb53d-691c-4821-a7b5-a14e895e80b5",
+          "status": "draft",
+          "saved_videos": 0,
+          "full_scripts": 0,
+          "read_verified": true,
+          "prepared_this_pass": true
+        },
+        {
+          "id": "308bcd14-682b-47a0-8327-042405cf3d18",
+          "content_run_id": "b320c8eb-5ee6-4b7c-8f7e-f05c15583691",
+          "status": "draft",
+          "saved_videos": 0,
+          "full_scripts": 0,
+          "read_verified": true,
+          "prepared_this_pass": false
+        }
+      ],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "Author the real scripts in the canonical draft; no automatic publication."
+    },
+    {
+      "client_id": "5e4e3335-a89c-4629-9efc-b6a194bec80c",
+      "client_name": "Kundedienste",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 0
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": null,
+        "reels_per_month": null,
+        "social_context": "excluded",
+        "source_references": [
+          "client_package:90e2d435-10d0-40ab-b8dd-1bdb1f59dacf (Monthly Content Package; current from 2026-06-30)",
+          "package_template:020ff1ae-1559-4aec-b6db-528c10b03ab0 (DP1; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": false,
+        "runtime_readiness": null
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "No run or script is recorded; keep the schedule unchanged until real work is commissioned."
+    },
+    {
+      "client_id": "1a6d6c62-7e5e-4e1e-93e6-21d9157f0a01",
+      "client_name": "LHP Student Village & Block",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 0
+      },
+      "package": {
+        "status": "unverified",
+        "professional_videos_per_month": null,
+        "reels_per_month": null,
+        "social_context": "unresolved",
+        "source_references": []
+      },
+      "canonical_client_guide": {
+        "present": false,
+        "runtime_readiness": null
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "Confirm package scope and a real brief; connector access already passes."
+    },
+    {
+      "client_id": "2a5ea019-64f5-4f8e-8a61-61a28940aa6e",
+      "client_name": "Local Deli",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 0
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": null,
+        "reels_per_month": null,
+        "social_context": "excluded",
+        "source_references": [
+          "client_package:09edc18c-1cc6-4245-abe4-bb0780fb386b (Monthly Content Package; current from 2026-06-30)",
+          "package_template:161bb6ae-88a2-4b8a-9586-80ff63ca766f (F1; 1/month)",
+          "package_template:1eb6d43a-2f02-48a7-b6b9-704b883c5ac0 (F2; 1/month)",
+          "package_template:a0d64774-49d0-46de-b305-31d2365aaa9b (DP1; 1/month)",
+          "package_template:8bc550b4-7c06-4db5-a902-e46dc81c5238 (DP2; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "No run or script is recorded; keep the schedule unchanged until real work is commissioned."
+    },
+    {
+      "client_id": "21300630-6755-4591-9a49-e22abbaf7e3d",
+      "client_name": "Loraclox",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 4
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": null,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "client_package:5a2839ee-a0d9-4c55-a013-b05079fa636b (Monthly Content Package; current from 2026-06-30)",
+          "package_template:e878ea27-22e2-40b3-b857-06e336849118 (F1; 1/month)",
+          "package_template:bb203e97-8ba3-40e4-bd54-432bbf327252 (F2; 1/month)",
+          "package_template:08aec60f-2a5b-4011-9988-27d6a2908cb4 (F3; 1/month)",
+          "package_template:54a6dc72-8730-4a4b-85f2-9fd3242a057a (DP1; 1/month)",
+          "package_template:77b7e45c-48d7-484f-a1e7-91f5870c81bf (DP2; 1/month)",
+          "package_template:d7f772aa-e04b-4126-b64d-e77d0a70a649 (DP3; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "Select the exact commissioned run when authoring; historical runs are not current bookings."
+    },
+    {
+      "client_id": "7b47afb0-fa55-4916-85f6-09c57e5905b9",
+      "client_name": "Madison Wear",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 3
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 2,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "client_package:d50bc06e-bd52-42eb-82a1-12cd82994add (Monthly Content Package; current from 2026-06-30)",
+          "package_template:c86ebf9c-519f-48e5-ae64-4c9aadcb7bfa (F1; 1/month)",
+          "package_template:24caee72-3bb3-4d69-9e7f-9b6e341ece72 (F2; 1/month)",
+          "package_template:989825a8-25d8-4ffc-8c14-98ed00ade2cd (F3; 1/month)",
+          "package_template:bb684a6c-be83-40ce-abef-20b21334cac6 (F4; 1/month)",
+          "package_template:fba096ba-ac79-4413-a2d2-b18756ac8f9e (F5; 1/month)",
+          "package_template:b81c8a2a-c6dc-46f9-a2d7-7dc38189d53f (F6; 1/month)",
+          "package_template:906b3e34-aac1-481b-af68-1086be3cdcbe (F7; 1/month)",
+          "package_template:ad67a717-0f60-4a1e-ac18-8923658c9289 (F8; 1/month)",
+          "package_template:548cf7bd-8cb1-4f88-8512-5d16ea2c6806 (Video 1; 1/month)",
+          "package_template:11a793f4-c016-4685-af0e-fa0180c5a6c2 (Video 2; 1/month)",
+          "package_template:02589d45-7ab2-4d33-bc97-0df304190927 (DP1; 1/month)",
+          "package_template:c2a8cebb-dac2-426b-9ea0-7fcac3e77ddc (DP2; 1/month)",
+          "package_template:e2df83fe-2adb-4e8b-b485-407478ee9c81 (DP3; 1/month)",
+          "package_template:572d8b0e-c8bd-4ab8-9674-a4bd80a56105 (DP4; 1/month)",
+          "package_template:18c44e3b-6189-416e-9d86-60e78ebd2f81 (DP5; 1/month)",
+          "package_template:e0cc946e-b21b-40d8-9c88-150649a9b15c (DP6; 1/month)",
+          "package_template:516b61e9-df82-40b8-a00e-8108ff5ffa75 (DP7; 1/month)",
+          "package_template:fd7f565e-ab10-4af8-beb4-1be0f443ad42 (DP8; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [
+        {
+          "id": "f300d0b1-372e-41ec-82ee-e21d75bdd40d",
+          "content_run_id": "347f49b6-6ba0-484b-aa67-1e7c22467583",
+          "status": "draft",
+          "saved_videos": 2,
+          "full_scripts": 0,
+          "read_verified": true,
+          "prepared_this_pass": false
+        }
+      ],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [
+          "MADISONS"
+        ],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "Author the real scripts in the canonical draft; no automatic publication."
+    },
+    {
+      "client_id": "e276f019-a580-44c5-a7ab-e43840c33a64",
+      "client_name": "Mimosa Mall",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 0
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": null,
+        "reels_per_month": null,
+        "social_context": "excluded",
+        "source_references": [
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5798269510"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "No run or script is recorded; keep the schedule unchanged until real work is commissioned."
+    },
+    {
+      "client_id": "94fe2568-3cf1-47dc-801e-d8d5396a0965",
+      "client_name": "NCNA",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 0
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": null,
+        "reels_per_month": null,
+        "social_context": "excluded",
+        "source_references": [
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5798269510"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "No run or script is recorded; keep the schedule unchanged until real work is commissioned."
+    },
+    {
+      "client_id": "3c20fae1-8e91-41d5-98eb-1c331600e6e3",
+      "client_name": "Neshora Oxygen",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 2
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 1,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5801092086"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": false,
+        "runtime_readiness": null
+      },
+      "guidelines": [
+        {
+          "id": "9ba79133-aace-4caa-bf4f-0b1c236f65df",
+          "content_run_id": "0441e2b1-7170-4ba1-bbbc-49400bda083a",
+          "status": "draft",
+          "saved_videos": 2,
+          "full_scripts": 2,
+          "read_verified": true,
+          "prepared_this_pass": false
+        }
+      ],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [
+        {
+          "id": "d9c13e82-d7a2-4697-b92e-6b5782c88346",
+          "title": "Neshora — Shandor and Justin real-person story direction (client supplied)",
+          "review_state": "unreviewed",
+          "record_hash": "21d60c45943d15f6f467f7f443bfd2e4"
+        }
+      ],
+      "next_action": "Staff review the existing saved scripts before any explicit review publication."
+    },
+    {
+      "client_id": "4236a60a-990f-484f-8d19-13d2f92fbe3b",
+      "client_name": "Novus Steel",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 6
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 1,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "client_package:d9a89a21-b228-400c-8285-da0cff95a62d (Monthly Content Package; current from 2026-06-30)",
+          "package_template:29860009-877b-4cb0-bc0b-1ad5c4ffd847 (Video 1; 1/month)",
+          "package_template:4433d4aa-f0ef-4e61-bc23-32c6eb8deab4 (F1; 1/month)",
+          "package_template:302e8d04-8cb1-4b02-bb5c-ca21004e14ef (F2; 1/month)",
+          "package_template:c12b2e55-e829-4b2c-9e7e-48bcaafdaf7a (F3; 1/month)",
+          "package_template:a79288aa-76e6-4dc6-b882-cb7fec83eb77 (F4; 1/month)",
+          "package_template:e56021f8-ea24-4bed-9de0-7d59e1be503b (DP1; 1/month)",
+          "package_template:186648d6-2d25-490a-891f-2a30d38965a4 (DP2; 1/month)",
+          "package_template:b1ccd043-7adf-449c-b1db-2db2d5730393 (DP3; 1/month)",
+          "package_template:7f7ecb4e-d999-4a21-9145-0094b933e297 (DP4; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [
+          "NOVUS_STEEL"
+        ],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [
+        {
+          "id": "24c0552e-295e-47e5-92dd-eabc10f38cae",
+          "title": "MSI source-preparation register | October archive | NO finished film established",
+          "review_state": "unreviewed",
+          "record_hash": "592a262313d851021a6ef1071c6ef6c0"
+        }
+      ],
+      "next_action": "Select the exact commissioned run when authoring; historical runs are not current bookings."
+    },
+    {
+      "client_id": "a8dc70e6-fb42-4fbd-8a38-ce5f53fdee4b",
+      "client_name": "Peyper Bonds",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 3
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 1,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "client_package:c8a87ca5-179d-4068-9528-09a4c0fba868 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:77c6ae3a-2b45-4965-b48c-37e04346697d (Video 1; 1/month)",
+          "package_template:0694a51d-4711-465e-b5e5-ba3177e3997f (F1; 1/month)",
+          "package_template:ae75604f-ebd0-4168-a89b-70fe9235bdbd (F2; 1/month)",
+          "package_template:2a48fdaa-2478-481f-8b2f-611bb9609f1c (F3; 1/month)",
+          "package_template:a19bd288-5748-4b36-815d-8c51234893c9 (DP1; 1/month)",
+          "package_template:c42b5cdf-357f-4c25-83b6-38c834aaadff (DP2; 1/month)",
+          "package_template:c16bea84-e261-49de-9d6e-06adce9316a9 (DP3; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [
+        {
+          "id": "5cbbf389-881b-4467-8433-8acb73086dd3",
+          "content_run_id": "acd146f0-97d7-4414-882f-69729a97c3fe",
+          "status": "draft",
+          "saved_videos": 1,
+          "full_scripts": 0,
+          "read_verified": true,
+          "prepared_this_pass": false
+        }
+      ],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [
+          "PEYPER_BONDS"
+        ],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "Author the real scripts in the canonical draft; no automatic publication."
+    },
+    {
+      "client_id": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
+      "client_name": "Piek Group",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 10
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 4,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "client_package:fb9bacfb-e1d4-4ed4-a25a-cbdca71e7331 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:d7962eeb-ea33-4a72-9e3d-73ff717bdfe0 (Video 1; 1/month)",
+          "package_template:6d565736-e5c0-42ac-bd00-694d5c433f06 (Video 2; 1/month)",
+          "package_template:ff13a101-de5b-40cf-bbb7-0bdba0af7bc7 (Video 3; 1/month)",
+          "package_template:be312060-6f5a-4372-9740-f4cb45fc1489 (Video 4; 1/month)",
+          "package_template:8aea11e1-925e-4c87-bcc9-806701f98414 (DP1; 1/month)",
+          "package_template:9eb9612f-400b-487a-82dd-3c260e87756d (DP2; 1/month)",
+          "package_template:c315bb95-0823-4c46-817f-4fa9366bd512 (DP3; 1/month)",
+          "package_template:17480168-5303-4e91-bec9-345b61a72861 (DP4; 1/month)",
+          "package_template:63ee551c-5aa1-4d50-9224-f06ee50b12b5 (DP5; 1/month)",
+          "package_template:27a4094b-44c8-443f-bbfb-caa46307b98c (DP6; 1/month)",
+          "package_template:8acbcffe-5393-4ecc-b49c-fdf38afcd528 (DP7; 1/month)",
+          "package_template:91357831-ed70-4bd2-b7ec-7e68984e9265 (DP8; 1/month)",
+          "package_template:f89f598d-1234-4994-a9bb-4e97525dc7f2 (DP9; 1/month)",
+          "package_template:8cc83660-1fad-4cba-bcc1-b0aa89169f63 (DP10; 1/month)",
+          "package_template:9a4147c2-cdbc-4aad-a79e-0588752012c3 (DP11; 1/month)",
+          "package_template:3d6fc306-50bb-4109-908d-ae4d6e84cfb9 (DP12; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [
+        {
+          "id": "3357ba75-8f49-4654-a2a9-566d9e7db888",
+          "content_run_id": "ec3939da-16fd-4f6c-99ed-b5bcb3850a7a",
+          "status": "draft",
+          "saved_videos": 0,
+          "full_scripts": 0,
+          "read_verified": true,
+          "prepared_this_pass": false
+        },
+        {
+          "id": "bac70bf1-b684-46e8-ab20-2ed0313ed9d1",
+          "content_run_id": "77d16013-7e7b-42cf-9b1e-438bfa300a55",
+          "status": "draft",
+          "saved_videos": 0,
+          "full_scripts": 0,
+          "read_verified": true,
+          "prepared_this_pass": true
+        },
+        {
+          "id": "d6f7750c-c679-43f9-a1f3-f51708244bbe",
+          "content_run_id": "bc87a43d-48b4-4dd0-91cf-d47ee15a566c",
+          "status": "draft",
+          "saved_videos": 0,
+          "full_scripts": 0,
+          "read_verified": true,
+          "prepared_this_pass": false
+        }
+      ],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [
+          "PIEK_GROUP"
+        ],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "Author the real scripts in the canonical draft; no automatic publication."
+    },
+    {
+      "client_id": "29a28efd-c998-45e2-a57c-4a751e779e66",
+      "client_name": "PSG Bloemfontein",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 1
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 1,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "client_package:854c0a99-b882-4e13-93b0-ffd6afb5788f (Monthly Content Package; current from 2026-06-30)",
+          "package_template:4a1bf959-ee2d-444b-9d93-14e4c9f6a67d (Video 1; 1/month)",
+          "package_template:f34de12a-cbb9-4a42-9532-eefddcc7eeb4 (DP1; 1/month)",
+          "package_template:6f1db1c5-4579-480f-bbc8-930dfb7f99f8 (DP2; 1/month)",
+          "package_template:d3712791-de0a-405b-ac14-6c53158c1a81 (DP3; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [
+        {
+          "id": "b411917b-6592-4d93-bca6-a0a1ecad00a8",
+          "content_run_id": "b91f3082-14ee-45b2-b426-b970e2556f2a",
+          "status": "draft",
+          "saved_videos": 1,
+          "full_scripts": 1,
+          "read_verified": true,
+          "prepared_this_pass": false
+        }
+      ],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [
+          "PSG"
+        ],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "Staff review the existing saved scripts before any explicit review publication."
+    },
+    {
+      "client_id": "4f6106de-c437-404e-8cef-fbe848de0665",
+      "client_name": "RC-Polypipe",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 4
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 1,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "client_package:55f59d3f-0177-403a-841b-ae49c11d8d9d (Monthly Content Package; current from 2026-06-30)",
+          "package_template:e6ceec60-46ea-4f74-a2d5-d594274e2506 (Video 1; 1/month)",
+          "package_template:14344812-f4e6-448f-80bc-a777a756005a (DP1; 1/month)",
+          "package_template:15866650-d734-420e-892d-29511f115551 (DP2; 1/month)",
+          "package_template:85664e0b-168a-4881-9582-c4c57da11a2e (DP3; 1/month)",
+          "package_template:05f1a733-f0d6-4476-8542-e5f497ea441b (DP4; 1/month)",
+          "package_template:4e3fc4b6-bdf6-492e-aaf8-f471bc52cedd (F1; 1/month)",
+          "package_template:6e44ef49-f9fe-414c-9283-b92e64a37d82 (F2; 1/month)",
+          "package_template:4cabe858-e4bb-4102-b567-754a13104286 (F3; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [
+        {
+          "id": "1f9eab52-8291-4733-bf1e-45e7fd9a0d8b",
+          "content_run_id": "c705cece-9e5c-4952-b217-73f3f9e5ee96",
+          "status": "published",
+          "saved_videos": 8,
+          "full_scripts": 8,
+          "read_verified": true,
+          "prepared_this_pass": false
+        }
+      ],
+      "published_review": {
+        "state": "verified",
+        "video_count": 8,
+        "invalid_token_denied": true,
+        "foreign_client_denied": true
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [
+          "RC_POLYPIPE"
+        ],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [
+        {
+          "id": "a2685141-92e3-47e1-9ff1-360e56882498",
+          "title": "24 Nov 2026 | Finale 8-video Afrikaanse shoot scripts en rolverdeling",
+          "review_state": "unreviewed",
+          "record_hash": "21dec273417af412a264433df2fba5c8"
+        }
+      ],
+      "next_action": "Published review link verified; retain the current reviewed snapshot."
+    },
+    {
+      "client_id": "cdb11a82-339e-4b46-9b09-bde1a23efeaf",
+      "client_name": "Red Oak",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 14
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 8,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "client_package:f05c337d-cdfd-41af-9c83-4cc468b3979a (Monthly Content Package; current from 2026-06-30)",
+          "package_template:2f80513e-5f2f-482e-bd33-38b5f76d5422 (Video 1; 1/month)",
+          "package_template:bf21a18e-922e-4392-85cd-77ebc2cabd32 (Video 2; 1/month)",
+          "package_template:50ec5e76-5b01-4492-a24f-1754f8f0b8fe (Video 3; 1/month)",
+          "package_template:0b240e59-c2d0-4a83-9864-b0de376f856c (Video 4; 1/month)",
+          "package_template:732c56d6-0a55-4ea6-9d24-862ffc44a0e2 (Video 5; 1/month)",
+          "package_template:632e5bf2-1fcb-40b8-8880-9b9397502f3e (Video 6; 1/month)",
+          "package_template:2dc5f186-8351-400f-a7bb-8200fa02d782 (Video 7; 1/month)",
+          "package_template:f40e29e5-f37f-4175-9972-8db1a8d31986 (Video 8; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [
+        {
+          "id": "122e8865-fa08-4df9-b314-4861814dbafd",
+          "content_run_id": "04ec94de-a368-4c23-9f0c-ab1a63183f9a",
+          "status": "draft",
+          "saved_videos": 0,
+          "full_scripts": 0,
+          "read_verified": true,
+          "prepared_this_pass": false
+        }
+      ],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [
+          "REDOAK"
+        ],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [
+        {
+          "id": "736c581b-7569-44fd-a6b1-e916735056f4",
+          "title": "Nov video 7 'Summer is calling' daytime summer edit: internal draft R01 rendered (Claude/Nolan)",
+          "review_state": "unreviewed",
+          "record_hash": "6d2b3a676e35fafbd3bbcd90bfbb3dd8"
+        }
+      ],
+      "next_action": "Author the real scripts in the canonical draft; no automatic publication."
+    },
+    {
+      "client_id": "ac4c5e0c-c5d3-4512-8472-fe59192abeca",
+      "client_name": "Rusoord Farmstay",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 0
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": null,
+        "reels_per_month": null,
+        "social_context": "excluded",
+        "source_references": [
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": false,
+        "runtime_readiness": null
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "No run or script is recorded; keep the schedule unchanged until real work is commissioned."
+    },
+    {
+      "client_id": "917d6f7c-1c2a-4c20-82f0-daa41b9062f5",
+      "client_name": "SecuriForce",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 15
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 4,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "client_package:c039a1ff-351b-48f1-9459-2568fd435f40 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:353a6414-0c5b-4150-83a5-772b05028f69 (Video 1; 1/month)",
+          "package_template:f085bd6d-ae19-406b-90c6-c1fd17dc800c (DP1; 1/month)",
+          "package_template:472415c8-85ad-42f4-b021-8278b2b6aab1 (DP2; 1/month)",
+          "package_template:7cb7e8e7-5176-4644-b516-527a7df713c6 (DP3; 1/month)",
+          "package_template:06859550-7f37-4815-aaa4-b8fe897b3303 (DP4; 1/month)",
+          "package_template:ecb506f8-3dd8-41e6-bf46-3598e030e8dc (F1; 1/month)",
+          "package_template:cfa657e8-a13c-4911-9889-a76bed0dc281 (F2; 1/month)",
+          "package_template:61f22761-41a0-467d-b317-214214ac4bf5 (F3; 1/month)",
+          "package_template:c15a5a7e-1b05-4780-adae-c3dd63532737 (F4; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [
+        {
+          "id": "2ac554fa-d16a-43f0-99b1-2f24f37512ea",
+          "content_run_id": "477763f7-90e4-48ea-94ed-4d7f8d00cead",
+          "status": "draft",
+          "saved_videos": 5,
+          "full_scripts": 5,
+          "read_verified": true,
+          "prepared_this_pass": false
+        },
+        {
+          "id": "a6aa6b64-a345-43d1-9b1f-2741a412371a",
+          "content_run_id": "69267ca8-b3d9-475c-9b72-dcf8bfb471d6",
+          "status": "draft",
+          "saved_videos": 0,
+          "full_scripts": 0,
+          "read_verified": true,
+          "prepared_this_pass": false
+        }
+      ],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "Staff review the existing saved scripts before any explicit review publication."
+    },
+    {
+      "client_id": "a60b4d07-0a30-4f1c-8d48-7bd9ea649c97",
+      "client_name": "Supa Quick BFN",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 0
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 1,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "client_package:5b15c7e9-49b4-403e-9bca-70d43801a868 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:612f76a0-c7dc-4c2f-9bce-83b0a68e841e (Video 1; 1/month)",
+          "package_template:de8d488c-5db7-4ad5-9526-4fc594671111 (DP1; 1/month)",
+          "package_template:5bfe6323-afb7-43d1-a57b-25150c4d60e3 (DP2; 1/month)",
+          "package_template:6b41c899-9bd0-441e-9dbe-d4ebf7049f62 (DP3; 1/month)",
+          "package_template:611279dc-9409-470d-aaad-0169bfde3dec (DP4; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "Record the real brief and exact run before authoring; do not invent a shoot or script."
+    },
+    {
+      "client_id": "e2870110-930c-4e63-b2fe-c858030f7258",
+      "client_name": "Supa Quick Centurion",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 1
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 1,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "client_package:f7388335-7104-4fa1-98b9-02dde13021e5 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:8c4ddbab-d8aa-48c3-a0bc-7ab970d53bd0 (Video 1; 1/month)",
+          "package_template:a666b18d-edc0-4bcb-b72b-b449656df41c (DP1; 1/month)",
+          "package_template:099f00ab-83ff-45c6-8ca9-81f44a4ee17a (DP2; 1/month)",
+          "package_template:1a35e371-a031-4e58-abd4-b31e4fb4ee45 (DP3; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [
+          "SUPA_QUICK_CENTURION",
+          "SUPAQUICK_CENTURION"
+        ],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "Select the exact commissioned run when authoring; historical runs are not current bookings."
+    },
+    {
+      "client_id": "a36ba938-e9dc-4ecf-bb67-4853608b1c01",
+      "client_name": "TBS Brokers",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 2
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": null,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "client_package:cc3cc3cf-ad7e-42f2-b565-042cfe96f495 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:43c9b8de-bb98-4cba-8a39-05c7e307851d (Video 1; 1/month)",
+          "package_template:3e108d50-374f-4c92-9245-a2fae6c02f80 (DP1; 1/month)",
+          "package_template:6094c485-2cdc-4476-836a-14ab7597592d (DP2; 1/month)",
+          "package_template:74afbe3c-f7c7-483d-85b6-4d2882bf3392 (DP3; 1/month)",
+          "package_template:c6016eeb-93f9-43ec-bd67-a8285a09f39e (DP4; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [
+          "TBS"
+        ],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "Select the exact commissioned run when authoring; historical runs are not current bookings."
+    },
+    {
+      "client_id": "dfa47255-875d-43cf-8a22-cfe1a6247fb7",
+      "client_name": "The Staffordshire",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 15
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 4,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [
+        {
+          "id": "28862509-8b67-45a2-ad3a-80141211855b",
+          "content_run_id": "d51b01ae-c9f1-4a00-ba78-754b04c7b350",
+          "status": "draft",
+          "saved_videos": 0,
+          "full_scripts": 0,
+          "read_verified": true,
+          "prepared_this_pass": true
+        }
+      ],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "Author the real scripts in the canonical draft; no automatic publication."
+    },
+    {
+      "client_id": "204f4f22-14c7-42ed-a956-da57af102706",
+      "client_name": "Tobich Optics",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 0
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": null,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "client_package:cb7f2931-a433-4f02-975b-2c58c8782a74 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:876349dd-18f2-49ba-8322-1e8dbb5f8e08 (DP1; 1/month)",
+          "package_template:7c6f689d-f472-4ed7-bb32-85b7b2150eaf (DP2; 1/month)",
+          "package_template:b7aa9a97-4b1f-49a3-9786-e4351933d4c3 (DP3; 1/month)",
+          "package_template:131b902c-ce14-4790-abf7-2821053d18b7 (DP4; 1/month)",
+          "package_template:c7fe1e64-c740-43fa-8235-31309940ec2a (F1; 1/month)",
+          "package_template:bb0c110e-f97c-470f-8fad-3b1f2803b69c (F2; 1/month)",
+          "package_template:6e7ad362-a395-433b-bd2c-8538fb6b986e (F3; 1/month)",
+          "package_template:2b3e1969-5695-40c6-9850-affd36175067 (F4; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [
+          "TOBICH"
+        ],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [
+        {
+          "id": "0e25e900-2ff0-44e3-9d07-9014f1baa722",
+          "title": "Tobich Optics | R07/R07A export links, actual production tools and handover | 11 November 2026",
+          "review_state": "unreviewed",
+          "record_hash": "3bf99cf29b05fc281c8fdd843a51b5ab"
+        }
+      ],
+      "next_action": "No run or script is recorded; keep the schedule unchanged until real work is commissioned."
+    },
+    {
+      "client_id": "e2ad6d57-5b06-46e1-b75b-b67f017d57f1",
+      "client_name": "Toyota Bloemfontein",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 8
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 4,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "client_package:c3cb4d60-bd41-4f30-bbed-757c18c780d3 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:8bd9130c-2ff6-4735-b695-95a920da9a20 (Video 1; 1/month)",
+          "package_template:89d5879a-1711-4abf-8d11-a2aa6b7e1445 (Video 2; 1/month)",
+          "package_template:d107b70e-0a8e-4fdf-97d0-d8d9bf566076 (Video 3; 1/month)",
+          "package_template:a061b1e1-aff9-48b5-a358-739af65e37de (Video 4; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [
+        {
+          "id": "568709e2-f382-4aea-8c20-fa576043266b",
+          "content_run_id": "b060718b-fff4-4348-a780-17ced59a0175",
+          "status": "draft",
+          "saved_videos": 4,
+          "full_scripts": 0,
+          "read_verified": true,
+          "prepared_this_pass": false
+        },
+        {
+          "id": "b025f1d0-2e3d-4ba6-b604-74f125eaf6ec",
+          "content_run_id": "7d25df5d-73ab-4e70-a82a-baa7e75ba6ab",
+          "status": "draft",
+          "saved_videos": 0,
+          "full_scripts": 0,
+          "read_verified": true,
+          "prepared_this_pass": true
+        }
+      ],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "Author the real scripts in the canonical draft; no automatic publication."
+    },
+    {
+      "client_id": "bbd1629e-79fb-4c41-b1e4-88a1f160bd34",
+      "client_name": "VCS Cleaning Solutions",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 0
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 1,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "CA direct CG Dynamics package instruction in this chat, 9 October 2026: VCS Cleaning Solutions — 8 posters, 1 video."
+        ]
+      },
+      "canonical_client_guide": {
+        "present": false,
+        "runtime_readiness": null
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [
+          "VCS"
+        ],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [
+        {
+          "id": "512abf47-d6bf-45c7-90eb-caa26e1d0c3c",
+          "title": "VCS — 23–31 October original promotion needs Excel cross-check",
+          "review_state": "unreviewed",
+          "record_hash": "069a0b40c3336ef29f2335f547a1fc36"
+        }
+      ],
+      "next_action": "Record the real brief and exact run before authoring; do not invent a shoot or script."
+    },
+    {
+      "client_id": "1f0406bb-d643-4b83-bc3e-b1ebe87eeb89",
+      "client_name": "Vrystaat Kunstefees",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 0
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": null,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5798269510"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "No run or script is recorded; keep the schedule unchanged until real work is commissioned."
+    },
+    {
+      "client_id": "e1cb958e-3f68-4a77-b5ea-b471ea62bdef",
+      "client_name": "Watch Addict",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 1
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 1,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "client_package:929dd709-e00d-47bc-9967-ba30cec6e517 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:1fe23a9f-e7b4-4c29-b852-8c79f94ad747 (Video 1; 1/month)",
+          "package_template:62cf6a6d-4185-415d-aa27-48ab521c5e9b (DP1; 1/month)",
+          "package_template:b644e194-09de-4244-ab25-b45aafb09db8 (DP2; 1/month)",
+          "package_template:40df4147-734f-48b6-b29c-fec6acd4fd2d (F1; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "Select the exact commissioned run when authoring; historical runs are not current bookings."
+    },
+    {
+      "client_id": "2b953772-e791-4dff-a278-d4dd3521f02e",
+      "client_name": "We Ar Fuels",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 3
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 1,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "client_package:a8442aab-1f23-4cbb-a4a2-f4594de34a74 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:9d83988d-4e09-4939-9478-aea61a802d7a (Video 1; 1/month)",
+          "package_template:68574a7d-f3ad-4090-8c4e-bdd89c8a7cc5 (F1; 1/month)",
+          "package_template:934e196d-f732-43c4-9f5c-4946a191e4d2 (F2; 1/month)",
+          "package_template:a6b32ca0-4669-40a8-b5da-017cfc72d0fb (F3; 1/month)",
+          "package_template:c80fe271-9dce-41d7-a0b6-0154360cc250 (F4; 1/month)",
+          "package_template:62d8c81d-012b-4396-afc9-d5294870662e (DP1; 1/month)",
+          "package_template:9bb7d546-3c52-47e2-9588-36af584000c4 (DP2; 1/month)",
+          "package_template:37f446fa-9d06-42ff-b18a-879324cf286a (DP3; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [
+        {
+          "id": "139d4d78-bed1-458b-ac92-fca1a8e18127",
+          "content_run_id": "f6b5f2c4-82ca-4eef-b59a-b6821e33ed04",
+          "status": "draft",
+          "saved_videos": 1,
+          "full_scripts": 1,
+          "read_verified": true,
+          "prepared_this_pass": false
+        }
+      ],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [
+          "WE_AR_FUELS"
+        ],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "Staff review the existing saved scripts before any explicit review publication."
+    },
+    {
+      "client_id": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
+      "client_name": "Wiseman Group",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 2
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": 1,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "client_package:fa845073-ba79-4632-aa63-75d51bb2bf25 (Monthly Content Package; current from 2026-06-30)",
+          "package_template:28150e2e-0f1f-4565-b505-00163fc84301 (Video 1; 1/month)",
+          "package_template:0b258a9d-9641-4044-8441-681281279001 (F1; 1/month)",
+          "package_template:1759c530-f94f-4c0e-b63e-5eb5ffd07859 (F2; 1/month)",
+          "package_template:dd8b6d4c-c8ca-4cbd-b95b-879fb0ca7db7 (F3; 1/month)",
+          "package_template:03415dde-68a1-4378-a137-91ef6a66e775 (F4; 1/month)",
+          "package_template:7c2fb4e9-7c06-4a23-afb5-a942e4f53735 (DP1; 1/month)",
+          "package_template:f4a39da1-8c96-484f-9cfb-8da5a2599823 (DP2; 1/month)",
+          "package_template:8cd2db1a-7872-4324-a7b3-94b5046d0c4f (DP3; 1/month)",
+          "package_template:35683be0-a50c-41f9-ac3f-e3fe707aeec5 (DP4; 1/month)",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [
+        {
+          "id": "4e7c54bc-d794-4310-ad2f-ddc30ceb390f",
+          "content_run_id": "de07a54e-6e05-42e2-a3ff-8e74d5eeeedf",
+          "status": "published",
+          "saved_videos": 6,
+          "full_scripts": 6,
+          "read_verified": true,
+          "prepared_this_pass": false
+        }
+      ],
+      "published_review": {
+        "state": "verified",
+        "video_count": 6,
+        "invalid_token_denied": true,
+        "foreign_client_denied": true
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [
+        {
+          "id": "e836c27c-420b-480c-967f-484acc4db9b8",
+          "title": "Final six video scripts for Wiseman Group / Midas guideline: handoff to replace 03, 05 and 06",
+          "review_state": "unreviewed",
+          "record_hash": "81bac54f0ef64cf5dbfbf3a8e49bd8c6"
+        },
+        {
+          "id": "a3bac1d8-fc83-438f-94ab-8f00ed62f0e5",
+          "title": "Keep video concepts short and immediately understandable",
+          "review_state": "unreviewed",
+          "record_hash": "09557c0470e4a4cbd304102a68038f84"
+        },
+        {
+          "id": "a0cf42cb-c006-4ca0-a48b-54c49ea73aa3",
+          "title": "Present every video as a simple scene-by-scene script",
+          "review_state": "unreviewed",
+          "record_hash": "a3b8c1b72b3ed1236e794d17051236f6"
+        },
+        {
+          "id": "09525f77-764a-44fa-9cdc-66fa55874cfe",
+          "title": "Video guidelines must contain complete scripts and exact scenes",
+          "review_state": "unreviewed",
+          "record_hash": "a8f04986afaa3d1ae00958ec55a55a9b"
+        }
+      ],
+      "next_action": "Published review link verified; retain the current reviewed snapshot."
+    },
+    {
+      "client_id": "504113ee-fba9-4993-807e-a86066615212",
+      "client_name": "WiseRide",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 1
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": null,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": true,
+        "runtime_readiness": "ready"
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [
+          "WISERIDE"
+        ],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "Select the exact commissioned run when authoring; historical runs are not current bookings."
+    },
+    {
+      "client_id": "0c01d90f-ba5e-4251-a597-bf3c83f990fa",
+      "client_name": "Zooz Lifestyle WFF",
+      "active": true,
+      "connector": {
+        "exact_client_context": "pass",
+        "run_discovery": "pass",
+        "foreign_client_denial": "pass",
+        "canonical_run_count": 0
+      },
+      "package": {
+        "status": "confirmed",
+        "professional_videos_per_month": null,
+        "reels_per_month": null,
+        "social_context": "eligible",
+        "source_references": [
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/504#issuecomment-5796095876",
+          "https://github.com/CGProductionHouse/CG-Dynamics/issues/516#issuecomment-5798269510"
+        ]
+      },
+      "canonical_client_guide": {
+        "present": false,
+        "runtime_readiness": null
+      },
+      "guidelines": [],
+      "published_review": {
+        "state": "not_shared"
+      },
+      "production_folders": {
+        "configured_short_code": null,
+        "recorded_video_codes": [],
+        "mapped_run_folders": 0,
+        "candidate_codes_are_not_approved_configuration": true
+      },
+      "recorded_script_note_candidates": [],
+      "next_action": "No run or script is recorded; keep the schedule unchanged until real work is commissioned."
+    }
+  ]
+}

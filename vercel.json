@@ -1,6 +1,6 @@
 {
   "git": { "deploymentEnabled": false },
-  "functions": { "api/guideline-preview.js": { "includeFiles": "{dist/index.html,public/client-logos/**}", "maxDuration": 15 } },
+  "functions": { "api/guideline-preview.js": { "includeFiles": "{dist/index.html,public/client-logos/**,public/client-preview-logos/**}", "maxDuration": 15 } },
   "headers": [{ "source": "/guidelines/(.*)", "headers": [
     { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" },
     { "key": "Referrer-Policy", "value": "no-referrer" },

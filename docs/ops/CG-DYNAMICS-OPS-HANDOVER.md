@@ -1,3 +1,195 @@
+## 25 November — RC WhatsApp image correction LIVE
+
+CA's urgent follow-through authorised one bounded preview-only release. Prebuilt
+production stage dpl_EFgzUJU4qutMkiEhV9UTKdnTYCVS passed hosted checks and was
+promoted SAME artifact;one upload,no cloud app compilation. Rollback dpl_GwQE8n9fRXGdr13L4Gbjj8VV2iM5.
+Exact prod89b20830 + owned e2e8da59 preview overlay in private detached worktree;
+NO unreleased staff/Pipeline/Calendar form code shipped. Git deployment staysOFF.
+Root/login200,RCmetadata200,correct opaque1200×630PNG200/exacthash;all45hosted
+preview assets match prepared bytes. No physical WhatsApp claim;send freshcg3URL.
+Original artwork/content/capabilities/publication preserved;no republish/data write.
+
+MCP102 ACTIVE,75source readbacks exact,one share-prefix line changed/74preserved.
+Bundle3a5f74582215216db92494595eb0ab5bfd7b1c820e906b30c53f5f6d910067ef.
+Normal exact-RC client tool returns8videos/freshcg3link. OAuth/auth/provider/staff
+policy unchanged. Source38checks/release-tree7checks/build/lint/diff and actual
+packaged/hosted/live acceptance pass. Masked local environment caught before
+upload;only existing first-party public anonymous config pinned locally,never
+logged/committed;no remote env change. Fresh usage estimate leaves12.07945USD
+included headroom before5USDreserve/1USDreleasecap;delayed estimates,not guarantee.
+No other-agent,permission,secret,Teams,content approval/publishing or migration.
+Exact receipt:[preview contrast release](GUIDELINE-PREVIEW-CONTRAST-2026-11-25.md).
+
+## 25 November — earlier prepared preview checkpoint (superseded by live release above)
+
+CA's actual RC WhatsApp large preview hid white transparent artwork on white.
+Same isolated PR1005 now prepares45 source-bound opaque public-logo preview
+assets,original artwork unchanged,RC dark matte,fine-lettering contrast checks,
+strict no-raw/missing/stale/foreign image fallback andcg3share-version code.
+38/38focused tests,production build/app code,scoped lint/diff and local visual
+sheet pass. No WhatsApp/phone or production acceptance claimed before release.
+Standing NO VERCEL respected:no upload/build/promote,MCP release,republish,data,
+permissions/provider or other-agent change. #679 current budget/serving reserve
+and exact active-domain rollback/source parity still need verification;delayed
+partial billing is not headroom. Do NOT release whole unmerged staff frontend
+or deploy new link version before corrected images are live. Exact receipt:
+[preview contrast](GUIDELINE-PREVIEW-CONTRAST-2026-11-25.md).
+
+## 24 November — staff connector101 and fresh Microsoft reconciliation
+
+Same isolated draft PR1005,code755d0d26. MCP101 ACTIVE,75source files independently
+matched;hosted bundle c22711f875e2a14a10a6c96e3f85c4b9aa9d718fe82d5cd3c41e4ab638259931.
+Preserve this preimage including70unchanged files/parallel publishing modules.
+Existing custom OAuth/auth gates unchanged. New shared policy removes the staff
+instruction to invoke admin-only reconciliation;automatic worker plus exact-task
+readback/pending state are required. Lifecycle and mirror freshness are separate.
+
+CA-authorised normal UI resumed paused collection. Existing worker completed the
+same exact job/run e874ca5e-7ce4-49d0-8b91-3af9e2fb2ddb at20:23:11SAST:
+35applied/1680skipped/0failed/82conflicts/0remaining,6449protected schedule exclusions.
+All6configured sources enumerated8163records;protected detail/package completeness
+is not inferred. Status is ACTIVE + fresh PARTIAL,not healthy.82journal rows match.
+78unknown-client cards/4ambiguous Supa branch cards remain held for exact owner
+confirmation. No package changes or upstream Microsoft writes.
+
+Six staff Day/Hours read checks pass. Installed company ChatGPT catalogue refreshed;
+new real Franco Project chat read bootstrap/Day/Hours/status with correct identity
+and2026.11.24-scoped-reconciliation-6 policy. One exact real Teams100%/Dynamics done
+task readback matches.460/460 focused serial tests incl disposable SQL,build/app
+bundle,scoped lint/diff,official Edge bundle/helper native check pass. No fake writes.
+Frontend recovery/banner/forms remain SOURCE ONLY;NO VERCEL or migration.
+Native company Gmail requires owner re-auth before existing sender/signature
+verification;no aliases/permissions/mail changed. Other agent/worktrees untouched.
+Exact receipt/held bucket inventory:[staff readiness](STAFF-CONNECTOR-READINESS-2026-11-24.md).
+Google Control Centre destination still unidentified;no guessed tracker write.
+
+## 24 November — guideline preparation and date-filtered discovery LIVE
+
+Same isolated PR1005. MCP100 ACTIVE,74 independently verified files, bundle
+`1da6cb62a662e0823aeeae4eeeeab7015df1f433d2d306f7ad3ce256c6edf19d`.
+This supersedes the earlier v95/v97 release baselines below. Preserve the current
+live preimage, including the parallel Meta/publishing modules. Existing auth and
+permissions are unchanged. No migration, Vercel or business-data write this increment.
+
+Staff can prepare one canonical guideline by exact active client/content month
+before booking a shoot. Deterministic identity and failed-receipt/month recovery
+avoid duplicates; existing unassigned documents are offered for exact reuse.
+Date searches now separately surface saved undated guidelines without inventing
+dates. RC's original blocked company ChatGPT conversation now returns the working
+eight-script no-login review link using read-only actions. Three cancelled
+1December bookings remain cancelled; no fake booking or publication was performed.
+
+219/219 final focused serial tests incl real disposable SQL, build, scoped lint,
+diff, official Edge bundle and helper native type check pass. Full downloaded
+runtime retains its pre-existing type-only support diagnostics. Calendar FORM
+mirror/duplicate repair is source-only, not live frontend. Exact limits and source
+receipt: [guideline release](GUIDELINE-PREPARATION-RELEASE-2026-11-24.md).
+Root/other worktrees remain untouched; earlier client/package/media holds remain.
+
+## 24 November — missing Elcheck film tracked; canonical connector registration LIVE
+
+CA's Studio screenshot exposed a real missing December R02, rather than another
+guideline permission issue. Same isolated PR1005; source checkpoints19873a97/4c083ca8.
+Exact Studio file/hash and19Nov18:50SAST internal delivery were independently
+verified read-only. New Pipeline record `eea0ac88-1f2c-8c85-8743-1f76d055b91f`
+preserves actual `2026_12_ELCHECK_VIDEO_1`, Nolan Claude Studio PC and R02 at
+internal_review. Media filing remains pending, not approved/published. Normal
+installed ChatGPT action + identical retry return the same ID; independent DB and
+desktop/mobile staff UI readback pass. No fake run, monthly slot or posting date.
+
+MCP v95 ACTIVE, bundle80a2f4db74ce835f5d65e7a7964c09b5cb07a7a1b09c68545d452beefc643264.
+All73 source files verified after fresh70file v92 preflight;67existing files remain
+byte-identical, including publishing. Later releases must preserve this v95
+preimage. `register_existing_internal_video` reuses canonical Pipeline registration,
+full archived-history scan, duplicate fences/readback and private full retry
+receipts. Company_admin + verified admin/manager only; no approvals/publication.
+Installed tools refreshed and action verified; all63active-client contexts pass.
+The v94/v95 parser corrections each change only one shared registration file;
+fresh 73-file preflight/readback passed. v95 preserves real legacy spaces/hyphens,
+leaves unknown codes/numbers NULL, refuses ambiguous copies and prevents another
+film/number/concept masquerading as a revision suffix. Auth/context/catalog and
+parallel modules stay byte-identical. Exact v92/v93/v94 rollbacks retained. Staff FORM improvement is source-
+only until the next approved frontend release. No Vercel or migration.
+
+Exactly1film added;105existing film revisions,63packages and Nov–Jan schedule
+rows unchanged.30Studio send files/11film stems checked; only Elcheck was missing.
+Final 184 serial tests across 14 suites, 48 nearest registration tests, build,
+scoped lint/diff/official Edge bundle pass; live and local responsive
+checks pass. No other-agent/media/Teams/provider/OAuth/config/secret changes.
+
+All63clients have a production receipt, not an all-content-ready certificate.
+Five confirmed-video clients still have no Pipeline row. Follow-through inspected
+29 exact mapped cloud export/portal folders and 10 provider file hashes. Four
+already have current exports: Emoya has four different-hash November variants;
+Human Auto has a real November export; Supa Quick BFN has a WISEMAN-named November
+film needing exact primary-client resolution; Staffordshire has three distinct
+November films, with VIDEO_2 duplicated byte-for-byte in two folders (count once).
+Do not request new edits merely because Pipeline was empty. Exact editor/revision/
+handoff remains required before registration. Hino's inspected latest exports are
+August; no current commission was established. Older Emoya October V8 stays
+historical owner-review evidence; no approval/current assignment inferred.
+Existing Nov canonical drafts for Emoya, Human Auto and Staffordshire are retained.
+No additional cloud-source film or shoot/date was invented or registered.3packages
+remain unconfirmed;22confirmed packages remain video-unquantified. The current
+Nov–Jan schedule still has only8November Cape rows; no bulk monthly allocation
+was performed. Exact IDs/source gaps/verification are in
+[the production receipt](ACTIVE-CLIENT-PRODUCTION-SETUP-2026-11-24.md).
+#381 cross-lane release notice7128179836. Root/PR910 worktrees stay untouched.
+
+## 24 November — all63 client guideline contexts verified;13missing drafts prepared
+
+CA asked to extend the RC repair to all clients. Same isolated PR1005, no new
+release. Actual installed connector:63exact active-client resolutions/discovery
+reads matched166canonical runs; all63real foreign-client requests denied. Full
+saved-field reads pass for all41canonical guidelines across27clients/39scripts.
+Prepared13missing draft documents for13existing non-cancelled November runs across
+11clients through the normal canonical ensure action; replay returns original ID.
+No new run/date/event/monthly slot, script edit, approval or publication.
+
+All4existing public review links verified anonymously (22videos), with bad-token
+and foreign-slug denial. All627existing client/package/video/guideline/run/calendar/
+share row hashes preserved; only13draft guidelines added. Another staff-created
+Bloem Action Sports guide during initial reads was protected, not duplicated.
+No duplicate/run-client/video-client/orphan-script/position integrity failures.
+MCPv92/all70source files still match the prior green154tests/build/lint release.
+
+Do not call all clients content-complete.3packages remain unverified (Agape,
+Jodrico,LHP);23clients have no run, including5with confirmed video capacity;
+11canonical research guides absent;62shortcodes unset/0registered run-folder maps.
+Existing video codes are candidates, not configuration authority. All exact IDs,
+source references, per-client next actions and protected boundaries are in
+[the complete fleet receipt](ACTIVE-CLIENT-GUIDELINE-SETUP-2026-11-24.md).
+No Vercel/deployment/migration/provider/OAuth/config/secrets/autopilot/Teams/other
+agent change. No guessed tracker; exact Control Centre destination unavailable.
+
+## 24 November — RC client-Project guidelines fixed LIVE (#896 / PR1005)
+
+Owner requested ordinary script preparation and review sharing from RC-Polypipe's
+internal client ChatGPT Project. Isolated branch `fix/rc-guideline-project-workflow`.
+Discovery was incorrectly staff-only; add/update also rejected the dispatcher's
+proven routing `client_id` as an editable video field. Both are fixed LIVE as MCPv92,
+with all70 exact source files read back and existing active-staff OAuth/isolation
+preserved. Other69 files are byte-identical to v91, including the publishing lane.
+Code checkpoint `678626da`; draft PR1005. Track the complete acceptance receipt in
+`docs/ops/RC-GUIDELINE-PROJECT-WORKFLOW-2026-11-24.md` and PR1005.
+
+Actual bounded preparation created one undated planning run and canonical draft
+guideline from the intact24Nov eight-script source. No shoot/calendar/month/package
+allocation was invented. Existing cancelled runs and unrelated pipeline films stay
+unchanged by exact hash. All eight original scripts/directions/technical checks
+were saved/read back through the actual installed connector in RC's client Project;
+successful retries returned original records, eight unique videos total. Published
+for review24Nov08:31:05UTC; same link re-read. Anonymous read sees exactRC/eight
+videos; wrong-token/foreign-slug denied, foreign-client MCP denied, anonymousMCP401.
+Company Chrome rendered the real eight-script review and per-video controls;
+no fake client response, phone acceptance, client approval or shoot booking claimed.
+154 focused tests,58 live-candidate tests, production build, scoped lint, diff and
+official local Edge bundle pass. No Vercel, migration, provider/config/secret change.
+Live includes other-agent publishing modules: patch the exact live bundle only;
+never replace it wholesale with main. Other worktrees remain untouched. RC's short
+code/folder readiness remains unconfigured; no invented OneDrive naming. Exact
+Google Control Centre target remains unavailable; no guessed tracker write.
+
 ## 16 November — authorised brand panel merge reconciliation (#984)
 
 Owner requested #984 into main before #999 into the existing PR910 branch.
@@ -1246,6 +1438,24 @@ This is a later direct CA operating correction that overrides older catch-all ta
 **This is docs-only continuity, NOT code/DB/data apply or a claim of production acceptance.** CA's owner instructions take precedence over old speculative lead creation workflows.
 
 # CG Dynamics Ops Handover
+
+## 24 November — RC guideline client-Project repair in progress (#896)
+
+Owner urgently requested fixing normal client-Project guideline preparation and
+sharing. Isolated `fix/rc-guideline-project-workflow`; main b524a9f9. Reproduced
+live staff-only find_content_runs denial despite exact-client guideline actions
+already being allowed. Minimal read-only classification +nested tenant fences
+pass132 repo tests/build/lint and51 actual live-based candidate tests. Full
+official local Edge bundle passes. v90/70-file rollback saved; candidate changes
+only three connector files,67others byte-identical. Never deploy Git folder over
+newer other-agent publishing modules. No Vercel/migration/provider/role change.
+
+Recovered exact RC update a2685141-92e3-47e1-9ff1-360e56882498: all8 final scripts
+and technical/visual/cast instructions intact. No RC guideline exists;3runs are
+cancelled and two pipeline films are unrelated. Do not revive/change those or
+guess a shoot date. Existing nullable schema supports an undated planning run.
+Live release +script preparation/share acceptance remain pending this checkpoint.
+[Exact repair and release boundaries](RC-GUIDELINE-PROJECT-WORKFLOW-2026-11-24.md).
 
 ### 27 October — provider freshness and false staff diagnostic corrected
 

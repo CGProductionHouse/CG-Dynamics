@@ -15,7 +15,7 @@
 
 import { readdirSync, readFileSync, writeFileSync, copyFileSync, mkdirSync, existsSync, statSync } from 'node:fs'
 import { dirname, extname, join, basename, resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import zlib from 'node:zlib'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
@@ -106,7 +106,7 @@ function paeth(a, b, c) {
 
 // Decode an 8-bit, non-interlaced PNG into a flat RGBA buffer. Returns null for
 // anything we cannot decode safely.
-function decodePng(buf) {
+export function decodePng(buf) {
   if (buf.length < 8 || !buf.subarray(0, 8).equals(PNG_SIG)) return null
   let offset = 8
   let width = 0
@@ -183,7 +183,7 @@ function decodePng(buf) {
   return { width, height, rgba }
 }
 
-function encodePng(rgba, width, height) {
+export function encodePng(rgba, width, height) {
   const ihdr = Buffer.alloc(13)
   ihdr.writeUInt32BE(width, 0)
   ihdr.writeUInt32BE(height, 4)
@@ -461,4 +461,4 @@ function run() {
   console.log('')
 }
 
-run()
+if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) run()

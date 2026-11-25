@@ -10,7 +10,10 @@
 
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { readMicrosoftScheduleSource } from './microsoftScheduleSource.ts'
+import { registerExistingInternalVideo } from './existingVideoTracking.ts'
+import { resolveGuidelinePreparation, setPreparedGuidelineMonth } from './guidelinePreparation.ts'
 import { fetchAllRows, fetchAllRowsByIdChunks } from '../_shared/paginatedRows.ts'
+import { withMicrosoftTransitionHealth } from '../../../src/lib/microsoftTransitionHealth.ts'
 import { CG_DYNAMICS_MCP_TOOLS, CG_DYNAMICS_MCP_SECURITY_SCHEMES } from './toolCatalog.ts'
 import { filterCapabilitiesByScope } from './capabilityManifest.ts'
 import {
@@ -487,7 +490,7 @@ async function recordIdempotency(
   audit?: ContextAuditEnvelope,
   result?: unknown,
 ) {
-  if (GUIDELINE_WRITE_TOOLS.has(toolName)) {
+  if (GUIDELINE_WRITE_TOOLS.has(toolName) || toolName === 'register_existing_internal_video') {
     // The deployed private audit table already has result_payload and its read
     // RPC replays it. Insert the original result + dual-principal audit together;
     // never rewrite historical status-only rows or downgrade to a status receipt.
@@ -502,6 +505,16 @@ async function recordIdempotency(
         effective_client_id: audit.effective_client_id,
       } : {}),
     })
+    if (error?.code === '23505' && toolName === 'ensure_content_guideline' && status === 'success') {
+      // A canonical ensure may safely recover its earlier failed preparation.
+      // Upgrade ONLY that exact errored input receipt; successful/legacy/foreign
+      // receipts and other editorial mutations remain immutable.
+      const recovered = await sb.from('mcp_idempotency_log').update({ result_status: status, result_payload: result })
+        .eq('caller_profile_id', callerProfileId).eq('tool_name', toolName)
+        .eq('idempotency_key', idempotencyKey).eq('input_hash', inputHash)
+        .eq('result_status', 'error').select('id').maybeSingle()
+      if (!recovered.error && recovered.data) return
+    }
     if (error) throw new Error('Guideline work may have been saved, but its retry receipt could not be confirmed. Read the existing guideline before any new write; do not create a replacement blindly.')
     return
   }
@@ -756,13 +769,16 @@ const handleListClientSchedule: ToolHandler = async (staff, input) => {
  * Read-only. Raw OneDrive drive/item identifiers and web URLs are deliberately withheld.
  */
 const handleFindContentRuns: ToolHandler = async (staff, input) => {
+  const clientId = (input.client_id as string | undefined) ?? staff.effectiveClientId ?? null
+  const selectionScope = assertRecordClientMatchesContext(staff.contextKind, staff.effectiveClientId, clientId, 'content run selection')
+  if (!selectionScope.allowed) return { error: selectionScope.error }
+
   let query = staff.supabase
     .from('content_runs')
     .select('id, client_id, client_name, name, run_date, start_time, location, status, calendar_event_id')
     .order('run_date', { ascending: false })
     .limit(Math.min(Math.max(Number(input.limit ?? 10), 1), 25))
 
-  const clientId = (input.client_id as string | undefined) ?? staff.effectiveClientId ?? null
   if (clientId) query = query.eq('client_id', clientId)
   if (input.run_date) query = query.eq('run_date', input.run_date)
   if (input.from) query = query.gte('run_date', input.from)
@@ -771,12 +787,14 @@ const handleFindContentRuns: ToolHandler = async (staff, input) => {
 
   // Deliverable -> run: resolve through the guideline video that references the deliverable.
   if (input.deliverable_id) {
-    const { data: ideas, error: ideaError } = await staff.supabase
+    let ideaQuery = staff.supabase
       .from('content_guide_ideas')
       .select('content_guideline_id')
       .eq('deliverable_id', input.deliverable_id)
       .neq('status', 'archived')
       .limit(2)
+    if (clientId) ideaQuery = ideaQuery.eq('client_id', clientId)
+    const { data: ideas, error: ideaError } = await ideaQuery
     if (ideaError) return { error: ideaError.message }
     if ((ideas ?? []).length > 1) {
       return { error: 'More than one active guideline video references that deliverable. Exact Content Run discovery is ambiguous and was refused.' }
@@ -785,12 +803,17 @@ const handleFindContentRuns: ToolHandler = async (staff, input) => {
     if (!guidelineId) {
       return { runs: [], matched_by: 'deliverable_id', note: 'No guideline video references that exact deliverable, so no Content Run could be resolved. Reported rather than guessed.' }
     }
-    const { data: guideline, error: guidelineError } = await staff.supabase
+    let guidelineQuery = staff.supabase
       .from('content_guidelines')
-      .select('content_run_id')
+      .select('content_run_id, client_id')
       .eq('id', guidelineId)
-      .maybeSingle()
+    if (clientId) guidelineQuery = guidelineQuery.eq('client_id', clientId)
+    const { data: guideline, error: guidelineError } = await guidelineQuery.maybeSingle()
     if (guidelineError) return { error: guidelineError.message }
+    if (guideline) {
+      const scope = assertRecordClientMatchesContext(staff.contextKind, staff.effectiveClientId, guideline.client_id, 'content guideline')
+      if (!scope.allowed) return { error: scope.error }
+    }
     if (!guideline?.content_run_id) {
       return { runs: [], matched_by: 'deliverable_id', note: 'The referencing guideline has no linked Content Run.' }
     }
@@ -799,13 +822,39 @@ const handleFindContentRuns: ToolHandler = async (staff, input) => {
 
   const { data: runs, error } = await query
   if (error) return { error: error.message }
+  // Reject a malformed/foreign result before any nested source reads or names,
+  // navigation, folder labels and statuses could escape this Project's client.
+  for (const run of runs ?? []) {
+    const scope = assertRecordClientMatchesContext(staff.contextKind, staff.effectiveClientId, run.client_id, 'content run')
+    if (!scope.allowed) return { error: scope.error }
+  }
 
-  const detailed = await Promise.all((runs ?? []).map(async (run: Record<string, unknown>) => {
+  // Dates filter bookings, not the existence of script preparation. Keep undated
+  // documents separate so an assistant cannot mistake them for a dated shoot.
+  let undatedRuns: Array<Record<string, unknown>> = []
+  let undatedTotal: number | null = null
+  if (clientId && (input.run_date || input.from || input.to) && !input.calendar_event_id && !input.deliverable_id) {
+    const [planning, documents] = await Promise.all([
+      fetchAllRows<Record<string, unknown>>((from, to) => staff.supabase.from('content_runs')
+        .select('id, client_id, client_name, name, run_date, start_time, location, status, calendar_event_id')
+        .eq('client_id', clientId).is('run_date', null).neq('status', 'cancelled').order('id').range(from, to)),
+      fetchAllRows<Record<string, unknown>>((from, to) => staff.supabase.from('content_guidelines')
+        .select('id,client_id,content_run_id,status').eq('client_id', clientId).neq('status', 'archived').order('id').range(from, to)),
+    ])
+    if (planning.error || documents.error) return { error: 'Undated guideline history could not be read completely. Do not conclude that no guideline exists or create a replacement.' }
+    if ([...planning.data, ...documents.data].some(row => row.client_id !== clientId)) return { error: 'Cross-client guideline history refused.' }
+    const ids = new Set(documents.data.map(row => row.content_run_id))
+    const eligible = planning.data.filter(row => row.run_date === null && row.status !== 'cancelled' && ids.has(row.id))
+    undatedTotal = eligible.length
+    undatedRuns = eligible.slice(0, 25)
+  }
+
+  const detailed = await Promise.all([...(runs ?? []), ...undatedRuns].map(async (run: Record<string, unknown>) => {
     const runId = run.id as string
     const [guidelineRes, mappingRes, closeoutRes] = await Promise.all([
-      staff.supabase.from('content_guidelines').select('id, title, month, status, client_id').eq('content_run_id', runId).maybeSingle(),
-      staff.supabase.from('content_run_onedrive_folders').select('drive_id, month_folder_item_id, folder_name, web_url, last_verified_at').eq('content_run_id', runId).maybeSingle(),
-      staff.supabase.from('content_run_closeouts').select('upload_status').eq('content_run_id', runId).maybeSingle(),
+      staff.supabase.from('content_guidelines').select('id, title, month, status, client_id').eq('content_run_id', runId).eq('client_id', run.client_id).maybeSingle(),
+      staff.supabase.from('content_run_onedrive_folders').select('drive_id, month_folder_item_id, folder_name, web_url, last_verified_at').eq('content_run_id', runId).eq('client_id', run.client_id).maybeSingle(),
+      staff.supabase.from('content_run_closeouts').select('upload_status').eq('content_run_id', runId).eq('client_id', run.client_id).maybeSingle(),
     ])
 
     const detailErrors = [guidelineRes.error, mappingRes.error, closeoutRes.error].filter(Boolean)
@@ -829,6 +878,7 @@ const handleFindContentRuns: ToolHandler = async (staff, input) => {
         .from('content_guide_ideas')
         .select('id, title, position, status, deliverable_id, client_id')
         .eq('content_guideline_id', guideline.id)
+        .eq('client_id', run.client_id)
         .order('position', { ascending: true })
       if (ideaRowsError) {
         return {
@@ -837,6 +887,9 @@ const handleFindContentRuns: ToolHandler = async (staff, input) => {
         }
       }
       videos = (ideaRows ?? []) as Array<Record<string, unknown>>
+      if (videos.some(video => video.client_id !== run.client_id)) {
+        return { error: 'A guideline video belongs to a different client. Video navigation was refused.' }
+      }
     }
 
     return {
@@ -868,9 +921,14 @@ const handleFindContentRuns: ToolHandler = async (staff, input) => {
   }))
 
   return {
-    runs: detailed,
+    runs: detailed.slice(0, (runs ?? []).length),
+    undated_preparations: detailed.slice((runs ?? []).length),
+    undated_preparation_count: undatedTotal,
+    undated_preparations_truncated: undatedTotal !== null && undatedTotal > undatedRuns.length,
     matched_by: input.deliverable_id ? 'deliverable_id' : input.calendar_event_id ? 'calendar_event_id' : input.run_date ? 'run_date' : clientId ? 'client' : 'recent',
-    note: detailed.length === 0
+    note: undatedTotal !== null && undatedTotal > 0
+      ? 'Saved undated guidelines appear separately in undated_preparations. They are not bookings or date matches. Inspect their saved videos and use get_content_guideline_share for the client review link; a shoot date, folder or package slot is not a prerequisite. Do not restore a cancelled booking or create another guideline just to share existing scripts.'
+      : detailed.length === 0
       ? 'No Content Run matched those exact criteria. Reported rather than guessed - never substitute a different client or date.'
       : 'One canonical Content Guideline per Content Run. Raw OneDrive identifiers and URLs are internal-only and withheld.',
   }
@@ -1097,9 +1155,19 @@ const handleUpsertCalendarEvent: ToolHandler = async (staff, input) => {
   }
 
   // Client-context pinning: a client Project cannot write another client's event.
+  if (existing) {
+    const existingScope = assertRecordClientMatchesContext(staff.contextKind, staff.effectiveClientId, existing.client_id as string | null, 'existing calendar event')
+    if (!existingScope.allowed) return { error: existingScope.error }
+  }
   const targetClientId = (input.client_id as string | undefined) ?? (existing?.client_id as string | undefined) ?? null
   const scope = assertRecordClientMatchesContext(staff.contextKind, staff.effectiveClientId, targetClientId, 'calendar event')
   if (!scope.allowed) return { error: scope.error }
+  let canonicalClientName: string | undefined
+  if (targetClientId) {
+    const client = await staff.supabase.from('clients').select('id,name,active').eq('id', targetClientId).eq('active', true).maybeSingle()
+    if (client.error || !client.data) return { error: 'The exact active calendar client could not be verified. No event was changed.' }
+    canonicalClientName = client.data.name
+  }
 
   const nowIso = new Date().toISOString()
   const partialSync = !nativeOnly && input.outlook_write_succeeded === false
@@ -1123,6 +1191,7 @@ const handleUpsertCalendarEvent: ToolHandler = async (staff, input) => {
   if (input.assigned_to_name !== undefined) writable.assigned_to_name = input.assigned_to_name
   if (input.client_id !== undefined) writable.client_id = input.client_id
   if (input.client_name !== undefined) writable.client_name = input.client_name
+  if (canonicalClientName !== undefined) writable.client_name = canonicalClientName
   if (!partialSync && effectiveMicrosoftEventId && effectiveMicrosoftCalendarId) {
     writable.microsoft_event_id = effectiveMicrosoftEventId
     writable.microsoft_source_type = 'outlook_calendar'
@@ -1183,7 +1252,7 @@ async function invokeSiblingFunction(
 }
 
 /** Bounded work units per invocation so the Edge time budget is never exceeded. */
-const MAX_SYNC_PROCESS_STEPS = 40
+const MAX_SYNC_PROCESS_STEPS = 4
 
 /**
  * Run the EXISTING durable Microsoft reconciliation (#325 item 1). Drives the canonical
@@ -1250,13 +1319,16 @@ const handleRunMicrosoftSync: ToolHandler = async (staff, input) => {
     lastError ? 'failed' : finished ? (status ?? 'complete') : (status ?? 'running'),
     sources,
   )
+  const collecting = !finished && !lastError && status === 'running' && outcome.sources_failed === 0
 
   return {
     job_id: jobId,
     finished,
     steps_processed: steps,
-    verdict: outcome.verdict,
-    reason: outcome.reason,
+    verdict: collecting ? 'IN_PROGRESS' : outcome.verdict,
+    reason: collecting
+      ? 'The durable preview is still collecting source evidence. Continue with this same job_id. No source failure is recorded; Dynamics mirror freshness is unchanged until reconciliation applies.'
+      : outcome.reason,
     coverage: {
       sources_total: outcome.sources_total,
       sources_complete: outcome.sources_complete,
@@ -1554,10 +1626,21 @@ const handleGetMicrosoftSyncStatus: ToolHandler = async (staff, input) => {
   const runs = data ?? []
   const latest = runs[0] ?? null
   const thresholdMinutes = Number(input.freshness_threshold_minutes ?? 0) || undefined
-  const health = summarizeSyncHealth(latest, new Date().toISOString(), thresholdMinutes)
+  const transition = await staff.supabase.from('microsoft_sync_settings')
+    .select('transition_status,updated_at').eq('id', true).maybeSingle()
+  const health = withMicrosoftTransitionHealth(
+    summarizeSyncHealth(latest, new Date().toISOString(), thresholdMinutes),
+    transition.data?.transition_status, !transition.error && !!transition.data,
+  )
 
   return {
     sync_health: health,
+    collection_status: {
+      state: health.transition_status,
+      observed_at: new Date().toISOString(),
+      changed_at: transition.error ? null : transition.data?.updated_at ?? null,
+      ...(transition.error ? { error: 'Microsoft collection status could not be verified.' } : {}),
+    },
     latest_run: latest,
     recent_runs: runs.map((r: Record<string, unknown>) => ({
       id: r.id, status: r.status, trigger_type: r.trigger_type,
@@ -2183,8 +2266,9 @@ const handleGetMyAssistantBootstrap: ToolHandler = async (staff) => {
       'Attach governed collateral by Drive asset key — never freeze binary IDs into Project Instructions and never use stale/superseded collateral.',
       'DAILY UPDATE CONTRACT: morning = greeting → summary → Today timeline → Work Queue → optional blocker → action prompt. Evening = closing → Done Today → Still Open → Tomorrow → Prep.',
       'PERSONALITY: derived from staff profile (working_preferences, output_preferences, repeated_corrections). Never hardcode tone across staff. Personality belongs in greeting/closing; work body stays operational.',
-      'NATURAL TASK REPLIES: during coexistence, "done", "50%", "waiting on client", "move to Friday", "add note" and "follow up Monday" update the exact live Teams/Planner task first, then run_microsoft_sync refreshes Dynamics. If reconciliation is delayed, report DYNAMICS SYNC PENDING; never duplicate the Microsoft-backed task.',
+      'NATURAL TASK REPLIES: during coexistence, "done", "50%", "waiting on client", "move to Friday", "add note" and "follow up Monday" update the exact live Teams/Planner task first. The existing worker refreshes Dynamics. Staff verify get_microsoft_sync_status and the exact linked task; run_microsoft_sync is company_admin-only, so never switch identity to invoke it. If reconciliation is delayed, report DYNAMICS SYNC PENDING; never duplicate the Microsoft-backed task or repeat a successful Microsoft write.',
       'CONTENT-RUN CLOSEOUT: When a staff member had client shoots/content runs that day, use get_content_run_plan to retrieve the canonical shot list, then collect per-client field updates, reconcile planned vs captured items, record missed/cancelled items with reasons, capture field notes, flag reshoots, verify OneDrive upload status and write approved updates to Dynamics via close_content_run. Never ask staff to recreate a plan already in Dynamics. Never mark closeout complete if upload is missing/partial/unverified.',
+      'GUIDELINE PREPARATION: When staff needs a content guideline, use ensure_content_guideline with the exact client and content month if no run is known. It reuses saved planning or prepares one undated run/draft; a shoot booking, package slot and production folder are not prerequisites for writing or sharing scripts. Never create a fake booking or tell staff to create a blank run manually. A saved calendar content-run event can instead be supplied by exact calendar_event_id. Ask only for a genuinely missing client/month or which of multiple real shoots is intended. Verify saved wording; when staff requests the client link, publish the saved guideline for review and verify client_share_url. Calendar changes still use the existing exact-staff/company-admin operational action and real requested date/time; never claim an undated plan booked a shoot.',
       'ONEDRIVE UPLOAD GATE: For every content run, use verify_content_run_upload to inspect the exact mapped client/content-run folder. If footage is missing/partial/unverified, keep the item unresolved and give the staff member the exact next action. After staff approval, use update_closeout_upload_status; it performs a fresh authorised inspection and persists only that evidence. Staff self-report alone always remains unverified.',
     ],
     message: profile
@@ -3219,7 +3303,7 @@ async function loadGuidelineVideos(staff: AuthenticatedStaff, guidelineId: strin
 async function ensureGuideline(staff: AuthenticatedStaff, scope: ContentRunScope, allowCreate = false) {
   const existing = await staff.supabase
     .from('content_guidelines')
-    .select('id, content_run_id, client_id, title, month, coverage_start, coverage_end, status')
+    .select('id, content_run_id, client_id, title, month, coverage_start, coverage_end, status, updated_at')
     .eq('content_run_id', scope.runId)
     .maybeSingle()
   if (existing.error) return { error: existing.error.message }
@@ -3257,8 +3341,19 @@ async function loadRunGuideline(staff: AuthenticatedStaff, runId: string, allowC
 }
 
 const handleEnsureContentGuideline: ToolHandler = async (staff, input) => {
-  const loaded = await loadRunGuideline(staff, input.content_run_id as string, true)
-  if ('error' in loaded) return { error: loaded.error }
+  if ([input.content_run_id, input.calendar_event_id, input.month].filter(value => value !== undefined).length !== 1) {
+    return { error: 'Use one exact Content Run, one saved calendar event, or the client content month. No shoot date is needed for preparation.' }
+  }
+  const preparation = input.content_run_id === undefined ? await resolveGuidelinePreparation(staff, input) : null
+  if (preparation && 'error' in preparation) return preparation
+  const runId = preparation?.runId ?? input.content_run_id as string
+  const loaded = await loadRunGuideline(staff, runId, true)
+  if ('error' in loaded) return { error: loaded.error, content_run_id: runId, message: 'Re-use this saved run when retrying guideline preparation; no replacement booking is needed.' }
+  if (preparation) {
+    const covered = await setPreparedGuidelineMonth(staff, loaded.guideline, preparation.requestedMonth)
+    if ('error' in covered) return { ...covered, content_run_id: runId }
+    loaded.guideline = covered.guideline
+  }
   return {
     ...buildGuidelineNavigation(loaded.guideline.id, loaded.scope.clientId, loaded.scope.runId),
     content_run_id: loaded.scope.runId,
@@ -3268,6 +3363,9 @@ const handleEnsureContentGuideline: ToolHandler = async (staff, input) => {
     title: loaded.guideline.title,
     coverage_start: loaded.guideline.coverage_start ?? null,
     coverage_end: loaded.guideline.coverage_end ?? null,
+    month: loaded.guideline.month ?? null,
+    booking_state: loaded.scope.runDate ? 'dated_run' : 'unbooked_preparation',
+    run_date: loaded.scope.runDate,
     created: loaded.created,
     video_count: loaded.videos.length,
     note: loaded.created
@@ -3392,8 +3490,14 @@ const handleGetContentVideoReadiness: ToolHandler = async (staff, input) => {
 const handleAddContentGuidelineVideo: ToolHandler = async (staff, input) => {
   const loaded = await loadRunGuideline(staff, input.content_run_id as string, true)
   if ('error' in loaded) return { error: loaded.error }
+  if (input.client_id !== undefined && input.client_id !== loaded.scope.clientId) {
+    return { error: 'The routing client does not match this content run.' }
+  }
   const fields = { ...input }
   delete fields.content_run_id
+  // The dispatcher pins client Projects to their exact client. That proven
+  // routing scope is not an editable video field; ownership comes from the run.
+  delete fields.client_id
   const validated = validateNewVideo(fields)
   if (!validated.ok) return { error: validated.error }
   const position = loaded.videos.reduce((max, video) => Math.max(max, Number(video.position ?? 0)), 0) + 1
@@ -3442,7 +3546,12 @@ async function resolveVideoScope(staff: AuthenticatedStaff, videoId: string) {
 const handleUpdateContentGuidelineVideo: ToolHandler = async (staff, input) => {
   const resolved = await resolveVideoScope(staff, input.content_guide_idea_id as string)
   if ('error' in resolved) return { error: resolved.error }
-  const validated = validateVideoPatch(input)
+  if (input.client_id !== undefined && input.client_id !== resolved.video.client_id) {
+    return { error: 'The routing client does not match this guideline video.' }
+  }
+  const fields = { ...input }
+  delete fields.client_id
+  const validated = validateVideoPatch(fields)
   if (!validated.ok) return { error: validated.error }
   const { data, error } = await staff.supabase
     .from('content_guide_ideas')
@@ -3576,6 +3685,7 @@ const handleRevokeContentGuidelineShare: ToolHandler = (staff, input) => manageG
 // ── Tool Router ─────────────────────────────────────────────────────────────
 
 const WRITE_TOOLS = new Set([
+  'register_existing_internal_video',
   'submit_monthly_strategy_draft',
   'amend_monthly_strategy_draft',
   'create_task',
@@ -3617,6 +3727,7 @@ const CANONICAL_RECEIPT_REPLAY_TOOLS = new Set([
 ])
 
 const toolHandlers: Record<string, ToolHandler> = {
+  register_existing_internal_video: registerExistingInternalVideo,
   publish_content_guideline: handlePublishContentGuideline,
   get_content_guideline_share: handleGetContentGuidelineShare,
   revoke_content_guideline_share: handleRevokeContentGuidelineShare,
@@ -3783,6 +3894,10 @@ async function handleToolsCall(
     if (existing.duplicate) {
       const conflict = (existing.result as { status?: string } | undefined)?.status === 'conflict'
       const previousError = (existing.result as { status?: string } | undefined)?.status === 'error' || isMcpErrorResult(existing.result)
+      if (toolName === 'register_existing_internal_video' && !conflict && !previousError
+        && typeof (existing.result as { id?: unknown } | undefined)?.id !== 'string') {
+        return jsonRpcError(id, -32603, 'Video tracking receipt has no original record ID. Read the Pipeline before any new write.')
+      }
       if (GUIDELINE_WRITE_TOOLS.has(toolName) && !conflict && !previousError
         && !ownsGuidelineWriteReceipt(existing.result, toolName, staff.profileId, canonicalIdempotencyKey)) {
         const nextRead = typeof toolInput.content_run_id === 'string'
@@ -3794,7 +3909,10 @@ async function handleToolsCall(
           next_read: nextRead, _context: audit,
         }) }], isError: true })
       }
-      if (operationalCreate && !conflict && !ownsOperationalReceipt(toolName, existing.result, { actorId: staff.profileId, key: canonicalIdempotencyKey })) {
+      if (toolName === 'ensure_content_guideline' && previousError && !conflict) {
+        // Retry the exact idempotent ensure against current canonical records.
+        // A transient source failure must not trap staff in a cached error loop.
+      } else if (operationalCreate && !conflict && !ownsOperationalReceipt(toolName, existing.result, { actorId: staff.profileId, key: canonicalIdempotencyKey })) {
         return jsonRpcError(id, -32603, 'Legacy operational receipt has no original record projection. Re-read before creating any replacement; do not retry with a new key blindly.')
       } else if (CANONICAL_RECEIPT_REPLAY_TOOLS.has(toolName) && !conflict) {
         replayThroughCanonicalKey = true

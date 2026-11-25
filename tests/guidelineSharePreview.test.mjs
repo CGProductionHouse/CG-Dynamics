@@ -8,7 +8,7 @@ const token='a'.repeat(64), slug='germoparts-content-guideline'
 const url=`https://www.cgdynamics.co.za/guidelines/${slug}/${token}`
 const snapshot={client:{name:'Germoparts',privateEmail:'PRIVATE CONTACT'},guide:{month:'2026-11-01',published_at:'2026-11-09T10:24:27.044Z',videos:[{script:'PRIVATE FULL SCRIPT'},{script:'SECOND SCRIPT'},{},{}],internal_notes:'PRIVATE NOTE'}}
 const template='<html><head><title>CG Dynamics</title></head><body><div id="root"></div><script type="module" src="/assets/app.js"></script></body></html>'
-const make=(fetchSnapshot=async()=>snapshot)=>createGuidelinePreviewHandler({loadTemplate:async()=>template,fetchSnapshot,logoForClient:name=>name==='Germoparts'?'/client-logos/germoparts.png':null})
+const make=(fetchSnapshot=async()=>snapshot)=>createGuidelinePreviewHandler({loadTemplate:async()=>template,fetchSnapshot,logoForClient:name=>name==='Germoparts'?'/client-preview-logos/germoparts-0123456789abcdef.png':null})
 
 test('reproduced generic SPA preview is replaced in initial HTML with the exact client, month, count and logo',async()=>{
   assert.equal(template.includes('og:title'),false)
@@ -17,7 +17,9 @@ test('reproduced generic SPA preview is replaced in initial HTML with the exact 
   assert.match(html,/<title>Germoparts · Content Guideline<\/title>/)
   assert.match(html,/<meta property="og:title" content="Germoparts · Content Guideline"/)
   assert.match(html,/November 2026 · 4 videos. Ready for your review/)
-  assert.match(html,/https:\/\/www.cgdynamics.co.za\/client-logos\/germoparts.png/)
+  assert.match(html,/https:\/\/www.cgdynamics.co.za\/client-preview-logos\/germoparts-0123456789abcdef.png/)
+  assert.match(html,/property="og:image:width" content="1200"/)
+  assert.match(html,/property="og:image:height" content="630"/)
   assert.match(html,/<div id="root"><\/div><script type="module" src="\/assets\/app.js"><\/script>/)
   assert.doesNotMatch(html,/PRIVATE|SECOND SCRIPT|internal_notes|privateEmail/)
 })

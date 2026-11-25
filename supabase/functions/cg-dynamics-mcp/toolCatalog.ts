@@ -107,8 +107,26 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
     dependency: 'main', canonicalContract: 'profiles + clients canonical registry (#319)',
   },
   {
+    name: 'register_existing_internal_video', title: 'Track an existing internal video (admin)',
+    description: 'Company-admin only. Register ONE genuinely existing private edit or internal delivery in the canonical Video Pipeline using its exact active client, release month, actual filename/stable identity, full SHA-256, revision, responsible editor and handoff evidence. Read complete client history including archived films first. Reuses staff Pipeline registration and duplicate/readback guards. A verified local export may be tracked with source_device/source_path while online filing is pending; never put a local path in media_url. Does not create a shoot, guideline, schedule slot, file copy, approval or publication. Existing matches must be reconciled, never overwritten or duplicated.',
+    inputSchema: objectSchema({
+      client_id: uuid, month: { type: 'string', pattern: '^\\d{4}-(0[1-9]|1[0-2])$' },
+      title: { type: 'string' }, identity: { type: 'string', description: 'Actual stable MP4 stem, uppercase without revision/extension. Preserve existing legacy naming.' },
+      filename: { type: 'string' }, sha256: { type: 'string', pattern: '^[a-fA-F0-9]{64}$' },
+      revision: { type: 'string' }, editor_name: { type: 'string' },
+      media_url: { type: 'string', description: 'Exact ordinary HTTPS private media/package link, if already filed.' },
+      source_device: { type: 'string', description: 'Exact verified workstation when the internal export has not been filed online.' },
+      source_path: { type: 'string', description: 'Exact existing Windows MP4 path on that workstation. Private evidence text only.' },
+      evidence_url: { type: 'string', description: 'Ordinary HTTPS reference to the existing handoff/project evidence.' },
+      evidence: { type: 'string', description: 'Source, delivery date, recipient, revision/hash verification and what remains unverified.' },
+      evidence_kind: { enum: ['private_edit', 'internal_delivery'] }, idempotency_key: idempotencyKeySchema,
+    }, ['client_id', 'month', 'title', 'identity', 'filename', 'sha256', 'revision', 'editor_name', 'evidence_url', 'evidence', 'evidence_kind', 'idempotency_key']),
+    annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
+    dependency: 'main', canonicalContract: 'content_guide_ideas + existingVideoRegistration canonical staff Pipeline contract; no schedule/approval/publication',
+  },
+  {
     name: 'get_microsoft_sync_status', title: 'Get Microsoft sync status',
-    description: 'Read the latest Microsoft to Dynamics reconciliation health, status, source completeness and freshness. Call this BEFORE relying on Dynamics task/calendar mirrors in a daily brief; never assume a scheduled job ran. Read-only: it reports state and triggers nothing.',
+    description: 'Read the current collection lifecycle (active/paused/complete/unverified) plus latest Microsoft to Dynamics reconciliation health, status, source completeness and freshness. Active collection is separate from a fresh or fully reconciled mirror. Call this BEFORE relying on Dynamics task/calendar mirrors in a daily brief; never assume a scheduled job ran. Read-only: it reports state and triggers nothing.',
     inputSchema: objectSchema({ history_limit: { type: 'integer', minimum: 1, maximum: 20 }, freshness_threshold_minutes: { type: 'integer', minimum: 1 } }),
     annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
     dependency: 'main', canonicalContract: 'microsoft_sync_runs canonical reconciliation history (#325)',
@@ -147,7 +165,7 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   },
   {
     name: 'run_microsoft_sync', title: 'Run Microsoft reconciliation',
-    description: 'Company-admin only. Runs the EXISTING durable Microsoft reconciliation PREVIEW job (job_start then bounded job_process units), returning PASS/DEGRADED/FAIL with per-source completeness. It fetches Microsoft truth but does not claim Dynamics mirrors were applied or fresh. It cannot auto-apply Client Schedule/monthly_deliverables decisions and never changes MASTER CLIENT TO DO or protected Client Socials plans. If unfinished, call again with the returned job_id.',
+    description: 'Company-admin only. Runs the EXISTING durable Microsoft reconciliation PREVIEW job (job_start then bounded job_process units), returning IN_PROGRESS while safely collecting, or PASS/DEGRADED/FAIL after the bounded preview step. Each call processes at most four source units; continue the same job_id. Per-source completeness is explicit. It fetches Microsoft truth but does not claim Dynamics mirrors were applied or fresh. It cannot auto-apply Client Schedule/monthly_deliverables decisions and never changes MASTER CLIENT TO DO or protected Client Socials plans. If unfinished, call again with the returned job_id.',
     inputSchema: objectSchema({
       job_id: { type: 'string', description: 'Resume an in-flight job returned by a previous call.' },
       range_start: { type: 'string' }, range_end: { type: 'string' },
@@ -189,7 +207,7 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   },
   {
     name: 'find_content_runs', title: 'Find Content Runs',
-    description: 'Find exact Content Runs by date, date range, client, CG Calendar event or monthly deliverable, and return the linked canonical Content Guideline, ordered videos, Client Schedule linkage counts, OneDrive readiness and upload status. Lets Morning Ops and Franco EOD work without guessing a Content Run ID. Read-only; raw OneDrive drive/item identifiers and URLs are never returned. Returns guideline_url for the exact saved document and, when resolved, content_run_url. When asked for the Dynamics link, return guideline_url as a clickable staff review link (staff sign-in required); never invent URLs or present a draft as client-published. Read list_content_guideline_videos after edits to verify saved content.',
+    description: 'Find exact Content Runs by date, date range, client, CG Calendar event or monthly deliverable, and return the linked canonical Content Guideline, ordered videos, Client Schedule linkage counts, OneDrive readiness and upload status. Available in internal client Projects, automatically pinned to that exact client; no staff-context switch is needed for guideline discovery. Lets Morning Ops and Franco EOD work without guessing a Content Run ID. With an exact client and date filters, saved undated guidelines are returned separately in undated_preparations; they are not bookings or date matches. Inspect these before concluding no guideline exists. Use get_content_guideline_share for an existing client review link; no booked shoot is required. Read-only; raw OneDrive drive/item identifiers and URLs are never returned. Returns guideline_url for the exact saved document and, when resolved, content_run_url. When asked for the Dynamics link, return guideline_url as a clickable staff review link (staff sign-in required); never invent URLs or present a draft as client-published. Read list_content_guideline_videos after edits to verify saved content.',
     inputSchema: objectSchema({
       client_id: uuid, run_date: date, from: date, to: date,
       calendar_event_id: uuid, deliverable_id: uuid,
@@ -527,8 +545,13 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   },
   {
     name: 'ensure_content_guideline', title: 'Ensure content guideline',
-    description: '#450. Return the ONE canonical Content Guideline for an exact Content Run, creating the draft document if it does not exist yet. Idempotent: a run always has exactly one guideline, and an existing guideline is returned untouched — never duplicated, never reset. Staff should never have to create a blank guideline by hand. Returns guideline_url for the exact saved document and, when resolved, content_run_url. When asked for the Dynamics link, return guideline_url as a clickable staff review link (staff sign-in required); never invent URLs or present a draft as client-published. Read list_content_guideline_videos after edits to verify saved content.',
-    inputSchema: objectSchema({ content_run_id: uuid, idempotency_key: idempotencyKeySchema }, ['content_run_id', 'idempotency_key']),
+    description: '#450. Prepare or return the canonical saved guideline. Supply ONE of content_run_id, an exact saved content-run calendar_event_id, or month (YYYY-MM) with the exact client. In a client Project the client is automatically pinned. If staff needs a guideline before a shoot is booked, use client + month: reuse the existing monthly document/run or create ONE undated planning workspace and draft. A shoot date, calendar event, package slot or production folder is NOT required to author or share a guideline. Never ask staff to create a blank run manually or book a fake shoot. Existing wording, scripts and publications are preserved; retries reuse the original document. Multiple real candidates return their saved identities for disambiguation. Return guideline_url for staff; when staff asks for the client review link, publish the saved scripts through publish_content_guideline and verify client_share_url. Preparation never books a shoot, approves content, changes packages or writes Client Schedule.',
+    inputSchema: {
+      ...objectSchema({ content_run_id: uuid, calendar_event_id: uuid, client_id: uuid,
+        month: { type: 'string', pattern: '^\\d{4}-(0[1-9]|1[0-2])(?:-01)?$', description: 'Requested content coverage month, not a fabricated shoot date.' },
+        idempotency_key: idempotencyKeySchema }, ['idempotency_key']),
+      oneOf: [{ required: ['content_run_id'] }, { required: ['calendar_event_id'] }, { required: ['month'] }],
+    },
     annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false, idempotentHint: true },
     dependency: '#450', canonicalContract: 'get_or_create_content_guideline_as_actor service-only RPC with server-resolved workforce actor (one guideline per run)',
   },

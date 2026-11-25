@@ -344,6 +344,7 @@ export interface MicrosoftSyncRunSummary {
   triggerType: 'admin' | 'agent'
   snapshotExportedAt: string
   summary: Partial<MicrosoftReconciliationSummary> & {
+    automatic?: boolean
     reviewed?: number
     applied?: number
     previouslyApplied?: number
@@ -434,11 +435,14 @@ export async function loadMicrosoftSyncState(): Promise<MicrosoftSyncStateResult
     supabase.from('microsoft_sync_runs').select('id, status, trigger_type, snapshot_exported_at, summary, source_completeness, safe_error, created_at, finished_at, preview_job_id, retry_of_run_id, reviewed_items').order('created_at', { ascending: false }).limit(12),
   ])
   const missing = [settings.error, runs.error].some(error => error?.code === '42P01' || error?.code === '42703')
-  if (missing) return { transitionStatus: 'active', runs: [], migrationNeeded: true, error: null }
+  if (missing) return { transitionStatus: 'paused', runs: [], migrationNeeded: true, error: null }
   const error = settings.error ?? runs.error
   if (error) return { transitionStatus: 'paused', runs: [], migrationNeeded: false, error: error.message }
+  if (!settings.data || !['active', 'paused', 'complete'].includes(String(settings.data.transition_status))) {
+    return { transitionStatus: 'paused', runs: [], migrationNeeded: false, error: 'Microsoft collection status could not be verified. No active collection is assumed.' }
+  }
   return {
-    transitionStatus: (settings.data?.transition_status as MicrosoftTransitionStatus | undefined) ?? 'active',
+    transitionStatus: settings.data.transition_status as MicrosoftTransitionStatus,
     runs: (runs.data ?? []).map(row => ({
       id: row.id as string,
       status: row.status as MicrosoftSyncRunSummary['status'],
