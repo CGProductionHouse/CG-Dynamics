@@ -1,6 +1,45 @@
 # Bloem Marble & Granite — January 2027 working proofs
 
-## Current owner pivot — architectural luxury and campaign variety
+## Current continuation — DP01 R8 saved; source-scope answer pending
+
+DP01 now **SEE IT / IN YOUR / LIGHT** in the same DAHb7sgsbpk, with genuine
+installed-stone photograph0L8A5635, conservative colour preparation, proportional
+material-focused crop, independent local tonal control, exact original logo and
+four live Gotham/Inter text elements. Not generated/reconstructed client media.
+Actual2160x2700 Canva PNG High2x inspected; final crop gives stone more prominence,
+headline leading is optically tighter, support copy30px, logo anchored to the
+photographed outer corner. Important frames have at least78px inset. Metadata-clean
+derivative proves identical decoded pixels; no embedded ICC in the Canva export,
+so no certified-sRGB claim. Final artifact hash:
+`e6815fd1dc41e5987bd390797005f86dddac6b6013123f79191505dc90411296`.
+
+Saved new unsigned caption matches notes exactly. Saved DP02/03/04 and their
+captions remain exact. Existing native checker passes all four pages:17texts,
+four exact logos,64px review inset, zero findings. Actual phone-size grid and
+original/finished/final comparison retained privately in `luxury-r4/spatial-r8/`.
+The four-file private working review pack includes DP04 as **reference only**;
+all manifest `sendAllowed` values remain false, and no full-set replay is allowed.
+
+Freshness is still explicit, not presumed:5635 has no suspected exact match in
+73master/138actualsocial images, but belongs to a kitchen already represented in
+the queue. CA was asked whether a new photograph from a previously featured
+project is allowed, or only entirely unseen projects. **Answer pending.** Do not
+infer approval from elapsed time or the internal save. Source files are cached;
+do not re-download/restart this proof on continuation.
+
+Reading all34 active-queue notes also caught an existing page21 edge/corner
+message. The initial edge concept was therefore changed before the saved caption
+to practical lighting-selection advice. Useful supplier guidance was checked at
+[London Stone Company](https://londonstone.au/?p=202832); no supplier capabilities,
+stock or material identity are transferred to Bloem. January Client Schedule read
+returned zero **scheduled-date** rows, not proof that undated work is absent.
+
+Working art is available; source-scope, reviewed pack, cycle allocation and human
+creative approval are separate gates. No R6/R7/R8 WhatsApp send, master merge,
+publication, deployment or new spend. Older R8 full-width-crop export is superseded
+by `DP01-R8-MATERIAL-FINAL-HD.png` in the current private selector.
+
+## Earlier owner pivot — architectural luxury and campaign variety
 
 CA requests a stronger architectural/specifier-facing identity and genuinely
 different stories, not four repeated stone panels. All further media sends are
@@ -334,8 +373,9 @@ preserves the staff strategy and records the actual proof/holds. Guide unchanged
 ## Next work and holds — current architectural refinement
 
 R3 is rejected; its old insertion request is obsolete. Current working design is
-DAHb7sgsbpk, DP02 R6 and DP03 R7, with DP01 still requiring a new cleared spatial
-story. A full-bleed fabrication DP01 test was actually inspected and cancelled:
+DAHb7sgsbpk, DP01 R8, DP02 R6 and DP03 R7, with DP01's broader-project eligibility
+awaiting the source-scope answer above. A full-bleed fabrication DP01 test was
+actually inspected and cancelled:
 too industrial for this brief, despite successful native edits. Do not promote
 that prototype or a repeated material-panel mechanism as the final campaign.
 Additional selected library kitchen/craft/bathroom originals yielded positive

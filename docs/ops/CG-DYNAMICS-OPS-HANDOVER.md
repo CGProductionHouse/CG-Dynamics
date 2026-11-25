@@ -1,4 +1,25 @@
-## 25 November latest — Bloem architectural-luxury owner pivot
+## 25 November latest — Bloem DP01 R8 working art complete; source-scope pending
+
+Same #948/draft#956 lane, same DAHb7sgsbpk workbench. DP01 now SEE IT / IN YOUR /
+LIGHT using original0L8A5635 installed stone, conservative colour preparation,
+material-focused crop, independent local tonal control and four live text layers.
+Actual2160x2700 High2x exported/inspected; metadata-clean pixels identical.
+Hash e6815fd1dc41e5987bd390797005f86dddac6b6013123f79191505dc90411296.
+Unsigned caption saved/read back. DP02/03/04 unchanged exactly. Four-page native
+check passes17texts/four logos/64px inset; DP01 important frames at least78px.
+
+Exact-frame scans:73master/138actualsocial, zero errors/suspected matches. Broader
+kitchen project already represented: CA clarification pending on new original
+versus entirely unseen-project eligibility. No inferred answer/send. Full34-page
+queue-note audit caught existing page21 edge message; draft changed to lighting.
+January scheduled-date rows0; undated/legacy work excluded. No invented allocation.
+Private current selector and four-file working-review pack are under Bloem
+discovery/luxury-r4/spatial-r8; DP04 reference-only, all sends held. Preserve cached
+sources and all73 master pages. Reviewed pack/human approval/normal-company-
+ChatGPT qualification remain separate. R0; no desktop takeover, production/SQL/
+deployment, new dependency, Nolan change or guessed Control Centre write.
+
+## Earlier 25 November — Bloem architectural-luxury owner pivot
 
 Actual2x Canva DP02/03 exports inspected; DP03 unsigned caption matches saved
 notes and its final logo anchor is beside the lower conversation block. Saved

@@ -27,6 +27,16 @@ support one concept where authorised; it is never evidence of a real client
 project, showroom, available material or partnership. Historical professional
 visits do not establish a current event, accreditation or recurring programme.
 
+Check queued presenter notes as well as actual art before committing a new
+concept. On25November Bloem's unused-frame edge draft duplicated the existing
+page21 edge/corner message; it was changed to room-lighting selection advice.
+Record exact-frame, broader project/shoot and concept repetition separately.
+A different frame does not clear a repeated project, but a project flag is not
+proof that the exact photograph was already published. Apply the actual cycle
+rule and verified allocations; clarify ambiguous scope instead of inventing a
+lifetime ban on every previously photographed project. Keep sends held while a
+required source decision is pending; continue reversible design/export work.
+
 25 November rejection follow-up: a logo must have an explicit compositional
 anchor (shared edge, column or deliberate optical relationship), not simply fit
 inside a safe-area box. If a backing is needed, inspect visible logo ink and
