@@ -1,0 +1,145 @@
+{
+  "status": "APPROVAL_CONSUMED_ROLLED_OUT_SEE_RECEIPT",
+  "pr": 991,
+  "branch": "codex/social-publishing-220",
+  "base_revision": "5372506db3db9334eea99831d4743c2f90d8785e",
+  "main_rechecked": "b524a9f91d61a5727db355194db2a988594b8af1",
+  "project_id": "ehtjfntukiwbgptqgbzy",
+  "live_worker": {
+    "version": 66,
+    "files": 36,
+    "bundle_sha256": "cb88de18abacefc2120fcac03b45f9b3d6de975af3414d2c479a1c03dc7830c1",
+    "mutated": false
+  },
+  "candidate": {
+    "file_count": 37,
+    "existing_changed": 1,
+    "preserved": 35,
+    "added": 1,
+    "verify_jwt": false,
+    "import_map": false,
+    "payload_sha256": "82438af777a56aabf9b15276eeba01403eff13472048fd7ea96ed96ac7a0691f",
+    "private_payload": "C:/Users/chris/.codex/artifacts/social-publishing-991/2026-11-25/worker-auth-qualification/signed-proof/worker.payload.json",
+    "source_and_payload_byte_parity": true
+  },
+  "protocol": {
+    "algorithm": "HMAC-SHA256",
+    "key_format": "fresh random256bit lowercase64hex as UTF8; no actual key created",
+    "edge_key": "BACKGROUND_WORKER_INVOCATION_SECRET",
+    "vault_key": "cg_background_worker_invocation_secret",
+    "message": "cg-background-worker:v1\nPOST\n<unix-seconds>",
+    "timestamp_header": "X-CG-Worker-Timestamp",
+    "signature_header": "X-CG-Worker-Signature",
+    "max_age_seconds": 90,
+    "max_future_skew_seconds": 15,
+    "single_use": false,
+    "base_key_queued": false,
+    "residual": "Readers of current queued proofs can replay inside freshness window, and continuing queue readers may obtain subsequent proofs. Durable job leases/fingerprints/reconciliation remain necessary."
+  },
+  "cron": {
+    "id": 1,
+    "name": "cg-background-worker",
+    "existing_command_md5": "a432533625dcb8db3cd10c3c7e518e69",
+    "schedule": "* * * * *",
+    "active": true,
+    "timeout_ms": 30000,
+    "username": "postgres",
+    "database": "postgres",
+    "only_targeting_worker_job_verified": true,
+    "change": "only exact existing command",
+    "schema_changes": 0,
+    "permission_changes": 0
+  },
+  "qualification": {
+    "full_node_suite": {
+      "files": 399,
+      "tests": 5148,
+      "pass": 5109,
+      "fail": 0,
+      "skipped": 39
+    },
+    "full_suite_receipt": "C:/Users/chris/.codex/artifacts/social-publishing-991/2026-11-25/worker-auth-qualification/signed-proof/suite-receipt.json",
+    "environment_corrections": [
+      "Test-only loopback Vite define isolates hardcoded broker fixture origin",
+      "11 initial SES failures resolved with existing Git Bash in process-only PATH; all12 SES checks pass, no source/system setting changes; initial logs retained"
+    ],
+    "new_isolated_postgres": {
+      "tests": 13,
+      "pass": 13,
+      "fail": 0,
+      "skipped": 0,
+      "real_pgcrypto": true,
+      "real_network": false,
+      "ports": "fixture cron/Vault/net in owned network-none PostgreSQL",
+      "log": "C:/Users/chris/.codex/artifacts/social-publishing-991/2026-11-25/worker-auth-qualification/hmac-postgres.tap"
+    },
+    "focused_http_queue_library": 33,
+    "native_deno": "PASS exact37file candidate",
+    "build": "PASS tsc and Vite7.3.6",
+    "app_bearing_bundle": "PASS17 emitted chunks include Client Schedule",
+    "scoped_eslint": "PASS new helper and three changed tests",
+    "diff": "PASS",
+    "browser_phone_native_provider": "NOT_PERFORMED server-only increment",
+    "native_facebook_publication": false
+  },
+  "caller_impact": "Browser fire-and-forget nudge receives refusal; RLS enqueue/read and minute cron remain; up to next tick delay",
+  "rollout": "New exact approval -> fresh preflight -> ONE private key in Edge/Vault with private parity -> guarded cron command -> exact37file worker LAST -> independent byte readback, anonymous refusal and natural signed HTTP completion/worker outcome",
+  "rollback": "No automatic security downgrade. Restoring v66 reopens anonymous invocation and requires explicit emergency approval. Preserve signed caller, keys, jobs and audit; never replay uncertain posts.",
+  "preserved": {
+    "publishing": "OFF",
+    "confirmation": "OFF",
+    "microsoft": "HOLD",
+    "teams": "Scheduling authority",
+    "other_owner_lanes": true,
+    "other_functions": true,
+    "vercel_actions": 0,
+    "dependencies_changed": 0,
+    "keys_created": 0,
+    "production_writes": 0
+  },
+  "proposal_files": [
+    {
+      "name": "supabase/functions/background-worker/index.ts",
+      "sha256": "d91dcd88b989e45ddb63aa1efd930c74558838753f21706147ae5ec2ce9aae38",
+      "repository_lf_sha256": "7c3dc5d0c4ad17b9aebf88bcab7f65b72940b1399d5eef1dd7c79944b9332bfe"
+    },
+    {
+      "name": "supabase/functions/_shared/backgroundWorkerInvocation.ts",
+      "sha256": "2f4462b7c71d7d07dc49c953bea9b3966cd830e8a966a793506bd71ecfdaacca",
+      "repository_lf_sha256": "2f4462b7c71d7d07dc49c953bea9b3966cd830e8a966a793506bd71ecfdaacca"
+    },
+    {
+      "name": "tests/backgroundWorkerInvocation.test.mjs",
+      "sha256": "ce1daee19d68f27480ddbd15219e6981a93f4fe591048d3e6bfbb7a0a8c95090",
+      "repository_lf_sha256": "ce1daee19d68f27480ddbd15219e6981a93f4fe591048d3e6bfbb7a0a8c95090"
+    },
+    {
+      "name": "tests/backgroundWorkerCronPostgres.test.mjs",
+      "sha256": "ee8a19aa83104ff3cb8f84f05ab799105a4a5e26565871fb016ea238ee943a52",
+      "repository_lf_sha256": "ee8a19aa83104ff3cb8f84f05ab799105a4a5e26565871fb016ea238ee943a52"
+    },
+    {
+      "name": "tests/clientPortalLibraryTruth.test.mjs",
+      "sha256": "8f1b11629e90af4cbca82124b2b2f1287c356fc8f258fe92a06bebc6ac8747e1",
+      "repository_lf_sha256": "e285ec25ba127341f68911b6d85465e81eed2c8a35cf86f60a7a6d9d35a0f378"
+    },
+    {
+      "name": "docs/ops/approvals/BACKGROUND-WORKER-AUTH-CRON-2026-11-24.sql",
+      "sha256": "553e9ec56be9e21b2ec4c8aba414835049b6af80410cf01369262f81e4c6deed",
+      "repository_lf_sha256": "553e9ec56be9e21b2ec4c8aba414835049b6af80410cf01369262f81e4c6deed"
+    },
+    {
+      "name": "docs/ops/approvals/BACKGROUND-WORKER-AUTH-2026-11-25.md",
+      "sha256": "568dc536e2c46eae6afd03a6f75758e45003ba51f51654879bac7dca84a4cfea",
+      "repository_lf_sha256": "568dc536e2c46eae6afd03a6f75758e45003ba51f51654879bac7dca84a4cfea"
+    }
+  ],
+  "previous_static_header_packet": "REJECTED_DO_NOT_RELEASE; retained privately",
+  "remaining_native_gate": "Exact approved future Cape original JPEG/caption/SAST time, fresh Teams/native duplicate and app-review evidence; separate account activation and ONE-post approval",
+  "google_control_centre": "Exact target unidentified; no guessed write",
+  "hash_scope": "sha256 is qualified working/payload bytes; repository_lf_sha256 accounts for Git text normalization. Frozen private payload SHA is authoritative for any approved release; never normalize preserved hosted files.",
+  "historical_qualification_revision": "f9425e8c82795e3af549684b224ca03e8e53854d",
+  "actual_release_receipt": "BACKGROUND-WORKER-AUTH-2026-11-25-RECEIPT.json",
+  "compatibility_note": "Historical proposal hashes retained. Actual runtime payload unchanged; protected-cron serializable compatibility correction and15-test receipt are recorded in the live receipt.",
+  "historical_record_notice": "Original live_worker, protocol, qualification, proposal_files and preserved fields are the pre-approval f9425e8c snapshot, not current production state. Use actual_release_receipt for current key/cron/worker state; do not regenerate or redeploy."
+}

@@ -1,0 +1,376 @@
+{
+  "status": "DEPLOYED_VERIFIED_PUBLISHING_DISABLED",
+  "approved_pr": 991,
+  "approved_revision": "9f61eb90c9deff4ac85db5e22c26e2c5a20a7a9a",
+  "runtime_source_revision": "3ba39e72c9f952e23d45e96f9d9de42e57d43520",
+  "project_id": "ehtjfntukiwbgptqgbzy",
+  "approval": "User: Approved please finisg, in reply to exact disabled three-component release request",
+  "verified_at": "2026-11-24T17:40:12.739Z",
+  "functions": [
+    {
+      "name": "social-publication",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "import_map": false,
+      "hosted_bundle_sha256": "62e8c288ceb5f88ef4155f1839e318929c47a89a46b85d0dbc9ee6650c7b3ad3",
+      "file_count": 9,
+      "all_hosted_bytes_match": true,
+      "payload_sha256": "5fe52b6d11b8490cc08aee6c59e58d6cba56d64aa2fd67cc3506efe5d016de4f",
+      "file_hashes": [
+        {
+          "name": "supabase/functions/social-publication/index.ts",
+          "sha256": "62e3ccea43368587f9d8ebfa10468570d3a25254b722648e6b91e901c98beb13"
+        },
+        {
+          "name": "supabase/functions/_shared/auth.ts",
+          "sha256": "8765e92b9c1638443a71f7bbddba04cbda2854f868f99d24397fc3c6bceb5008"
+        },
+        {
+          "name": "supabase/functions/_shared/google-ads-policy.ts",
+          "sha256": "c4b8422806235881fed254f48b18e38b9462c8145c33eb8f889c6452ea3c9cb3"
+        },
+        {
+          "name": "supabase/functions/_shared/cors.ts",
+          "sha256": "909f9578ddfca6a74d0df8e627433fe1000a74d51713e06f81b095744bba5d95"
+        },
+        {
+          "name": "supabase/functions/_shared/socialPublicationManagement.ts",
+          "sha256": "a7c45b413be82806601ab01944b01b103a68135a32d83915659d6502af22d1c3"
+        },
+        {
+          "name": "supabase/functions/_shared/socialPublicationAuthorization.ts",
+          "sha256": "fef06b1a82033c864a60530729fa1310ca680963b27bac75f3be8ca8aa5eece0"
+        },
+        {
+          "name": "supabase/functions/_shared/socialPublishing.ts",
+          "sha256": "f6b11ad13472a5a433188d0370e30cb0d34ee09496e76c91988b0c3c59142959"
+        },
+        {
+          "name": "supabase/functions/_shared/instagramPublishingCaption.ts",
+          "sha256": "0a864451b6360c932de5f9951e87e0db5283d852d7c9efc9752c6814838cfa26"
+        },
+        {
+          "name": "supabase/functions/_shared/socialPublicationAuthorizationStore.ts",
+          "sha256": "3500f0a03aea9b59ab0cfafc92e71b531dff092b0d8a169bede6ceb9680c8da2"
+        }
+      ]
+    },
+    {
+      "name": "social-publication-authorization",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "import_map": false,
+      "hosted_bundle_sha256": "1ea197e4b4ed5b25baf3573a7bba5b2329d2d4926472722a3dc37fe99278efe0",
+      "file_count": 28,
+      "all_hosted_bytes_match": true,
+      "payload_sha256": "ad4b1c295a506f245b633df9b0af0f3a77ae4c8b09106f863e3d95334ac7019c",
+      "file_hashes": [
+        {
+          "name": "supabase/functions/social-publication-authorization/index.ts",
+          "sha256": "af730c3b1b5ad993fac737c9ba7805c1cf33b5083e598ca4f522616b166b8343"
+        },
+        {
+          "name": "supabase/functions/_shared/auth.ts",
+          "sha256": "8765e92b9c1638443a71f7bbddba04cbda2854f868f99d24397fc3c6bceb5008"
+        },
+        {
+          "name": "supabase/functions/_shared/google-ads-policy.ts",
+          "sha256": "c4b8422806235881fed254f48b18e38b9462c8145c33eb8f889c6452ea3c9cb3"
+        },
+        {
+          "name": "supabase/functions/_shared/cors.ts",
+          "sha256": "909f9578ddfca6a74d0df8e627433fe1000a74d51713e06f81b095744bba5d95"
+        },
+        {
+          "name": "supabase/functions/_shared/facebookPublicationRuntime.ts",
+          "sha256": "9cd2290b7de980cae1799f3777959fb81b048c9322f5e83355acdb4124f94f4c"
+        },
+        {
+          "name": "supabase/functions/_shared/facebookPublishingProvider.ts",
+          "sha256": "6c11cdbd64664d6c51c67b7edfdd5a5a46a4023f3b93b368d1899c69aedc2f6f"
+        },
+        {
+          "name": "supabase/functions/_shared/metaPublishingCredential.ts",
+          "sha256": "500a4b239458ae5d40fe57aec6fc2c470f2c83f64cfa19da09eca8b3e2170ce1"
+        },
+        {
+          "name": "supabase/functions/_shared/metaTokenStorage.ts",
+          "sha256": "9727ac5002d12eeb52a9cc71e8b70eef5320bdcbba3d8b8e43e5baf473a89291"
+        },
+        {
+          "name": "supabase/functions/_shared/metaTokenDiagnostics.ts",
+          "sha256": "5df83bddfe8a754123cbcccc5165746c6d668f1c85ea1034de2a179678fba8a8"
+        },
+        {
+          "name": "supabase/functions/_shared/meta.ts",
+          "sha256": "6e0ad8ba5092f48f0eb417136d185391f0f0942d3f937b65760dcfb1d02400c9"
+        },
+        {
+          "name": "supabase/functions/_shared/metaInsightResponse.ts",
+          "sha256": "171594ea89967e92535861e5604faf93fdb85ed9c9113d3fa8e270303a76ae4b"
+        },
+        {
+          "name": "supabase/functions/_shared/metaUsage.ts",
+          "sha256": "7ae5c58f334c19232ee6d1af1dbf1128d29b544f75ea33183245ad29f725b12e"
+        },
+        {
+          "name": "supabase/functions/_shared/metaPeriod.ts",
+          "sha256": "11c6282714b35764d8d6d302c0565cf88f79e2144072782d696861c56008dbff"
+        },
+        {
+          "name": "supabase/functions/_shared/facebookPublishing.ts",
+          "sha256": "a66af80531e2df992426e09cc8dac314880c22f81726387b179187992ad0dc29"
+        },
+        {
+          "name": "supabase/functions/_shared/socialPublishing.ts",
+          "sha256": "f6b11ad13472a5a433188d0370e30cb0d34ee09496e76c91988b0c3c59142959"
+        },
+        {
+          "name": "supabase/functions/_shared/instagramPublishingCaption.ts",
+          "sha256": "0a864451b6360c932de5f9951e87e0db5283d852d7c9efc9752c6814838cfa26"
+        },
+        {
+          "name": "supabase/functions/_shared/facebookPublishingTransport.ts",
+          "sha256": "d6a2a31c2fbb603caba381a66a6c274d2a02d54e6f81aa3ee5296446655f2509"
+        },
+        {
+          "name": "supabase/functions/_shared/socialPublishingMedia.ts",
+          "sha256": "7dbfa193508cabfc2209d7eed5062722d54a3a21f21da4f9d7217abc65a78956"
+        },
+        {
+          "name": "supabase/functions/_shared/facebookPhotoMedia.ts",
+          "sha256": "7e214bd9256170a23c6ec23d332d50fe6d4748174de4918bfe7c4c602f0500fc"
+        },
+        {
+          "name": "supabase/functions/_shared/facebookPublicationMedia.ts",
+          "sha256": "e213f01fa4fe1c35bd79e03e23d94b6d1b040cffb3acb10482834c2c17959448"
+        },
+        {
+          "name": "supabase/functions/_shared/publicationJpeg.ts",
+          "sha256": "7ce6a18a5f496f3b9bdac0b1e3d7727ca6e8bb04b09e545394026c1efbdb8871"
+        },
+        {
+          "name": "supabase/functions/_shared/publicationJpegCodec.ts",
+          "sha256": "c5fd7d78a4c1ace9ef04659bbe0a061f8b657ffb9ce5324adc3b3a567297f25d"
+        },
+        {
+          "name": "supabase/functions/_shared/socialPublicationPreparation.ts",
+          "sha256": "02e847358599c300eb6eac4005aa09e724d2354e8ee5b4e7c2f5241f0684066a"
+        },
+        {
+          "name": "supabase/functions/_shared/socialPublicationAuthorization.ts",
+          "sha256": "fef06b1a82033c864a60530729fa1310ca680963b27bac75f3be8ca8aa5eece0"
+        },
+        {
+          "name": "supabase/functions/_shared/socialPublicationRuntimeSource.ts",
+          "sha256": "a8387f668593d065383817e5d107b84682114d42121b4b8a120f0c414098e2eb"
+        },
+        {
+          "name": "supabase/functions/_shared/socialPublicationAuthorizationStore.ts",
+          "sha256": "3500f0a03aea9b59ab0cfafc92e71b531dff092b0d8a169bede6ceb9680c8da2"
+        },
+        {
+          "name": "supabase/functions/_shared/facebookPublicationInspection.ts",
+          "sha256": "46363c4062f98fc0a44a9001bf54a230c94578b779637e97c3446be32616c0e1"
+        },
+        {
+          "name": "supabase/functions/_shared/facebookPublicationStaff.ts",
+          "sha256": "3d7ca74a846a97bbf1fa50d2e6425f220ef337afd49bdf33c718019a71ba965a"
+        }
+      ]
+    },
+    {
+      "name": "background-worker",
+      "version": 66,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "import_map": false,
+      "hosted_bundle_sha256": "cb88de18abacefc2120fcac03b45f9b3d6de975af3414d2c479a1c03dc7830c1",
+      "file_count": 36,
+      "all_hosted_bytes_match": true,
+      "payload_sha256": "bcde11f963242e5ee5bb632c2f89c01f4e5c15937bd2d9b51d88391af4d7e87f",
+      "file_hashes": [
+        {
+          "name": "supabase/functions/background-worker/index.ts",
+          "sha256": "c8c652e7826eecae302bf99608064d19529037e7a62f6c10eccba7801de8c7e0"
+        },
+        {
+          "name": "supabase/functions/_shared/metaWorkerDispatch.ts",
+          "sha256": "d95c50b55c6f423a83160b6443513076f1237fd15acc2d43a23d09d15cfeced3"
+        },
+        {
+          "name": "supabase/functions/_shared/metaPeriod.ts",
+          "sha256": "11c6282714b35764d8d6d302c0565cf88f79e2144072782d696861c56008dbff"
+        },
+        {
+          "name": "supabase/functions/_shared/paginatedRows.ts",
+          "sha256": "43caa785b001883676c828a311b095767d4e643d6b3ab2ac68326b7ffed4facd"
+        },
+        {
+          "name": "supabase/functions/_shared/googleAdsFreshness.ts",
+          "sha256": "2d23e363859dab9589965fd3096879cf099f64f5be371ac45edaa0f5b8725e39"
+        },
+        {
+          "name": "supabase/functions/_shared/google-ads-policy.ts",
+          "sha256": "c4b8422806235881fed254f48b18e38b9462c8145c33eb8f889c6452ea3c9cb3"
+        },
+        {
+          "name": "supabase/functions/_shared/metaFleetTerminalBackoff.ts",
+          "sha256": "1260b419b9bc654a19883695734853c769930f912a6dd7ff62dd7dad291336f2"
+        },
+        {
+          "name": "supabase/functions/_shared/meta.ts",
+          "sha256": "6e0ad8ba5092f48f0eb417136d185391f0f0942d3f937b65760dcfb1d02400c9"
+        },
+        {
+          "name": "supabase/functions/_shared/metaInsightResponse.ts",
+          "sha256": "171594ea89967e92535861e5604faf93fdb85ed9c9113d3fa8e270303a76ae4b"
+        },
+        {
+          "name": "supabase/functions/_shared/metaUsage.ts",
+          "sha256": "7ae5c58f334c19232ee6d1af1dbf1128d29b544f75ea33183245ad29f725b12e"
+        },
+        {
+          "name": "supabase/functions/_shared/metaRateLimit.ts",
+          "sha256": "26b208fed993476e7730958ff3892637a4465f77c6727e9900e2f8ff5cd96d60"
+        },
+        {
+          "name": "supabase/functions/_shared/contentAutopilotPass.ts",
+          "sha256": "0b3f27fa1ff976e4eeb5ceaeb6ad81951f3976df78d8c06ec62af51198a6ce26"
+        },
+        {
+          "name": "supabase/functions/cg-dynamics-mcp/contentGuidelineActions.ts",
+          "sha256": "0e082a304dc9e0c73bcce80e19d2396b725ff153f0ab004881a0247d98c4f4f1"
+        },
+        {
+          "name": "supabase/functions/_shared/contentAutopilotSchedule.ts",
+          "sha256": "a1143104a775a80bb2f54a7fc49877fe3b1a51811c257592d2a86713211758ee"
+        },
+        {
+          "name": "supabase/functions/_shared/monthlyStrategyAutopilotSchedule.ts",
+          "sha256": "5fa2a6ddd5e8b85e5f89199012f54b05f39081995e9f88fd043043efbd8ecb7d"
+        },
+        {
+          "name": "supabase/functions/_shared/tiktokFreshness.ts",
+          "sha256": "1c3fadcb1458ca9a07ae4c3f599237c9da65f0f218d267f99db292aa76f70328"
+        },
+        {
+          "name": "supabase/functions/_shared/socialPublishingQueue.ts",
+          "sha256": "35793516bc78411ae04f68dd2fee637a9bbcbb9ebc8160fe1448afa5640b944c"
+        },
+        {
+          "name": "supabase/functions/_shared/socialPublishingExecution.ts",
+          "sha256": "d5201e8a1c868c0461f34762208ae480bc7c13d5db6450b8a4d8915bcb1dc52b"
+        },
+        {
+          "name": "supabase/functions/_shared/socialPublishing.ts",
+          "sha256": "f6b11ad13472a5a433188d0370e30cb0d34ee09496e76c91988b0c3c59142959"
+        },
+        {
+          "name": "supabase/functions/_shared/instagramPublishingCaption.ts",
+          "sha256": "0a864451b6360c932de5f9951e87e0db5283d852d7c9efc9752c6814838cfa26"
+        },
+        {
+          "name": "supabase/functions/_shared/socialPublicationAuthorization.ts",
+          "sha256": "fef06b1a82033c864a60530729fa1310ca680963b27bac75f3be8ca8aa5eece0"
+        },
+        {
+          "name": "supabase/functions/_shared/facebookPublicationRuntime.ts",
+          "sha256": "9cd2290b7de980cae1799f3777959fb81b048c9322f5e83355acdb4124f94f4c"
+        },
+        {
+          "name": "supabase/functions/_shared/facebookPublishingProvider.ts",
+          "sha256": "6c11cdbd64664d6c51c67b7edfdd5a5a46a4023f3b93b368d1899c69aedc2f6f"
+        },
+        {
+          "name": "supabase/functions/_shared/metaPublishingCredential.ts",
+          "sha256": "500a4b239458ae5d40fe57aec6fc2c470f2c83f64cfa19da09eca8b3e2170ce1"
+        },
+        {
+          "name": "supabase/functions/_shared/metaTokenStorage.ts",
+          "sha256": "9727ac5002d12eeb52a9cc71e8b70eef5320bdcbba3d8b8e43e5baf473a89291"
+        },
+        {
+          "name": "supabase/functions/_shared/metaTokenDiagnostics.ts",
+          "sha256": "5df83bddfe8a754123cbcccc5165746c6d668f1c85ea1034de2a179678fba8a8"
+        },
+        {
+          "name": "supabase/functions/_shared/facebookPublishing.ts",
+          "sha256": "a66af80531e2df992426e09cc8dac314880c22f81726387b179187992ad0dc29"
+        },
+        {
+          "name": "supabase/functions/_shared/facebookPublishingTransport.ts",
+          "sha256": "d6a2a31c2fbb603caba381a66a6c274d2a02d54e6f81aa3ee5296446655f2509"
+        },
+        {
+          "name": "supabase/functions/_shared/socialPublishingMedia.ts",
+          "sha256": "7dbfa193508cabfc2209d7eed5062722d54a3a21f21da4f9d7217abc65a78956"
+        },
+        {
+          "name": "supabase/functions/_shared/facebookPhotoMedia.ts",
+          "sha256": "7e214bd9256170a23c6ec23d332d50fe6d4748174de4918bfe7c4c602f0500fc"
+        },
+        {
+          "name": "supabase/functions/_shared/facebookPublicationMedia.ts",
+          "sha256": "e213f01fa4fe1c35bd79e03e23d94b6d1b040cffb3acb10482834c2c17959448"
+        },
+        {
+          "name": "supabase/functions/_shared/publicationJpeg.ts",
+          "sha256": "7ce6a18a5f496f3b9bdac0b1e3d7727ca6e8bb04b09e545394026c1efbdb8871"
+        },
+        {
+          "name": "supabase/functions/_shared/publicationJpegCodec.ts",
+          "sha256": "c5fd7d78a4c1ace9ef04659bbe0a061f8b657ffb9ce5324adc3b3a567297f25d"
+        },
+        {
+          "name": "supabase/functions/_shared/socialPublicationPreparation.ts",
+          "sha256": "02e847358599c300eb6eac4005aa09e724d2354e8ee5b4e7c2f5241f0684066a"
+        },
+        {
+          "name": "supabase/functions/_shared/socialPublicationRuntimeSource.ts",
+          "sha256": "a8387f668593d065383817e5d107b84682114d42121b4b8a120f0c414098e2eb"
+        },
+        {
+          "name": "supabase/functions/_shared/socialPublicationAuthorizationStore.ts",
+          "sha256": "3500f0a03aea9b59ab0cfafc92e71b531dff092b0d8a169bede6ceb9680c8da2"
+        }
+      ]
+    }
+  ],
+  "unchanged_other_functions": 48,
+  "configuration_digests_unchanged": 77,
+  "publishing_confirmation_release_gates": "ALL_ABSENT",
+  "social_jobs_before": 0,
+  "social_jobs_after": 0,
+  "endpoint_http_acceptance": {
+    "anonymous_POST": {
+      "social-publication": 401,
+      "social-publication-authorization": 401
+    },
+    "OPTIONS": {
+      "social-publication": 200,
+      "social-publication-authorization": 200
+    },
+    "cache_control": "no-store for both anonymous refusals",
+    "authenticated_review_acceptance": "NOT_RUN: no approved future original image/caption/time tuple"
+  },
+  "unexpected_worker_probe": {
+    "count": 1,
+    "status": 200,
+    "processed_jobs": 0,
+    "reported_fleet_items_enqueued": 2,
+    "batch_id": "b8968a76-6d9b-4870-ab05-20e3150ade88",
+    "pre_existing_public_entry_confirmed_in_v65": true,
+    "existing_cron": "cg-background-worker every minute; no Authorization/worker header; no Vault reference",
+    "lesson": "Worker is executable on request, not a read-only health endpoint. No more worker probes. No rollback, job cleanup, auth/config or cron change made.",
+    "remaining_security_gate": "Coordinated worker authentication and exact cron caller change requires separate review/testing/approval; changing only one would break existing minute ticks."
+  },
+  "unchanged_boundaries": [
+    "No content approval/publication/provider upload or schedule",
+    "No migrations, accounts, mappings, permissions, keys or settings changed",
+    "No Microsoft write or Vercel action"
+  ],
+  "local_qualification": "Existing 39 PostgreSQL +147 focused/packet checks, three native Deno entrypoints, build/app-bundle/lint/diff passed at approved revision; no unnecessary unchanged full-suite rerun"
+}

@@ -10,6 +10,9 @@
 
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { readMicrosoftScheduleSource } from './microsoftScheduleSource.ts'
+import { readFacebookPostReadiness } from './facebookPostReadiness.ts'
+import { facebookPublicationAction } from './facebookPublicationActions.ts'
+import { startFacebookPermissionSetup } from './facebookPermissionSetup.ts'
 import { fetchAllRows, fetchAllRowsByIdChunks } from '../_shared/paginatedRows.ts'
 import { CG_DYNAMICS_MCP_TOOLS, CG_DYNAMICS_MCP_SECURITY_SCHEMES } from './toolCatalog.ts'
 import { filterCapabilitiesByScope } from './capabilityManifest.ts'
@@ -3576,6 +3579,7 @@ const handleRevokeContentGuidelineShare: ToolHandler = (staff, input) => manageG
 // ── Tool Router ─────────────────────────────────────────────────────────────
 
 const WRITE_TOOLS = new Set([
+  'confirm_facebook_photo_publication',
   'submit_monthly_strategy_draft',
   'amend_monthly_strategy_draft',
   'create_task',
@@ -3608,6 +3612,7 @@ const WRITE_TOOLS = new Set([
 // These backends own the durable idempotency receipt. An identical MCP retry must reach them so
 // they can return the original record id; the generic Dynamics log stores status/audit only.
 const CANONICAL_RECEIPT_REPLAY_TOOLS = new Set([
+  'confirm_facebook_photo_publication',
   'submit_monthly_strategy_draft',
   'amend_monthly_strategy_draft',
   ...CLIENT_WORKSPACE_ACTIONS,
@@ -3646,6 +3651,11 @@ const toolHandlers: Record<string, ToolHandler> = {
   read_microsoft_schedule_source: readMicrosoftScheduleSource,
   run_microsoft_sync: handleRunMicrosoftSync,
   get_provider_health: handleGetProviderHealth,
+  get_facebook_post_readiness: (staff, input) => readFacebookPostReadiness(staff.supabase, staff.profileId, input, name => Deno.env.get(name)),
+  start_facebook_permission_setup: (staff, input) => startFacebookPermissionSetup(staff.supabase, staff.connection.profileId, input, name => Deno.env.get(name)),
+  prepare_facebook_photo_publication: (staff, input) => facebookPublicationAction(staff.supabase, staff.profileId, 'preview', input, name => Deno.env.get(name)),
+  confirm_facebook_photo_publication: (staff, input) => facebookPublicationAction(staff.supabase, staff.profileId, 'confirm', input, name => Deno.env.get(name)),
+  get_social_publication_status: (staff, input) => facebookPublicationAction(staff.supabase, staff.profileId, 'status', input, name => Deno.env.get(name)),
   get_google_ads_audit: handleGetGoogleAdsAudit,
   run_provider_sync: handleRunProviderSync,
   find_content_runs: handleFindContentRuns,

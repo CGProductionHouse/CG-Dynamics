@@ -4,6 +4,7 @@ import { ActionButton } from '../../components/ui/Buttons'
 import { PremiumCard, PremiumCardHeader } from '../../components/ui/PremiumCard'
 import { StatusBadge, Pill } from '../../components/ui/Badges'
 import { LoadingState } from '../../components/ui/States'
+import { getTiktokBusinessStatus, startTiktokBusinessOAuth, type TiktokBusinessStatus } from '../../lib/tiktokBusiness'
 import {
   getTiktokConnectionQueue,
   getTiktokConnectionStatus,
@@ -53,16 +54,21 @@ export default function TikTokIntegrationPage() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const callbackResult = searchParams.get('tiktok')
+  const businessResult = searchParams.get('business')
   const callbackClientId = searchParams.get('client') ?? ''
   const [queue, setQueue] = useState<TiktokConnectionQueue>(emptyQueue)
   const [selectedClientId, setSelectedClientId] = useState(callbackClientId)
   const [statusState, setStatusState] = useState<{ clientId: string; value: TiktokConnectionStatus } | null>(null)
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState<string | null>(null)
-  const [message, setMessage] = useState(callbackResult ? callbackMessages[callbackResult] ?? callbackMessages.error : null)
+  const [message, setMessage] = useState<{ tone: 'error' | 'success' | 'warning'; message: string } | null>(businessResult
+    ? { tone: businessResult === 'connected' ? 'success' : 'error', message: businessResult === 'connected' ? 'TikTok Business authorization returned. Check the exact account status below.' : 'TikTok Business authorization could not be verified. Your analytics connection is unchanged.' }
+    : callbackResult ? callbackMessages[callbackResult] ?? callbackMessages.error : null)
   const [syncMonth, setSyncMonth] = useState(currentMonth())
   const [syncResult, setSyncResult] = useState<TiktokSyncResult | null>(null)
   const [search, setSearch] = useState('')
+  const [businessTarget, setBusinessTarget] = useState({ clientId: '', connectionId: '', handle: '', confirmed: false })
+  const [businessStatus, setBusinessStatus] = useState<{ clientId: string; connectionId: string; value: TiktokBusinessStatus } | null>(null)
 
   async function loadQueue(silent = false) {
     try {
@@ -105,12 +111,13 @@ export default function TikTokIntegrationPage() {
   }, [])
 
   useEffect(() => {
-    if (!callbackResult) return
+    if (!callbackResult && !businessResult) return
     const next = new URLSearchParams(searchParams)
     next.delete('tiktok')
     next.delete('client')
+    next.delete('business')
     setSearchParams(next, { replace: true })
-  }, [callbackResult, searchParams, setSearchParams])
+  }, [callbackResult, businessResult, searchParams, setSearchParams])
 
   useEffect(() => {
     if (!selectedClientId) return
@@ -123,6 +130,19 @@ export default function TikTokIntegrationPage() {
 
   const selected = queue.items.find(item => item.clientId === selectedClientId) ?? null
   const status = statusState?.clientId === selectedClientId ? statusState.value : null
+  const businessConnectionId = status?.connection?.id ?? ''
+  const currentBusiness = businessStatus?.clientId === selectedClientId && businessStatus.connectionId === businessConnectionId ? businessStatus.value : null
+  const targetIsCurrent = businessTarget.clientId === selectedClientId && businessTarget.connectionId === businessConnectionId
+  const businessHandle = targetIsCurrent ? businessTarget.handle : ''
+  const businessConfirmed = targetIsCurrent && businessTarget.confirmed
+  useEffect(() => {
+    if (!selectedClientId || !businessConnectionId) return
+    let current = true
+    getTiktokBusinessStatus(selectedClientId, businessConnectionId).then(value => {
+      if (current) setBusinessStatus({ clientId: selectedClientId, connectionId: businessConnectionId, value })
+    })
+    return () => { current = false }
+  }, [selectedClientId, businessConnectionId])
   const filteredItems = useMemo(() => {
     const term = search.trim().toLocaleLowerCase()
     return term ? queue.items.filter(item => item.clientName.toLocaleLowerCase().includes(term) || item.account?.displayName?.toLocaleLowerCase().includes(term)) : queue.items
@@ -142,6 +162,7 @@ export default function TikTokIntegrationPage() {
   }
 
   async function connect(item: TiktokConnectionQueueItem) {
+    setBusinessTarget({ clientId: '', connectionId: '', handle: '', confirmed: false })
     setSelectedClientId(item.clientId)
     await runAction(`connect:${item.clientId}`, async () => {
       const result = await startTiktokOAuth(item.clientId)
@@ -150,11 +171,25 @@ export default function TikTokIntegrationPage() {
     })
   }
 
+  function selectClient(clientId: string) {
+    if (clientId !== selectedClientId) setBusinessTarget({ clientId: '', connectionId: '', handle: '', confirmed: false })
+    setSelectedClientId(clientId)
+  }
+
+  async function connectBusiness() {
+    if (!selectedClientId || !businessConnectionId || !businessConfirmed) return
+    await runAction('business-connect', async () => {
+      const result = await startTiktokBusinessOAuth({ clientId: selectedClientId, connectionId: businessConnectionId, expectedHandle: businessHandle, confirmExactAccount: true })
+      if (!result.ok || !result.url) throw new Error(result.error ?? 'Business connection could not start.')
+      window.location.assign(result.url)
+    })
+  }
+
   function nextClient() {
     const unresolved = queue.items.filter(item => item.state === 'reconnect_required' || item.state === 'not_connected')
     const currentIndex = unresolved.findIndex(item => item.clientId === selectedClientId)
     const next = unresolved[currentIndex >= 0 ? (currentIndex + 1) % unresolved.length : 0]
-    if (next) setSelectedClientId(next.clientId)
+    if (next) selectClient(next.clientId)
   }
 
   function runSync() {
@@ -203,7 +238,7 @@ export default function TikTokIntegrationPage() {
           <input className={INPUT_CLASS} value={search} onChange={event => setSearch(event.target.value)} placeholder="Search client or verified account" aria-label="Search TikTok connection queue" />
           <div className="mt-4 max-h-[660px] space-y-2 overflow-y-auto pr-1">
             {filteredItems.map(item => (
-              <button key={item.clientId} type="button" onClick={() => setSelectedClientId(item.clientId)} className={`w-full rounded-xl border p-3 text-left transition ${item.clientId === selectedClientId ? 'border-brand-accent/50 bg-brand-accent/10' : 'border-white/8 bg-black/20 hover:border-white/20'}`}>
+              <button key={item.clientId} type="button" onClick={() => selectClient(item.clientId)} className={`w-full rounded-xl border p-3 text-left transition ${item.clientId === selectedClientId ? 'border-brand-accent/50 bg-brand-accent/10' : 'border-white/8 bg-black/20 hover:border-white/20'}`}>
                 <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="truncate text-sm font-semibold text-white">{item.clientName}</p><p className="mt-1 truncate text-xs text-white/45">{item.account?.displayName ?? 'No provider account verified'}</p></div><QueueState state={item.state} /></div>
               </button>
             ))}
@@ -224,6 +259,21 @@ export default function TikTokIntegrationPage() {
           </PremiumCard>
 
           <PremiumCard>
+            <PremiumCardHeader eyebrow="Business publishing" title="Connect TikTok publishing" subtitle="Authorize the approved Business app for this exact client account. Teams remains your scheduling platform." />
+            <p className="mb-4 text-sm text-brand-primary">{currentBusiness?.message ?? 'Select an existing verified analytics connection to prepare publishing access.'}</p>
+            {currentBusiness?.accountHandle && <p className="mb-4 text-sm text-white">@{currentBusiness.accountHandle} · Access expires {formatDateTime(currentBusiness.expiresAt)}</p>}
+            <Field label={`Exact TikTok username for ${selected?.clientName ?? 'this client'}`}>
+              <input className={INPUT_CLASS} value={businessHandle} placeholder="@username" autoComplete="off" disabled={!businessConnectionId}
+                onChange={event => setBusinessTarget({ clientId: selectedClientId, connectionId: businessConnectionId, handle: event.target.value, confirmed: false })} />
+            </Field>
+            <label className="my-4 flex items-start gap-3 text-sm text-brand-primary"><input type="checkbox" className="mt-1" checked={businessConfirmed} disabled={!businessHandle || !businessConnectionId}
+              onChange={event => setBusinessTarget({ clientId: selectedClientId, connectionId: businessConnectionId, handle: businessHandle, confirmed: event.target.checked })} />
+              I have checked that this username belongs to {selected?.clientName ?? 'the selected client'}.</label>
+            <ActionButton loading={busy === 'business-connect'} disabled={!businessConnectionId || !businessConfirmed || !currentBusiness?.available} onClick={() => void connectBusiness()}>Authorize with TikTok</ActionButton>
+            <p className="mt-3 text-xs text-brand-primary">Authorization does not publish or schedule content. TikTok shows the permissions before you consent.</p>
+          </PremiumCard>
+
+          <PremiumCard>
             <PremiumCardHeader eyebrow="Automatic freshness" title="Read-only analytics" subtitle="Daily refresh is the normal path. Manual sync is available for a deliberate staff retry and preserves TikTok-native metric semantics." />
             <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-end"><Field label="Month"><input className={INPUT_CLASS} type="month" max={currentMonth()} value={syncMonth} onChange={event => setSyncMonth(event.target.value)} /></Field><ActionButton loading={busy === 'sync'} disabled={!connected || !selectedClientId} onClick={runSync}>Run manual sync</ActionButton></div>
             {syncResult?.ok && <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5"><Metric label="Videos" value={syncResult.videosSynced} /><Metric label="Views" value={syncResult.metrics.views} /><Metric label="Likes" value={syncResult.metrics.likes} /><Metric label="Comments" value={syncResult.metrics.comments} /><Metric label="Shares" value={syncResult.metrics.shares} /></div>}
@@ -232,7 +282,7 @@ export default function TikTokIntegrationPage() {
           <PremiumCard>
             <PremiumCardHeader eyebrow="Reporting contract" title="TikTok-native metrics" subtitle="Missing provider data stays unavailable and is never converted to a false zero." />
             <div className="overflow-x-auto rounded-lg border border-white/8"><table className="min-w-[680px] w-full divide-y divide-white/8 text-left text-sm"><thead className="bg-black/30 text-xs uppercase tracking-wide text-brand-primary"><tr><th className="px-4 py-3">Metric</th><th className="px-4 py-3">Provider field</th><th className="px-4 py-3">Type</th><th className="px-4 py-3">Meaning</th></tr></thead><tbody className="divide-y divide-white/8">{TIKTOK_METRICS.map(metric => <tr key={metric.key}><td className="px-4 py-3 font-medium text-white">{metric.label}</td><td className="px-4 py-3 font-mono text-xs text-brand-primary">{metric.sourceMetric}</td><td className="px-4 py-3"><Pill tone="neutral">{metric.aggregation}</Pill></td><td className="px-4 py-3 text-xs text-brand-primary">{metric.meaning}</td></tr>)}</tbody></table></div>
-            <div className="mt-4 rounded-lg border border-amber-400/20 bg-amber-400/5 p-4 text-sm text-amber-200">Publishing is unavailable in this rollout. CG Dynamics does not request video.publish or video.upload.</div>
+            <div className="mt-4 rounded-lg border border-amber-400/20 bg-amber-400/5 p-4 text-sm text-amber-200">Publishing is unavailable in this rollout. Analytics sign-in stays read-only; Business publishing authorization is a separate, explicit connection.</div>
           </PremiumCard>
         </div>
       </div>

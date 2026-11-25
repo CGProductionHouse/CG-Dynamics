@@ -30,3 +30,8 @@ verify_jwt = false
 # Amazon SNS cannot send a Supabase JWT. The handler verifies the SNS message signature
 # against an AWS-hosted certificate and the configured topic ARN before trusting anything.
 verify_jwt = false
+
+[functions.tiktok-business-oauth-callback]
+# OAuth provider cannot carry a Supabase JWT. One-time hashed, expiring state
+# plus active actor/client/exact-account checks replace that boundary.
+verify_jwt = false

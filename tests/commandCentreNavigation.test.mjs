@@ -1,6 +1,14 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
-import test from 'node:test'
+import { test, before, after } from 'node:test'
+import { createServer } from 'vite'
+
+let server, mobileNavigationGroups
+before(async () => {
+  server = await createServer({ configFile: false, server: { middlewareMode: true, hmr: false }, optimizeDeps: { noDiscovery: true }, logLevel: 'error' })
+  ;({ mobileNavigationGroups } = await server.ssrLoadModule('/src/lib/mobileStaffNavigation.ts'))
+})
+after(async () => { await server?.close() })
 
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8')
 const app = read('../src/App.tsx')
@@ -54,13 +62,18 @@ test('Team Work and Morning List Import never render for staff/team roles', () =
 
 // ── 5 + 6. Desktop and mobile navigation both expose the workflow ───────────
 
-test('desktop sidebar and mobile drawer both render the full hub list including the workflow', () => {
-  // Desktop and mobile reuse the same renderNav over zoneItems, so entries in
-  // primaryNavItems surface in both. The desktop sidebar also renders on mobile
-  // through the slide-out drawer.
+test('desktop sidebar and searchable mobile More retain Team Work and its import workflow', () => {
+  // PR993 uses a role-filtered all-workspace menu on phones. Preserve that
+  // accepted interface rather than requiring the former desktop drawer clone.
   assert.match(layout, /zoneItems\.map\(item => <NavigationLink/)
   assert.match(layout, /renderNav\(desktopCollapsed\)/)
-  assert.match(layout, /renderNav\(false, closeMobile\)/)
+  assert.match(layout, /mobileGroups = mobileNavigationGroups\(currentRole, menuSearch\)/)
+  assert.match(layout, /mobileGroups\.map\(group/)
+  assert.match(layout, /group\.items\.map\(item => <NavigationLink/)
+  for (const role of ['admin', 'manager']) {
+    const items = mobileNavigationGroups(role).flatMap(group => group.items)
+    assert.equal(items.filter(item => item.to === '/admin/command-centre').length, 1)
+  }
   assert.match(adminNav, /label: 'Team Work'/)
   assert.match(adminNav, /label: 'Morning List Import'/)
 })
@@ -74,14 +87,17 @@ test('mobile quick-nav is role-stable and never displaces Content or Calendar', 
   assert.doesNotMatch(layout, /MOBILE_PRIMARY_PATHS = \[[^\]]*morning-import[^\]]*\]/)
 })
 
-test('Team Work and Morning List Import reach managers via the More drawer, not the bottom bar', () => {
-  // The drawer renders every role-visible zone item, so managers see the work
-  // entries there (More -> entry = two taps). The bottom bar stays untouched.
-  assert.match(layout, /zoneItems\.map\(item => <NavigationLink/)
-  assert.match(layout, /renderNav\(false, closeMobile\)/)
-  assert.match(adminNav, /label: 'Team Work'/)
-  assert.match(adminNav, /label: 'Morning List Import'/)
-  assert.match(adminNav, /to: '\/admin\/command-centre', label: 'Team Work'[\s\S]{0,120}access: 'manager'/)
+test('phone More reaches manager Team Work with import inside that page and preserves ordinary staff isolation', () => {
+  for (const role of ['admin', 'manager']) {
+    const items = mobileNavigationGroups(role, 'team work').flatMap(group => group.items)
+    assert.ok(items.some(item => item.to === '/admin/command-centre'))
+    assert.ok(!mobileNavigationGroups(role).flatMap(group => group.items).some(item => item.to === '/admin/command-centre#morning-import'), 'import is inside Team Work, not a second mobile destination')
+  }
+  for (const role of ['staff', 'team']) {
+    assert.ok(!mobileNavigationGroups(role).flatMap(group => group.items).some(item => item.to.startsWith('/admin/command-centre')))
+  }
+  assert.match(commandCentre, /id="morning-import"/)
+  assert.match(commandCentre, /getElementById\('morning-import'\)\?\.scrollIntoView/)
 })
 
 // ── 7. A future consolidation cannot silently remove the workflow ───────────

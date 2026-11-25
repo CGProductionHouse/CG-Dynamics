@@ -1,0 +1,80 @@
+{
+  "status": "LIVE_NATIVE_CAPE_ACCOUNT_ACCESS_VERIFIED",
+  "approval": "Approve exact bounded-expiry release",
+  "approvedRevision": "f66de2b7",
+  "project": "ehtjfntukiwbgptqgbzy",
+  "deployCalls": 2,
+  "releases": [
+    {
+      "function": "cg-dynamics-mcp",
+      "baselineVersion": 96,
+      "releasedVersion": 97,
+      "releasedAtUtc": "2026-11-24T11:25:10.284Z",
+      "fileCount": 73,
+      "changed": 2,
+      "preserved": 71,
+      "added": 0,
+      "removed": 0,
+      "allHostedBytesMatched": true,
+      "bundleSha256": "387758b2d99092a25cbed8214e50c2b7e23e844199e9632c20c8457bf6f4e15a",
+      "verify_jwt": false,
+      "import_map": false
+    },
+    {
+      "function": "meta-oauth-callback",
+      "baselineVersion": 75,
+      "releasedVersion": 76,
+      "releasedAtUtc": "2026-11-24T11:25:44.706Z",
+      "fileCount": 8,
+      "changed": 3,
+      "preserved": 5,
+      "added": 0,
+      "removed": 0,
+      "allHostedBytesMatched": true,
+      "bundleSha256": "455d0796366a1f9813233fa1c1afdc06ca965ff2f20ba6c21585066ccf019df9",
+      "verify_jwt": false,
+      "import_map": false
+    }
+  ],
+  "configurationDigests": 77,
+  "allConfigurationDigestsUnchanged": true,
+  "publishingSubmissionConfirmationAndExactReleaseSettingsAbsent": true,
+  "anonymousMcpStatus": 401,
+  "missingStateCallbackStatus": 302,
+  "accountAcceptance": {
+    "data_state": "available",
+    "scope": "facebook_account_readiness",
+    "client_id": "42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa",
+    "checked_at": "2026-11-24T11:25:42.149Z",
+    "account": {
+      "account_id": "262645554440912",
+      "account_name": "Cape Lumber Marketing",
+      "native_access_verified": true,
+      "required_permissions_verified": true,
+      "create_content_task_verified": true
+    },
+    "canConfirm": false,
+    "canPublish": false,
+    "note": "Mapped Page access only. App review/release eligibility, approved creative, original media, Teams/time, native duplicates and publication are not checked. No review ID, upload, job, confirmation, account connection or Microsoft sync was created.",
+    "_context": {
+      "connection_principal_user_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee",
+      "connection_principal_profile_id": "49888d42-6fd7-44ae-93f6-e70ebb27a9ee",
+      "connection_principal_role": "admin",
+      "effective_context_kind": "company_admin",
+      "effective_staff_profile_id": null,
+      "effective_client_id": null
+    }
+  },
+  "candidateScan": {
+    "checkedAt": "2026-11-24T11:27:08.461Z",
+    "count": 0,
+    "hasMore": false
+  },
+  "newConsentLinks": 0,
+  "credentialRefreshOrReplacement": false,
+  "newJobsOrPublications": 0,
+  "vercelActions": 0,
+  "unknownOrExpiredEvidenceStillBlocked": true,
+  "proofCapSeconds": 900,
+  "nativePublicationVerified": false
+}

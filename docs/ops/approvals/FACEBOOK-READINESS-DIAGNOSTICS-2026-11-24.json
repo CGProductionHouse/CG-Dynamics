@@ -1,0 +1,46 @@
+{
+  "status": "PREPARED_NOT_DEPLOYED",
+  "project": "ehtjfntukiwbgptqgbzy",
+  "function": "cg-dynamics-mcp",
+  "baselineVersion": 92,
+  "baselineBundleSha256": "68ee05746f22f834b0b9bb6fc8eaffbd191411a9166f9fba666fa8db73b2f317",
+  "fileCount": 70,
+  "changed": 3,
+  "preserved": 67,
+  "added": 0,
+  "removed": 0,
+  "verify_jwt": false,
+  "import_map": false,
+  "files": [
+    {
+      "name": "supabase/functions/_shared/metaPublishingCredential.ts",
+      "beforeSha256": "e55b7d5daf43d4200f70b0f8e6cf610ec932d0daef8612e812c335116e3a5bcf",
+      "afterSha256": "a0897f01aa61a41a0d3529acfd83c78bb7d5051967882c15f9c50825bffa7861"
+    },
+    {
+      "name": "supabase/functions/_shared/facebookPublishingProvider.ts",
+      "beforeSha256": "9e41c0d8180404b752ebfd825af7bdd43d4bdca20581c9ea0c461f4190955f40",
+      "afterSha256": "6c11cdbd64664d6c51c67b7edfdd5a5a46a4023f3b93b368d1899c69aedc2f6f"
+    },
+    {
+      "name": "supabase/functions/_shared/socialPublicationAuthorization.ts",
+      "beforeSha256": "e69cb18427944ea0b8ed797d8a514b5ed57f4032eeb83a7c46f4f4fdc28fbf2e",
+      "afterSha256": "fef06b1a82033c864a60530729fa1310ca680963b27bac75f3be8ca8aa5eece0"
+    }
+  ],
+  "candidateSourceSha256": "51ad493e685ee6d592f7598e600b8e450df3059526c96acf6523f9ab4ff5c3c7",
+  "requiresFreshBaselineReadback": true,
+  "publishingEnabled": false,
+  "settingsChanges": 0,
+  "qualification": {
+    "focusedTestsPassed": 116,
+    "focusedTestsFailed": 0,
+    "focusedTestsSkipped": 0,
+    "build": "PASS tsc/Vite7.3.6 and app bundle",
+    "scopedLint": "PASS",
+    "diff": "PASS",
+    "nativeDeno": "PASS three helpers and full candidate entry; seven prior type-only support files and existing checker config are not in deployment payload",
+    "productionDataRepair": "Cape binding only applied by separate exact approval; no schema change",
+    "nativePublishingVerified": false
+  }
+}

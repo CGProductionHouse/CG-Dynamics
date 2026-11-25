@@ -1,6 +1,7 @@
 import { corsHeaders, jsonResponse } from '../_shared/cors.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { getTiktokAccessToken, getTiktokPublishStatus } from '../_shared/tiktok.ts'
+import { normalizePublishingObservation } from '../_shared/socialPublishing.ts'
 
 // ── TikTok Publish Status ──────────────────────────────────────────────────
 // Polls TikTok for the status of a pending publish.
@@ -95,24 +96,11 @@ Deno.serve(async (req) => {
     return jsonResponse({ ok: false, error: 'Could not fetch publish status.' }, 502)
   }
 
-  // Map TikTok status to our internal status
-  // Current TikTok values: PROCESSING_UPLOAD, PROCESSING_DOWNLOAD, SENDING_TO_USER_INBOX, FAILED, PUBLISH_COMPLETE
-  let mappedStatus: string
-  switch (status.status) {
-    case 'PUBLISH_COMPLETE':
-      mappedStatus = 'published'
-      break
-    case 'FAILED':
-      mappedStatus = 'failed'
-      break
-    case 'PROCESSING_UPLOAD':
-    case 'PROCESSING_DOWNLOAD':
-    case 'SENDING_TO_USER_INBOX':
-      mappedStatus = 'processing'
-      break
-    default:
-      mappedStatus = 'pending'
+  const observation = normalizePublishingObservation('tiktok', { ...status, operationId: body.publishId })
+  if (observation.state === 'unknown_outcome') {
+    return jsonResponse({ ok: false, error: 'TikTok publication is not yet verified. Reconcile this existing publish ID; do not submit again.' }, 502)
   }
+  const mappedStatus = observation.state === 'posted' ? 'published' : observation.state
 
   // Update receipt
   const updateFields: Record<string, unknown> = {
@@ -127,20 +115,26 @@ Deno.serve(async (req) => {
     updateFields.tiktok_video_id = publicPostIds[0]
   }
 
-  await sb
+  const { error: receiptError } = await sb
     .from('tiktok_publish_receipts')
     .update(updateFields)
     .eq('publish_id', body.publishId)
+  if (receiptError) {
+    return jsonResponse({ ok: false, error: 'TikTok status was received but its receipt could not be saved. Retry status only; do not submit again.' }, 503)
+  }
 
   // If published, create content mapping using the public post ID
   if (mappedStatus === 'published' && publicPostIds.length > 0) {
-    await sb
+    const { error: mappingError } = await sb
       .from('tiktok_content_mappings')
       .upsert({
         client_id: clientId,
         tiktok_video_id: publicPostIds[0],
         last_synced_at: new Date().toISOString(),
       }, { onConflict: 'client_id,tiktok_video_id' })
+    if (mappingError) {
+      return jsonResponse({ ok: false, error: 'TikTok publication receipt is saved, but content linking needs reconciliation. Retry status only; do not submit again.' }, 503)
+    }
   }
 
   return jsonResponse({

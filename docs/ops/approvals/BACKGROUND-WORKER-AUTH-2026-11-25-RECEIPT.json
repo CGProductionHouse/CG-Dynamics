@@ -1,0 +1,297 @@
+{
+  "status": "DEPLOYED_VERIFIED_PUBLISHING_DISABLED",
+  "approved_runtime_revision": "f9425e8c82795e3af549684b224ca03e8e53854d",
+  "approval": "CA: Yes, you can roll it out, get everything live; finish this lane while preserving the other native/browser scheduling agent",
+  "project_id": "ehtjfntukiwbgptqgbzy",
+  "function": {
+    "name": "background-worker",
+    "version": 68,
+    "deployed_at": "2026-11-25T08:01:23.414Z",
+    "bundle_sha256": "e98cc7e720f3414a3a859b5c3b108ceb34b0cf53f41feb7fff7557cbc6abe9ad",
+    "payload_sha256": "82438af777a56aabf9b15276eeba01403eff13472048fd7ea96ed96ac7a0691f",
+    "files": 37,
+    "all_hosted_bytes_match": true,
+    "changed_existing": 1,
+    "preserved_existing": 35,
+    "new_helper": 1,
+    "verify_jwt": false,
+    "import_map": false,
+    "deployment_calls": 1,
+    "file_hashes": [
+      {
+        "name": "supabase/functions/background-worker/index.ts",
+        "sha256": "d91dcd88b989e45ddb63aa1efd930c74558838753f21706147ae5ec2ce9aae38"
+      },
+      {
+        "name": "supabase/functions/_shared/metaWorkerDispatch.ts",
+        "sha256": "d95c50b55c6f423a83160b6443513076f1237fd15acc2d43a23d09d15cfeced3"
+      },
+      {
+        "name": "supabase/functions/_shared/metaPeriod.ts",
+        "sha256": "11c6282714b35764d8d6d302c0565cf88f79e2144072782d696861c56008dbff"
+      },
+      {
+        "name": "supabase/functions/_shared/paginatedRows.ts",
+        "sha256": "43caa785b001883676c828a311b095767d4e643d6b3ab2ac68326b7ffed4facd"
+      },
+      {
+        "name": "supabase/functions/_shared/googleAdsFreshness.ts",
+        "sha256": "2d23e363859dab9589965fd3096879cf099f64f5be371ac45edaa0f5b8725e39"
+      },
+      {
+        "name": "supabase/functions/_shared/google-ads-policy.ts",
+        "sha256": "c4b8422806235881fed254f48b18e38b9462c8145c33eb8f889c6452ea3c9cb3"
+      },
+      {
+        "name": "supabase/functions/_shared/metaFleetTerminalBackoff.ts",
+        "sha256": "1260b419b9bc654a19883695734853c769930f912a6dd7ff62dd7dad291336f2"
+      },
+      {
+        "name": "supabase/functions/_shared/meta.ts",
+        "sha256": "6e0ad8ba5092f48f0eb417136d185391f0f0942d3f937b65760dcfb1d02400c9"
+      },
+      {
+        "name": "supabase/functions/_shared/metaInsightResponse.ts",
+        "sha256": "171594ea89967e92535861e5604faf93fdb85ed9c9113d3fa8e270303a76ae4b"
+      },
+      {
+        "name": "supabase/functions/_shared/metaUsage.ts",
+        "sha256": "7ae5c58f334c19232ee6d1af1dbf1128d29b544f75ea33183245ad29f725b12e"
+      },
+      {
+        "name": "supabase/functions/_shared/metaRateLimit.ts",
+        "sha256": "26b208fed993476e7730958ff3892637a4465f77c6727e9900e2f8ff5cd96d60"
+      },
+      {
+        "name": "supabase/functions/_shared/contentAutopilotPass.ts",
+        "sha256": "0b3f27fa1ff976e4eeb5ceaeb6ad81951f3976df78d8c06ec62af51198a6ce26"
+      },
+      {
+        "name": "supabase/functions/cg-dynamics-mcp/contentGuidelineActions.ts",
+        "sha256": "0e082a304dc9e0c73bcce80e19d2396b725ff153f0ab004881a0247d98c4f4f1"
+      },
+      {
+        "name": "supabase/functions/_shared/contentAutopilotSchedule.ts",
+        "sha256": "a1143104a775a80bb2f54a7fc49877fe3b1a51811c257592d2a86713211758ee"
+      },
+      {
+        "name": "supabase/functions/_shared/monthlyStrategyAutopilotSchedule.ts",
+        "sha256": "5fa2a6ddd5e8b85e5f89199012f54b05f39081995e9f88fd043043efbd8ecb7d"
+      },
+      {
+        "name": "supabase/functions/_shared/tiktokFreshness.ts",
+        "sha256": "1c3fadcb1458ca9a07ae4c3f599237c9da65f0f218d267f99db292aa76f70328"
+      },
+      {
+        "name": "supabase/functions/_shared/socialPublishingQueue.ts",
+        "sha256": "35793516bc78411ae04f68dd2fee637a9bbcbb9ebc8160fe1448afa5640b944c"
+      },
+      {
+        "name": "supabase/functions/_shared/socialPublishingExecution.ts",
+        "sha256": "d5201e8a1c868c0461f34762208ae480bc7c13d5db6450b8a4d8915bcb1dc52b"
+      },
+      {
+        "name": "supabase/functions/_shared/socialPublishing.ts",
+        "sha256": "f6b11ad13472a5a433188d0370e30cb0d34ee09496e76c91988b0c3c59142959"
+      },
+      {
+        "name": "supabase/functions/_shared/instagramPublishingCaption.ts",
+        "sha256": "0a864451b6360c932de5f9951e87e0db5283d852d7c9efc9752c6814838cfa26"
+      },
+      {
+        "name": "supabase/functions/_shared/socialPublicationAuthorization.ts",
+        "sha256": "fef06b1a82033c864a60530729fa1310ca680963b27bac75f3be8ca8aa5eece0"
+      },
+      {
+        "name": "supabase/functions/_shared/facebookPublicationRuntime.ts",
+        "sha256": "9cd2290b7de980cae1799f3777959fb81b048c9322f5e83355acdb4124f94f4c"
+      },
+      {
+        "name": "supabase/functions/_shared/facebookPublishingProvider.ts",
+        "sha256": "6c11cdbd64664d6c51c67b7edfdd5a5a46a4023f3b93b368d1899c69aedc2f6f"
+      },
+      {
+        "name": "supabase/functions/_shared/metaPublishingCredential.ts",
+        "sha256": "500a4b239458ae5d40fe57aec6fc2c470f2c83f64cfa19da09eca8b3e2170ce1"
+      },
+      {
+        "name": "supabase/functions/_shared/metaTokenStorage.ts",
+        "sha256": "9727ac5002d12eeb52a9cc71e8b70eef5320bdcbba3d8b8e43e5baf473a89291"
+      },
+      {
+        "name": "supabase/functions/_shared/metaTokenDiagnostics.ts",
+        "sha256": "5df83bddfe8a754123cbcccc5165746c6d668f1c85ea1034de2a179678fba8a8"
+      },
+      {
+        "name": "supabase/functions/_shared/facebookPublishing.ts",
+        "sha256": "a66af80531e2df992426e09cc8dac314880c22f81726387b179187992ad0dc29"
+      },
+      {
+        "name": "supabase/functions/_shared/facebookPublishingTransport.ts",
+        "sha256": "d6a2a31c2fbb603caba381a66a6c274d2a02d54e6f81aa3ee5296446655f2509"
+      },
+      {
+        "name": "supabase/functions/_shared/socialPublishingMedia.ts",
+        "sha256": "7dbfa193508cabfc2209d7eed5062722d54a3a21f21da4f9d7217abc65a78956"
+      },
+      {
+        "name": "supabase/functions/_shared/facebookPhotoMedia.ts",
+        "sha256": "7e214bd9256170a23c6ec23d332d50fe6d4748174de4918bfe7c4c602f0500fc"
+      },
+      {
+        "name": "supabase/functions/_shared/facebookPublicationMedia.ts",
+        "sha256": "e213f01fa4fe1c35bd79e03e23d94b6d1b040cffb3acb10482834c2c17959448"
+      },
+      {
+        "name": "supabase/functions/_shared/publicationJpeg.ts",
+        "sha256": "7ce6a18a5f496f3b9bdac0b1e3d7727ca6e8bb04b09e545394026c1efbdb8871"
+      },
+      {
+        "name": "supabase/functions/_shared/publicationJpegCodec.ts",
+        "sha256": "c5fd7d78a4c1ace9ef04659bbe0a061f8b657ffb9ce5324adc3b3a567297f25d"
+      },
+      {
+        "name": "supabase/functions/_shared/socialPublicationPreparation.ts",
+        "sha256": "02e847358599c300eb6eac4005aa09e724d2354e8ee5b4e7c2f5241f0684066a"
+      },
+      {
+        "name": "supabase/functions/_shared/socialPublicationRuntimeSource.ts",
+        "sha256": "a8387f668593d065383817e5d107b84682114d42121b4b8a120f0c414098e2eb"
+      },
+      {
+        "name": "supabase/functions/_shared/socialPublicationAuthorizationStore.ts",
+        "sha256": "3500f0a03aea9b59ab0cfafc92e71b531dff092b0d8a169bede6ceb9680c8da2"
+      },
+      {
+        "name": "supabase/functions/_shared/backgroundWorkerInvocation.ts",
+        "sha256": "2f4462b7c71d7d07dc49c953bea9b3966cd830e8a966a793506bd71ecfdaacca"
+      }
+    ]
+  },
+  "configuration": {
+    "old_digest_count": 77,
+    "all_old_digests_unchanged": true,
+    "new_key_count": 1,
+    "edge_vault_private_parity": true,
+    "plaintext_input_files_removed": true,
+    "raw_key_in_queued_headers": false,
+    "existing_keys_read_or_rotated": false,
+    "total_entries": 78
+  },
+  "other_functions": {
+    "count": 50,
+    "all_code_hashes_and_settings_unchanged": true,
+    "observed_platform_reload": "Adding the approved global Edge key bumped all50 other function versions by1 and updated timestamps; all other metadata including code hash, entrypoint, auth and import-map flags stayed identical. Worker auto-reloaded66->67 then one approved deployment produced68."
+  },
+  "cron": {
+    "jobid": 1,
+    "name": "cg-background-worker",
+    "active": true,
+    "schedule": "* * * * *",
+    "timeout_ms": 30000,
+    "database": "postgres",
+    "username": "postgres",
+    "old_command_md5": "a432533625dcb8db3cd10c3c7e518e69",
+    "new_command_md5": "ae45cb9aba7ee979b0642e45d002fdb3",
+    "only_command_changed": true,
+    "other_job_md5": {
+      "2": "1cbde4812bc304b8bcd315a30585491d",
+      "3": "822af6e4e11b67ab3a5ef6ff6faecdb7"
+    },
+    "compatibility_correction": {
+      "initial_result": "Transaction refused SELECT FOR UPDATE with42501 permission denied; independent readback confirmed original command and all cron rows unchanged.",
+      "correction": "Serializable transaction + SELECT without direct row lock + existing cron.alter_job API. Same exact guarded command and identity, no grants/role/config expansion.",
+      "tests": {
+        "actual_isolated_postgres": 15,
+        "pass": 15,
+        "fail": 0,
+        "skipped": 0,
+        "restricted_caller": true,
+        "concurrent_owner_edit_refuses_overwrite": true
+      },
+      "sql_sha256": "814885b07e446c3dfcb6c9cc15b0a402cc8e17b0cfc375acf25deaa3f1fb93f2"
+    }
+  },
+  "acceptance": {
+    "anonymous_post": {
+      "status": 401,
+      "error": "WORKER_AUTH_REQUIRED",
+      "cache": "no-store"
+    },
+    "get": {
+      "status": 405,
+      "allow": "POST"
+    },
+    "natural_completed_requests": [
+      {
+        "at": "2026-11-25T08:02:19.388Z",
+        "version": 68,
+        "method": "POST",
+        "status": 200,
+        "request_id": "01a211b9-d383-76c2-8a53-73673fc6d14b",
+        "execution_ms": 18681
+      },
+      {
+        "at": "2026-11-25T08:03:16.121Z",
+        "version": 68,
+        "method": "POST",
+        "status": 200,
+        "request_id": "01a211ba-bcd0-7bbc-bd84-e09f167e85bf",
+        "execution_ms": 15689
+      },
+      {
+        "at": "2026-11-25T08:04:16.644Z",
+        "version": 68,
+        "method": "POST",
+        "status": 200,
+        "request_id": "01a211bb-a7e3-7470-993a-0bb202392c64",
+        "execution_ms": 16033
+      }
+    ],
+    "pg_net_worker_response": {
+      "id": 188264,
+      "status": 200,
+      "timed_out": false,
+      "request_created": "2026-11-25T08:02:00.559812Z",
+      "ok": true,
+      "processed": []
+    },
+    "cron_run": {
+      "runid": 276876,
+      "start": "2026-11-25T08:02:00.435209Z",
+      "end": "2026-11-25T08:02:00.556716Z",
+      "status": "succeeded"
+    },
+    "correlation": "Worker-specific completed pg_net body, minute cron and independent version68 route logs corroborate natural execution. Pre-dispatch pg_net ID/headers were not captured; do not claim a recorded shared trace ID between pg_net and Edge logs. Cron enqueue success alone was not used.",
+    "manual_signed_invocations": 0,
+    "social_job_count_before": 0,
+    "social_job_count_after": 0,
+    "native_provider_publication": false
+  },
+  "publishing_gates": "All four submission/confirmation/release settings still absent; no content, provider account, campaign, media, permission, Microsoft or Vercel action",
+  "proof_limit": "90-second age/+15-second future skew; not single-use; existing duplicate fences remain required",
+  "tracking_handoff": {
+    "task_id": "50e655ff-6369-4aa0-bebc-e616ff2277a1",
+    "title": "Nolan social scheduling | native receipts and Dynamics handoff",
+    "source": "cg_assistant",
+    "owner": "CG Production House Admin",
+    "create_receipt": "24fca7b2-52fd-459d-b2b5-faf015d1dfff",
+    "comment_receipt": "a6abe516-2d90-48ef-aaf7-63a67b2291bf",
+    "same_comment_replay_occurrences": 1,
+    "readback": "company_admin normal connector PASS",
+    "existing_editing_tracker_untouched": "7f413d31-17cd-4761-b2e9-a031c1343444",
+    "limitations": "Operating convention over existing per-item task comments; not automatic native import, database uniqueness, staff-role/phone acceptance or proof Nolan has picked it up. No actual scheduled/posted client receipt fabricated."
+  },
+  "qualification": {
+    "retained_full_suite_revision": "f9425e8c",
+    "files": 399,
+    "pass": 5109,
+    "optional_skips": 39,
+    "current_sql_compatibility": 15,
+    "new_build": "PASS tsc/Vite7.3.6 26.91s",
+    "scoped_lint": "PASS SQL fixture delta",
+    "native_bundle": "Exact unchanged37-file candidate retained PASS"
+  },
+  "rollback": "No automatic downgrade; restoring66 reopens anonymous worker access and needs explicit emergency approval. Preserve signed caller/key/jobs/audit.",
+  "google_control_centre": "Exact target unidentified; no guessed write"
+}

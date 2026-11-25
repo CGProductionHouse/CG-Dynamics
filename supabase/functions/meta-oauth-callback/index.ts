@@ -1,7 +1,8 @@
 import { corsHeaders } from '../_shared/cors.ts'
 import { metaFetch, readMetaError, redact, resolveMetaGraphConfig } from '../_shared/meta.ts'
-import { inspectMetaAccessToken } from '../_shared/metaTokenDiagnostics.ts'
+import { inspectMetaAccessToken, verifiedMetaTokenValidUntil } from '../_shared/metaTokenDiagnostics.ts'
 import { encryptMetaStoredToken, validateMetaTokenEncryptionConfig } from '../_shared/metaTokenStorage.ts'
+import { exchangeMetaCodeForLongLivedToken } from '../_shared/metaLongLivedToken.ts'
 
 // Server-side Supabase client using the service_role key.
 // This bypasses RLS — only Edge Functions should ever use this.
@@ -135,7 +136,7 @@ Deno.serve(async (req) => {
     return redirect(`${appUrl}/admin/integrations/meta?meta=error`)
   }
 
-  // Exchange the authorization code for a long-lived access token.
+  // Exchange the one-use code, then request the documented long-lived User token.
   const appId = Deno.env.get('META_APP_ID')
   const appSecret = Deno.env.get('META_APP_SECRET')
   const redirectUri = Deno.env.get('META_REDIRECT_URI')
@@ -145,43 +146,22 @@ Deno.serve(async (req) => {
     return redirect(`${appUrl}/admin/integrations/meta?meta=error`)
   }
 
-  const tokenParams = new URLSearchParams({
-    client_id: appId,
-    redirect_uri: redirectUri,
-    client_secret: appSecret,
-    code,
-  })
-
-  let tokenResponse: Response
+  let tokenData: Awaited<ReturnType<typeof exchangeMetaCodeForLongLivedToken>>
   try {
-    tokenResponse = await metaFetch(
-      `${graphBaseUrl}/oauth/access_token`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: tokenParams.toString(),
-      },
-    )
-  } catch (err) {
-    console.error('Meta token exchange network error:', redact(err instanceof Error ? err.message : String(err), [appSecret, code]))
+    tokenData = await exchangeMetaCodeForLongLivedToken({ graphBaseUrl, appId, appSecret, redirectUri, code })
+  } catch {
+    console.error('Meta long-lived token exchange failed; existing credentials were not replaced.')
     return redirect(`${appUrl}/admin/integrations/meta?meta=error`)
   }
 
-  if (!tokenResponse.ok) {
-    console.error('Meta token exchange error:', await safeMetaError(tokenResponse, [appSecret, code]))
-    return redirect(`${appUrl}/admin/integrations/meta?meta=error`)
-  }
-
-  const tokenData = await tokenResponse.json()
-  const accessToken: string | undefined = tokenData.access_token
-
-  if (!accessToken) {
-    console.error('Meta token exchange missing access_token in response')
-    return redirect(`${appUrl}/admin/integrations/meta?meta=error`)
-  }
+  const accessToken = tokenData.accessToken
 
   const grantedScopes = await fetchGrantedScopes(graphBaseUrl, accessToken)
   const tokenDiagnostics = await inspectMetaAccessToken({ graphBaseUrl, appId, appSecret, accessToken })
+  if (!verifiedMetaTokenValidUntil(tokenDiagnostics, Date.now())) {
+    console.error('Meta token lifetime could not be verified; existing credentials were not replaced.')
+    return redirect(`${appUrl}/admin/integrations/meta?meta=error`)
+  }
   const missingScopes = REQUESTED_SCOPES.filter(scope => !grantedScopes.includes(scope))
   const connectionStatus = tokenDiagnostics.state === 'invalid' || missingScopes.length > 0 ? 'needs_reauth' : 'connected'
   const permissionError = tokenDiagnostics.state === 'invalid'
@@ -261,9 +241,9 @@ Deno.serve(async (req) => {
       connection_id: connectionId,
       encrypted_access_token: storedToken,
       token_type: tokenDiagnostics.tokenType,
-      token_expires_at: tokenDiagnostics.expiresAt ?? (tokenData.expires_in
-        ? new Date(Date.now() + tokenData.expires_in * 1000).toISOString()
-        : null),
+      token_expires_at: tokenDiagnostics.expiresAt && tokenData.expiresAt
+        ? new Date(Math.min(Date.parse(tokenDiagnostics.expiresAt), Date.parse(tokenData.expiresAt))).toISOString()
+        : tokenDiagnostics.expiresAt ?? tokenData.expiresAt,
       data_access_expires_at: tokenDiagnostics.dataAccessExpiresAt,
       last_validated_at: tokenDiagnostics.validatedAt,
       validation_state: tokenDiagnostics.state,

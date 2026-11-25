@@ -13,6 +13,7 @@ import {
 } from '../../lib/metaSyncFailures'
 import { metaAssetRunLabel, type MetaAssetRunPresentation } from '../../lib/metaAssetRunPresentation'
 import { InstagramConnectionQueue } from '../../components/integrations/InstagramConnectionQueue'
+import { FacebookPublishingConsent } from '../../components/integrations/FacebookPublishingConsent'
 
 const STEP_LABELS = ['Connect Meta', 'Link assets', 'Sync data', 'Review draft']
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined
@@ -1676,6 +1677,7 @@ export default function MetaIntegrationPage() {
             {connecting ? 'Connecting…' : connectState === 'connected' ? 'Reconnect Meta' : 'Connect Meta'}
           </ActionButton>
         </div>
+        <FacebookPublishingConsent disabled={connectionLoading || connecting} checking={connectionLoading} grantedScopes={connectionInfo?.grantedScopes ?? null} />
       </PremiumCard>
 
       {/* Step indicator */}

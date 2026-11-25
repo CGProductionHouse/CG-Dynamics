@@ -1,11 +1,14 @@
 // CG Assistant durable background worker (DEPLOYED, verify_jwt=false).
 // Drains the background_jobs queue server-side using the injected service role,
-// so jobs continue after the app closes. Invoked on a schedule (pg_cron ->
-// pg_net) and opportunistically by the app. verify_jwt is false because it only
-// drains the durable queue with its own service role; it performs no action on
-// behalf of the caller and trusts nothing from the request body.
+// so jobs continue after the app closes. Invoked by signed pg_cron -> pg_net
+// requests. verify_jwt=false is paired with the private HMAC guard BEFORE any
+// privileged client/housekeeping. Browser nudges have no private key and refuse;
+// the minute cron is the durable caller. Request bodies grant no authority.
 import { createClient, type SupabaseClient } from 'jsr:@supabase/supabase-js@2'
 import webpush from 'npm:web-push@3.6.7'
+import { authorizeBackgroundWorkerInvocation } from '../_shared/backgroundWorkerInvocation.ts'
+import { SOCIAL_PUBLICATION_JOB, runClaimedSocialPublication } from '../_shared/socialPublishingQueue.ts'
+import { facebookPublicationRuntime, readFacebookPublicationConfiguration } from '../_shared/facebookPublicationRuntime.ts'
 import { dispatchMetaWorker } from '../_shared/metaWorkerDispatch.ts'
 import { currentMetaMonth, previousMetaMonth, currentMonthHasIncrementalWindow } from '../_shared/metaPeriod.ts'
 import { fetchAllRows } from '../_shared/paginatedRows.ts'
@@ -52,6 +55,7 @@ interface JobRow {
   payload: Record<string, unknown>
   requested_by: string | null
   requested_by_name: string | null
+  idempotency_key?: string
 }
 
 interface JobResult extends Record<string, unknown> {
@@ -59,7 +63,9 @@ interface JobResult extends Record<string, unknown> {
   progress?: number
 }
 
-Deno.serve(async () => {
+Deno.serve(async request => {
+  const refusal = await authorizeBackgroundWorkerInvocation(request, name => Deno.env.get(name))
+  if (refusal) return refusal
   const url = Deno.env.get('SUPABASE_URL')
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   if (!url || !serviceKey) {
@@ -90,6 +96,10 @@ Deno.serve(async () => {
     if (!job || !job.id) break
     try {
       const result = await runJob(supabase, job as JobRow, url, serviceKey, worker)
+      if (job.job_type === SOCIAL_PUBLICATION_JOB && result.managed === true) {
+        processed.push({ id: job.id, job_type: job.job_type, ok: result.publication !== undefined })
+        continue
+      }
       if (result.waiting === true) {
         const { error: deferError } = await supabase.rpc('defer_background_job', {
           p_id: job.id,
@@ -794,6 +804,17 @@ async function runJob(
   const payload = (job.payload ?? {}) as Record<string, unknown>
 
   switch (job.job_type) {
+    case SOCIAL_PUBLICATION_JOB: {
+      // Source-only candidate. Global flag alone cannot activate publishing:
+      // dedicated photo gate + exact-account server packet are also mandatory.
+      const configuration = readFacebookPublicationConfiguration(name => Deno.env.get(name))
+      return await runClaimedSocialPublication({ sb: supabase, jobId: job.id,
+        key: job.idempotency_key ?? '', worker, now: new Date().toISOString(),
+        enabled: configuration !== null,
+        // Preserve the worker's existing JSR client/session. The helpers' ESM
+        // SDK has a separate nominal class identity; adapt only this type edge.
+        bindings: configuration ? facebookPublicationRuntime(supabase as unknown as Parameters<typeof facebookPublicationRuntime>[0], configuration).workerBindings(job.id) : undefined })
+    }
     case GOOGLE_ADS_REFRESH_JOB_TYPE: {
       return await runGoogleAdsRefreshJob({
         payload, url, serviceKey,

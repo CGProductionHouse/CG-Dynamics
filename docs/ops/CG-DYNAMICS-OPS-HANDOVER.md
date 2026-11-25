@@ -1,3 +1,1594 @@
+## 25 November — worker68 LIVE; native scheduler handoff preserved
+
+CA approved the worker key/cron/37file rollout following f9425e8c. Receipt: approvals/BACKGROUND-WORKER-AUTH-2026-11-25-RECEIPT.json. One new private key configured in Edge+Vault, matching digest privately verified; all77 prior config digests unchanged, total78. Plaintext temporary inputs removed. Original direct cron row-lock transaction refused42501 and independently read back unchanged; corrected only transaction isolation to SERIALIZABLE and removed unsupported FOR UPDATE. Existing cron.alter_job performs the same guarded command update through its supported authority. No grants, new live roles/functions/schema or assumptions of supabase_admin. Fresh15 real PostgreSQL checks include restricted caller and concurrent-owner-edit rollback. Exact signed command MD5ae45cb9aba7ee979b0642e45d002fdb3; original minute/active/30s timeout/user/db and jobs2/3 hashes preserved.
+
+Deployed exact unchanged runtime payload ONCE: worker68/37files, bundlee98cc7e720f3414a3a859b5c3b108ceb34b0cf53f41feb7fff7557cbc6abe9ad. Every hosted file independently byte-matches;35 existing helpers preserved. Adding the approved global key caused Supabase to reload all functions:50 others version+1/timestamps only; ALL other code hashes, auth/import-map flags, entrypoints and metadata unchanged. Worker auto-reload66->67 then explicit deploy68; do not repeat. Anonymous POST401/no-store, GET405/AllowPOST. Independent function logs verify natural version68 POST200 at08:02:19,08:03:16,08:04:16 UTC; pg_net188264 HTTP200/not timed out/worker success/processed[] and cron276876 corroborate the08:02 tick. No raw queued proof/headers read or manual signed invocation. A shared pre-dispatch trace ID was not captured; do not overstate that correlation. Social jobs0; all publishing/confirmation/release gates remain absent. No native post, media upload, campaign/account/permission/Microsoft/Vercel change. Proof is90s/+15s and not single-use; durable duplicate fences still required. Rollback to66 reopens anonymous execution and needs explicit emergency authority.
+
+Retained f9425e8c whole399-file/5109pass/39optional-skip qualification applies to unchanged runtime. Current compatibility delta15 PostgreSQL pass/no skips, scoped lint, fresh TypeScript/Vite build26.91s, bundle/diff pass. Other-owner #1005/#995/Nolan lanes preserved. Existing video tracker7f413d31-17cd-4761-b2e9-a031c1343444 was read and left untouched. New authorised Dynamics-native coordination task50e655ff-6369-4aa0-bebc-e616ff2277a1, Nolan social scheduling | native receipts and Dynamics handoff, is saved through normal company-admin create_task and get_task. update_task setup comment + identical retry returned SAME atomic receipt and exactly ONE saved occurrence. No impersonated staff/phone/Nolan-device acceptance. This task is a handoff, not a new queue: per-item native receipts belong on existing owned work tasks linked to the same monthly_deliverable; never grow a global log. Preserve exact client/channel/account/media/caption/time and separate scheduled/posted/unknown states. This is an operating convention, NOT automatic native import or a database duplicate fence.
+
+Direction: Nolan keeps current company Chrome/native scheduling ownership; this lane does not touch his tabs or publish. Keep API writes OFF until an approved unsubmitted original image/caption/time, fresh native duplicate/app-review evidence and separate exact-account/ONE-post authority are prepared. Do not force every connected analytics account into publishing. Research below supports a hybrid rollout, not claims of guaranteed equal views. Google Control Centre exact target remains unidentified; no guessed write.
+
+## 25 November — signed worker proof replaces rejected raw-key draft; LOCAL ONLY
+
+Resumed PR #991 from5372506d after ownership/main/live-source/cron and MSI capacity checks. Live worker remains66/36files; status1/authorization1; publishing and confirmation OFF. No key generated, production mutation, provider post or Vercel action. The consumed disabled-runtime approval must not be reused.
+
+Read-only metadata exposed a design prerequisite: net.http_request_queue has PUBLIC read grants; anon/authenticated can SELECT; owner supabase_admin and current postgres cannot change that protected boundary. This does not establish external API exposure. Rejected the old static-header packet (private manifest marked REJECTED_DO_NOT_RELEASE); do NOT restore/release it or attempt protected-role/ACL changes.
+
+Replacement keeps the base key only in Edge+Vault and queues HMAC-SHA256(timestamp/purpose/POST). Guard awaits WebCrypto BEFORE privileged client/housekeeping; proof age90s/+15s skew, no public bearer fallback, fails closed. Captured proofs can replay within freshness window; database readers with continuing queue access may obtain subsequent proofs. This is bounded-proof/key protection, not a single-use/exclusive database-reader boundary. Existing durable leases/fingerprints/reconciliation remain mandatory. No schema/permission change or new dependency. Browser nudge refuses, while canonical RLS enqueue/read and existing minute cron remain; delay may extend to next tick.
+
+Exact review: approvals/BACKGROUND-WORKER-AUTH-2026-11-25.md and adjacent qualification JSON. Candidate37files: one entry changed/35live helpers preserved/one new helper. Guarded SQL changes only cron job1 command; preserves minute cadence,30s timeout, user/db and unrelated jobs. Focused33 checks and actual isolated PostgreSQL13 pass/no skips; pgcrypto -> Node HMAC -> actual worker WebCrypto verified without network. Native Deno exact closure PASS. Whole Node suite: 399 files /5148 tests /5109 pass /39 optional skips /0 remaining failures, reconciled with the retained Git-Bash replacement receipt (12/12 pass;11 initial WSL-startup failures) and test-only loopback fixture fix. Build/tsc/Vite7.3.6, app-bearing bundle(17chunks), scoped ESLint and diff PASS. No browser/phone/native provider acceptance claimed. Test-only loopback Vite config fixes the reproduced conflicting global fixture-origin failure without changing production transport.
+
+Next requires separately approved private key+exact cron+worker rollout, guard LAST; all gates stay OFF. Readback every hosted byte and verify one natural signed minute tick, no manual privileged worker probe. Reverting to66 would reopen anonymous access and requires explicit emergency security-downgrade approval; never auto-rollback or discard audit. Cape original/caption/future time, fresh Teams/native duplicate/app-review and separately authorized activation/ONE post remain in the existing content evidence record. Staff/Nolan/#1005/#995/Microsoft lanes preserved. Google tracker target still unidentified; no guessed write.
+
+## 24 November — auth hardening prototype preserved; MSI capacity hold
+
+Approved runtime below remains LIVE66/1/1, all publishing switches OFF. Separate
+local coordinated worker-auth prototype prepared, NOT authorized/deployed and no
+key generated. New private64hex header gate refuses before any client/housekeeping;
+one guarded cron command keeps job1's minute schedule/30s timeout/user/database and
+all other jobs. Requires a fresh private Edge+Vault key and worker guard LAST.
+15 guard/queue checks +13 actual isolated PostgreSQL checks pass/no skips. SQL uses
+fixture cron/Vault/net and substitutes only the synthetic baseline fingerprint.
+Known caller impact: browser nudgeBackgroundWorker is opportunistic and would be
+refused; canonical RLS enqueue/read remains and minute cron is durable authority.
+Do not silently expose a private worker key in the browser or create another queue.
+
+Broad suite stopped ONLY its verified owned Node tree when freeRAM fell below8GB;
+last sample19:53 SAST7.12GB, CPU0. No other app/agent/OS setting touched. Full suite
+is INTERRUPTED, not passing; no observed assertion failures before interruption.
+Native Deno/build/bundle/lint of this prototype remain PENDING; do not request
+production approval or commit unbuilt source. Prior approved runtime186-check
+qualification remains separate and complete. No repeated full-suite run now.
+
+All5 prototype files, exact37file worker payload, guarded cron SQL, hashes,
+qualification/rollout/rollback and resume instructions are preserved privately:
+C:/Users/chris/.codex/artifacts/social-publishing-991/2026-11-24/worker-auth-hardening/
+manifest.json and README.md. They were moved outside the checkout and only our
+tracked entry patch reversed, leaving committed qualified source clean. Nothing
+deleted. Once capacity admits work, verify hashes/current ownership/live source
+and cron command fingerprint before restoring proposal/ files; finish focused
+qualification/build and then obtain separate exact security/cron/key approval.
+
+## 24 November — approved runtime LIVE, publishing OFF; existing worker auth gap
+
+CA's "Approved please finisg" consumed the exact disabled-runtime request for
+PR991/9f61eb90. Fresh65/16file worker and49function inventory matched the frozen
+3ba39e72 packet;77 config digests captured and all publishing/confirmation/release
+gates absent; social jobs0. Released ONE each in order: social-publication1/9files,
+social-publication-authorization1/28files, background-worker66/36files. Every
+hosted byte matches; worker15 existing helpers preserved,48 other functions and
+all77 configuration digests unchanged. Receipt:
+approvals/FACEBOOK-RUNTIME-2026-11-24-RECEIPT.json. DO NOT redeploy this packet.
+
+Both new endpoints: anonymous POST401/no-store; OPTIONS200. Authenticated exact
+review acceptance is NOT run: no genuine approved future image/caption/time.
+No post/provider upload/schedule, content approval, social job, migration,
+account/mapping/permission/config/key, Microsoft or Vercel change. Social jobs
+remain0; publishing switches remain absent. Existing186 local checks/build/
+native Deno qualify the exact source; no unnecessary unchanged suite rerun.
+
+IMPORTANT EXCEPTION: one attempted anonymous worker refusal probe returned200
+and invoked normal housekeeping. It processed0 jobs but reported a Meta fleet
+batch with2 items enqueued (exact batch in receipt). The refusal assumption was
+wrong; do NOT repeat or treat the worker as a read-only health endpoint. Source65
+already had Deno.serve(async () => ...) with no request authentication; this
+release preserved it. Live cron job1/cg-background-worker ticks every minute and
+has no Authorization/worker header or Vault reference. A unilateral auth change
+would break existing scheduling; hardening requires a coordinated reviewed
+worker+exact-cron change and separate approval. No such change or destructive
+job cleanup was attempted. This existing security gate must be resolved before
+calling the publishing system production-ready. Record is on #991/#220/#236/#381.
+
+Next remains the exact approved content tuple/fresh Teams/native duplicates,
+coordinated worker-auth follow-up, then separately approved activation/ONE native
+post with an independent receipt. Other-owner lanes and Microsoft hold preserved.
+Google Control Centre exact target unidentified; no guessed write.
+
+## 24 November — Cape content evidence and refreshed runtime prepared; no release
+
+Continued SAME draft #991/#220/#236; main b524a9f9 remains an ancestor. Native
+Cape Page acceptance/MCP97/callback76 and completed approvals below are retained;
+no repeat consent, binding repair, deploy or token/config change. Fresh worker
+inventory is65/16files (same hosted source closure as64); both publishing staff
+endpoints still absent. Refreshed held packet from runtime source3ba39e72:
+worker36files (one index changed,15hosted helpers preserved,20added), status9,
+authorization28. Current bounded-zero lifetime helpers included and exact parity
+checked. Manifest: approvals/FACEBOOK-RUNTIME-PREPARATION-2026-11-24.json.
+Prepared only; future release must recheck full source/inventory/config drift.
+
+Actual exact-client schedule24Nov–31Dec yields only25Nov old-video repost;
+zero content_review_versions. Company OneDrive portal has seven past JPEG/text
+pairs through18Nov; scoped December search empty. Company WhatsApp identifies
+Sydney's18Nov July-video repost file/caption, but not a verified exact approval;
+it is outside the image pilot. January images have unresolved staff feedback.
+Canva main DAGVuJURh6I/rev3212 includes December/January creative, but no verified
+original/caption/future-time/approval tuple. No personal Chrome or provider
+publishing action. Exact bounded evidence/next content step:
+approvals/CAPE-FACEBOOK-PILOT-CONTENT-2026-11-24.md. Do not call missing immutable
+reviews proof that all Teams/Canva/client work is empty or approve drafts silently.
+
+Fresh39actual isolated PostgreSQL +147focused/packet tests all PASS/no skips,
+including ChatGPT original JPEG/native-zero proof and lost-response/no-replay
+journeys. Graph/Storage are synthetic; this is NOT native publishing acceptance.
+Three assembled native Deno entrypoints pass; build/bundle/lint receipt is in
+the manifest. Only tests and records change; no runtime source/schema change.
+Facebook migration pair confirmed present; TikTok/Instagram pair remains absent.
+Publishing, staff confirmation and controlled live test require exact separate
+authority. Fresh Teams/native duplicate evidence and exact approved image/time
+remain; preserve Microsoft hold, other agents and current role boundaries.
+Task-owned QA container stopped after tests. No production writes or Vercel.
+Google Control Centre exact target remains unidentified; no guessed update.
+
+## 24 November — Cape native Facebook account acceptance PASSES; MCP97/callback76 LIVE
+
+CA approved "Approve exact bounded-expiry release" for f66de2b7. Immediate fresh
+full-source baselines96/73files and75/8files matched both qualified overlays.
+ONE deploy each: MCP97(2changed/71preserved) and callback76(3changed/5preserved),
+no added/removed hosted files. Every hosted byte independently matched, preserving
+all #1005/#995 work. Auth/import-map settings and all77 configuration digests
+unchanged; publishing/submission/confirmation/exact-release settings still absent.
+Anonymous MCP401; missing-state callback302 refuses before consent consumption.
+Exact per-function hashes and readback in
+approvals/META-ZERO-EXPIRY-2026-11-24-RECEIPT.json. DO NOT redeploy/repeat completed
+diagnostic96/callback75 or bounded-expiry97/76 packets or regenerate setup links.
+
+ACTUAL company-admin get_facebook_post_readiness(account_only:true), checked
+24Nov11:25:42.149Z (13:25 SAST), now AVAILABLE for exact Cape client
+42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa / Page262645554440912 / Cape Lumber Marketing:
+native_access_verified=true, required_permissions_verified=true,
+create_content_task_verified=true. Existing encrypted grant reused; no new consent,
+credential copy/refresh/replacement, mappings, permissions, jobs, content or posting.
+This is real provider/Page evidence, not the synthetic fixture. canConfirm/canPublish
+remain false. It does NOT prove app-review/release eligibility or actual publication.
+
+Fresh complete exact-client future approved PNG/JPEG review scan11:27:08.461Z:
+0 candidates, has_more=false. Next first-path gates are one real approved future
+original image/caption/time in canonical review flow, fresh Teams/native-duplicate
+evidence, separately authorized held worker/status/authorization runtime + account
+activation/controlled post, then independent native receipt. Do not invent/approve
+creative, dates or quantity, weaken the Microsoft hold or call queued=published.
+Refresh held runtime packet helpers with the now-qualified lifetime code before
+any future release; old frozen packets may carry the previous strict-null reader.
+
+202 focused tests/build/app bundle/lint/diff/native Deno receipts remain qualified;
+no extra unchanged full-suite/SQL rerun. Physical phone/client-role publication
+acceptance is not claimed. No Vercel/Microsoft/config/schema/campaign change.
+Existing #991/#220/#236/#381 ownership; Google Control Centre target unidentified.
+
+## 24 November — explicit-zero lifetime correction qualified LOCALLY; no further consent
+
+Existing deployed state remains MCP96 / callback75. Owner's ONE request is used;
+do not regenerate/replay consent. Native lifetime gate remains the last observed
+result until the following separate release is authorized. No token replacement,
+refresh, mapping, scope, configuration/key, content, Microsoft or Vercel write.
+
+Reproduced parser defect: numeric expires_at=0 and missing expiry both becameNULL.
+Facebook's own AccessTokenMetadata SDK leaves numeric zero distinct from expired
+DateTime values. Local correction preserves an optional native expiryKind, accepts
+ONLY explicit numeric zero with fresh valid app-bound USER evidence and a finite
+future data-access expiry, and limits private proof to min(data expiry,15minutes).
+Required scopes, exact mapping/native Page CREATE_CONTENT and worker revalidation
+remain. Unknown/string-zero/malformed expiry, missing bounds, stale/wrong-app/type,
+expired evidence and foreign Pages stay blocked. The proof window is NOT persisted
+as a fabricated token expiry. Current stored credential is reused without export.
+
+Callback's private exchange may return an unqualified nullable relative expiry;
+callback now MUST verify the fresh native lifetime BEFORE any connection/token
+replacement. Explicit-zero native evidence plus finite data access is supported;
+missing/unknown proof fails and preserves existing data. This avoids reconsent loops
+and does not turn on publishing or perform background token renewal.
+
+202 focused tests PASS/no failures/skips: actual MCP/Graph-response + encrypted
+store path checks zero/missing bounds/foreign Page/missing CREATE_CONTENT with zero
+publication calls; actual callback preserves encryption/no writes on unknown
+lifetime; proof cap/staleness/expiry and prior authorization/Instagram/Meta truth
+checks included. Build/app bundle, scoped lint/diff and native Deno of both full
+current-source overlays PASS; checker-only types excluded. No new whole-suite,
+SQL/native-provider/physical-phone acceptance is claimed. No dependency change.
+
+Prepared frozen manifest approvals/META-ZERO-EXPIRY-2026-11-24.json:
+MCP96/73files ->2helpers changed/71preserved, source SHA256
+14740d92f5a948b9f5e45405caa6a1d339792a9c0dddc93c4f48abebd4a8efe9;
+callback75/8files ->3changed/5preserved, source SHA256
+4919b88958e1c4400598c8fc0eee6773edafa40ed9162d2ddbc3f3c0df3f28b8.
+ZERO added/removed files, auth/settings unchanged. NOT approved/deployed. Next exact
+approval is only these two function overlays, fresh drift check, readback, then
+native account_only using EXISTING consent. No link or token refresh is needed to
+test it. Preserve all other-agent hosted bytes; same #991/#220/#236 ownership and
+staff/Nolan/Teams/Microsoft holds. Google Control Centre target remains unidentified.
+
+## 24 November — callback75 LIVE, one setup link consumed; lifetime gate persists
+
+CA approved "Approve callback fix and one setup link" for831cb1c8. Fresh full
+callback74 baseline matched; ONE deployment ->75 ACTIVE/8files, all8 hosted bytes
+independently matched,1changed/6preserved/1added helper. Auth/import-map settings
+and all77 configuration digests unchanged. Exact release receipt:
+approvals/META-LONG-LIVED-CALLBACK-2026-11-24-RECEIPT.json. Do not redeploy/repeat.
+
+Generated exactly ONE setup link through existing company-admin MCP. Official
+host/callback/code/unchanged7-scope contract verified; one unused hashed request
+independently confirmed before delivery. Owner completed consent; that exact
+request was consumed24Nov11:10:59.066Z. Do NOT regenerate or replay the link. Raw
+URL/state stays only in the private owner conversation, outside repo/artifacts.
+
+Post-consent native account_only still returns META_PUBLISHING_TOKEN_EXPIRY_UNVERIFIED.
+The expected connection remains last_connected_at19Nov15:43:19.424Z; one encrypted
+USER row remains valid, expiry NULL, newly validated24Nov11:11:06.742Z with data
+access until22Feb2027. The intended credential replacement is not established.
+Preserved old credential; do not claim fresh token/Page proof or request consent
+again. Bounded log probes returned no usable failure detail; no raw provider log
+or credentials exported. Continue local lifetime parsing investigation: current
+diagnostics collapses explicit numeric zero and missing expiry into the same NULL.
+Meta's own SDK treats numeric zero separately from expired dates. Any correction
+must retain fresh validity/app/USER/scopes, finite data-access bounds and exact
+native Page rights; unknown/missing/expired evidence must remain refused. No such
+new lifetime-policy release is authorized yet. Publishing/Microsoft/Vercel remain off.
+
+## 24 November, 13:04 SAST — approved diagnostics LIVE96; long-lived callback correction LOCAL
+
+CA answered "Approve exact three-file diagnostic release". Fresh read found MCP95/
+73files, with #1005's added video-tracking files and changed entry/catalogue/context.
+All3 approved helper baseline/replacement hashes still matched bb390745. Preserved
+ALL70 other current hosted files, including the3 newly added upstream files; no
+downgrade to the old92/70file bundle. Exact overlay source SHA256
+d208d708f3e6ed50db1fc21cf94a87af0ebfe493da4ddca3df4f06626706fe80. Fresh immediate
+preflight matched entire95 source. ONE deployment -> MCP96 ACTIVE/73files; all73
+hosted bytes independently matched. Bundle SHA256
+d8175572431b3a417fd3ab5de120d1042ef17a94958a6bc4586b921ba5e6facc.
+verify_jwt=false/import_map=false and custom authentication preserved. All77
+configuration digests unchanged; publishing/submission/confirmation/exact-release
+settings absent, inspection enabled. Anonymous MCP401. CLI2.115's API `value`
+field is DIGEST (verified against official CLI formatter), normalized to metadata;
+no actual credential values retrieved/copied. Do NOT redeploy this completed packet.
+
+Fresh company-admin native account_only now returns
+META_PUBLISHING_TOKEN_EXPIRY_UNVERIFIED. This is the precise current credential
+lifetime block; missing mapping is fixed, but Page CREATE_CONTENT is still not
+verified because credential lifetime blocks the Page reads. Publishing stays OFF.
+Receipt: approvals/FACEBOOK-READINESS-DIAGNOSTICS-2026-11-24-RECEIPT.json.
+
+Traced a separate confirmed OAuth implementation gap: callback74 (source baseline
+matches this branch) claimed long-lived exchange but only performed the initial
+code exchange. Meta's current official long-lived-token documentation requires a
+second fb_exchange_token request. Local reproduction stored the synthetic short
+token instead of final long token. Corrected callback + new server-only helper:
+one code POST, one documented long-lived GET, no retries/redirects, strict final
+bearer token and finite >2minute lifetime, conservative issuance time, fixed errors.
+Only final credential reaches existing app/scope checks and encrypted persistence.
+Failed/malformed/throttled/uncertain second exchange causes no connection/token
+replacement. State consumption/encryption/scopes/mappings/publishing policy unchanged.
+This does not repair the currently stored credential or bypass the unknown-expiry gate.
+
+LOCAL ONLY:80 focused Meta/OAuth/reporting/consent checks pass/no skips; actual
+callback storage/failure integration, native Deno of the exact8-file callback
+candidate, build/tsc/Vite7.3.6/app bundle and scoped lint/diff pass. One initial
+broader harness lacked synthetic Vite env; corrected fixture-only env run80green.
+Existing SQL/state interfaces unchanged; no fresh full-suite/PG/native OAuth/phone
+acceptance claimed. Manifest approvals/META-LONG-LIVED-CALLBACK-2026-11-24.json:
+callback74 baseline7files ->1changed/6preserved/1new helper, source SHA256
+5454f1c9a768c65c14a5332c9f3de47df1b84083df341026c62795a69c631808.
+No callback deployment, token refresh/replacement, new login/setup state, permission,
+mapping/content/Microsoft/Vercel action. Next exact authority: callback correction
+release and ONE fresh owner-consent setup link; owner completes consent, then read
+back encrypted/lifetime metadata and exact Page readiness. Do not assume this fixes
+Cape until real provider acceptance. Preserve #1005/#995 and other lanes; Google
+Control Centre exact target still unidentified, so no guessed update.
+
+## 24 November, 12:42 SAST — staff credential-recovery guidance completed locally
+
+Continued #991 from bb390745; current main remains an ancestor and #1005's
+guideline/video-tracking lane is separate. No additional release approval has
+arrived. Cape's applied binding is not replayed; no repeated native/metadata sweep.
+The exact three-helper diagnostic packet/source hash remains unchanged and held.
+
+Reproduced generic staff instructions for the new credential/unknown-expiry codes
+in the actual publication panel harness. src/lib/socialPublishing.ts now gives
+administrator/read-only diagnostic guidance, preserves the exact account, and
+does not prescribe reconnecting for an unverified lifetime. Possible-start and
+unknown-outcome reconciliation messages retain precedence, so credential errors
+cannot become permission for another post. Test corrected a harness collapse on
+the second case, then all51 publication-management checks pass/no skips. Build,
+tsc/Vite7.3.6, actual changed ContentReviewCard bundle, scoped ESLint/diff pass.
+No browser/device/native publishing acceptance claimed; this is local frontend
+copy, not part of the pending Supabase packet or authorization for Vercel.
+
+Only two app/test files changed; auth/roles/confirmation flags/queue behavior
+unchanged. No production/provider/Microsoft/data/config/permission/content write,
+deployment or cost action this increment. Same pending exact three-file diagnostic
+approval is next, then fresh hosted-source comparison and account-only diagnosis.
+Do not weaken expiry policy or create a post to get around this hold. Google
+Control Centre target remains unidentified; owning PR/issues hold the record.
+
+## 24 November — Cape binding APPLIED; native publishing proof remains unavailable
+
+CA explicitly answered "Approve exact Cape Facebook binding repair" today.
+Verified original packet SHA256e46c5af88aac81731f7fd5d94b57a77d8a59c6fd838ffb3955d1ef0308fbc781
+and unchanged preimage/consent/scope/encrypted-row guards, then executed ONE guarded
+transaction at08:56:54.936043Z. Independent readback confirms mapping4441c144-d1c5-46b1-980f-9145280857fc
+for Cape42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa / Page262645554440912 now binds to
+65d8f626-54d7-45fa-ac75-5348eb364540. Normal updated_at changed; Page/Instagram/ad
+identity preserved. All46 other complete mapping rows retain digest
+eaeb58b984aa90a28bfc5ccaf80cd5bd. Receipt:
+docs/ops/approvals/CAPE-FACEBOOK-CONNECTION-BINDING-2026-11-24-RECEIPT.json.
+DO NOT replay the approved SQL or ask for the same repair again.
+
+Fresh company-admin MCP account_only advances beyond EXACT_ACCOUNT_MAPPING_REQUIRED
+but returns PUBLICATION_VERIFICATION_UNAVAILABLE. Native CREATE_CONTENT/app/token
+proof is NOT established. Separate complete exact-client candidate read08:58:01.702Z:
+zero future approved Facebook PNG/JPEG reviews, has_more=false. No content approved,
+scheduled, queued or published. No deployment/config/key/permission/Microsoft/Vercel action.
+
+Metadata-only token read: stored validation valid/USER at23Nov07:01:37.135Z,
+token_expires_at NULL, data-access expiry17Feb2027. This is historical metadata,
+not the precise cause of today's generic failure. Existing credential policy
+requires a fresh finite lifetime. Reproduced unknown-expiry rejection and opaque
+diagnostics locally; added fixed server-owned META_PUBLISHING_TOKEN_EXPIRY_UNVERIFIED
+and META_PUBLISHING_CREDENTIAL_UNAVAILABLE classifications, preserving every block,
+role/client boundary and retry rule. Provider strings/exception codes cannot be
+copied to public errors. The actual MCP path has a deterministic encrypted-store +
+Graph-response regression, not native provider acceptance. Diagnostics remain LOCAL.
+
+Qualification:116 focused checks pass/no skips; npm build/tsc/Vite7.3.6 and actual
+app-bundle content pass, scoped ESLint/diff pass, native Deno2.9.8 checks all3
+helpers. Initial Node harness lacked its qualified JPEG path and native Deno
+needed node-modules-dir=none; corrected harnesses passed using private caches,
+without repository dependency/lockfile/shared node_modules changes. No fresh
+whole-suite, PostgreSQL, browser-action or phone acceptance claimed for this narrow
+error-classification change. MSI capacity check before build:12.31GB free RAM,
+45.4% commit,45.02GB free C:,CPU7%; one heavy job only.
+
+Live MCP is now v92/70files from another lane, not v90. All3 diagnostic helper
+baselines match v92; preserve its other67 files and recent #1005 guideline changes.
+No redeploy today. Company Chrome extension profile cgproductionhouse.com is
+available through current cua_repl inventory; personal christie-ann and pinned
+WhatsApp sessions preserved. No browser settings/restart/credential extraction.
+
+Three-file diagnostic packet is qualified and remains NOT APPROVED/DEPLOYED:
+docs/ops/approvals/FACEBOOK-READINESS-DIAGNOSTICS-2026-11-24.json, candidate source
+SHA25651ad493e685ee6d592f7598e600b8e450df3059526c96acf6523f9ab4ff5c3c7.
+Full candidate entry passes native Deno with the prior seven type-only support
+files/existing checker config; support files are NOT deployment additions.
+No review blocker found in this bounded self-review; no independent review/merge
+of the entire draft PR is claimed. Only a separately authorized live diagnostic
+release can reveal the current credential failure; fresh live baseline must match.
+Do not bypass unknown expiry, refresh/backfill/copy tokens or repeat consent
+speculatively. Afterwards establish actual exact Page task/app/token proof, one
+approved future image/caption/time, fresh Teams/native duplicate evidence and
+separately authorized publishing/runtime/controlled-post activation. #991/#220/#236
+retain the scheduler lane; #1005/#995 MCP entry/catalogue and staff/Nolan lanes stay
+separate. Google Control Centre exact target remains unidentified; no guessed write.
+
+## 19 November, 18:35 SAST — consent and Cape asset access verified; exact binding awaits approval
+
+Owner consent completed: exact setup state used2026-11-19T15:43:17.868Z;
+existing connection65d8f626-54d7-45fa-ac75-5348eb364540 connected at15:43:19.424Z
+with pages_manage_posts plus existing reporting permissions. Metadata-only checks
+confirm ONE stored credential row, encrypted-envelope=true; no credential read.
+Fresh API-backed Load Meta assets in legitimately signed-in company Chrome returns
+Cape Lumber Marketing (Lumber Yard) for Cape's existing Page262645554440912.
+Picker is a current discovery entry, not the existing-linked-page fallback.
+No Save link, reconnect, sync, consent or publishing control was clicked.
+
+Browser recovery: installed Chrome/native-host diagnostics pass. Used the existing
+official chrome/26.1111.71704/scripts/browser-client.mjs setupBrowserRuntime route
+through Node REPL, explicitly selecting extension profile cgproductionhouse.com.
+It successfully reads/navigates/uses the existing company session with known URLs.
+Reuse valid browser/tab handles and returned documentation; never numeric IDs as
+identity. No extension/settings/security change, reinstall, browser restart, debug
+port, profile/session copying or credential extraction. The intermittent Windows
+Computer Use URL-guard root cause is NOT established; its guard was not disabled.
+Existing user OAuth tab and pinned WhatsApp preserved. Verification tab left open.
+
+Cape mapping4441c144-d1c5-46b1-980f-9145280857fc still has connection_id NULL,
+client42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa. Prepared ONLY the exact one-row repair
+in docs/ops/approvals/CAPE-FACEBOOK-CONNECTION-BINDING-2026-11-19.sql. Final packet
+SHA256e46c5af88aac81731f7fd5d94b57a77d8a59c6fd838ffb3955d1ef0308fbc781.
+Changes connection_id to the consented connection plus normal updated_at trigger;
+preserves Page/Instagram/ad identities and every other mapping. Short table lock,
+timeouts, exact consent/fingerprint/grant/token-count checks, one-row and whole-row
+postconditions refuse drift. NOT APPROVED/APPLIED; no production UPDATE executed.
+
+Fifteen actual isolated PostgreSQL checks PASS/no skips. Additional review first
+reproduced mixed legacy/encrypted credential ambiguity, then corrected both total
+and encrypted row counts; initial failing fixture retained, final15green. Fixtures
+do not establish hosted RLS or native CREATE_CONTENT/app/token proof. Private DBs
+dropped/count0; task-owned network-none container stopped/exited0; MSI capacity
+snapshot admitted one job. No new dependency installed; no app/runtime change or
+expensive full/build rerun. Private SQL/test/log/README/screenshot in artifacts/
+social-publishing-991/2026-11-19/cape-binding under C:/Users/chris/.codex.
+
+NEXT: exact CA data-repair approval → fresh drift check + ONE guarded transaction
+→ readback + existing account_only MCP check of live Page tasks/app/token binding.
+That publishing-access check is still held by the NULL mapping; do not bypass it
+or call discovery alone publishing-ready. Keep publication and worker activation
+off; eligible approved future creative/time/Teams/native duplicates and separate
+runtime/controlled-post approval remain. No deployment, SQL migration, grant,
+config/key, other-client/content/approval/date/Microsoft/Vercel change. #991/#220/
+#236/#381 own this lane; other agents and pending holds remain. Google tracker
+exact target still unknown; no guessed write.
+
+## 19 November, 17:28 SAST — company plugin refreshed; ONE Facebook setup link verified
+
+Recovered supported Computer Use in the EXISTING company Chrome session; verified
+ChatGPT Account email info@cgproductionhouse.com before acting. Clicked the existing
+CG Dynamics Refresh tools ONCE; UI changed Write31 to Write32. New ordinary company
+chat https://chatgpt.com/c/6aff14bf-d3f8-83e9-9d37-fc1a0e399f09 resolved company_admin
+and reported ONE start_facebook_permission_setup call with confirmation=true.
+Actual official Facebook code/HTTPS callback/seven-scope URL returned. Read-only
+production aggregate against its SHA256 state hash independently confirms ONE
+matching request, active manager, unused, expires2026-11-19T16:25:16.856Z
+(18:25:16 SAST). Initial SELECT incorrectly named consumed_at; corrected to the
+existing callback's used_at after reading source. Both were SELECT only.
+
+The ONE-link approval is now consumed: do NOT generate another or retry this call.
+The link remains in that company chat; raw URL/state excluded from durable records.
+Owner Facebook consent is NEXT, preserving existing asset selections; not opened
+or accepted here. No backend redeploy, settings/permission/config/key/mapping change,
+Microsoft, content/job/publication, migration or Vercel action. Existing two company
+connections, tabs and pinned WhatsApp preserved. Publishing remains disabled; native
+grant/Page binding and controlled publication acceptance remain separately gated.
+UI recovery/link verification supersede the historical browser hold below. This
+Codex chat's own cached action discovery was NOT proven refreshed. Documentation
+only; prior runtime/build qualification unchanged, no expensive tests repeated.
+
+## 19 November — exact MCP permission-setup packet LIVE v90; earlier browser hold
+
+At 17:13 SAST on 19 November, CA explicitly confirmed the existing approval request:
+"Yes—approve exact MCP release and setup link" for revision323d83da's unchanged
+70-file packet and ONE expiring Facebook setup link. This confirms the narrow
+authority previously inferred from Please continue; no second deployment is needed.
+No authority for provider consent, publishing, configuration or other releases.
+Executed ONE deploy after fresh v89/68file complete-closure comparison to the
+frozen manifest. MCPv90/70files ACTIVE. Independent hosted readback: ALL70files
+match the frozen payload byte-for-byte,64prior files preserved,4changed,2added;
+verify_jwt=false/import_map=false unchanged. Payload SHA256
+04461b73d8bf6a301f5b0c603892921376f87f7b0ffdedb26fdf2b3c0602830a;
+hosted bundle5b7668d35da8caa13239dd7b656b37fb4448321ff2d15d09dd50dd65737cb6ca.
+OAuth-start remainsv75, all5files/settings unchanged. Read-only digest metadata
+shows ALL77configuration digests unchanged; no actual secret values read/copied.
+Consent-setup flag stays enabled; publishing/submission/confirmation/exact-release
+gates remain absent/false. Unauthenticated MCP returns401. NO duplicate deployment.
+
+The backend now exposes start_facebook_permission_setup in its source catalogue;
+actual installed company ChatGPT discovery/execution is NOT yet verified. Computer
+Use stopped this turn because it could not confidently determine Chrome's current
+URL for policy enforcement. No further app input/retry/alternate browser automation,
+profile/session copying or security-setting change. Company refresh, normal-chat
+acceptance and the authorised ONE expiring setup link remain unfinished; NO OAuth
+state/link was generated. Do not describe previous v89 normal-chat acceptance as
+v90/new-action acceptance. Existing signed-in sessions/tabs preserved.
+
+At this explicit-approval continuation, installed tools still expose neither
+start_facebook_permission_setup nor a connector-catalogue refresh action. No
+invocation or OAuth state/link creation attempted; ONE link remains authorised.
+Do not seek repeat release/link approval or work around authentication/discovery.
+
+Private source snapshots, preflight, deploy result, all-file readback, digest-only
+config proof and release receipt: C:/Users/chris/.codex/artifacts/social-publishing-991/
+2026-11-19/mcp-permission-release. Next supported company UI/tool recovery must
+verify the existing company account, refresh its existing catalogue and generate
+ONE already-authorised link, without redeployingv90 or changing flags. Owner Meta
+consent, exact grant/Page binding, approved future original photo/caption/time,
+fresh Teams/native duplicate proof and separate worker/account/one-post approval
+remain. No native provider, mapping, token, content/job, production SQL/migration,
+Microsoft, Vercel or cost action. Google tracker target still unknown.
+
+## 19 November — six additional REAL PostgreSQL state checks PASS; packet unchanged
+
+Continued SAME PR #991 from10eb7d97. Added only the opt-in test
+tests/metaPermissionStatePostgres.test.mjs; no application/runtime change. Six
+checks PASS on real isolated PostgreSQL17.10: actual MCP dispatcher/installed SDK
+state persistence, actor/hash/expiry, concurrent callback consumption with ONE
+winner and no replay, expired/tampered states, inactive/mid-insert role revocation,
+unconfirmed/wrong-context/disabled requests, and a genuine INSERT permission error.
+The actual callback hash/query subsection is executed BEFORE any provider/code
+exchange. PostgREST wire transport is synthetic; minimal fixture schema/grants are
+NOT production schema/RLS or native Facebook acceptance. New six tests skip by
+default and cannot touch Docker without the exact existing QA opt-in.
+
+Verified task label + network=none + no published ports; reused only the previously
+stopped cg-dynamics-social-220-qa container. Its private random database was dropped,
+remaining matching databases0; container stopped cleanly/exited0. Other containers,
+staff apps and Microsoft unchanged. No credentials inspected; test metadata reads
+only task/network/ports/running fields. Syntax/diff and disabled-mode checks pass.
+Previous159affected/native/build/lint receipts remain applicable to unchanged app
+source b84fe934; full23-minute suite not repeated for this test-only addition.
+
+Exact70-file candidate-v2 and SHA04461b73d8bf6a301f5b0c603892921376f87f7b0ffdedb26fdf2b3c0602830a
+UNCHANGED. Fresh native DB evidence is private under artifacts/social-publishing-991/
+2026-11-19/meta-state-postgres in C:/Users/chris/.codex. Production release approval
+remains pending; no state/link, grant, mapping, job, config, SQL, deployment or
+Vercel action in production. Do not treat a generic continuation as a new exact
+release packet or as proof of native publishing readiness.
+
+## 19 November — ChatGPT Facebook permission setup prepared, NOT live
+
+Same DRAFT PR #991; tested source b84fe934. Reproduced the missing accessible
+consent path: installed/live MCP lacks start_facebook_permission_setup and the
+new frontend button remains source-only under #679. Added an explicit company-admin
+setup action using the EXISTING hashed state/callback authority, with fresh active
+manager checks before/after state persistence. Only owner-requested setup returns
+an expiring official Meta URL; reporting scopes stay unchanged and only
+pages_manage_posts is added for the opt-in. No provider grant, mapping, job or
+posting occurs here. Each deliberate OAuth setup has a fresh nonce, not operational
+idempotency; catalogue AND shared Assistant guidance forbid automatic retries.
+
+159 affected checks PASS. Full serial run completed5101total/5068pass/1fail/
+32optional skips; sole failure was the stale63-tool assertion after adding tool64.
+Corrected that expectation and rechecked ALL159affected cases, including exposure,
+auth/context, SDK transport, scopes, state/expiry/privacy and packet guards. No second
+whole-suite run after that test-only correction and guidance-wording clarification;
+do not label the original full run green. Final build/app bundle, scoped lint/diff,
+native Deno local OAuth entry + exact70-file MCP packet PASS. No new UI/device/native
+Facebook consent/publication or installed-new-action acceptance claimed. Previous
+37real PostgreSQL checks remain prior evidence for unchanged SQL/queue/worker.
+
+Fresh read-only hosted source is MCPv89/68files. Prepared candidate-v2 changes only
+4MCPfiles, preserves64hosted files byte-for-byte, adds2helpers;70total. Payload SHA256
+04461b73d8bf6a301f5b0c603892921376f87f7b0ffdedb26fdf2b3c0602830a.
+Private packet: artifacts/social-publishing-991/2026-11-19/mcp-permission-setup/
+under C:/Users/chris/.codex. Earlier candidate is superseded; use candidate-v2 ONLY.
+No config changes or redeploy authorized. Local OAuth-start shared-helper refactor
+is tested but EXCLUDED from this packet: hosted OAuth-startv75 remains untouched.
+Exact CA release approval + immediate hosted-closure drift check required before
+deploying MCP. Owner consent, actual grant/exact Page binding, approved future
+image/caption/time, fresh Teams/native duplicate proof and separate worker/submission/
+account activation remain. Publishing stays OFF; no production state was created.
+
+Mainb524a9f9 unchanged. Inspected #995 Marketing additions in shared MCP index/catalogue;
+do not copy or overwrite them, reconcile at merge and invalidate a packet on hosted
+drift. #1003 has no MCP overlap. Teams/staff/Nolan lanes untouched. One heavy job at
+a time/concurrency1 retained; observed RAM above11GB, MSI sample CPU52C/GPU45C
+around build check. No Vercel, SQL, account/content/permission/secret/Microsoft action.
+Google Control Centre exact target remains unknown; no guessed write.
+
+## 19 November — MSI crashes: reduced local workload is mandatory for this lane
+
+CA reports repeated MSI laptop crashes and confirms the WHOLE laptop freezes or
+restarts, not only ChatGPT/Codex. Agents must watch machine load.
+Read-only Windows evidence: Cyborg15A13VF/31.7GB RAM; Event41/6008 confirms
+unexpected shutdowns reported at09:44:30 and13:47:29 SAST today. BugcheckCode0,
+PowerButtonTimestamp0, no minidump/MEMORY.DMP, no observed resource-exhaustion2004
+event in the bounded query. These do NOT identify a root cause. Application
+errors/hangs also exist; do not assume they caused the whole-machine shutdowns.
+Post-reboot snapshot:17.4GB RAM free,36.7GB system-drive free,23%CPU,57C NVIDIA
+GPU, AC connected. Not evidence of temperatures or memory pressure at crash time.
+
+For continuing work: ONE heavy local job at a time, Node --test-concurrency=1.
+Never overlap full tests/build/Docker fixtures; no stress test to diagnose this.
+Sample memory/commit/CPU/free disk before and during long owned jobs. Hold new
+heavy work below8GB free RAM, above80%commit, below20GB free system disk or when
+CPU is already above85%. These are conservative workload admission limits, not
+manufacturer limits or a guarantee against crashes. If pressure rises, checkpoint
+and stop only the exact task-owned job; preserve staff/browser/other-agent work.
+Read-only local sampler:
+C:/Users/chris/.codex/artifacts/msi-stability/2026-11-19/Read-WorkCapacity.ps1.
+At14:20:57 SAST the sampler returned hold_new_heavy_work:5.08GB RAM free,
+47.7%commit,39%CPU. Heavy work HELD; do not start another full test/build until
+capacity recovers. Process groups include Chrome3.58GB, ChatGPT3.27GB, WSL2.75GB,
+Claude1.79GB, WebView1.68GB and Node1.62GB. No single-process cause established;
+none were killed, shared WSL/Docker preserved. Historical disk-controller Event11
+targets Harddisk2/DR2 (16/17Nov); current enumeration cannot identify that historical
+device. Do not blame the internal NVMe. No WHEA/Display/nvlddmkm/stornvme/volmgr
+warnings/errors returned by bounded3day queries; this is not a hardware pass.
+Crash dump configuration is already3/minidump with event logging on; no dump
+present. No registry change, diagnostics reboot, scan or stress test performed.
+
+The sampler is on-demand, not a background monitor. CA subsequently explicitly
+requested a laptop cooling/stability fix before resuming scheduling. Narrow,
+reversible changes now VERIFIED on the MSI Cyborg: Windows Balanced scheme
+381b4222-f694-41f0-9685-ff5bb260df2e PERFBOOSTMODE changed from2/Aggressive to0/
+Disabled on AC and battery; maximum processor state remains100% for both. Fresh
+powercfg readback after changing MSI Center confirms0/0 still persists. MSI Center
+User Scenario changed from MSI AI Engine to Balanced; UI selection verified.
+No graphics-mode switch, restart, elevation bypass, firmware, driver, pagefile,
+security, credential or production change. CPU boost reduction can slow heavy jobs.
+
+MSI Hardware Monitoring UI first showed CPU56C/GPU50C/fan2651RPM; later showed
+CPU55C/GPU48C/fan2651RPM with25%CPU and64%memory. These are ordinary-load
+observations after mitigation, NOT temperatures at crash time or a stress-test pass.
+At14:29:15 SAST the sampler returned capacity_available:10.54GB free RAM,
+40%commit,41%CPU,36.51GB free system disk. No shared process was killed; no cause
+for resource recovery established. Resume bounded scheduling preparation under the
+single-job/admission rules above; recheck before any heavy work. No claim that the
+underlying whole-machine freeze/restart cause has been identified or eliminated.
+
+Private evidence/rollback: C:/Users/chris/.codex/artifacts/msi-stability/2026-11-19/
+cooling-fix/README.md and power-before.json. A .pow export was denied before changes;
+the original values were retained as text instead. Restore only if requested:
+set PERFBOOSTMODE2 on AC and DC for that scheme and reactivate it; MSI's prior
+scenario was AI Engine. Do not silently restore aggressive boost during scheduling.
+
+## 19 November — exact-approved MCP and consent backend release is LIVE
+
+CA explicitly approved the two immutable backend packets and ONLY the consent
+setup flag. Executed from tested source08960624, same DRAFT PR #991. Final hosted
+readback AFTER configuration: cg-dynamics-mcp v89/68files and meta-oauth-start
+v75/5files ACTIVE, every file byte matches its approved packet, verify_jwt=false/
+import_map=false unchanged. MCP preserves62prior hosted files; OAuth preserves
+3helpers and includes only documented identical duplicate-property cleanup.
+OAuth deploy response reported an internal error, but fresh readback proved the
+exact ACTIVE source; NO duplicate deploy/retry. Initial readback path normalization
+was corrected for src/ helpers and functions/ roots, not the deployed content.
+
+Added ONLY SOCIAL_FACEBOOK_PHOTO_CONSENT_ENABLED=true. Digest-only CLI metadata
+proved all76prior configuration digests unchanged, one new flag, and publishing/
+submission/confirmation/exact-release gates all ABSENT. No actual secret values
+read, copied or logged. CLI calls its SHA256 field value rather than digest;
+verification checked all rows are64hex and compared the known public true hash.
+No write was repeated after correcting that verifier. Unauthenticated MCP and
+OAuth-start each return401; authenticated Cape listing still returns available,
+zero candidates, confirmation/publication false. No job/content/mapping/SQL,
+provider consent, Microsoft, Vercel, campaign or native publication action.
+
+Company Chrome profile cgproductionhouse.com and ChatGPT info@cgproductionhouse.com
+verified. Existing Dynamics plugin refreshed in place; actual installed catalogue
+now31write/32read with prepare_facebook_photo_publication,
+confirm_facebook_photo_publication and get_social_publication_status present.
+Existing Allow all setting and two connections untouched. Separate new normal
+ChatGPT acceptance chat COMPLETE: Inspect Facebook Readiness,
+https://chatgpt.com/c/6afedf1d-0e2c-83ea-bc80-cce2e02bd297.
+It sees all3new actions, actually ran resolve_project_context +two read-only
+readiness inspections, and truthfully reports EXACT_ACCOUNT_MAPPING_REQUIRED /
+zero eligible future reviews. No prepare/confirm/status call without a real review
+ID, no record/job/permission/sync write. Discovery/read-only execution PASS;
+native scheduling remains BLOCKED. Screenshot/transcript retained. No staff/Nolan
+chat changed. The frontend permission screen
+is built/tested SOURCE ONLY; no Vercel or production UI release performed.
+
+Remaining: owner Facebook consent via a supported accessible surface (new frontend
+control is not live; its approved hosting release is still separate), actual grant/
+exact Page-connection binding, one approved unscheduled future photo/caption/time,
+fresh Teams/native duplicate check, then separately approved worker/submission/
+exact-account activation and controlled post/readback. No future approved pilot
+or Cape review snapshot was present in bounded reads; never invent IDs/approvals.
+Elcheck repair separately pending. Full local5051pass/32skip,102focused,10real DOM
+checks and375/390/430viewport receipts remain current. No new local runtime edit
+after that freeze. Google tracker target still unidentified; do not guess.
+
+## 19 November — publishing permission screen qualified; release authorized
+
+Resumed SAME PR #991 from1dda40f4; origin/mainb524a9f9 and current ownership
+checked. Only this Codex lane active; other client/staff/Nolan/Teams work preserved.
+Finished the previously uncommitted Facebook permission setup in the EXISTING
+Meta integration screen. Normal reporting Connect Meta remains unchanged.
+Separate review + explicit checkbox invokes only the existing opt-in OAuth
+endpoint. Strict response/purpose/URL/scope validation refuses an older reporting
+response, unsafe redirects or broadened permissions. A recorded scope never
+claims Page publishing readiness. No request on render/open/cancel; pending guard
+prevents double-click requests; unmount/connection-state changes suppress late
+navigation. Server consent, actual owner grant and dispatch gates remain separate.
+
+Final full5083total/5051pass/32optional skips/0fail (473.5s). Build + app-bearing
+MetaIntegration bundle, scoped lint/diff and102focused tests
+pass, including ACTUAL Supabase FunctionsClient -> actual OAuth handler with
+synthetic auth/database/provider fixtures, disabled gate and current-role refusals.
+Company Chrome recovered this turn: correct cgproductionhouse.com profile used.
+Actual local React DOM10checks pass; desktop and375/390/430viewport checks have
+no horizontal overflow. Screenshots/private fixture receipt retained; viewport
+reset, created test tab closed, owned fixture server stopped. No native consent,
+real ChatGPT action invocation, provider publishing or physical-phone acceptance.
+Final whole-suite receipt is recorded in this increment's PR and social work record.
+
+Bounded SELECT-only future approved PNG/JPEG Facebook pilot search (same-client,
+active, unarchived, unposted, unscheduled; null-status handling matches source)
+returned no candidates. Cape's authenticated readiness remains
+EXACT_ACCOUNT_MAPPING_REQUIRED from the last exact-client read. No approval,
+asset/date/account binding, Teams refresh or old-post replay manufactured.
+
+Read-only release preflight: MCPv87/65files and OAuth-startv73/5files retain the
+same deployment-bundle hashes as the immutable prepared packets; verify_jwt and
+import_map still false. No credentials/config values read. Existing packet hashes
+and helper-preservation counts below remain authority; no packet rebuilt.
+CA explicitly APPROVED these TWO backend updates and consent-setup flag only;
+execution/readback is the immediate next step, not yet a live-release claim here.
+Publishing/MCP submission/staff confirmation/worker activation remain
+off; no Vercel, migrations, mappings, campaign/content/permission writes performed.
+Elcheck repair request is separately pending and untouched. Google tracker target
+still unidentified. Next is the exact approved release/owner consent, verified
+account binding and one explicitly approved future pilot, then independent native
+receipt and company normal-chat acceptance. Fixtures are not native readiness.
+
+## 18 November — safely paused for laptop shutdown
+
+CA requested pause/shutdown after tested source4f6efcfc was pushed to SAME DRAFT
+PR #991. Worktree clean; owned QA container exited. PR/#220/#236/#381 checkpoint
+comments record exact evidence and next gates. Resume from the qualified bridge
+below; no unchanged test rerun or live action inferred. Pending Elcheck approval
+and all release holds remain unchanged. No forced application termination.
+
+## 18 November — ChatGPT scheduling bridge qualified locally; release held
+
+SAME DRAFT PR #991, continued from0149441d; mainb524a9f9 and current ownership
+checked. No competing scheduler or overlap with #995/#1003/#1004/Nolan/Teams.
+Reproduced missing prepare/confirm/status MCP actions, then added SOURCE-ONLY
+prepare_facebook_photo_publication, confirm_facebook_photo_publication and
+get_social_publication_status. These reuse the existing staff preflight,
+exact-account runtime, atomic authorization RPC, background_jobs and receipt
+reader. Company-admin context plus fresh active manager required; no expansion
+of client/staff Project access. Tool catalogue source63 (32read/31write).
+
+New SOCIAL_FACEBOOK_PHOTO_MCP_ENABLED is default-off, independent of existing
+staff/dispatch/exact-account release gates. Preview creates no job; confirmation
+requires explicit exact scheduling intent, unchanged fingerprint and stable key.
+No caller date/account/media/caption/approval/Teams override. Canonical receipt
+replay rechecks current authority; uncertain committed responses require status
+recovery before retry. Status stays readable with submission gates off and never
+claims native schedules checked. Authorization is not verified publication.
+
+Final full5075total/5043pass/32optional skips/0fail (510.1s); focused93pass;
+real isolated PostgreSQL37pass/0skip (308.9s), including actual MCP adapter ->
+runtime -> atomic queue -> due worker -> independent receipt journey. This uses
+synthetic Graph/Storage responses, not real platform acceptance. One job/one
+simulated provider POST, lost-response recovery, role/client/source fencing and
+paired-channel independence pass. Build + actual app bundle, scoped lint/diff,
+strict native Deno adapter and whole entry checks pass. Seven analysis-only
+type mappings resolve inherited frontend type imports; no product import-map
+change/runtime import masking. Two final nullability assertions were proven
+emitted-token-identical to the fully tested runtime. Owned QA container stopped.
+
+Immutable private mcp-publication-actions/candidate-5793153f-final packet: actual
+hosted MCPv87/65files captured read-only; patch3existing files, preserve62exact,
+add3helpers =68files. Payload SHA256
+5aac9755859e0a54fcdf7b0bbc38e14e2cca0e294230e870ba54302dde4610cf.
+Exact packet native Deno +14action tests +5offline preparation guards pass.
+No new dependency: SDK/JPEG imports are inherited approved closure dependencies.
+Initial partial candidate-5793153f is explicitly REJECTED, never release it.
+Live MCP remains v87, current installed action catalogue unchanged. No release,
+flag/config/key/credential/account/mapping/content/schedule/permission write.
+Company ChatGPT normal-chat/action-refresh acceptance remains unverified.
+
+Applied Facebook migration pair NOT replayed; two later-platform migrations,
+runtime/OAuth packets and Elcheck exact repair approval remain held unchanged.
+Next real pilot needs verified app grant/exact connection binding, an approved
+unscheduled photo/caption/future time, fresh Teams/native duplicate review and
+separate exact runtime/MCP/config release authorization. Do not infer approval
+from continue or claim native readiness from fixtures. No Microsoft, Vercel,
+deployment, provider POST or cost action. Google tracker target still unknown.
+Full source/evidence receipt and precise residual gates are in the existing
+SOCIAL-PUBLISHING-220-2026-11-15.md work record; no second checklist created.
+
+## 18 November — native Meta pairing audit and Elcheck mapping repair held
+
+Continued SAME PR #991 from b9041fff for CA's paired Facebook/Instagram scheduling
+direction. Main b524a9f9, ownership/active workers checked; other lanes preserved.
+Read-only registry: 63 active clients /47 active Meta mappings /29 both-platform
+IDs /18 Page-only /16 unmapped; 10 mappings lack connection_id. Stored counts
+are not native all-client verification; registry active is not launch inclusion.
+Preserve AV/Red Oak holds and Zooz not-yet-active decision.
+
+Company Chrome native proof found Elcheck's Instagram @elcheck_sa
+(17841459467022319) already connected to its exact mapped Page1299076156631543.
+Dynamics' existing Elcheck row has no Instagram fields. No foreign active row
+owns the ID. Exact private repair changes only those two fields + timestamp;
+identity/baseline/ownership/race guards and idempotent replay; two real isolated
+PG tests pass including the real table's timestamp-only trigger. SQL SHA256
+aa106c507a667aa5b94b0a2c25afc9dd807e68b714f53fa06cd5ce914eb54cd0.
+PENDING exact user approval under AGENTS.md:125, NOT APPLIED. Recheck baseline
+and hash before any apply; no sync/publication follows. Screenshot/SQL/tests in
+private native-acceptance evidence; current Meta client view left open.
+
+Actual CG Dynamics developer app976168728361566 is Development; Facebook and
+both Instagram-route publishing permissions are Standard /Ready to use(0) /
+No App Review requested. Advanced Facebook publishing lists business verification
+and App Review. No setting/request/consent submitted. Standard access is not proof
+that a CA/app-role pilot is impossible, and is not general external-client
+eligibility or actual grant proof. Existing review owner #505 preserved.
+Some native linked Instagram sessions show Login needed; no credentials or
+permissions changed. Bounded native portfolio coverage recorded, not full sweep.
+
+Added paired-channel real-SQL acceptance to existing suite: final 36 tests pass,
+zero skips/failures (265.9s). Actual authority/queue/receipt SQL; synthetic provider
+observations. Two exact-repair fixture tests separately pass, including existing
+timestamp trigger. Scoped lint/diff green. No application runtime change since
+b9041fff's green full/build/native checks; retained as PRIOR, not rerun/inflated.
+Owned network-none QA container stopped after final evidence capture.
+MCP publishing is STILL READ-ONLY: future preview/confirm/status bridge must
+reuse current authorization/queue and separate default-off release. First FB
+native pilot before Instagram activation; no silent automatic cross-posting.
+No production SQL/data, provider/account/secret/permission/content/schedule,
+Microsoft, Edge deployment, Vercel or cost action. Applied pair not replayed;
+held migrations/packets unchanged. Google tracker target unknown.
+
+## 18 November — company/native acceptance and opt-in Meta publishing consent
+
+SAME DRAFT PR #991 continued from2fe35141; mainb524a9f9/open PR ownership checked.
+Company Chrome and ChatGPT info@cgproductionhouse.com verified. Meta's selected
+Facebook profile is Christie-Ann Groenewald. Native Cape Lumber Marketing
+Page262645554440912 matches the existing exact-client mapping; Scheduled shows
+no scheduled posts.18Nov07:00 is already published, excluded from any pilot.
+No native content/settings/terms accepted or changed by this agent.
+
+SELECT-only metadata: active Cape mapping connection_id is NULL; single stored
+connection65d8f626-54d7-45fa-ac75-5348eb364540 lacks pages_manage_posts. No tokens,
+keys/secrets/credential values read. Human browser access/reporting health are
+not publishing grant proof. MCP15:47:55UTC returns no eligible approved future
+Facebook photo; no approval or mapping guessed. Company plugin Refresh tools
+settled, but new action schema acceptance remains unverified. A task-created
+normal-chat draft was NOT sent; browser transport then detached, closure unknown.
+No staff/Nolan chats or existing permissions changed; stop browser retry loops.
+
+Reproduced missing opt-in publishing permission path in actual OAuth handler
+(four red regressions), then added SOURCE-ONLY default-off mode to existing
+meta-oauth-start. Exact confirmed query + separate server consent flag + fresh
+active manager required. Adds only pages_manage_posts/auth_type=rerequest;
+existing six-scope reporting button, callback/encryption, hashed expiring state,
+account mappings/queue unchanged. No new UI button or live flag configuration.
+Response explicitly publishing_ready:false. App eligibility, real consent/grants
+and exact token/Page binding still require verification; no scope=grant claim.
+
+Final frozen-runtime suite5061total/5029pass/32optional skips/0fail(596.8s);
+10new handler regressions pass. Build/app bundle, scoped lint/diff and native
+Deno all4repository entries pass. Source tests use synthetic OAuth/provider
+fixtures; no real grant/publication/phone acceptance. Prior36SQL retained, no new SQL
+changes. Immutable candidate-fdfaf1ea three-function runtime packet unchanged;
+this OAuth source is separate/undeployed/unapproved. No production SQL/data,
+Edge/config/key/OAuth/account/mapping/permission/content/date/approval,
+publishing/deployment/Vercel/Microsoft action. Applied pair not replayed; other
+two migrations held. Existing social work record contains exact evidence and
+next dependency: verified app/owner consent/binding, approved unscheduled asset/
+caption/future time, fresh Teams/native duplicate review, then exact separate
+release/live-test approval. Other owners preserved; Google tracker target unknown.
+
+One extra read-only source capture: meta-oauth-start ACTIVEv73/5files. Exact
+assembled closure exposed hosted-only SDK generic annotation and duplicate
+identical property typecheck failures. Both early packets REJECTED/preserved.
+Final qualified packet changes only entry plus later identical availability
+property removal in meta.ts; other3hosted helpers byte-identical. Existing
+explicit SDK annotation has identical emitted runtime tokens; actual old/new
+factPayload values compared. Five offline guards and EXACT native Deno closure
+pass. Five-file payload SHA07750f9e57118aab7b51c98a5b70d950e91cab9e1ca8c8ed1203a17014cf8d09;
+private native-acceptance/candidate-meta-consent-f9eeb5b7-qualified. No flag write
+in packet. Separately held, requires fresh source/auth/config review and exact
+release/permission approval; do not deploy from continuation. Self-review only.
+
+## 18 November — native worker SDK boundary repaired; exact runtime packet prepared
+
+Continued SAME DRAFT PR #991, tested source fdfaf1eaa9eb6241eee436563be19859c5ef462a.
+Fresh main b524a9f9 / PR ownership checked; other-agent lanes untouched.
+
+A targeted read-only capture verified background-worker ACTIVE v64, 16 hosted
+files, custom auth setting unchanged; inventory49, both social-publication and
+social-publication-authorization ABSENT. No business rows, tokens or credentials
+read. Hosted source closure hash92e77be14cff304b152746e422181fa3c30f5e57241cb55107cc54699d1077ae.
+
+Exact candidate native Deno check reproduced TS2345 before repair: worker JSR
+SupabaseClient and helper ESM SupabaseClient have separate nominal identities.
+Node/Vite tests and the local type bridge had not caught that actual Edge type
+boundary. Reused the existing worker's localized Parameters-based SDK adapter;
+kept the exact client instance/session and all runtime guards. No SDK import,
+role, authorization, scheduling, provider or runtime behavior change. Compiled
+JavaScript token streams before/after are identical (only trivia differs), hash
+ e25582035fcaf8caf24a35050ad835f822503797bbcfcc562eb9d38c5634a387.
+
+Added two actual worker-runJob regressions: exact same SDK client through due
+submission and independent receipt, one synthetic POST only; disabled publishing
+blocks without constructing bindings or contacting the provider. Focused final
+runtime/management suite74pass,0skip,0fail. Build/app-bearing status bundle,
+scoped lint/diff and native Deno2.9.8 all THREE real entrypoints pass. Existing
+prior full5017pass/32skip and36actual SQL checks are retained as PRIOR receipts,
+not rerun or inflated this turn: executable tokens/SQL are unchanged. First
+native check populated its local cache with existing public dependencies; final
+exact-packet check used that cache. No package/lock/shared node_modules edits.
+
+Private immutable candidate-fdfaf1ea uses actual hosted helpers, not local
+replacements. Worker36files: ONLY existing entry modified,15hosted helpers
+preserved byte-for-byte,20publishing helpers added. New staff status/withdrawal
+endpoint9files; staff inspection/preview/confirmation endpoint28files. All use
+existing custom authentication; active manager gates remain. No flag values or
+secrets were read; configuration safety must be freshly verified before release.
+Four offline packet checks pass: exact payload/source hashes, hosted helper
+preservation, version/auth/source/inventory drift refusal, no overwrite or
+checkout/junction escape. Native Deno checks the EXACT assembled source closure,
+not a fixture module declaration. Previous candidate-e564c182 is explicitly
+REJECTED_DO_NOT_RELEASE; its failing log/payloads are preserved, not overwritten.
+
+Final payload SHA256:
+background-worker cf9ac414c547a332147306842115dea23da9ac85563b24f601cfdef0fd755800
+social-publication ec8fa2c145cd7a71ea0b267efdfc785f538c952f19fdf7e38a23cc7facb8cb3e
+social-publication-authorization b774f58462efbb0b19a73f6c0ce4f00b002d0209f528b6ae735aa4ebe583409c
+Source/inventory/manifest/checker/rollback/acceptance evidence retained under
+existing PR991 artifact root,2026-11-18/facebook-runtime-preparation. Status is
+PREPARED_NOT_AUTHORIZED_NOT_DEPLOYED; two new endpoints and worker release still
+need exact separate approval. Do not deploy this from a bare continuation.
+
+No production SQL/data/Edge/config/key/OAuth/account/mapping/permission/content/
+date/approval/Microsoft/Vercel/publication change. Applied DB pair not replayed;
+TikTok Business/Instagram migrations remain held. Browser access still reports
+unavailable; installed tool schema still lacks account_only. One access question
+is pending; no retry loop, credential extraction or unsupported invocation.
+Next remains native Page/grants, approved unscheduled original/caption/future
+time, fresh Teams capture/native duplicate review, then exact reviewed live-test
+packet/approval. Self-review only; no real provider/browser/phone acceptance.
+Google Control Centre target remains unidentified; no guessed write.
+
+## 18 November — confirmation recovery and final staff/source fencing (source only)
+
+Continued the same DRAFT PR #991 from ef1655048b61f4cefe568e86cc8d81664c6d4d21;
+main b524a9f9 and ownership checked. No competing scheduler or other-agent work.
+
+Reproduced before editing: a never-settling confirmation left the panel busy;
+a lost confirmation allowed another preparation; a role revoked during status
+pagination still received evidence. A later regression also reproduced a stale
+click handler resending after successful reconciliation. Corrected that latch,
+interrupted the earlier full run, and used a new final run on frozen runtime.
+
+Confirmation and withdrawal now observe one mutation for at most 12 seconds,
+without cancellation, automatic retry or assumed failure. An uncertain result
+may have committed. The confirmation panel retains the captured intent and
+locks preparation for its mounted review, including after success. Its explicit
+Check confirmation action uses the existing bounded read-only status endpoint.
+Only one exact client/review/Facebook Page/time/server-verified fingerprint with
+current recorded authority proves an existing confirmation. Missing old-version
+fingerprints can still display status but cannot prove reconciliation. Neither
+confirmation receipt nor recovery is presented as a verified live post. Failed
+withdrawal observation requires status recovery and never claims it stopped.
+The latch is mounted-form memory, not reload persistence; existing backend
+idempotency and authorization guards remain authoritative after navigation.
+
+The staff-only status reader rechecks review/client/deliverable identity,
+canonical source existence and active admin/manager after all pages, including
+empty results. Drift or partial evidence is unavailable. No new schema/RPC,
+privilege, client DTO or provider call. The fingerprint is existing confirmation
+evidence, not a credential or additional publication authority.
+
+Isolated real PostgreSQL exercised a committed confirmation with a lost browser
+response, actual frontend recovery through the management reader, the same job
+before/after, zero provider calls before due, then one simulated provider POST
+and independently verified receipt. Graph/Storage/accounts/media remain synthetic;
+SQL and installed SDK/component callbacks are actual local execution. No browser
+visual, real role/device, native Page or real publication acceptance is inferred.
+
+Final frozen-runtime suite: 5,049 total / 5,017 pass / 32 optional skips /
+zero failures (700.7s). Separate isolated PostgreSQL: 36 pass, no skips, including
+approval admission, due worker/receipts, authorization/role/lease fences and the
+release-packet rehearsal. Owned network-none QA container stopped, exit 0.
+Final tsc/Vite 7.3.6 build, emitted app/status/read-deadline/mutation-observer
+bundle, cached native Deno 2.9.8 check of social-publication entrypoint, scoped
+lint and diff pass. Default-off preparation UI remains hidden/tree-shaken;
+component behavior was executed with synthetic React callbacks, not a browser.
+The two issue-519 test-generated outputs were restored. No runtime changes after
+the final full suite began. Earlier interrupted suite is NOT acceptance evidence.
+Source self-review found no blocking issue for this increment; not independent
+provider review or permission to merge/deploy/publish the full DRAFT PR.
+Private source hashes and acceptance logs retained under the existing PR991
+artifact root, 2026-11-18/confirmation-recovery.
+
+Production remains the previously verified MCP v87/source ecc8d256 and the exact
+approved database pair already applied once; no replay. The two TikTok Business/
+Instagram migrations remain held. Staff confirmation, worker and this new
+management helper/UI remain unreleased/default off. No production SQL/data,
+Edge/config/key/OAuth/account/mapping/permission, content/date/approval, Microsoft,
+Vercel/deployment or provider publication changes in this increment. Company
+browser access remains unavailable and installed connector discovery omits the
+account-only argument; no repeated transport loop or unsupported invocation.
+
+Next: supported company action refresh plus native exact Page/grants proof;
+select genuinely approved unscheduled content/caption/future time with fresh
+Teams capture and native duplicate review; then prepare one separately approved
+complete worker/UI/live-test packet. Preserve #995/#1003/#1004/Nolan/staff lanes.
+Google Control Centre target remains unidentified; no guessed update.
+
+## 18 November — exact-approved Facebook database pair APPLIED and verified
+
+CA explicitly approved PR991/bd5d3fc7's two exact Facebook database transactions
+AND their original-version history receipts. Continued same DRAFT PR991; no
+publisher/Edge/frontend/config/account/content/Microsoft/Vercel authority added.
+Fresh main/PR/ownership check retained #995/#1003/#1004/Nolan/staff/calendar lanes.
+
+Fresh read-only preflight matched55 required column types/RLS/service access,
+zero candidate collisions/versions/publication column/social jobs. Existing
+history178rows and533background jobs recorded; queue relation688128bytes.
+Private immutable packet SHA256
+2ad6060315430cffd580fdc1cf623f32ebf32d9342913b316e849c8e826cba76
+still exactly matched the source-pinned offline preparer. Both transactions
+used the EXACT rehearsed original-version route,3slock/60sstatement budgets and
+advisory lock. Applied queue ONCE, independently verified before applying capture
+ONCE, then independently verified both at 2026-11-18T12:51:52.58219+00:00.
+
+LIVE ORIGINAL migration receipts:
+20261115104948 social_publishing_queue, one source statement, SHA256
+00233282015fcfac969421f6429f0c13cdb2421df57dff7141b64e5562076b7b;
+20261116085815 social_publication_preparation_evidence, one source statement,
+SHA256 d82380bc84e4ccedc702408e07353c334a4c16c3fa7650faaf21e13b284600e8.
+History now180rows; digest of ALL178 prior rows unchanged. No history repair,
+generated timestamp, deletion or broad db push. Capture checked the exact first
+receipt before application. Approved guarded query hashes remain6c17c5b0.../
+c891204d...; full hashes/packet are retained in the preceding source receipt.
+
+Verified live nullable publication jsonb column,2new partial indexes, preserved
+all4existing indexes and original background_jobs policy, added ONLY restrictive
+active-manager social-job SELECT policy. RLS stays enabled. Existing8job types
+remain allowed plus social_publish. ALL9new RPCs: SECURITY INVOKER, empty fixed
+search_path, EXECUTE for service_role, denied anon/authenticated/PUBLIC.
+Second apply changed none of the verified queue objects.
+social_publish jobs=0; ALL existing publication column values=NULL.
+Both TikTok Business/Instagram candidate migration versions remain ABSENT.
+No client content, review/approval/date, account/OAuth/mapping/key/provider,
+worker/Edge/cron/flag, Microsoft/Teams or Vercel change or native post.
+
+ALL49 Edge function metadata/version/bundle/auth/entrypoint values unchanged
+against immediate preflight; MCP remainsv87. Security advisories6before/6after,
+NO new findings (not a claim that pre-existing advisories are resolved).
+Private applied-readback.json saved beside the immutable packet. No SQL retried.
+Current readbacks verify schema/ACL/history/data absence, NOT native scheduling/
+publication or real staff/client/phone acceptance. Publishing stays default OFF;
+staff confirmation/publishing bindings/worker/frontend remain unreleased.
+The pending migrations are now ONLY20261115104950TikTok Business and
+20261116102019Instagram steps in this lane; do not replay the applied pair.
+
+Existing source acceptance retained: frozen-runtime5038total/5006pass/32skip,
+2offline packet checks,35rehearsed queue/packet SQL +1admission SQL; build/bundle/
+scoped lint/diff green before approval. No runtime code changed in this release,
+so no repeated full-suite/build. Only these continuity docs change; diff verified.
+Next remains supported company ChatGPT action refresh/native Page+grants proof,
+genuine approved unscheduled asset/caption/futuretime/native duplicates and fresh
+Teams capture, then a complete separately approved worker/UI/live-post packet.
+No account connection, content approval or publication authority inferred from
+schema application. Google Control Centre target unidentified; no guessed write.
+
+## Earlier 18 November — bounded readiness and preview recovery, source only
+
+Continued SAME DRAFT PR991 from867895cf; mainb524a9f9 and open PR ownership
+checked. Extends the existing read-recovery increment, no new schedule/queue.
+
+Reproduced BOTH additional hangs before changes with actual confirmation-panel
+callbacks: inspect and preview kept "Checking the exact publication" indefinitely.
+Both regressions failed on the displayed state. Reused a private read-only
+deadline helper in the existing socialPublishing lib for status/inspect/preview.
+The8second bound covers SDK/session, transport and error-body JSON parsing;
+a transport ignoring abort still returns unavailable. Original exact-review,
+mapping, caption/hash/time/media, fixed safe error copy and false-authority
+contracts remain. A manual read can recover; late evidence cannot populate it.
+Confirmation/withdrawal mutation handlers are unchanged and do NOT use this
+read-only timeout or acquire an automatic retry.
+
+Current focused management acceptance41pass includes abort-ignoring hangs with
+the real panel callbacks, late results, all3 read modes through the INSTALLED
+Supabase SDK, and a streaming HTTP error body which never completes until after
+the deadline. Fixture HTTP/Graph/Storage remain synthetic, no browser visual/
+phone/native provider acceptance claimed. Full accumulated Node acceptance:
+5038total /5006pass /32skip /0fail (646.5s). Separate35 actual isolated PostgreSQL
+checks pass:34queue/runtime/OAuth plus1actual admission/internal/client-approval
+journey into the same due queue. Owned network-none QA container stopped exit0.
+Local tsc/Vite7.3.6 build, emitted app/status-deadline bundle, scoped lint and
+diff pass. Default-off preparation UI remains tree-shaken/hidden in that build;
+no enabled preparation UI or live browser acceptance is inferred. Only the two
+issue519 test-generated outputs were restored. No runtime edits after full run began.
+Only lib/tests and these existing continuity records change; no migration,
+dependency, role/access, provider or live runtime changes.
+
+Hostedv87/sourceecc8d256, four held migrations/default-off dispatch, Teams hold,
+company action-discovery/native account acceptance and the exact genuine
+approved unscheduled creative/time/native-duplicate/fresh-Teams pilot gates
+remain unchanged. No Vercel/deployment/publication/config/OAuth/accounts/keys/
+SQL/data/mappings/permissions/Microsoft or other-agent work. No repeated browser
+failure loop. Google Control Centre target remains unidentified; no guessed write.
+Source self-review, not independent/native acceptance.
+
+Next approval packet is ONLY Facebook's existing minimal database pair on
+ehtjfntukiwbgptqgbzy, in source order, with original-version history bookkeeping:
+20261115104948_social_publishing_queue.sql SHA256
+00233282015fcfac969421f6429f0c13cdb2421df57dff7141b64e5562076b7b;
+20261116085815_social_publication_preparation_evidence.sql SHA256
+d82380bc84e4ccedc702408e07353c334a4c16c3fa7650faaf21e13b284600e8.
+Queue adds the publication column/indexes, restrictive manager read for NEW
+social jobs and service-only queue/confirmation/receipt RPCs. Capture RPC is
+service-only/read-only over existing complete exact Teams captures; no collector.
+Other two candidates/TikTok/Instagram are excluded. No actual job, content/date/
+approval change, worker/Edge release, flag/schedule/key/account/Microsoft or Vercel
+action. Current35SQL rehearsal includes the Facebook pair alone BEFORE other
+platform migrations. Fresh preflight must match absence/dependencies/ownership;
+stop on drift, failure or uncertain application before retrying. Preserve all
+jobs/approvals/audit/receipts, never destructive schema rollback. Publishing stays
+OFF; this packet cannot itself establish native/posted acceptance.
+Original-version route is now PREPARED/REHEARSED, NOT APPROVED/APPLIED.
+Offline scripts/qa/prepare-facebook-database-release.mjs pins ONLY these two
+source hashes, adds transaction-local3slock/60sstatement budgets and a shared
+advisory lock, rejects existing version/name or wrong-order receipts, and inserts
+each ORIGINAL version/name/source statement receipt in the SAME transaction as
+its DDL. No existing history is edited/deleted. Source bytes are hex-encoded in
+the receipt to preserve their exact text through SQL transport. Current hosted
+history column metadata was read-only checked: required version/name/statements
+types match; other columns are nullable. No credential lookup/network in preparer.
+This exact guarded SQL transaction route avoids MCP apply_migration's unsupported
+version parameter (upstream https://github.com/supabase/mcp/issues/241); application
+requires explicit SQL + original-version receipt approval, not an auto-timestamp
+apply followed by history repair. No broad db push or generated-version deletion.
+
+Two offline packet tests pass, including tampered-source refusal. The actual
+PostgreSQL suite was rerun with THIS generated pair:35pass/0fail, including wrong
+order with no receipt, injected receipt failure rolling back the new RPC, correct
+original versions and replay refusal with no jobs. Earlier same-turn actual
+admission test1pass remains unchanged,36SQLchecks across those final receipts.
+Full5038 suite covers the frozen runtime changes; the2new offline packet checks
+and new SQL rehearsal ran separately after that full run. No later runtime edit.
+Owned QA container stopped exit0 after each run; no other services touched.
+Private immutable packet: social-publishing-991/2026-11-18/facebook-database-pair/
+payload.json and manifest.json. Whole payload SHA256
+2ad6060315430cffd580fdc1cf623f32ebf32d9342913b316e849c8e826cba76.
+Queue guarded query SHA256
+6c17c5b040e54b4232815b55f79ac5999532eac1f3e376ee15bb6a88f5ec6f06;
+capture guarded query SHA256
+c891204d8fca8b63384c0a572a5aa3976df753eb8d262ce951c3aafb22a88eea.
+Compare all payload/source/query hashes and fresh metadata before any approved
+write. After each response (or uncertain response) independently read back
+version/name/exact source statement, RPC/role grants/index/policy, zero social
+jobs and unchanged default-off runtime; never blindly retry. Stop on drift or
+partial failure; retain any earlier committed schema/receipt without deletion.
+
+## Earlier 18 November — stalled publishing-status recovery fixed locally
+
+Continued SAME DRAFT PR991 from9d14aedb; mainb524a9f9/current PR ownership and
+active workers checked. #995/#1003/#1004/Nolan/staff/Teams/calendar/package lanes
+remain separate; no duplicate scheduler or shared dependency installation.
+
+Reproduced BEFORE the fix with the actual publication panel's callback harness:
+an SDK read that never settles keeps "Checking publication records" indefinitely,
+with Refresh disabled even after the intended deadline. The new test failed on
+that exact displayed state. getStaffPublicationStatus now bounds the WHOLE
+read to8seconds, including SDK/session work that ignores abort, attempts to abort
+the transport, and returns unavailable rather than an empty/successful status.
+Staff can explicitly refresh the SAME review; late success cannot replace that
+new read. Completed/rejected reads clear their timers. No automatic retry or
+withdrawal/confirmation/queue/provider action was added.
+
+Validation:78affected tests pass, including the actual panel callbacks with a
+never-settling abort-ignoring read, manual refresh and late result, the INSTALLED
+Supabase SDK with abort-aware fixture transport, deadline cleanup, existing
+manager/client isolation, exact withdrawal/confirmation and Facebook runtime
+duplicate/unknown-outcome guards. This is actual-code integration with SYNTHETIC
+Graph/Storage/HTTP, not live publishing or browser visual acceptance. Initial
+broader run failed22tests at setup because the shared node_modules lacks jpeg-js;
+reused existing SHA512-verified pinned0.4.4 task TEMP package through the existing
+fixture switch, then all78passed. No package/lock/shared node_modules change.
+Local tsc/Vite7.3.6 build, emitted ContentReviewCard app/deadline bundle,
+scoped ESLint and diff checks pass. Self-review found no blocker in this narrow
+read-recovery delta; no independent review or live UI acceptance is implied.
+No database code changed, so existing35isolated SQL checks remain a prior separate
+receipt; neither the full5030suite nor DB fixtures were rerun for this narrow read.
+
+This fix is SOURCE ONLY, not deployed to frontend or MCP. Hostedv87/sourceecc8d256,
+four UNAPPLIED migrations, default-off publishing, Teams sync hold and exact pilot
+approval/source/account/permission/freshness gates stay unchanged. No production
+SQL/data/config/OAuth/account/mapping/permission/Microsoft/Vercel/cost action.
+Browser access remains the previously recorded host/tool limitation; no bypass
+or new device claim. Self-review only, not independent/native acceptance.
+Google Control Centre target remains unidentified; no guessed write.
+
+## Earlier 18 November continuation — live schema prerequisites and cached-action diagnosis
+
+Same DRAFT PR991 at3d0cfc66, mainb524a9f9 unchanged after fetch; clean before edits.
+Browser inventory still returns no browsers/local access unavailable; ended UI
+portion without retrying the known failing Chrome fallback or changing settings.
+
+Authenticated company_admin resolution succeeded through existing Dynamics link.
+One bounded request attempted account_only:true through that installed getter.
+Returned scope was future_approved_facebook_photo_reviews, NOT account-only,
+consistent with the installed cached action schema omitting the new field.
+Cape42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa
+returned candidates:[],has_more:false,next_offset:null at11:39:46UTC.
+This proves live authenticated listing/zero eligible reviews only; it does NOT
+prove native Page permission or account access. No invented review/source IDs,
+credential extraction, permission expansion or API-auth bypass followed.
+
+Read-only production metadata at11:41:40UTC verifies55 required column types,
+all8 prerequisite tables with RLS enabled and service-role SELECT available,
+no candidate queue RPC/index/policy collisions, and no publication column.
+All4 candidate migration versions are ABSENT from actual migration history.
+The current background job type constraint does not permit social_publish.
+Saved reusable single-SELECT metadata check:
+scripts/qa/social-publishing-schema-preflight.sql.
+It reads schema metadata/migration history only, not business rows; no statements
+apply or rehearse a migration on production. Compatible metadata is NOT a full
+migration rehearsal, native/provider acceptance, live queue or publishing grant.
+Existing35 isolated SQL acceptance remains separate; no new full-suite rerun.
+This continuation's production metadata SELECT, npm run build (tsc/Vite7.3.6)
+and git diff --check pass. Only QA SQL and continuity Markdown changed; no new
+runtime/UI/device or independent-review acceptance is claimed.
+
+No runtime, schema, live data, flag/config, accounts/OAuth/mappings/permissions,
+provider publication, Microsoft, other-agent or Vercel action. No redeploy ofv87.
+Existing exact packet/kill-switch/rollback gates remain unchanged. Need supported
+company action discovery refresh before account_only can be tested; approved
+unscheduled immutable creative/caption/futuretime and fresh Teams capture still
+required before an exact controlled post packet can be authorized. Zero eligible
+reviews cannot be fixed by bypassing manager/client approval. Google Control
+Centre target remains unidentified; no guessed tracker write.
+
+## Earlier 18 November — exact read-only MCP upgrade released; native account test still pending
+
+Continued SAME DRAFT PR991 from tested source ecc8d25662ed2963ecd69977c5ebee94d6f9d421.
+CA's contextual "Please continue" followed the exact read-only release question;
+scope stayed source-only. Fresh GitHub/main/open-PR checks preserved #995,
+#1003/#1004, Nolan, staff, Teams, calendar and package owners.
+
+Immediately before release ALL63 hosted files and complete v86 metadata matched
+the captured reviewed baseline, with no drift. Uploaded the exact prepared
+candidate-final/payload.json ONCE; SHA256
+bbec134a9d84f6adce371021bdcbd10db8e575179078a4c2e96e2390d077ae81.
+MCP is ACTIVE v87, same function ID/custom authentication/import_map=false.
+Fresh readback verifies ALL65 contents exactly:5existing changed,58preserved,
+2reviewed JPEG helpers added. ALL48 other function versions/bundles/auth/entrypoints
+unchanged against this turn's fresh inventory. Anonymous tools/list denied401
+with authentication challenge. Existing linked company_admin context resolves.
+
+NO config/flag/secret/key/auth/permission/account/OAuth/mapping/SQL/migration,
+Microsoft, other-function, publishing/confirmation/worker, Vercel or cost change.
+The original PNG/JPEG account/review inspection code is now hosted; staff admission
+UI, publishers and four candidate migrations remain unreleased/held. Deployment
+does not establish a scheduled item or successful Facebook publication.
+
+Native account-only check was NOT executed: this chat's installed getter snapshot
+still lacks account_only. Browser inventory reported local browser access unavailable.
+The bounded fallback to existing Chrome window stopped at Computer Use's current-URL
+safety enforcement BEFORE navigation/input. UI work ended; no bypass, profile copies,
+credential reads, account/settings change, fresh sign-in or staff-message action.
+Company ChatGPT discovery refresh and real Cape Page access remain unverified.
+
+No runtime code changed in this continuation. Existing source acceptance remains
+5030total/4998pass/32skip/0fail,79focused,35actual isolated SQL,7native codec and
+actual prepared MCP Deno/build/app/lint/diff pass. No repeated full-suite run,
+new browser/phone acceptance or native publication claim. Source self-review,
+not independent native end-to-end acceptance. Private applied-readback.json saved
+beside the existing immutable account-readiness-upgrade packet.
+
+Next: when supported company browser/tool discovery is available, refresh ONLY
+existing Dynamics actions (preserve both links/permissions), then call the SAME
+get_facebook_post_readiness for Cape42d9841f-90ac-4ef0-a0f0-7e39f3d8aefa with
+account_only:true and resolved company_admin. Do not redeployv87 or resetflags.
+Then prepare a genuinely approved unscheduled creative/caption/futuretime/native
+duplicate/Page/grants/media and fresh Teams packet before requesting exact controlled
+pilot authority. Cape18Nov already-scheduled work is excluded. Four production
+migrations and release/worker authority remain separate gates. Google Control Centre
+exact target remains unidentified; no guessed write. Rollback requires exact approval
+to restore capturedv86 source while preserving all config and records.
+
+## Earlier 17 November — account-only Facebook readiness; exact read-only upgrade prepared
+
+Same DRAFT PR991/#220/#236/#269 continues51750a58; main b524a9f9 unchanged.
+Current PRs/issues/active chats checked; preserve #995 shared catalog and the
+#1003/#1004/Nolan/staff/Teams/package/calendar/strategy lanes. No duplicate queue.
+
+Reproduced that existing readiness rejected account-only inspection when no
+approved review existed. Added account_only:true to the SAME read-only getter,
+mutually exclusive with review_id/offset; no extra tool/context permission.
+It resolves only the existing active exact-client mapping, reuses private
+encrypted credential/native app/scope/Page-token/CREATE_CONTENT readers, and
+projects only Page ID/name/checked permissions. No guessed review/deliverable ID,
+media, Storage signing, queue, confirmation, approval, OAuth refresh or sync.
+Final role/client/mapping drift and expired proof invalidate the result.
+canConfirm/canPublish ALWAYS false. App-review eligibility, creative, media,
+Teams/time, native duplicates and release remain explicitly NOT checked.
+
+Fresh read-only production inventory: MCP ACTIVEv86/63files/custom authentication
+unchanged, import_map=false. All63 contents exactly match the prior approved
+payload6ee8f42a2cce61f822b29dc092e350042c9e942f48c20c3e9e044715eb41dd46.
+Canonical file digest4ec1fa21f19ac4e29858a41f97f0d261452faa3176ca0e6089aa116e863784a1.
+No production mutation occurred. New packet is PREPARED, NOT AUTHORIZED/DEPLOYED.
+
+Upgrade uses the existing offline preparer --upgrade-v86. Changes ONLY five
+existing files: readiness getter, catalog, Facebook inspector/runtime/provider.
+Preserves58 hosted files BYTE-IDENTICALLY, including hosted-only OneDrive variants;
+adds2 private JPEG helpers,65files total. Uses the already-approved pinned codec.
+NO config/secret/flag/permission/auth/mapping/schema/other-function change. Keeps
+MCP index/context policy and all48 other functions. Staff UI/authorizer/worker
+and four candidate migrations are excluded. New source payload SHA256:
+bbec134a9d84f6adce371021bdcbd10db8e575179078a4c2e96e2390d077ae81.
+Private artifact root: C:/Users/chris/.codex/artifacts/social-publishing-991/
+2026-11-17/account-readiness-upgrade/. Use candidate-final, NOT earlier candidate.
+Includes fresh hosted-v86.json and functions-before.json; old approved packet is
+untouched. Preparer refuses whole-source drift, path/junction escape, duplicate
+paths, unreviewed dependencies and overwriting any existing packet.
+
+Validation:79focused checks,35 actual isolated SQL checks (account-only before
+ANY publishing migration, then existing full approval/queue/role/fencing cases),
+7native actual-decoder Deno tests and ACTUAL prepared hosted MCP Deno type check
+pass. Build/emitted app, scoped lint and diff pass. Full suite5030total /
+4998pass /32skips /0fail (525.5s); final79focused tests also pass after a QA-only
+negative-test precision improvement. No runtime source changed after that run began.
+No UI changes/new browser acceptance claimed; prior51750a58's24mobile-width Chrome
+cases remain unchanged. Native Graph/Storage transport is still simulated in QA;
+the new account mode has NOT executed against a real Page. Owned QA container
+stopped cleanly. Source self-review is not independent/native acceptance.
+
+Next protected action is CA's exact approval for this ONE read-only MCP source
+upgrade. No config writes or publishing. Freshly compare ALL63 v86 files before
+any approved upload; any version/content drift stops for owner reconciliation.
+After approved release, read back65files/auth/anonymous denial and unchanged48
+other-function metadata, refresh supported company tool discovery, then inspect
+ONE exact client's existing mapped account. Do not publish or synthesize approval.
+Rollback requires exact approval: restore captured v86 source only, preserving
+config/secrets/permissions/content/receipts. The live post packet still needs real
+approved unscheduled original/caption/time/native-duplicate and fresh Teams evidence.
+Google Control Centre target remains unidentified; no guessed write. No Vercel.
+
+## Earlier 17 November — verified review admission and recovery, SOURCE ONLY
+
+Continued SAME DRAFT PR991/#220/#236/#269 from edbd573c; main b524a9f9 unchanged.
+Fresh issue/PR/active-chat checks preserve #995 staff AI, #1003 client readiness,
+#1004 website leads, Nolan/Teams/workboard/package lanes. Only shared handover
+overlap with those current diffs; no broad dispatch or duplicate scheduler.
+
+Reproduced three real final-creative admission failures before edits: null save
+receipt reported success, lost response could not recover the saved review, and
+a UUID with changed saved caption was accepted. Existing contentReviews helper
+now verifies the SAME unique immutable upload path, canonical deliverable, original
+MIME/caption/channels/time/client-approval choice and valid persisted review ID.
+Save/read deadlines are bounded. Lost/null responses reconcile read-only; neither
+reconciliation nor a matching receipt approves content or queues publication.
+Known source guards remain actionable; unexpected errors stay private/uncertain.
+
+Staff form now blocks rapid duplicate clicks and freezes the attempted fields
+while unresolved. Check submission reads the same attempt without upload/RPC
+replay. Verified save clears the file selection; later versions require explicit
+new file selection. Late completion cannot update another/unmounted item. Pending
+attempt is local mounted-form state, not a new durable store or reload guarantee;
+after navigation use the canonical review history before sending another version.
+
+New actual-PostgreSQL journey executes the EXISTING review foundation/source-guard
+SQL: assigned upload policy, submit RPC, internal then exact-client approval,
+pending-stage queue denial and foreign-client rejection, then the SAME due queue,
+separate receipt and one simulated native POST. A deliberately lost response after
+the actual transaction commits recovers with one upload/submission. Canonical
+approval/source history remains intact; no direct approval UPDATE substitutes for
+the normal workflow. Storage/SDK transport and Facebook HTTP remain simulated.
+Actual installed Supabase SDK marshalling is tested separately with synthetic HTTP.
+
+Validation:20 focused helper/SDK tests;24 isolated Chrome admission cases at
+375/390/430/1440; new actual SQL admission journey plus all34 prior queue/role/
+fencing tests pass. Build/emitted ClientSchedule app, scoped lint, actual cached
+MCP typing and diff pass. Full suite5012 total /4980 pass /32 skips /0 failures
+(516.5s). QA-only final installed-SDK test also passes separately. Owned
+network-none container stopped after SQL; generated issue519 outputs restored.
+
+No migration/dependency/production data/account/permission/Edge/config/OneDrive/
+Microsoft/Vercel/publication/cost changes. Last verified live MCP was v86 with
+approved PNG-only source74327024; this continuation did not release/reconfigure
+it. JPEG and staff UI/worker have not been deployed by this lane.
+Four candidate migrations and fresh Teams/real approved unscheduled source/native
+Page permissions/exact release approval gates remain. Detailed source/transport/
+role/phone evidence is in the SAME social-publishing receipt; no new checklist.
+Google Control Centre target remains unidentified; no guessed write.
+
+## Earlier 17 November — company ChatGPT readiness verified; JPEG increment SOURCE ONLY
+
+Continued SAME DRAFT PR991/#220/#236/#269 from7686ca0c; main b524a9f9 remains
+unchanged. Reconciled current PR ownership, including #995 shared MCP catalog,
+#1003 client readiness and #1004 website leads; those lanes remain untouched.
+Company Chrome verified CG(cgproductionhouse.com)/info@cgproductionhouse.com.
+Refreshed ONLY the installed Dynamics plugin's tool discovery; both connections,
+permission mode, signed-in sessions and pinned WhatsApp preserved. Catalog now
+shows30read/30write, including get_facebook_post_readiness. Real company ChatGPT
+[acceptance chat](https://chatgpt.com/c/6afc2fd1-7e60-83e9-8022-40499ad9372c)
+resolved exact Cape Lumber and called the new tool successfully. Bounded MCPv86
+names-only logs independently confirm invocation17Nov10:44:55UTC. Returned
+available/zero candidates/has_more:false/canConfirm:false/canPublish:false.
+This verifies discovery/authentication/candidate listing, NOT native Page/media
+qualification or publication: no eligible approved review exists in that scope.
+
+Signed-in staff review list shows no content awaiting review. Exact Cape Schedule
+17–30Nov:18Nov F3 already scheduled (EXCLUDE, never repost);23Nov DP4 to_do,
+unassigned;25Nov video repost to_do. Microsoft mirror is2Nov, sync hold unchanged.
+Existing23Nov drawer's immutable final-creative admission is present but unsaved;
+its09:00 default is NOT an approved posting time. No source/approval/job writes.
+
+Direct OneDrive canonical portal Graphic Design folder lists dated JPEG+caption
+pairs through18Nov, no23Nov-named final in those14children. Separate1.png–7.png
+are undated/ambiguous: do NOT map or approve them by inference. Search indexing
+missed existing files; use direct listing. One attempted raw18Nov JPEG fetch
+failed403 serviceReadOnly; do not claim real Cape bytes qualified or loop on it.
+
+Reproduced original JPEG rejected by PNG-only Facebook inspection. Source now
+shares the ALREADY approved pinned jpeg-js0.4.4 decoder with Instagram, qualifies
+unchanged strict baseline JPEG originals at inspection/preparation/pre-delivery,
+preserves original SHA256/MIME and retains PNG checks. MCP listing and manager UI
+accept PNG/JPEG metadata without treating it as qualification/approval. No new
+dependency/migration/table/authority/flag. JPEG support is NOT deployed; approved
+v86 PNG-only packet remains unchanged and must not be reused for a new delta.
+
+Validation:95 focused checks,34 actual isolated PostgreSQL checks (including JPEG
+confirmation→real due claim→separate receipt and no duplicate POST),56 local Chrome
+cases375/390/430/1440 and7 actual native-Deno decoder tests pass. External browser
+traffic blocked; Graph/Storage remain simulated. Build/emitted app, scoped lint,
+cached actual MCP/staff/worker type checks and diff pass. Corrected complete suite:
+4992 total /4961 pass /31 skips /0 failures. Initial invalid fixture run aborted;
+only the corrected complete run counts. Generated issue519 test output restored.
+Source self-review is not independent/live acceptance. Owned network-none QA
+container stopped cleanly; other DBs unchanged. Existing four production migration
+holds, Microsoft hold, staff-only management roles and exact live pilot gates stay.
+
+Next: admit one genuinely approved unscheduled original/caption with exact future
+SAST time through existing Schedule flow; qualify actual bytes/native Page/grants
+read-only and resolve fresh captured Teams evidence with its owner. Do not ask
+for a live publication approval on an incomplete packet. Any later JPEG backend,
+staff endpoint/UI, migration or controlled pilot release needs exact approval.
+No production/data/account/settings/Microsoft/Vercel/publication/cost action this
+continuation. Full details in the existing social-publishing receipt. Google
+Control Centre target remains unidentified; no guessed tracker write.
+
+## Earlier 17 November — approved Facebook readiness backend LIVE
+
+CA approved and applied ONLY PR #991 source74327024's read-only MCP packet plus
+SOCIAL_FACEBOOK_PHOTO_INSPECTION_ENABLED=true. Preflight all41 hosted v84 files
+matched; source deployed once asv85. Standard project-secret update advanced MCP
+to ACTIVEv86 and the other48 function versions by one. ALL63 MCP source files
+match the reviewed payload; ALL48 other function bundle hashes/auth/importmaps
+remain unchanged. Existing custom auth preserved; anonymous tools/list denied401;
+both existing plugin links resolve company_admin as CG Production House Admin.
+Publishing/confirmation flags and exact release tuple remain absent. No native
+post, SQL/migration/data, OAuth/mapping/permission, Microsoft, Vercel or other code
+deployment. Staff UI/entry remain source-only. Approved payload hash:
+6ee8f42a2cce61f822b29dc092e350042c9e942f48c20c3e9e044715eb41dd46.
+
+Native inspection NOT executed: new action is absent from this chat's tool list;
+browser verification stopped at Computer Use's current-URL safety check after
+identifying the correct company profile and Dynamics Admin. No bypass/session
+copy or further browser input. Next is supported tool discovery refresh and ONE
+exact approved-client-PNG inspection, then separate pilot approval; do not redeploy
+this packet or repeat unchanged full tests. Teams freshness/sync hold remains.
+See existing social-publishing receipt and private applied-readback.json for full
+source/config/auth proof. PR #995/#1004 and Nolan/staff lanes remain untouched;
+Google Control Centre target still unknown, no guessed write.
+
+## Earlier 17 November — independent Facebook readiness; packet preparation
+
+PR991/#220/#236/#269 continues ac55f313, current main b524a9f9. New read-only
+inspection separates native Page/image proof from held Teams capture and dispatch.
+Same approved review/mapping/PNG/hash/encrypted Meta readers; no alternate store,
+scope/approval/write authority or publishing. Staff UI displays per-check actions;
+company-admin MCP get_facebook_post_readiness lists paged exact-client approved
+future PNG candidates or inspects one exact review. Both canConfirm/canPublish
+remain false. Catalog source60tools (30read/30write); tool is NOT live yet.
+Separate inspection flag and default-off staff confirmation flag prevent worker
+gates accidentally enabling the new staff endpoint. Worker/publisher unchanged.
+
+Validation: full **4980total/4949pass/31skips/0fail**, final232affected,33 actual
+PostgreSQL checks (inspection before ANY candidate migration),52 isolated browser
+cases375/390/430/1440, fixture build/app/scoped lint/diff and cached actual Deno
+check of prepared hosted payload pass. Graph/Storage remain simulated; no native
+Meta acceptance. QA container stopped cleanly, no other DB services touched.
+
+Fresh read-only production evidence: MCP ACTIVEv84/41files/custom auth unchanged;
+publishing endpoints absent.177migration entries show ALL4 publishing candidates
+absent and brand20261111064719 applied. Prepared read-only MCP payload changes3
+existing files, preserves38 exactly (including hosted OneDrive variants) and adds22
+library files. Payload hash6ee8f42a2cce61f822b29dc092e350042c9e942f48c20c3e9e044715eb41dd46.
+Exact proposed config is only SOCIAL_FACEBOOK_PHOTO_INSPECTION_ENABLED=true;
+confirmation stays unset/false and no worker flag, key, account, SQL or permission
+change. NO production mutation/deploy/publication/Vercel/cost action occurred.
+
+Read [existing receipt](SOCIAL-PUBLISHING-220-2026-11-15.md) for exact preparer,
+manifest, all-file drift/readback/rollback and native acceptance steps. Requires
+CA's explicit approval before this one backend release+flag. PR995 shared MCP
+files/marketing retirement and PR1004 website leads remain separate; source
+snapshots must be refreshed before release to protect any later owner changes.
+MCP readiness enables native evidence without browser/session copying, publishing
+migrations or Vercel. Teams sync hold and exact content/permission/live pilot gates
+remain. Google Control Centre target unknown; no guessed write.
+
+## Latest 17 November — Facebook first pathway in existing PR991
+
+Same DRAFT PR991/#220/#236/#269, parent01102d00; main unchanged b524a9f9.
+Reproduced due-time preflight exception losing the staff recovery reason; now
+records allowlisted blocked receipt BEFORE any submission barrier. Actual manager
+panel shows source/account/media/release actions and gives uncertainty precedence;
+no new retry/publication authority, staff/client management access or second queue.
+Real connected PostgreSQL journeys now cover approval→preview→atomic confirm→
+actual due claim→submission→independent receipt→manager status, plus stale-source
+hold and lost-response no-replay. **32 actual SQL checks /96 affected checks /
+44 isolated Chrome cases at375/390/430/1440 pass**. Facebook's3 SQL journeys passed
+with ONLY queue+evidence migrations, then the other2 applied and32/32 still passed.
+Graph/Storage/SDK transport
+remain synthetic; no native publication acceptance. Build/app/scoped lint/cached
+Deno/diff pass. Final full suite: **4964 total /4933 pass /31 skips /0 failures**
+(explicit loopback fixture, concurrency2). Exact revision in PR completion comment.
+Docker Desktop + only task-owned network-none QA container started; no other DBs.
+
+Real pilot account/approved creative/grants remain UNSELECTED. Reporting health
+read is not publishing proof. Computer Use halted on inability to establish
+Chrome URL safely; no further UI or alternate auth/session access. FOUR lane
+migrations STILL UNAPPLIED in production. Exact future SAST/UTC time, approved
+PNG/caption/hash, native dedup/account/task/grants and due-time Teams evidence
+are required before a live packet;5minute capture gate cannot be bypassed while
+Microsoft sync hold remains. Rollback retains receipts/audit, disables new
+authority and reconciles possible provider operations. Full exact gates, migration
+scopes and later-platform dependencies in the [existing receipt](SOCIAL-PUBLISHING-220-2026-11-15.md).
+No production mutation/deploy/publish/OAuth/settings/cost; Nolan/staff/Teams/Picasso
+and current main brand/report lanes preserved. Google Control Centre target remains
+unidentified; no guessed write. Continue Facebook native preparation, not breadth.
+
+## Latest 16 November — private TikTok native publishing prerequisites
+
+Same DRAFT PR991/#220/#269. New private unregistered reader reuses actual
+encrypted Business identity/grant resolution around native settings/property
+GETs. Account token belongs only on settings; current documented property list
+is app_id/secret-scoped, not the historical advertiser label. Fixed HTTPS,
+bounded bodies/deadline/cancellation; no credential/signature/extra-field
+projection or logging. Six inspection/GET calls maximum, no provider mutation.
+No real credential/provider read occurred: synthetic fixtures/actual encryption.
+
+Settings retain actual privacy/engagement/duration; verified domains and exact
+URL prefixes remain app-level facts, not client publication rights. Metadata
+blocker enforces conservative HTTPS/clean-path scope, fresh exact binding and
+declared1800second lifetime. Existing five-minute Meta signed delivery stays
+unchanged and does not qualify. No media/DNS fetch, upload, codec proof, real
+expiry/bytes/source/rights/eligibility or passing default; canSubmit:false in
+both APIs. No route/tool/env parser/worker registration or OAuth/store rewrite.
+56new/279affected checks, actual cached Deno typing, lint/build/app bundle pass.
+Final frozen-source suite: **4962 total /4931 pass /31 skips /0 failures**,
+concurrency2. Source review passes for this private increment, not rollout.
+Only unrelated generated issue519 artifacts restored after completion.
+[Existing receipt](SOCIAL-PUBLISHING-220-2026-11-15.md) retains exact sources/gates.
+
+Mainb524a9f9 #984/#1000/#1001/#1002 preserved unchanged: brand panel + already
+applied20261111064719 migration (DO NOT REPLAY), stopped hourly dispatch and
+other owners' exact Dulux/PVC live/source snapshots. FOUR lane migrations still
+unapplied; no SQL restart/new SQL proof or new live/device acceptance. No new
+dependency/schema by this lane; no live SQL/data/config/secrets/permissions/
+OAuth/provider mutation/upload/posting/Microsoft/Vercel/deploy/hosting/cost.
+Teams/sync hold, staff/Nolan/OneDrive finals untouched. Native config/consent/
+acceptance, approved video-source/owned delivery, explicit disclosures and
+source-to-share_id uploader/pilot remain held. Tracker target unknown, no guess.
+
+## Earlier 16 November — private TikTok durable reconciliation bridge
+
+Same DRAFT PR991/#220/#269. Status-only binding now connects the exact canonical
+job/lease/submission receipt to the concrete Business credential/status reader,
+then rechecks stored intent/fence before returning a queue observation. Typed private
+audit retains all native public IDs, read count/time; existing service-only JSON
+save substrate reused without SQL/schema changes. Manager/client projections do
+not disclose the audit. Synthetic SDK/RPC/HTTP composition tests are not fresh
+PostgreSQL/RLS or live provider acceptance.
+
+180second cooldown,5native attempts/20minute age bound, terminal review hold;
+no first-ID selection, credential serialization, refresh or publish retry.
+Native success/failure stays ambiguous until the future uploader proves the
+immutable approved-source-to-share_id link. Submit/preflight unavailable; this
+binding is UNREGISTERED with no env/parser/public endpoint activation.
+61new/246affected regressions pass; actual Deno typing, build/emitted app and
+scoped lint pass. Final frozen-source suite: **4898 total /4867 pass /31 skips /
+0 failures**, concurrency2. Source self-review passes for this private increment.
+Restored only unrelated generated issue519 artifacts after completion.
+Review reproduced/fixed SQL null-stripping breaking compact terminal receipt
+decode, with two red-to-green storage-shaped regressions; no SQL changed.
+Earlier corrected4896/4865/31/0 pass is before that fix, not final-source proof.
+[Existing receipt](SOCIAL-PUBLISHING-220-2026-11-15.md) records precise limits.
+Main34c4552e/PR998 exact Madison/strategy files and their owner's live snapshot
+preserved below; no new live/device/content acceptance claim. FOUR candidates
+unapplied, no Docker restart/new SQL proof. No deploy/provider/OAuth/config/
+secret/data/permission/Microsoft/Vercel/hosting/cost change. Teams/sync hold/
+staff/Nolan unaffected. Tracker exact target unknown; no guessed write.
+
+## Earlier 16 November — concrete private TikTok Business status credentials
+
+Same DRAFT PR991/#220/#269. Missing status resolver now has a concrete encrypted
+Business-store + native inspection/profile implementation and private status
+composition. No new store/route/tool/worker/env activation. Exact active client/
+connection/authorization, original confirmed handle, current app/creator/scopes,
+AES-GCM connection/access AAD, expiry/refresh/revocation and post-inspection
+canonical/token reread enforced. Native extra scopes are not adopted; refresh
+token/consumer credentials never selected. No refresh, eligibility or last-verified
+write. A read credential is NOT publication/app-review/rollout approval.
+
+Official token inspector is POST-read with app_id/access_token JSON, returning
+app_id/creator_id/scope; exact username profile GET needs user.info.username.
+Sources retrieved through Firecrawl after bounded company Chrome control timeout;
+no browser/profile/security change or sign-in demand. Shared JSON reader keeps
+64KiB/time/UTF8 bounds; rejected-body resource leak reproduced/fixed. SDK/HTTP
+cancellation and concurrent rotation/revocation are covered.76 new/222 affected
+checks, actual Deno typing, lint/build/emitted app pass. Frozen full run:
+**4835 total /4804 pass /31 skips /0 failures** at concurrency2. Opt-in SQL
+remains skipped; no new SQL claim/restart of previously blocked container.
+Unrelated generated issue519 artifacts restored; private-source self-review passes.
+No live credentials/DB/API execution or product UI/device proof. No new dependency/
+migration; FOUR candidates unapplied. Main62f7a88a/PR997 and other owner's exact
+Novus/fleet/live/phone receipt below preserved; Teams/sync hold/Nolan/staff separate.
+Backend/config/consent/native acceptance/uploader/durable registration remain
+held; no publication/deploy/OAuth/SQL/config/secret/permission/provider mutation/
+Microsoft/Vercel/cost action. [Existing evidence](SOCIAL-PUBLISHING-220-2026-11-15.md).
+Tracker exact target unknown; no guessed write.
+
 ## 16 November — authorised brand panel merge reconciliation (#984)
 
 Owner requested #984 into main before #999 into the existing PR910 branch.
@@ -109,6 +1700,36 @@ permission hold; Instagram fresh. No global blocker, guessed scope/dates or cons
 No code/migration/Vercel or other agent changes. Google Control Centre exact target
 unavailable; no guessed tracker write.
 
+## Latest 16 November — TikTok Business task-status source path
+
+Same DRAFT PR991/#220/#269. Official v1.3 status contract read in company Chrome;
+profile/site account verified, no settings/auth changes. Exact app-specific
+business_id/open_id + publish_id/share_id GET with Access-Token header, numeric
+code0/data and native post_ids. Added PRIVATE core/HTTP reader, never registered.
+Explicit tiktok_accounts normalizer branch preserves the original two-argument
+consumer handler/analytics behavior. Missing public IDs remain pending (180s
+next-read suggestion, no timer); inbox delivery requires action, multiple public
+IDs remain private review evidence, contradictory receipts never overwrite the
+original. HTTP/envelope failures remain unavailable; diagnostics sanitized.
+
+Exact mapping/identity/app/grants/Business credentials remain a REQUIRED private
+server port, not a default pass or consumer/browser fallback. Fixed-host one-GET
+read, no redirects/retry, body/time/freshness bounds; cancellation gap reproduced
+and fixed. Shared deadline helper preserves existing LinkedIn API/errors/tests.
+66 new/242 affected checks, actual Deno type check, lint/build/emitted app pass.
+Full frozen-source regression **4759 total /4728 pass /31 skips /0 failures**
+at concurrency2; prior Vite timeout did not recur, no staff/test guard weakened.
+No live status API/browser product or phone acceptance; no PostgreSQL restart/
+SQL execution (opt-in group skipped, prior SQL evidence remains separate).
+Generated unrelated issue519 artifacts restored; source self-review passes.
+Actual grant, uploader/
+source-to-share_id provenance, durable multi-receipt integration and native pilot
+remain gates. No new dependency/migration; FOUR candidates unapplied; no deploy/
+publication/OAuth/provider/config/secret/mapping/permission/Microsoft/Vercel/cost
+action. Teams/sync hold/staff/Nolan preserved. Main1c1bd36e/PR996 integrated;
+other owner's exact source and live/phone receipt below retained unchanged.
+[Existing receipt](SOCIAL-PUBLISHING-220-2026-11-15.md). Tracker target unknown.
+
 ## 16 November — Novus published; existing strategy author through January
 
 CA explicitly approved Novus October publication: exact report940f3153 is now
@@ -133,6 +1754,62 @@ notified to continue January; no saved January row claimed at release acceptance
 Other agent work untouched; no Vercel. Google Control Centre target unavailable;
 no guessed tracker write.
 
+## Latest 16 November — standalone native Deno JPEG qualification
+
+Same DRAFT PR991/#220. Added QA-only native Deno acceptance for the actual
+approved npm codec/private adapter/runtime: **6/6 pass**, actual type checking,
+real pixels/original bytes on both IG routes, corrupt entropy/sanitized failure,
+independent codec resolution bound, frozen exact-release isolation and maximum
+1440x1800 synthetic profiles. No Vite/decoder mock/type bridge. Official Deno
+2.9.8 archive SHA256 verified in task TEMP, isolated cache/public package types;
+no system/shared-node_modules/browser setup change. Cached test execution denies
+net/env/run/write/ffi/sys, permits only fixture read and asserts its own grants.
+Zero provider/database calls. Build/emitted app/lint/diff pass; no full/browser/
+SQL rerun for unchanged runtime. Standalone Windows Deno import/decoding gap is
+closed; **hosted Supabase Edge CPU/import/version, real-account/media/provider
+acceptance remain unverified**. Publishing composition remains UNREGISTERED.
+
+No production/deploy/provider/OAuth/SQL/Microsoft/Vercel/cost action, no database
+restart/bypass, FOUR migrations unapplied; prior test/review limits below remain.
+Current main already included, active staff/Nolan/Teams lanes and sync hold
+preserved. [Native test recipe/evidence](SOCIAL-PUBLISHING-220-2026-11-15.md).
+Tracker exact target unavailable; no guessed write.
+
+## Earlier 16 November — approved JPEG source adoption and honest publishing controls
+
+Same DRAFT PR991/#220. CA approved exact pinned `jpeg-js@0.4.4` and private
+adapter; adoption is no longer pending. Minimal manifest/lock addition only,
+existing entries/shared node_modules untouched, packaged license/decoder notices
+retained. Actual imported codec now composes privately with existing Instagram
+runtime, never worker/Edge/MCP registration or an activation flag. Five real
+Node decode cases pass with corrupt entropy rejection/original bytes retained;
+strict helper typing uses actual package declarations. Native Deno/Edge import
+and CPU qualification remain unverified; approval is NOT rollout authority.
+
+Reproduced/fixed Facebook-creation controls being offered on superseded or
+other-platform/non-PNG reviews. Existing manager visibility/history/withdrawal
+retained; new creation requires approved FB PNG plus default-off candidate flag
+and backend authorization.27 focused checks and36 actual isolated Chrome cases
+at375/390/430/1440 pass, including role exclusions/cancel/late-preview discard.
+Real components and library, synthetic I/O, external network blocked; no company
+browser/session change or physical-phone/native-provider claim. Build/emitted
+app/lint/helper typing pass. Corrected full run4690 total /4658 pass /1 Vite
+module-load timeout /31 skips. Unchanged Teams audit file passes9/9 isolated
+after that timeout, without a code change; original full run is NOT all-green.
+First invocation's16 Bash/OpenSSL environment failures cleared with the existing
+Git tools in process PATH. Self-review passes for bounded source adoption only;
+full-suite Vite stability/native/provider acceptance remain distinct concerns.
+Automatic approval review blocked restarting the owned network-none PostgreSQL
+QA container (“blocked by policy” only). It stays stopped; no bypass or fresh
+database-test claim. Prior frozen2bbaa2b5's29 PostgreSQL passes remain separate
+evidence. Queue/preparation/authority/migrations unchanged in this increment;
+unrelated generated artifacts restored.
+
+Mainf89fefea/PR994 integrated with owner files and LIVE record below unchanged;
+no deployment by this lane. FOUR migrations unapplied; Teams/sync hold/Nolan
+preserved. No production/provider/OAuth/SQL/Edge/Microsoft/Vercel action.
+[Existing evidence](SOCIAL-PUBLISHING-220-2026-11-15.md). Tracker unknown; no guess.
+
 ## 16 November — client opening crop corrective release LIVE
 
 CA's new screenshot confirms #993 reached the phone but the opening view still
@@ -148,6 +1825,54 @@ match exact local bytes, routes200/invalid capability404. No cloud app build or
 DB/provider/account change. Prior dpl_B8eMyLViZqYRNxae4cR9HXqLhwhB retained.
 Physical iPhone acceptance remains unverified; do not claim HTTP checks prove it.
 Exact Google Control Centre target remains unavailable; no guessed tracker write.
+
+## Latest 16 November — LinkedIn private GET-only receipt core
+
+Same draft PR991/#220. Added private fixed-host/versioned GET transport and exact
+organization/post/image status verification; no LinkedIn OAuth/mapping store,
+provider/analytics claim or Edge/MCP/worker registration. #493 connection milestone
+is separate. Credential resolver remains a REQUIRED unimplemented server port
+for current app/role/active exact mappings, with no token/default grant fallback.
+READER public version/media-owner proof is distinct from AUTHOR drafts: later
+unpublished edits cannot hide the original public post; older public copy cannot
+prove a newer job posted. Draft/public regression reproduced/fixed in review.
+Reader404 may use exact pending author evidence; auth/rate/transport errors never
+become absence/healthy. No automatic retry, search, upload or publication. Body/
+time/cancellation/receipt and route bounds enforced; no image URL is fetched.
+CG creative hash/provenance, native rich-commentary/version/provider acceptance
+and actual role/scope entitlement remain gates.69 new/109 affected checks, build/
+emitted app, lint and helper typing pass. Final frozen-source full acceptance:
+**4711 total /4681 pass /30 skipped /0 failures**, including all29 actual isolated
+PostgreSQL checks. Generated unrelated artifacts restored; owned network-none QA
+container stopped. Source review passes within this private read-only increment;
+see the [existing receipt](SOCIAL-PUBLISHING-220-2026-11-15.md).
+No new UI/device/native/provider evidence. FOUR prior migrations unapplied;
+decoder approval pending; no new dependency or production/provider/OAuth/SQL/
+Edge/Microsoft/Vercel action. Main4ee7d503/staff/Nolan preserved; tracker unknown.
+
+## Earlier 16 November — Instagram caption qualification, source only
+
+Same draft PR991/#220. Integrated main4ee7d503/PR993, resolving only this handover's
+prepend conflict and preserving the staff/mobile owner's runtime and release
+record below. No deployment by this publishing lane. Reproduced oversized copy
+passing preparation; shared caption qualification now rejects invalid length/
+hashtags/mentions/UTF-16 before credential/media/provider access and exposes fixed
+confirmation blockers. Approved text stays exact; email/contact copy is preserved.
+GET-only reconciliation skips new-post limits; invalid current copy cannot cross
+the second durable publish barrier. Conservative UTF-16/lexical profile is explicit
+in the [same receipt](SOCIAL-PUBLISHING-220-2026-11-15.md), not native acceptance.
+Focused236/236/build/emitted app/lint/typing pass. First full merged run exposed
+two obsolete old-drawer navigation assertions; test-only correction now exercises
+actual searchable-menu role/reachability behavior (33/33 mobile/nav checks pass).
+All14 main mobile/login runtime files are unchanged. Final merged-source full
+acceptance: **4642 total /4612 pass /30 skipped /0 failures**, including all29
+actual isolated PostgreSQL checks. Generated unrelated artifacts restored; owned
+network-none QA container stopped; source review passes. No new UI/browser/phone/
+native provider proof. Decoder dependency approval still pending; manifests and
+shared node_modules unchanged. Instagram unregistered; FOUR migrations unapplied;
+no new SQL/schema/production/provider/OAuth/Microsoft/Vercel action. PPA/conditional
+2FA and disclosure/native text boundaries remain real-provider gates. Staff/Nolan
+lanes preserved; Google Control Centre target unidentified, no guessed write.
 
 ## 16 November — approved mobile staff/client viewport release LIVE
 
@@ -194,6 +1919,278 @@ mapping checks and iPhone user-gesture clipboard handling. No account reset or
 production mutation. [Evidence and limitations](CLIENT-LOGIN-MESSAGE-COPY-2026-11-16.md).
 Local tests/build/lint/diff green; browser acceptance unverified. NOT LIVE; #679
 hosting gate and other agent lanes remain unchanged.
+
+## Latest 16 November — Instagram canonical confirmation source path
+
+Same draft PR #991 / #220. Reproduced both Instagram routes being rejected by the
+Facebook-only canonical reader, then extended the EXISTING photo preparation to
+route-specific exact-account policies, grants, approved channels/JPEG/media profile,
+captured Teams proof and original hashes. Private Instagram composition now shares
+target derivation and ORIGINAL durable confirmation recovery with Facebook; existing
+staff prepare/confirm flow is reused with its old import/Edge contract preserved.
+No second queue, scheduler, approval store or Microsoft lane. Revoked/stale/foreign/
+changed evidence cannot authorize submission. Preview/confirmation never signs files
+or makes a provider mutation; duplicate confirmation keeps one original receipt.
+
+Instagram remains UNREGISTERED in every live dispatch/Edge/MCP path, without a new
+environment activation parser. Mandatory decoder dependency approval remains pending;
+manifest/lock/shared node_modules untouched. Caption/disclosure qualification and
+dedicated exact-account release/registration/native-provider-phone acceptance remain
+gates. FOUR prior candidate migrations unapplied; no new SQL/schema/dependency or
+production/provider/OAuth/Microsoft/Vercel change. Current focused228/228 and isolated
+PostgreSQL29/29 pass, including both login-specific atomic confirmation cases;5 real
+task-TEMP codec decodes, build/emitted app, scoped lint and typing bridge pass. Final
+full acceptance: **4608 total /4578 pass /30 skipped /0 failures**, including actual
+candidate PostgreSQL. Generated unrelated artifacts restored; owned network-none
+QA container stopped. Source review passes within this private increment. See
+[same receipt](SOCIAL-PUBLISHING-220-2026-11-15.md). No new UI/phone/native Edge proof.
+Main4af41304; Nolan PR990 untouched; Google Control Centre target unidentified.
+
+## Earlier 16 November — LinkedIn native status gap fixed locally
+
+Same draft PR #991 / #220. Official LinkedIn schema review reproduced native
+PUBLISH_REQUESTED becoming unknown in the shared normalizer. Fixed native
+lifecycleState/legacy status handling, conflict rejection and share/ugcPost URN
+validation; media AVAILABLE/draft/unknown never counts as published.214 affected
+regressions, build/emitted app, scoped lint, helper typing and diff pass AFTER
+this correction. The full4597/4567/30 run below predates this small isolated
+LinkedIn change. No LinkedIn runtime/credential/mapping/worker registration or
+live mutation. Organization entitlement/role, versioned transport, durable media
+upload/barriers and exact-author/media readback still required; see existing
+[receipt](SOCIAL-PUBLISHING-220-2026-11-15.md). JPEG dependency approval pending;
+manifest/lock/shared node_modules unchanged. No deployment or production change.
+
+## Earlier 16 November — Instagram private prerequisites verified locally
+
+Same draft PR #991 / #220. Concrete private exact-account encrypted credential
+checks now distinguish Instagram Login from Facebook Login, without reporting or
+plaintext fallback, added scopes, consent or credential writes. Shared Meta app/
+token diagnostics preserve the existing Facebook path. Private composition joins
+original approved bytes/hash, mandatory strict JPEG decode and existing durable
+container/publish/status stages; it remains UNREGISTERED in every activation path.
+No default decoder or caller-supplied qualification. Conservative original baseline
+JFIF only; rejected metadata/profiles are never stripped or converted.
+
+Reproduced/fixed async preflight clock errors and last-slot quota blocking status
+verification. Completion-clock freshness/expiry and captured Teams proof are
+rechecked; exhausted quota cannot admit/create/publish but GET-only reconciliation
+continues. Full local **4597 total /4567 pass /30 skipped /0 failures**, including
+27 actual PostgreSQL checks;154 focused tests pass. Five real JPEG decodes against
+an integrity-checked official jpeg-js0.4.4 archive in task-only TEMP pass, including
+corrupt entropy and maximum admitted solid/high-detail images. Build/emitted app,
+scoped lint, typing bridge and diff pass. No native Edge/provider/UI/phone proof.
+
+Production dependency adoption is still UNAPPROVED: manifest/lock/shared
+node_modules unchanged. Exact source-only jpeg-js0.4.4 adoption proposal and SRI
+are in the [existing receipt](SOCIAL-PUBLISHING-220-2026-11-15.md). Do not install into
+the shared node_modules junction or copy npm's unrelated lock pruning. Instagram
+canonical candidate/confirmation/release wiring, caption/disclosure qualification
+and actual provider acceptance remain gates. FOUR prior migrations stay unapplied;
+no new migration, production SQL/data/Edge/config/secret/OAuth/provider/Microsoft/
+Vercel operation. Existing Facebook/TikTok gates remain off. Main4af41304; Nolan
+PR990 untouched. Google Control Centre target unidentified; no guessed writes.
+
+## Earlier 16 November — Instagram durable phases, local only
+
+Same draft PR #991 / #220 / #236. Added source-only single-JPEG container/readiness/
+one-way publish/owner-verification stages over existing background_jobs. New
+UNAPPLIED `20261116102019_instagram_publication_steps.sql` makes FOUR pending
+migrations. No second queue/table/cron, public grants or Microsoft writes.
+Concurrent/crashed/expired/revoked/changed attempts cannot repeat media_publish;
+late IDs stay reconciliation evidence. Exact route/account, bounded private
+transport, current returned quota, immutable container/media identities and
+five-minute/minute-spaced bounded checks are enforced. Preserve generic worker
+leases and Facebook behavior. Initial-dispatch refactor regression fixed/tested.
+
+Instagram remains UNREGISTERED for live dispatch pending concrete login-specific
+app/role/mapping credential verification and qualified JPEG/media/caption profile.
+Reporting-token fallback does not meet that requirement. No actual provider
+media/permission/phone acceptance and no added production dependency. `jpeg-js@0.4.4`
+was only researched/downloaded to task TEMP for inspection; production adoption
+requires explicit approval. Existing Facebook/TikTok source flags remain off.
+No production SQL/data/Edge/config/secret/OAuth/provider/Microsoft/Vercel action.
+
+Local PostgreSQL: 27/27 (including four new Instagram groups); 43 Instagram regressions,
+build/app bundle, scoped lint and helper/entry typing bridge pass. Final full-run
+4,542 total / 4,512 passed / 30 skipped / 0 failures. Owned network-none QA container
+stopped and generated unrelated artifacts restored. New code has no UI changes. Main
+4af41304; no overlapping publishing files in Nolan PR990. Current receipt remains
+[social publishing](SOCIAL-PUBLISHING-220-2026-11-15.md); Google Control Centre
+target still unidentified, no guessed tracker writes. Teams/sync hold unchanged.
+
+## Earlier 16 November — Facebook photo flow wired, local only
+
+Same draft PR991/#220. Supersedes earlier "unregistered" SOURCE status below:
+the concrete private Facebook runtime now joins canonical review/schedule reads,
+encrypted app/token + live exact-Page rights, bounded original PNG validation,
+staff preview/confirmation and the existing worker/queue. New UNDEPLOYED
+social-publication-authorization derives account/client from a server packet;
+no browser proofs, new schedule store, provider POST during preview/confirmation
+or Microsoft change. Lost responses cannot authorize another submission.
+
+Default-off: existing global flag PLUS dedicated SOCIAL_FACEBOOK_PHOTO_ENABLED
+and exact client/connection/Page server release packet required. UI independently
+needs VITE_SOCIAL_PUBLISHING_PREVIEW. These are source gates, not authority to
+enable anything. Static 8-bit non-interlaced PNG only in this conservative pilot;
+JPEG/video/other platform adapters and actual provider/native schedule/phone
+acceptance remain open. Existing Meta scopes may need later approved consent.
+THREE prior migrations remain unapplied; no new migration/dependency in this step.
+No production data/SQL/Edge/config/secret/OAuth/provider/Microsoft/Vercel action.
+
+Full local4494 total /4464 pass /30 skipped /0 failures incl isolated PostgreSQL;
+103 affected checks pass (one added Edge-entry test after full run; same runtime).
+Build/emitted app, scoped lint, helper/new-entry TypeScript bridge and diff pass.
+Browser inventory has no available browsers; no fresh visual/phone acceptance or
+UI/session changes. Owned network-none QA container stopped; generated unrelated
+test artifacts restored. Main4af41304; Nolan PR990 untouched. Current receipt:
+[social publishing](SOCIAL-PUBLISHING-220-2026-11-15.md). Google Control Centre
+target remains unidentified, so no guessed tracker write.
+
+## Earlier 16 November — publishing preparation evidence, local only
+
+Same draft PR991 / #220. Private canonical candidate reader derives the approved
+snapshot hash WITHOUT signing/sharing, binds exact manager/client/review/account
+release policy, and requires fresh private provider/media qualification. No caller
+booleans or signature-only qualification. New stable invoker/service-only RPC reads
+one exact task proof from existing completed Microsoft capture; no new collector,
+refresh/apply, source stamp or Microsoft write. It rejects stale/incomplete/foreign/
+duplicate/changed evidence and cannot fall back after a newer failed capture.
+Only IDs/date/revision/timing leave SQL; existing sync hold preserved.
+
+Reproduced/fixed canonical manual `scheduled` status still passing worker begin
+when posted_at was null. Admission and final SQL now reject scheduled/posted.
+Queue migration remains unapplied and was updated. CLI-generated additional
+`20261116085815_social_publication_preparation_evidence.sql` is also **unapplied**;
+there are now THREE pending migration candidates in this draft. Review latest
+contents before any future release. [Current receipt](SOCIAL-PUBLISHING-220-2026-11-15.md).
+
+Reader is private/unregistered. Actual provider/media qualification, exact-account
+release review, preview/new-confirmation wiring and provider/phone acceptance remain
+gates. Current staff status/withdrawal stays unchanged, canAuthorize false. No
+production SQL/data/config/Edge/OAuth/provider/Microsoft/Vercel action occurred.
+Final full4463 total /4433 pass /30 skipped /0 failures, with isolated PostgreSQL.
+121 affected checks pass;19 new regressions included. The manual-scheduled
+duplicate-post regression failed before the fix, then passed. Build/app-bundle,
+scoped lint, strict helper typing and diff pass. No new UI/browser/phone or real
+provider acceptance claimed. Generated artifacts restored; owned container stopped.
+
+## 16 November — staff publishing status/withdrawal, local only
+
+Same draft PR991 / #220. Manager-only publishing status panel is wired into the
+existing Client Schedule production cards and staff approval queue; client and
+ordinary staff cards expose no controls. Imported existing Lucide assets; no new
+dependency/page/calendar. New undeployed `social-publication` function only reads
+exact review/client/deliverable jobs or explicitly withdraws authority. It cannot
+grant new authority, call providers or dispatch the worker. Empty vs unavailable
+and queued/processing/verified/uncertain states remain distinct. Withdrawal uses
+second confirmation, exact scope and readback; it preserves started/posting truth
+and never changes creative approval or Teams.
+
+Reproduced/fixed the disabled publishing gate blocking withdrawal. Active managers
+can withdraw while creation remains disabled. New authorization and worker
+provider bindings remain unregistered. Existing unapplied migrations unchanged
+in this increment; no production/API/provider/OAuth/Microsoft/Vercel actions.
+
+Browser control refused the native Chrome read because current URL confidence
+was unavailable; no UI input/settings/session changes occurred. Fixture stopped.
+Callback/lifecycle/SSR checks cover scope races and role exclusion; **no new visual
+or phone acceptance claimed**. [Current receipt and release order](SOCIAL-PUBLISHING-220-2026-11-15.md).
+Final full4444 total /4414 pass /30 skipped /0 failures, including isolated
+PostgreSQL.42 targeted checks pass;20 new regressions included in full total.
+Build/emitted management bundle, scoped lint, strict Edge/helper typing and diff
+pass. Earlier full failures (old staff-copy assertion/cleanup guard) are resolved.
+Generated access artifacts restored; owned container/fixture stopped. No deploy.
+
+## 16 November — exact staff publication confirmation, local only
+
+Same draft PR991 / #220. Preview/confirm server action core now binds the exact
+approved image/caption/account/time and re-reads private server readiness. Preview
+writes nothing; only active manager/admin confirmation can persist authority.
+UTF-8 fingerprint + confirmation/provenance are stored atomically in the existing
+background_jobs row. Repeats/races return the original receipt. The SQL begin
+barrier refuses raw/unconfirmed, revoked or fingerprint-mismatched jobs.
+Revocation stops unstarted work; after begin it preserves in-flight/posted truth
+and read-only reconciliation. It never promises provider deletion/cancellation.
+
+No new table/queue/dependency. Existing **unapplied** queue migration revised;
+future release must review current PR contents. Core/RPC ports are not exposed by
+an Edge endpoint, MCP tool or staff UI yet. Trusted current-context/Teams/media
+adapters and staff-action wiring remain; worker bindings remain unregistered.
+No live SQL/data/provider/config/OAuth/Microsoft/deployment action. Existing
+Nolan/staff lane and Microsoft hold preserved. [Current receipt](SOCIAL-PUBLISHING-220-2026-11-15.md).
+Local real-PostgreSQL regression also reproduced and fixed historical requester
+access to candidate publication payloads after a role change. Restrictive SELECT
+policy applies only to social_publish and requires an active manager/admin;
+other job visibility is preserved. No live publication-data exposure inferred.
+Final acceptance:4424 total /4394 pass /30 skipped /0 failures with isolated
+PostgreSQL;28 new regressions and101 affected checks pass. Build/app-bundle,
+scoped lint, strict helper typing and diff pass. Expected failing RLS reproduction
+superseded by final19-test PostgreSQL and full green runs. Generated artifacts
+restored; owned container stopped. No new UI/phone/hosted-provider acceptance.
+
+## 16 November — private Facebook photo delivery, local only
+
+Same draft PR991 / #220/#236, isolated `codex/social-publishing-220` worktree.
+Added private Facebook provider ports using the exact existing client/Page/
+connection mapping, encrypted Meta token reader and current app/token diagnostics.
+Live scope/task/Page-token identity checks, fixed-host cursor pagination,
+sanitized no-retry Graph transport and one-mutation guard precede receipt capture.
+Private approved snapshots are re-read, byte-hash verified and signed for five
+minutes; no OneDrive source URL or arbitrary caller URL is delivered. No new
+schema, dependency or setting. [Current receipt and remaining gates](SOCIAL-PUBLISHING-220-2026-11-15.md).
+
+Ports remain unregistered; worker publishing and public enqueue remain held.
+Trusted current-context/explicit authorization/Teams instruction and full media
+qualification gates still apply. No production API, OAuth, data/configuration,
+publishing, Microsoft or Vercel action occurred. No change to Nolan/staff lanes.
+Verification:37 new /63 affected checks pass; full4396 total /4366 pass /30 skipped /
+0 failures with isolated PostgreSQL. Build/app-bundle, scoped lint, strict helper
+typing and diff pass. Generated access artifacts restored; owned QA container
+stopped. No new UI/phone/live-provider acceptance claimed. Source push keeps the
+existing disabled Vercel Git-deployment guard; PR remains draft.
+
+## 15 November — durable publishing queue + Business OAuth, local only
+
+CA requested continued Meta/TikTok/LinkedIn/YouTube publishing infrastructure.
+[Draft PR991](https://github.com/CGProductionHouse/CG-Dynamics/pull/991),
+`codex/social-publishing-220`, extends existing #220/#236/#269/#493, with no
+competing calendar/queue or Nolan/staff workboard changes. Teams remains current;
+Microsoft sync hold preserved. [Implementation/provider/activation receipt](SOCIAL-PUBLISHING-220-2026-11-15.md).
+
+Read-only company Chrome now shows TikTok API for Business **CG Dynamics Approved**
+and Business video/photo/publish-status endpoints in its Accounts permission
+section. September Pending evidence is stale. Ten native Manage account entries
+are visible; API authorization is not inferred. Current main and clean historical
+`codex/tiktok-business-agency` lack the configured Business OAuth callback; this
+candidate completes that code locally using the historical foundation. Meta Suite
+native access works; current OAuth source still lacks publishing scopes.
+
+Continuation wires durable SQL ports onto existing background_jobs and shared
+worker, preserving a submitting barrier across lease recovery and retaining late
+provider receipts without another POST. Unique intent/source/actor/fence and
+cross-version guards are tested in real task-isolated PostgreSQL. The worker's
+private provider bindings remain unconfigured; premature flag enablement holds
+jobs. There is no public publication enqueue endpoint or active publishing pilot.
+
+Business OAuth start/callback/status, encrypted tokens, leased refresh and the
+exact-account staff form are implemented locally using #269's authorization model;
+its old separate publish_jobs queue is deliberately omitted. No consumer token,
+mapping, Meta key or Microsoft setting changes. Read-only hosted inventory/catalog
+confirms Business functions/tables remain absent, so live pairing was not started.
+The form's leave/return confirmation defect was reproduced and fixed in the local
+synthetic browser fixture; provider calls/consent were blocked during that test.
+
+Focused130 tests, scoped lint, helper/Edge typing bridge and app build pass. Full
+4359:4329pass/30skip/0fail completed, including final SQL guard hardening. After
+the Wi-Fi pause,120 affected checks passed again for the final worker-only
+completion guard. Native Deno/hosted Edge, real OAuth consent,
+real publishing and phone acceptance are not inferred from local fixtures.
+Two candidate migrations and three Business functions require a later exact
+reviewed rollout, dedicated private configuration and specific-account consent.
+No new production dependency/schema/data/Edge/OAuth/settings, uploaded or published
+content, deployment or spend. No all-provider readiness claim.
+Existing staff/Nolan/Picasso PRs untouched. #679 gates remain. Exact Google Control
+Centre target remains unavailable; no guessed tracker write.
 
 ## 11 November — video editing system of record + brand rules panel
 
