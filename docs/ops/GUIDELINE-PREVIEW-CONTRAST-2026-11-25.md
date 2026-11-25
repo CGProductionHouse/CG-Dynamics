@@ -1,5 +1,58 @@
 # Guideline preview contrast correction — 25 November 2026
 
+## LIVE — approved bounded release, 25 November 08:28 SAST
+
+CA's urgent follow-through authorised the single bounded preview release. The
+earlier held state below is historical. One production-target prebuilt upload
+`dpl_EFgzUJU4qutMkiEhV9UTKdnTYCVS` passed hosted acceptance, then the SAME artifact
+was promoted. No second upload or cloud application compilation. Rollback:
+`dpl_GwQE8n9fRXGdr13L4Gbjj8VV2iM5`. Fresh pre-promote inspection proved it was
+still the live deployment. Git auto-deploy remains OFF; this is no general lift
+of the hosting freeze.
+
+Release source is exactly production commit89b2083077f35aebd93c5a897377911d432b260f
+plus the preview-only e2e8da59 overlay, in a detached private release worktree.
+Unreleased PR1005 staff/Pipeline/Calendar form changes were NOT shipped. Existing
+package versions, original logos, roles and provider configuration are preserved.
+The two existing UI share/copy strings now usecg3. Qualified source manifest and
+complete private prebuilt artifact remain under the private receipt directory.
+
+The downloaded local environment contained masked values; isolated verification
+correctly failed503 BEFORE upload. Only the existing public anonymous client
+configuration was recovered from the working first-party app and pinned locally.
+No privileged secret was retrieved, no value logged/committed and no remote
+environment/configuration changed. The final packaged function returned200,
+HEAD200,wrong-capability404,correctRC/8videos and all45 packaged asset hashes.
+The initial build --id read path also refused an already-READY deployment;
+no build/release was performed against that existing deployment. Do not repeat it.
+
+Hosted stage:exact RC metadata200,new opaque-image hash match and bad-token404
+without client metadata. Live production:root/login200,RC200,correct PNG200,
+1200×630,fully opaque and exact reviewed output hash. All45 hosted image assets
+independently match their prepared hashes. No physical WhatsApp acceptance is
+claimed; the owner receives a fresh share URL to paste instead of the cached one.
+
+Frontend image release preceded MCP101→102. Fresh75-file preflight/readback
+matched; only contentGuidelineActions.ts changed its successful share URL prefix
+cg2→cg3,other74 files byte-identical including staff/Meta/publishing modules.
+Existing OAuth/verify_jwt=false preserved. Hosted bundle:
+`3a5f74582215216db92494595eb0ab5bfd7b1c820e906b30c53f5f6d910067ef`.
+Official Edge bundle passes. Normal installed exact-RC client action freshly
+returnscg3,8videos and unchanged publication24November08:31:05.564519UTC.
+No content/run/calendar/client/package/approval/publishing mutation or republish.
+Capability URLs stay out of GitHub; private client-ready-link.txt holds the result.
+
+Fresh CLI usage response25November06:07UTC covers1–25November:usage excluding
+platform fee7.92055USD,estimated20USD included-credit headroom12.07945USD. Preserve
+5USD serving reserve and1USD maximum incremental release allowance; billing is
+delayed,not a guarantee. No spend cap,protection,hosting project or paid add-on
+changed. Earlier incomplete billing-only reads below are superseded by this
+fresh aggregate response and official Pro credit readback.
+
+38 source-focused tests,7 actual release-tree image/packaging checks,production
+TypeScript/Vite build,scoped lint/diff and built-function/hosted/live checks pass.
+Other agents/worktrees untouched. No external WhatsApp message was sent.
+
 CA supplied a real RC-Polypipe WhatsApp screenshot: its white transparent logo
 became invisible on the large white link-preview image. The compact dark preview
 was legible. This is an image-compositing defect, not missing scripts or a share

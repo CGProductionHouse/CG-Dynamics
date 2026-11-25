@@ -1,4 +1,26 @@
-## 25 November — RC WhatsApp image contrast prepared; release HELD
+## 25 November — RC WhatsApp image correction LIVE
+
+CA's urgent follow-through authorised one bounded preview-only release. Prebuilt
+production stage dpl_EFgzUJU4qutMkiEhV9UTKdnTYCVS passed hosted checks and was
+promoted SAME artifact;one upload,no cloud app compilation. Rollback dpl_GwQE8n9fRXGdr13L4Gbjj8VV2iM5.
+Exact prod89b20830 + owned e2e8da59 preview overlay in private detached worktree;
+NO unreleased staff/Pipeline/Calendar form code shipped. Git deployment staysOFF.
+Root/login200,RCmetadata200,correct opaque1200×630PNG200/exacthash;all45hosted
+preview assets match prepared bytes. No physical WhatsApp claim;send freshcg3URL.
+Original artwork/content/capabilities/publication preserved;no republish/data write.
+
+MCP102 ACTIVE,75source readbacks exact,one share-prefix line changed/74preserved.
+Bundle3a5f74582215216db92494595eb0ab5bfd7b1c820e906b30c53f5f6d910067ef.
+Normal exact-RC client tool returns8videos/freshcg3link. OAuth/auth/provider/staff
+policy unchanged. Source38checks/release-tree7checks/build/lint/diff and actual
+packaged/hosted/live acceptance pass. Masked local environment caught before
+upload;only existing first-party public anonymous config pinned locally,never
+logged/committed;no remote env change. Fresh usage estimate leaves12.07945USD
+included headroom before5USDreserve/1USDreleasecap;delayed estimates,not guarantee.
+No other-agent,permission,secret,Teams,content approval/publishing or migration.
+Exact receipt:[preview contrast release](GUIDELINE-PREVIEW-CONTRAST-2026-11-25.md).
+
+## 25 November — earlier prepared preview checkpoint (superseded by live release above)
 
 CA's actual RC WhatsApp large preview hid white transparent artwork on white.
 Same isolated PR1005 now prepares45 source-bound opaque public-logo preview
