@@ -108,6 +108,14 @@ Measure and justify the real job's inset. Backgrounds intended to bleed reach al
 edges; accidental hairline photo strips, clipped marks and stretched footers fail.
 Physical print bleed is separately specified by the printer, not a social margin.
 
+Each logo also needs a stated alignment anchor within the composition. Check
+visible-ink padding around any backing and its relationship to nearby headings,
+columns and negative space; a contained native frame alone cannot pass this check.
+Inspect contact-shadow falloff and diagonal antialiasing at actual export size.
+Upsized low-resolution source media remains limited even when typography is sharp.
+Client-specific luxury/background and punctuation feedback belongs in that
+client's rules; it is not a global dark-background or no-punctuation mandate.
+
 Photos need selection **and** professional finishing. Compare original, edited
 derivative and final crop. Resolve ICC/EXIF evidence before grading; real colour
 conversion is not `.convert('RGB')` or attaching an sRGB tag. Correct exposure,

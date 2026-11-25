@@ -17,6 +17,31 @@ colours, forms, fonts and preferences remain in that client's pack/rules.
 
 Produce professional, individually art-directed work from exact client evidence. A technically valid render is not creative approval.
 
+25 November rejection follow-up: a logo must have an explicit compositional
+anchor (shared edge, column or deliberate optical relationship), not simply fit
+inside a safe-area box. If a backing is needed, inspect visible logo ink and
+balanced padding on all four sides. PSG DP01 was corrected in place with22px
+nominal padding and its backing aligned to the lower copy's margin; two native
+elements changed, other pages/type/photos/captions preserved. Cape DP03's reviewer
+specified bottom-left as an alternative to floating beside its heading.
+
+Inspect diagonal seams and shadow falloff in the actual2x export. Small native
+previews missed stair-stepped raster edges and clipped contact shadows in Bloem's
+luxury revision; independently replaceable antialiased graphics/faded shadows
+corrected those layers. A larger exported canvas cannot restore a small source.
+DP01's550px catalogue swatch was therefore replaced with a separately retrieved,
+history-checked3744x2496 original sample, preserving its photographed name and
+veining without inferred material category or generative reconstruction.
+Full returned Canva locator IDs work; bare element IDs can fail with a misleading
+page-ID error. Verify unchanged state after a rejected call before retrying.
+Read/write private Unicode captions and JSON explicitly as UTF-8 on Windows;
+Python's cp1252 default caused a false caption-mismatch diagnosis.
+Luxury is not an all-dark mandate: CA rejected Bloem's dark DP02 during live
+review. Its targeted warm/raking-light revision uses a real photographed-name
+detail to explain the concept; do not rebuild a positively received sibling.
+A product on the client's current catalogue is not verified physical shop stock.
+An explicit stock question holds the affected item until facts/concept reconcile.
+
 Browser recovery25November: removal of the old browser tool namespace did not
 remove the supported installed browser runtime. The bundled browser client's
 `setupBrowserRuntime()` returns an agent usable from the available Node REPL;

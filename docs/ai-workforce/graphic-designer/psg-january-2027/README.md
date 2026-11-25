@@ -1,5 +1,21 @@
 # PSG Bloemfontein — January 2027 working production
 
+## 25 November — DP01 logo correction R12
+
+Actual Ger-Marie16:28 feedback asks for equal clear space around a backed logo;
+CA additionally requires intentional compositional alignment. Same DAHbRapxiLM
+DP01 corrected in place: exact237x45logo at100,100 on a281x89backing at78,78,
+nominal22px clear space each side. The backing aligns with the lower copy's left
+margin. Only two native elements changed; all other typography, photos, masks,
+captions and DP02/03 preserved. Actual saved readback and2160x2700 HD export
+inspected; lossless metadata-clean PNG has identical decoded pixels.
+
+Only amended DP01 delivered to CG Picasso Approvals17:09SAST25November,
+unique3EB0CB3E68EA6F9E2A21AD, Delivered, HD2048x2560 selected; exact unsigned caption.
+No replay of DP02/03. Private evidence `alignment-20261125/`. Dynamics update
+667f4a44-71de-4ecf-8e55-9025e4cec7ec records the preference/correction, unreviewed.
+Creative review and existing publication/schedule/pack gates remain separate.
+
 ## 25 November — current R11 review delivered
 
 Used the user's existing signed-in internal Canva/WhatsApp tabs; retained both.

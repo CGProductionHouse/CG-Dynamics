@@ -1,5 +1,16 @@
 # Cape Lumber — January 2027 working production
 
+## 25 November — new DP03 logo feedback
+
+Ger-Marie16:25 requests the floating logo either above a larger heading or in the
+bottom-left. Only the exact existing DP03 source logo was moved to78,1120,
+220x143.368, in DAHbFhGSrvg page3; every other native element and allocated caption
+preserved. Actual draft preview inspected and source saved. Master target remains
+owned working page28 PBGq4Z2X18Lw6qTF in DAGVuJURh6I243pages. Native editing again
+explicitly unsupported at243pages. **Master alignment transfer, final HD export and
+new DP03 delivery are not yet completed.** Do not claim the existing master or its
+earlier delivered export includes this new one-logo correction.
+
 ## 25 November — four feedback amendments delivered
 
 Actual17November Ger-Marie feedback and its DP01 annotation were retrieved from

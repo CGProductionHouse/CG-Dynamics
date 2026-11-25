@@ -1,5 +1,70 @@
 # Bloem Marble & Granite — January 2027 working proofs
 
+## Current correction — R3 rejected; R4 review and targeted R5
+
+Four R4 photo/caption messages sent serially to CG Picasso Approvals17:12–17:16,
+HD2048x2560 selected, exact unsigned captions. Unique IDs and prepared/readback
+receipts retained privately; initial witnesses are Sent, not assumed Delivered.
+PSG's changed DP01 also delivered separately; no old full-set replay.
+
+**New CA feedback17:17:** R4 DP02 is too dark/boring and needs more creativity;
+DP03 asks whether the three catalogue stones are actually in the shop. R4 DP02
+creative readiness is rejected. Hold DP03: fresh official granite page lists the
+three as catalogue examples, not current shop inventory. Do not infer current
+stock/sample availability from that page or June's original sample photographs.
+DP04 received a positive reaction; preserve its existing accepted work pending
+the normal explicit final-approval process, not a fresh rebuild of the full set.
+
+Targeted DP02 R5 saved in the same editable workbench: warm plaster-style studio
+graphic with raking light, separate real Galaxy sample/contact shadow, exact
+photographed-name enlargement and restrained red reference leader. Live heading
+and exact logo retained, no invented numeric code/category, caption unchanged.
+Actual native preview inspected; final HD export/readback/delivery tracked in the
+current private receipt. Do not reuse the dark DP02 export for this saved R5.
+Saved native diff proves DP01/03/04 byte-equivalent element documents and unchanged
+DP02 caption;13DP02 elements retained. Actual2160x2700 R5 export inspected,
+metadata-clean pixels identical. Only warm DP02 resent17:28SAST, unique
+3EB0DF0A424426EC14B5BD, fresh Sent readback, HD2048x2560 selected. No full-set replay.
+Tagged separate status note Sent17:24, unique3EB0DC1A8DAF6E43F8418B, actual Amonique
+and Ger-Marie mention entities. Current Dynamics feedback update
+12c09c00-a427-4627-ae7f-71be286ee40a; prior rejection/R4 update
+c28e9248-19b9-4bb0-a435-30d9b8da438f. Both unreviewed, guide/v2 strategy unchanged.
+
+CA and Ger-Marie rejected the delivered R3 on25November: flat, insufficient depth,
+texture and luxury; avoid full stops in headings. **R3 is rejected, not current
+creative/send readiness. Its pending insertion request is obsolete; do not merge
+it.** Historical receipts below establish delivery only, not creative acceptance.
+
+R4 internal revision [DAHb7sgsbpk](https://www.canva.com/design/DAHb7sgsbpk/edit)
+uses actual master15/24/26/28 as visual references: real mineral macros, separate
+physical-sample layers/masks, contact shadows, restrained red architectural seams
+and live Gotham/Inter typography.60native elements/19live texts/four exact logos;
+all19text/four-logo frames meet the working64px inset review. Allocated captions
+equal the original canonical hashes and saved notes, unsigned. No new offer,
+material category or technical-performance claim is invented.
+
+DP01 now uses original199A2403 Black Marquina,3744x2496, replacing the enlarged
+soft Kashmir catalogue source. Its photographed label and original veining remain;
+no perspective reconstruction/generative texture. Fresh73-master/138-social scans
+have zero errors/suspected exact matches, with bounded coverage rather than global
+unused clearance. DP02 retains actual Galaxy; DP03 has three exact catalogue
+references; DP04 retains actual Calacatta Fine. DP03's550x376 catalogue originals
+remain a source-resolution limitation, not restored high-resolution slab detail.
+
+Actual2160x2700 Canva exports inspected. HD inspection caught a covered Galaxy
+label, a headline crossing onto light stone, stepped diagonal raster seams and
+clipped shadow edges; corrected in independent layers. Metadata-clean upload PNGs
+retain identical decoded pixels; untagged colour is not an ICC/sRGB certificate.
+Private current evidence: `discovery-20261125/luxury-r4/`, including final native
+readback, real exports, source receipt, quality check and serial delivery receipts.
+Earlier scene/HTML and earlier R4 exports are historical; use the final native
+readback and specifically selected current HD files, including Marquina DP01.
+
+Exact-client Dynamics update c28e9248-19b9-4bb0-a435-30d9b8da438f records the
+rejection and correction, unreviewed. Canonical January staff draftv2 unchanged.
+All73master pages/human work protected. No final creative approval, publication,
+dated schedule, portal filing or reviewed structured-runtime qualification.
+
 25 November 2026. Existing #948 / draft #956 lane. Owner authorised selecting
 the next January client after the Cape/PSG review deliveries. **Four internal
 drafts saved together and delivered in HD for internal review; no creative

@@ -1,4 +1,35 @@
-## 25 November — Bloem four HD review posters delivered
+## 25 November — Bloem rejection/correction; PSG logo amendment
+
+Same #948/draft#956 lane. Earlier R3 delivery below was creatively rejected by
+CA/Ger-Marie; do not merge it or treat its pending insertion request as current.
+R4 DAHb7sgsbpk saved/actual2160x2700exports inspected,60native elements/19live
+texts, exact logos/unsigned captions. Replaced soft DP01 catalogue swatch with
+original3744x2496Black Marquina sample after73-master/138-social bounded checks;
+corrected source-label occlusion, rough raster seams and clipped shadow falloff.
+Four unique HD-selected photo/caption messages Sent17:12–17:16 to Picasso Approvals.
+
+Fresh CA17:17 feedback rejects R4 DP02 as too dark/boring and questions DP03 shop
+availability. **Hold DP03:** catalogue listing is not current stock evidence.
+Targeted warmer DP02 R5 saved in the same workbench with independent actual-name
+detail and soft contact shadow. Actual2160x2700export inspected and saved native
+diff preserves DP01/03/04 and the exact caption. Only warm DP02 resent17:28,
+3EB0DF0A424426EC14B5BD, Sent readback, HD2048x2560selected; no full-set replay.
+DP04 has a positive reaction; do not rebuild accepted siblings or infer
+final publication approval. Dynamics updatesc28e9248-19b9-4bb0-a435-30d9b8da438f /
+12c09c00-a427-4627-ae7f-71be286ee40a unreviewed; staff strategy/guide unchanged.
+
+PSG DAHbRapxiLM DP01: two-element logo/backing amendment, explicit compositional
+anchor/equal22px nominal padding, actual2xexport inspected. Only DP01 Delivered
+17:09,3EB0CB3E68EA6F9E2A21AD; other pages/type/photos/captions unchanged.
+Cape DP03 exact-logo source moved bottom-left; master28 transfer/new HD/send remain
+unfinished.243-page native editing explicitly unsupported; do not claim completion.
+Separate tagged concise status note Sent17:24 with actual Amonique/Ger-Marie entities.
+Shared skill/system and exact-client READMEs updated. Local build/diff validation;
+no production/schema/SQL/dependency/deployment/new spend, Nolan or other-lane changes.
+Original signed-in internal tabs retained, no desktop takeover/restart. Control
+Centre exact target remains ungrounded; no guessed write. See private current receipts.
+
+## Earlier 25 November — Bloem four HD review posters delivered (later rejected)
 
 Existing #948/draft#956 lane. Supported installed Node browser runtime recovered
 the original signed-in internal Canva/WhatsApp tabs after the old namespace was
