@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { readFileSync } from 'node:fs'
 import { emptyStrategyData } from '../src/lib/strategyEngine.ts'
-import { loadMonthlyStrategyWorkspace, shapeMonthlyStrategyBrief, strategyMcpInputHash, strategyMonthIsCurrentOrNext, submitMonthlyStrategyProposal } from '../supabase/functions/cg-dynamics-mcp/monthlyStrategyWorkspace.ts'
+import { loadMonthlyStrategyWorkspace, shapeMonthlyStrategyBrief, strategyMcpInputHash, strategyMonthIsInPlanningWindow, submitMonthlyStrategyProposal } from '../supabase/functions/cg-dynamics-mcp/monthlyStrategyWorkspace.ts'
 import { assertToolAllowedInContext } from '../supabase/functions/cg-dynamics-mcp/projectContext.ts'
 import { amendMonthlyStrategyFields } from '../supabase/functions/cg-dynamics-mcp/monthlyStrategyAmendment.ts'
 
@@ -46,7 +46,8 @@ class Query {
   }
 }
 class FakeDb {
-  constructor(row = true) {
+  constructor(row = true, month = MONTH) {
+    this.month = month
     const draft = emptyStrategyData()
     draft.actionPlan.professional_video.enabled = true
     draft.actionPlan.design_poster.enabled = true
@@ -54,7 +55,7 @@ class FakeDb {
     this.tables = {
       clients: [{ id: CLIENT, name: 'Piek Group', active: true, package_settings: {} }],
       client_guides: [{ id: 'guide-1', client_id: CLIENT, version: 2, runtime_readiness: 'ready', guide_markdown: 'Piek offers exact verified service lines.' }],
-      monthly_client_strategies: row ? [{ id: 'strategy-1', client_id: CLIENT, strategy_month: MONTH, workflow_status: 'draft',
+      monthly_client_strategies: row ? [{ id: 'strategy-1', client_id: CLIENT, strategy_month: month, workflow_status: 'draft',
         published_version: null, version: 1, strategy_data: draft, seed_context: { origin: 'monthly_strategy_autopilot' }, staff_amended_at: null, internal_notes: 'Keep staff note.' }] : [],
       monthly_client_strategy_revisions: [],
     }
@@ -73,12 +74,12 @@ class FakeDb {
       if (name === 'amend_monthly_client_strategy_with_context') row.staff_amended_at = '2026-10-16T12:00:00Z'
     } else if (name === 'seed_monthly_client_strategy') {
       if (row) return { data: { created: false, strategy_id: row.id }, error: null }
-      this.tables.monthly_client_strategies.push({ id: 'strategy-2', client_id: CLIENT, strategy_month: MONTH,
+      this.tables.monthly_client_strategies.push({ id: 'strategy-2', client_id: CLIENT, strategy_month: this.month,
         workflow_status: 'draft', published_version: null, version: 1, strategy_data: args.p_strategy_data, seed_context: args.p_seed_context })
     } else throw new Error(`Unexpected RPC: ${name}`)
-    const receipt = { strategy_id: row?.id ?? 'strategy-2', client_id: CLIENT, strategy_month: MONTH, version: row?.version ?? 1, workflow_status: 'draft', created: !row,
+    const receipt = { strategy_id: row?.id ?? 'strategy-2', client_id: CLIENT, strategy_month: this.month, version: row?.version ?? 1, workflow_status: 'draft', created: !row,
       after_seed_context: args.p_seed_context }
-    this.tables.monthly_client_strategy_revisions.push({ client_id: CLIENT, strategy_month: MONTH, idempotency_key: KEY, actor_profile_id: ACTOR, receipt })
+    this.tables.monthly_client_strategy_revisions.push({ client_id: CLIENT, strategy_month: this.month, idempotency_key: KEY, actor_profile_id: ACTOR, receipt })
     return { data: receipt, error: null }
   }
 }
@@ -89,7 +90,7 @@ function prepared(db, blockers = []) {
     blockers,
     previousReportId: null,
     seedContext: {
-      origin: 'monthly_strategy_autopilot', client_id: CLIENT, strategy_month: MONTH,
+      origin: 'monthly_strategy_autopilot', client_id: CLIENT, strategy_month: db.month,
       sources: { client_guide_id: 'guide-1' }, intelligence_evidence: [],
       source_coverage: { client_guide: 'available', previous_published_report: 'none' },
       source_windows: { confirmed_package_scope: { professional_video: 1, design_poster: 3 } },
@@ -118,11 +119,40 @@ test('strategy MCP idempotency hash accepts Unicode and nested key reordering', 
   assert.equal(await strategyMcpInputHash(first), await strategyMcpInputHash(reordered))
 })
 
-test('only current and next month are eligible, including year rollover', () => {
-  assert.equal(strategyMonthIsCurrentOrNext(TODAY, MONTH), true)
-  assert.equal(strategyMonthIsCurrentOrNext(TODAY, '2026-12-01'), false)
-  assert.equal(strategyMonthIsCurrentOrNext('2026-12-15', '2027-01-01'), true)
-  assert.equal(strategyMonthIsCurrentOrNext(TODAY, '2026-11-12'), false)
+test('company planning permits current plus two months across year rollover, with a hard bound', () => {
+  for (const month of ['2026-11-01', '2026-12-01', '2027-01-01']) {
+    assert.equal(strategyMonthIsInPlanningWindow('2026-11-16', month), true, month)
+  }
+  for (const month of ['2026-10-01', '2027-02-01', '2027-01', '2027-01-02', '2027-13-01']) {
+    assert.equal(strategyMonthIsInPlanningWindow('2026-11-16', month), false, month)
+  }
+  assert.equal(strategyMonthIsInPlanningWindow('2026-12-15', '2027-02-01'), true)
+  assert.equal(strategyMonthIsInPlanningWindow('2026-12-15', '2027-03-01'), false)
+  assert.equal(strategyMonthIsInPlanningWindow('invalid', '2027-01-01'), false)
+})
+
+test('January planning uses the exact January row and existing canonical draft RPC', async () => {
+  const month = '2027-01-01', today = '2026-11-16'
+  const db = new FakeDb(false, month)
+  const brief = shapeMonthlyStrategyBrief(await loadMonthlyStrategyWorkspace(db, CLIENT, month, today, deps(db)))
+  assert.equal(brief.strategy_month, month)
+  const result = await submitMonthlyStrategyProposal(db, submitInput(brief, { strategyMonth: month, today, proposal: { ...proposal, strategyMonth: month } }), deps(db))
+  assert.equal(result.state, 'draft_filled')
+  assert.equal(result.published, false)
+  assert.equal(db.calls[0].name, 'seed_monthly_client_strategy')
+  assert.equal(db.calls[0].args.p_strategy_month, month)
+  assert.equal(db.tables.monthly_client_strategies[0].strategy_month, month)
+  assert.equal(db.tables.monthly_client_strategies[0].workflow_status, 'draft')
+})
+
+test('past, malformed and beyond-horizon months fail before any source read or write', async () => {
+  const db = { from() { throw Error('Unexpected database read') }, rpc() { throw Error('Unexpected write') } }
+  for (const month of ['2026-10-01', '2027-02-01', '2027-01', '2027-01-12']) {
+    await assert.rejects(loadMonthlyStrategyWorkspace(db, CLIENT, month, '2026-11-16'), /CURRENT_OR_NEXT_TWO_MONTHS_REQUIRED/)
+    const input = { clientId: CLIENT, strategyMonth: month, today: '2026-11-16' }
+    assert.equal((await submitMonthlyStrategyProposal(db, input)).error, 'CURRENT_OR_NEXT_TWO_MONTHS_REQUIRED')
+    assert.equal((await amendMonthlyStrategyFields(db, input)).error, 'CURRENT_OR_NEXT_TWO_MONTHS_REQUIRED')
+  }
 })
 
 test('brief exposes exact source/window/version and never claims unknown report data as zero', async () => {
@@ -266,14 +296,14 @@ test('connector wiring has no approve/publish action and reuses guarded strategy
   assert.doesNotMatch(index, /transition_monthly_client_strategy/)
 })
 
-async function amendmentFixture() {
-  const db = new FakeDb()
+async function amendmentFixture(month = MONTH, today = TODAY) {
+  const db = new FakeDb(true, month)
   const row = db.tables.monthly_client_strategies[0]
   row.strategy_data.goldStandard = structuredClone(goldStandard)
   for (const [key, items] of Object.entries(proposal.actionPlan)) row.strategy_data.actionPlan[key].items = [...items]
   row.strategy_data.calendarSelections = [{ eventId: 'keep', title: 'Staff selected', date: null, use: false, note: 'Preserve.' }]
   row.strategy_data.futureExtension = { keep: true }
-  row.seed_context = { ...row.seed_context, client_id: CLIENT, strategy_month: MONTH, generation: { provider: 'old-provider' } }
+  row.seed_context = { ...row.seed_context, client_id: CLIENT, strategy_month: month, generation: { provider: 'old-provider' } }
   Object.assign(row.seed_context, {
     sources: prepared(db).seedContext.sources,
     intelligence_evidence: prepared(db).seedContext.intelligence_evidence,
@@ -281,9 +311,9 @@ async function amendmentFixture() {
     source_windows: prepared(db).seedContext.source_windows,
   })
   row.staff_amended_at = '2026-10-15T12:00:00Z'
-  const brief = shapeMonthlyStrategyBrief(await loadMonthlyStrategyWorkspace(db, CLIENT, MONTH, TODAY, deps(db)))
+  const brief = shapeMonthlyStrategyBrief(await loadMonthlyStrategyWorkspace(db, CLIENT, month, today, deps(db)))
   const input = {
-    clientId: CLIENT, strategyMonth: MONTH, today: TODAY, expectedVersion: row.version,
+    clientId: CLIENT, strategyMonth: month, today, expectedVersion: row.version,
     evidenceFingerprint: brief.evidence_fingerprint, sourceIds: ['guide-1'],
     actorProfileId: ACTOR, idempotencyKey: KEY,
     changes: [{ path: 'goldStandard.testAndChange', expected: goldStandard.testAndChange,
@@ -291,6 +321,31 @@ async function amendmentFixture() {
   }
   return { db, row, input }
 }
+
+test('January editorial work stays draft-only, preserves staff notes and cannot reach a different client/month', async () => {
+  const { db, row, input } = await amendmentFixture('2027-01-01', '2026-11-16')
+  const result = await amendMonthlyStrategyFields(db, input, deps(db))
+  assert.equal(result.state, 'draft_amended')
+  assert.equal(result.published, false)
+  assert.equal(row.workflow_status, 'draft')
+  assert.equal(db.calls[0].args.p_strategy_month, '2027-01-01')
+  assert.equal(db.calls[0].args.p_client_id, CLIENT)
+  assert.equal(db.calls[0].args.p_internal_notes, 'Keep staff note.')
+  for (const change of ['client', 'month', 'staff-version', 'source-race']) {
+    const fresh = await amendmentFixture('2027-01-01', '2026-11-16')
+    if (change === 'client') fresh.row.client_id = OTHER
+    if (change === 'month') fresh.row.strategy_month = '2026-12-01'
+    if (change === 'staff-version') fresh.row.version++
+    let reads = 0
+    const dependencies = { ...deps(fresh.db), prepare: async () => {
+      if (change === 'source-race' && ++reads === 2) fresh.db.tables.client_guides[0].guide_markdown += ' Changed.'
+      return prepared(fresh.db)
+    } }
+    const refused = await amendMonthlyStrategyFields(fresh.db, fresh.input, dependencies)
+    assert.ok(refused.error, change)
+    assert.equal(fresh.db.calls.length, 0, change)
+  }
+})
 
 test('explicit strategy amendment changes only the compared field through the audited staff RPC', async () => {
   const { db, row, input } = await amendmentFixture()

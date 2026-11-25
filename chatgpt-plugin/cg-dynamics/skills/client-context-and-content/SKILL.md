@@ -78,3 +78,22 @@ facts, the creative standard, and canonical contacts all come from the registere
 - No shadow client-knowledge store; the MCP/client-intelligence runtime is the authority.
 
 See `references/human-creative-standard.md` for the standing quality/anti-filler rules.
+
+## PICASSO design and motion-graphics work
+
+Use the official repository standard
+`docs/ai-workforce/graphic-designer/PICASSO-DESIGN-SYSTEM.md` and portable
+`picasso-standard.v1.json`. On an approved runtime release, `get_client_context`
+with `task_type=image_edit` (or `script`/`general`/`content_idea`) and an explicit
+`scope_key` returns an additive `picasso` packet: exact reviewed Brand Pack, active
+rules, fingerprints and the format-aware checklist, or a hold. If absent, report
+the missing rollout/capability; never claim this invocation succeeded from docs.
+Retrieve caption/footer policy separately using `task_type=caption`.
+
+Before any internal draft send complete every applicable check against the actual
+current export, including relevant social/queued artwork reuse, professional photo
+finishing, safe text/logo inset, true full-frame bleed, exact fonts and meaningful
+depth/unique composition. Motion adds playback/timing checks without forcing still
+output. Keep private assets in authorised storage, use native/headless tools, and
+never force routine desktop takeover. Agent self-review does not establish final
+human approval. Captions have no signatures; resend changed items only, serialized.

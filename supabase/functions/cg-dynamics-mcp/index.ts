@@ -10,6 +10,7 @@
 
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { readMicrosoftScheduleSource } from './microsoftScheduleSource.ts'
+import { loadPicassoContext, type PicassoReadClient } from './picassoContext.ts'
 import { fetchAllRows, fetchAllRowsByIdChunks } from '../_shared/paginatedRows.ts'
 import { CG_DYNAMICS_MCP_TOOLS, CG_DYNAMICS_MCP_SECURITY_SCHEMES } from './toolCatalog.ts'
 import { filterCapabilitiesByScope } from './capabilityManifest.ts'
@@ -1738,6 +1739,11 @@ const handleGetClientContext: ToolHandler = async (staff, input) => {
           guide_markdown: guide.guide_markdown,
           project_instructions: guide.project_instructions,
         }
+      : null,
+    // Additive read-only creative contract; guide readiness and existing contacts
+    // retain their separate authority. No model call, new tool or write path.
+    picasso: ['image_edit', 'script', 'content_idea', 'general'].includes(String(input.task_type))
+      ? await loadPicassoContext(staff.supabase as unknown as PicassoReadClient, clientId, typeof input.scope_key === 'string' ? input.scope_key : '', new Date().toISOString(), { guide, recordedUpdates })
       : null,
     contact_footer: contactFooter,
     recorded_client_updates: recordedUpdates.view,

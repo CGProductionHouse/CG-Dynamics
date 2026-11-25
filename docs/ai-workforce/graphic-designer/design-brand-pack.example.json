@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "clientId": "00000000-0000-4000-8000-000000000000",
+  "revision": "draft-1",
+  "status": "draft",
+  "reviewedBy": "",
+  "reviewedAt": "",
+  "reviewDue": "",
+  "source": {
+    "provider": "OneDrive",
+    "locator": "REPLACE_WITH_VERIFIED_DURABLE_ITEM_LOCATOR",
+    "observedAt": "2026-11-25T00:00:00Z",
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "scopes": [
+    {
+      "key": "REPLACE_EXACT_SCOPE",
+      "name": "SYNTHETIC TEMPLATE - NOT A CLIENT PACK",
+      "canvaKitId": "REPLACE_KIT",
+      "logos": [
+        {
+          "variant": "primary",
+          "clearSpace": "REPLACE_VERIFIED_RULE",
+          "validFor": "REPLACE_TARGET_PERIOD_AND_LOGO_VALIDITY",
+          "source": {
+            "provider": "OneDrive",
+            "locator": "REPLACE_WITH_VERIFIED_DURABLE_ITEM_LOCATOR",
+            "observedAt": "2026-11-25T00:00:00Z",
+            "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        }
+      ],
+      "fonts": [
+        {
+          "family": "REPLACE_ACTUAL_FAMILY",
+          "weights": [
+            "REPLACE_ACTUAL_WEIGHT"
+          ],
+          "roles": "REPLACE_ROLES",
+          "availability": "verified",
+          "licence": {
+            "provider": "OneDrive",
+            "locator": "REPLACE_WITH_VERIFIED_DURABLE_ITEM_LOCATOR",
+            "observedAt": "2026-11-25T00:00:00Z",
+            "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        }
+      ],
+      "colours": [
+        {
+          "hex": "#000000",
+          "roles": "REPLACE_VERIFIED_COLOUR_AND_ROLES",
+          "source": {
+            "provider": "Canva",
+            "locator": "REPLACE_WITH_VERIFIED_DURABLE_ITEM_LOCATOR",
+            "observedAt": "2026-11-25T00:00:00Z",
+            "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        }
+      ],
+      "visualLanguage": {
+        "typography": "REPLACE_WITH_ACTUAL_APPROVED_EVIDENCE",
+        "shapes": "REPLACE_WITH_ACTUAL_APPROVED_EVIDENCE",
+        "gradients": "REPLACE_WITH_ACTUAL_APPROVED_EVIDENCE",
+        "texture": "REPLACE_WITH_ACTUAL_APPROVED_EVIDENCE",
+        "depth": "REPLACE_WITH_ACTUAL_APPROVED_EVIDENCE",
+        "photoTreatment": "REPLACE_WITH_ACTUAL_APPROVED_EVIDENCE",
+        "motion": "REPLACE_WITH_ACTUAL_APPROVED_EVIDENCE",
+        "avoid": "REPLACE_WITH_ACTUAL_APPROVED_EVIDENCE"
+      },
+      "voice": "REPLACE_VERIFIED_VOICE",
+      "claimsAndContacts": {
+        "provider": "CG Dynamics",
+        "locator": "REPLACE_WITH_VERIFIED_DURABLE_ITEM_LOCATOR",
+        "observedAt": "2026-11-25T00:00:00Z",
+        "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "photography": {
+        "provider": "OneDrive",
+        "locator": "REPLACE_WITH_VERIFIED_DURABLE_ITEM_LOCATOR",
+        "observedAt": "2026-11-25T00:00:00Z",
+        "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "approvedExamples": [
+        {
+          "provider": "Canva",
+          "locator": "REPLACE_WITH_VERIFIED_DURABLE_ITEM_LOCATOR",
+          "observedAt": "2026-11-25T00:00:00Z",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      ],
+      "feedback": [
+        {
+          "provider": "CG Dynamics",
+          "locator": "REPLACE_WITH_VERIFIED_DURABLE_ITEM_LOCATOR",
+          "observedAt": "2026-11-25T00:00:00Z",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        }
+      ]
+    }
+  ]
+}

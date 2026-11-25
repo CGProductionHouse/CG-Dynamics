@@ -29,7 +29,7 @@ const uuid = { type: 'string', format: 'uuid' }
 const date = { type: 'string', format: 'date' }
 const strategyMonth = {
   type: 'string', format: 'date', pattern: '^\\d{4}-(0[1-9]|1[0-2])-01$',
-  description: 'First day of the CURRENT or NEXT Johannesburg month, YYYY-MM-01 (for example 2026-11-01). A YYYY-MM month key is not accepted.',
+  description: 'First day of the current Johannesburg month or either of the next two months, YYYY-MM-01. November planning can include January across the year boundary. Past months, later months and YYYY-MM keys are not accepted.',
 }
 const idempotencyKeySchema = {
   type: 'string',
@@ -279,7 +279,7 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   },
   {
     name: 'get_monthly_strategy_brief', title: 'Get monthly strategy evidence',
-    description: 'Company-admin only. Read one exact client and CURRENT or NEXT month: confirmed package, prior published findings, incorporated notes, ready client guide, approved research, dated opportunities, current draft/version, source windows and blockers. No generic substitute. Use its evidence_fingerprint and citations for submit_monthly_strategy_draft (gap filling), or amend_monthly_strategy_draft only for explicitly requested exact-field editorial changes. Read-only and no model/provider call.',
+    description: 'Company-admin only. Read one exact client and the current month or either of the next two months: confirmed package, prior published findings, incorporated notes, ready client guide, approved research, dated opportunities, current draft/version, source windows and blockers. Future planning does not establish future facts or approval. No generic substitute. Use its evidence_fingerprint and citations for submit_monthly_strategy_draft (gap filling), or amend_monthly_strategy_draft only for explicitly requested exact-field editorial changes. Read-only and no model/provider call.',
     inputSchema: objectSchema({ client_id: uuid, strategy_month: strategyMonth }, ['client_id', 'strategy_month']),
     annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
     dependency: 'main', canonicalContract: '#391/#731 prepareDraft + monthly_client_strategies exact-client read',
@@ -308,7 +308,7 @@ export const CG_DYNAMICS_MCP_TOOLS: readonly CgDynamicsMcpTool[] = [
   },
   {
     name: 'amend_monthly_strategy_draft', title: 'Amend exact reviewed strategy fields',
-    description: 'Company-admin only, on explicit staff request. Amend selected fields of an EXISTING unpublished CURRENT/NEXT month draft, comparing the exact original field values and fresh brief version/source fingerprint. Unlike automatic gap filling this is an intentional audited staff amendment. Use only existing cited research and preserve all unselected staff wording. Refreshes verified canonical source receipts while preserving unrelated seed history. For an explicitly requested provenance-only refresh, compare one exact current field with an identical replacement; changed_fields is empty and context_refreshed confirms the receipt update. If neither content nor provenance changed, no write occurs. Changed fields/sources/versions refuse the write. Never approve/publish or change scope, quantities, dates, calendar, packages or permissions. Read back changed fields and provenance after saving.',
+    description: 'Company-admin only, on explicit staff request. Amend selected fields of an EXISTING unpublished draft for the current month or either of the next two months, comparing the exact original field values and fresh brief version/source fingerprint. Unlike automatic gap filling this is an intentional audited staff amendment. Use only existing cited research and preserve all unselected staff wording. Refreshes verified canonical source receipts while preserving unrelated seed history. For an explicitly requested provenance-only refresh, compare one exact current field with an identical replacement; changed_fields is empty and context_refreshed confirms the receipt update. If neither content nor provenance changed, no write occurs. Changed fields/sources/versions refuse the write. Never approve/publish or change scope, quantities, dates, calendar, packages or permissions. Read back changed fields and provenance after saving.',
     inputSchema: objectSchema({
       client_id: uuid, strategy_month: strategyMonth,
       evidence_fingerprint: { type: 'string', pattern: '^[a-f0-9]{64}$' },

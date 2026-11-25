@@ -13,6 +13,21 @@ When user feedback changes direction:
 3. If it changes the actual product direction, update `docs/cg-dynamics-product-goals.md` too.
 4. Do not treat small UI feedback as permission to forget the bigger workflow.
 
+## Phone staff/admin cleanup — 16 November 2026
+
+CURRENT: CA-approved release is LIVE, source ccbb6ec7 / deployment
+dpl_B8eMyLViZqYRNxae4cR9HXqLhwhB. 205 affected tests/build/lint/diff and exact
+staging/production HTTP asset readbacks pass. Phone rendered acceptance remains
+unverified; no all-app claim. See current mobile release receipt. Earlier
+candidate wording below is retained as history.
+
+PR #993 is the source candidate for CA's phone usability complaint: searchable
+cross-workspace navigation, short client cards/action sheets, direct login-copy,
+deliberate account settings and safer shared touch/input sizing. 175 relevant
+tests/build/lint/diff pass. Rendered browser/physical-phone acceptance and the
+existing reviewed hosting release gate remain; not a production or all-app
+completion claim. Details: `docs/ops/MOBILE-STAFF-CLEANUP-2026-11-16.md`.
+
 ## Monthly strategy automation correction — 9 October 2026
 
 | Request | Status | Notes |

@@ -1,5 +1,13 @@
 # CG Graphic Designer / Poster Studio — proof architecture
 
+25 November: the common production authority is now the
+[PICASSO design system](PICASSO-DESIGN-SYSTEM.md), with a shared executable checklist,
+staff Content operations panel and proposed structured extension to the existing
+Dynamics brand profile/rules authority. It covers still and animated compositions
+and video graphics without replacing Nolan. This document's historical proof
+schemas/client discovery packs remain evidence, not automatically reviewed runtime
+packs. Source rollout and actual company-ChatGPT acceptance remain separate gates.
+
 Issue #948 is the parent implementation authority. Issue #955 is the Piek Group January 2027 full-month acceptance authority. This directory records the smallest tested architecture; it does not claim production readiness.
 
 ## Current acceptance target

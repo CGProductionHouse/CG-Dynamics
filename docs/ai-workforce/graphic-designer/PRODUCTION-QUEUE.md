@@ -1,5 +1,15 @@
 # Graphic designer production queue
 
+Current25November: owner prioritised official shared PICASSO standards inside
+Dynamics for every model, human designers and still/motion work. Same #948/#956
+lane, reconciled with main b524a9f9. Implemented format-aware 27-item evidence
+contract, read-only exact-client connector packet, structured brand-pack extension,
+Content operations panel and local artifact-bound preflight. See
+[system](PICASSO-DESIGN-SYSTEM.md) and
+[qualification/remaining gates](PICASSO-SYSTEM-ACCEPTANCE-2026-11-25.md).
+No design resend, real-client pack approval/population, production schema/runtime
+rollout or everyday ChatGPT success is inferred. Prior PSG delivery holds remain.
+
 Current18November override: **PSG R8 saved in place in DAHbRapxiLM.** Owner
 rejects circle through type and requires distinct concepts/compositions. Only
 business circle/yellow tick removed; fresh native diff proves all other elements,

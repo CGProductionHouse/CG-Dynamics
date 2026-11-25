@@ -27,6 +27,25 @@ listed migrations that have since been applied).
   Microsoft, provider keys) belongs in an Edge Function.
 - Never expose, log, commit or return secrets.
 
+## Prepared, not applied — PICASSO pack extension (25 November)
+
+`20261125073157_picasso_design_pack.sql` adds nullable structured `design_pack`
+metadata to the existing staff-only `client_brand_profiles`, with exact-client
+constraint and unchanged RLS/grants. No seed/backfill or new table. Qualified in
+an isolated network-disabled PostgreSQL fixture; production application and actual
+multi-role/runtime acceptance require their own approval. See
+`docs/ai-workforce/graphic-designer/PICASSO-SYSTEM-ACCEPTANCE-2026-11-25.md`.
+Do **not** replay the already-applied base brand migration below.
+
+## Recently applied
+
+- `20261111064719_client_brand_profiles_and_rules.sql` — staff-only client brand
+  profiles and brand rules for the Video Pipeline brand panel. **Applied 11 November
+  2026 with CA approval**; ledger version matches the file. CG Production House
+  profile, 4 CG rules and 6 house rules seeded (seed kept out of this public repo). Additive; depends only on `is_manager()` and
+  `is_active_content_staff()`, both live. Supersedes the never-applied
+  `phase-8a-client-brand-workflow.sql` (do not run that file).
+
 ## 3. Adding a new production migration
 
 1. Create a timestamped file:

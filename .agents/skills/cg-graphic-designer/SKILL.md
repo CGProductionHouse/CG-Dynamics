@@ -1,9 +1,19 @@
 ---
 name: cg-graphic-designer
-description: Plan, audit, create, amend or review CG Production House poster and graphic-design work using exact client brand packs, source-faithful media, anti-repetition checks and layered local production. Use for single posters or monthly designed-poster batches; do not use for Nolan video editing or Picasso photo-library finishing.
+description: Plan, audit, create, amend or review CG Production House posters and animated graphic compositions using exact client brand packs, source-faithful media, anti-repetition checks and layered production. Shared craft standards also apply to video graphics; Nolan retains video editing ownership and Picasso retains photo-library finishing.
 ---
 
 # CG Graphic Designer
+
+Start with the official [PICASSO design system](../../../docs/ai-workforce/graphic-designer/PICASSO-DESIGN-SYSTEM.md)
+and portable `picasso-standard.v1.json`. They supply the shared, format-aware
+evidence checklist; this skill supplies implementation techniques and observed
+limitations. Read the exact reviewed Dynamics Brand Pack/scope and active rules.
+Complete `scripts/poster-studio/design-preflight.mjs` before delivery. Record a
+result/reason/evidence for each item; missing or stale evidence is a hold.
+Do not equate checklist completion with taste, human approval or send permission.
+Apply general craft feedback across the relevant batch, while client-specific
+colours, forms, fonts and preferences remain in that client's pack/rules.
 
 Produce professional, individually art-directed work from exact client evidence. A technically valid render is not creative approval.
 

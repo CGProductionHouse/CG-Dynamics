@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import ContentRunReadinessPanel from '../../components/content/ContentRunReadinessPanel'
+import PicassoDesignSystemPanel from '../../components/content/PicassoDesignSystemPanel'
 import { applyOpsFilters, fetchContentOps, opsFilterOptions, OPS_BUCKET_LABELS, OPS_BUCKET_ORDER, type OpsFilters, type OpsItem, type OpsSummary } from '../../lib/contentOps'
 
 // #220 — Cross-client content operations dashboard. Read-only monitoring so
@@ -76,6 +77,7 @@ export default function ContentOperationsPage() {
         </div>
       </div>
       <p className="text-sm text-white/55">Every content item from planning to posted, across the clients you can see. Nothing here posts to a platform — it makes sure nothing is forgotten.</p>
+      <PicassoDesignSystemPanel />
 
       {!loading && !error && raw && <div className="flex flex-wrap items-center gap-2">
         <input className={`${INPUT} min-w-[12rem] flex-1`} placeholder="Search title, client or assignee" value={filters.query ?? ''} onChange={e => setFilter('query', e.target.value)} />

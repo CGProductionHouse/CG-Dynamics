@@ -149,3 +149,7 @@ scripts/generated/
 .worktrees/
 artifacts/
 scripts/poster-studio/__pycache__/
+
+# Generated Python interpreter caches
+__pycache__/
+*.py[cod]

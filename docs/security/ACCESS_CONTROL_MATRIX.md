@@ -284,3 +284,34 @@ through RLS or the `admin_set_package_classification` RPC.
 | Process delivery queue | service role only | service role only | service role only | no |
 
 The browser considers push active only when permission is granted, a browser subscription exists, and the same endpoint is active server-side for the signed-in user.
+
+### client_brand_profiles, client_brand_rules (live 11 November 2026)
+
+Staff-only brand facts and must/should rules that video editors read beside a
+video in Content → Video Pipeline. Migration
+`20261111064719_client_brand_profiles_and_rules.sql` was applied to production on 11 November 2026 with CA approval;
+it supersedes the never-applied `phase-8a-client-brand-workflow.sql`, whose read
+policy would have exposed brand notes to client-role logins.
+
+| Operation | Admin | Manager | Staff/Team | Client |
+|-----------|-------|---------|------------|--------|
+| Read brand profiles and active rules | yes | yes | yes (active content staff) | no |
+| Create or edit a client brand profile | yes | yes | no | no |
+| Add a rule for one client (as themselves) | yes | yes | yes | no |
+| Add a house rule (applies to every client) | yes | yes | no | no |
+| Retire a rule | yes | yes | no | no |
+| Edit or delete a rule | no | no | no | no |
+
+Rules are never edited or deleted: a trigger allows an update only to retire a
+rule and stamps the retiring user. Anon has no access.
+
+PICASSO's proposed `design_pack` column extends this same profile (migration
+`20261125073157_picasso_design_pack.sql`, **not applied here**). It inherits active
+content-staff read and manager-only write, with an exact `clientId` constraint.
+No new table, policy, grant, public projection or privileged function. Metadata
+contains private OneDrive locators, not file bytes or credentials. The staff UI
+updates only the selected existing profile with an `updated_at` conflict fence.
+The connector reuses its existing staff/exact-client authentication and reads only
+that client's pack and active client/house rules; no parent/sibling lookup.
+Missing schema/data yields a delivery hold, never a broad fallback. Static/mock
+tests do not substitute for later actual multi-role production acceptance.

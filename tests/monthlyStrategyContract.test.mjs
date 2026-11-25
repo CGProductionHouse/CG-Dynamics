@@ -147,6 +147,42 @@ test('sparse clients receive no generic strategy fallback from recorded delivera
   assert.deepEqual(baseline.evidence, [])
 })
 
+test('approved Madison Content directions produce bounded exact-guide evidence', () => {
+  const markdown = read('../artifacts/client-strategy-dossiers/issue-513/runtime-guides/madison-wear.md')
+  const signals = extractReadyGuideSignals(markdown)
+  assert.deepEqual(signals, ['exact product features', 'product-on-model posts', 'outfit pairings', 'styling tips'])
+  const baseline = buildMonthlyBaseline({
+    clientName: 'Madison Wear', guideId: 'exact-madison-guide', readyGuideMarkdown: markdown,
+    contextUpdates: [], previousDirection: [], previousDrivers: [], deliverables: [],
+  })
+  assert.equal(baseline.evidence.length, 4)
+  assert.ok(baseline.evidence.every(item => item.authority === 'client_guide' && item.source_id === 'exact-madison-guide'))
+  assert.ok(baseline.evidence.every(item => signals.includes(item.excerpt)))
+  assert.ok(signals.every(value => !/Loch Logan|064|sales@|Lay.Buy|PayJustNow|Polo|Cutty|Dickies|Levi|checkout/i.test(value)))
+})
+
+test('Content directions recognition keeps contact, uncertainty, negative and subsection guards intact', () => {
+  const markdown = [
+    '## 9. CONTENT DIRECTIONS',
+    '- Outfit pairing demonstrations.',
+    '- Never claim current stock.',
+    '- sales@example.com',
+    '- https://example.com/unverified',
+    '### Unresolved facts',
+    '- Invented current offer.',
+    '### Contact details',
+    '- A private address must not become a creative route.',
+    '## Content directions and guardrails',
+    '- Another unsupported offer.',
+    '## Content directions — unresolved',
+    '- An unverified product launch.',
+    '## Other metadata',
+    '- A new route must not be inferred from arbitrary bullets.',
+  ].join('\r\n')
+  assert.deepEqual(extractReadyGuideSignals(markdown), ['Outfit pairing demonstrations'])
+  assert.deepEqual(extractReadyGuideSignals('## Content governance\n- Arbitrary administrative material.'), [])
+})
+
 test('seed context exposes considered and selected calendar evidence without creating another schedule', () => {
   assert.match(runtime, /authority: 'content_calendar'/)
   assert.match(runtime, /authority: 'company_calendar'/)

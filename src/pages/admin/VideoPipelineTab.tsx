@@ -29,6 +29,7 @@ import {
   type VideoProductionPhase,
 } from '../../lib/videoPipelineRules'
 import { GuidelineBrief } from './contentGuideline'
+import { ClientBrandPanel } from '../../components/content/ClientBrandPanel'
 import {
   clientName,
   deliverableLabelText,
@@ -435,6 +436,7 @@ export default function VideoPipelineTab({ clients, staff }: { clients: ClientOp
                 footer={<ProductionActions idea={selected} busy={busy} actionError={actionError} onAction={runAction} />}
               />
             )}
+            <ClientBrandPanel key={selected.client_id ?? 'none'} clientId={selected.client_id} clientName={clientName(clients, selected.client_id)} />
           </section>
         </div>
       ) : filtered.length === 0 ? (

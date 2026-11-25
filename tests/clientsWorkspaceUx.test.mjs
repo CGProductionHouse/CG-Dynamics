@@ -21,7 +21,9 @@ test('exact-client primary routes remain visible and secondary routes remain acc
     '/admin/published?client=',
     '/admin/integrations/meta?client=',
   ]) assert.ok(clients.includes(route), `${route} retained`)
-  assert.match(clients, /<details[^>]*>[\s\S]*?<summary[^>]*>More actions<\/summary>/)
+  assert.match(clients, /aria-label=\{`Actions for \$\{client.name\}`\} aria-haspopup="dialog"/)
+  assert.match(clients, /<ActionSheet title=\{client.name\}/)
+  assert.match(clients, /setOpen\(false\); onArchive\(\)/)
   assert.match(clients, /onArchive=\{\(\) => setConfirmAction\(\{ type: 'archive', client: c \}\)\}/)
   assert.match(clients, /aria-pressed=\{viewFilter === f\}/)
 })
