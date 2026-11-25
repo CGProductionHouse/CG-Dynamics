@@ -59,6 +59,16 @@ line endings: rendered innerText can double paragraph breaks. Select HD per phot
 send serially and read back a unique message ID/state before continuing. Preserve
 the user's explicitly retained signed-in Canva/WhatsApp tabs.
 
+After sharing a design batch, send a **separate concise review note** to the same
+approvals group. Use a friendly client/month heading, short bullets identifying
+the changed items and a simple request for feedback. Select real WhatsApp mention
+entities for Amonique Fourie and Ger-Marie (owner's spoken Monique/Charmery), not
+plain typed names. Keep client-forwardable artwork captions unsigned. Verify the
+note's unique message ID and Sent/Delivered state; do not resend the artwork to
+add the note. Insert multiline text through fill/paste or Shift+Enter: literal
+newlines in pressSequentially can submit the message prematurely. If interrupted,
+inspect the sent state and complete the note without replaying media.
+
 After a tool update, test read and write capabilities separately. Canva's earlier
 `read_design` restored native layer/notes transactions while `edit_design` still
 returned INVALID_ARGUMENT for the temporary text test. Verify unchanged state,

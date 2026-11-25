@@ -1,3 +1,26 @@
+## 25 November — tagged review follow-up and next-client discovery
+
+Existing #948/draft#956 lane. Cape4/PSG3 media deliveries below remain current;
+no replay. Separate concise January review heading/tag and client/bullet summary
+Delivered to CG Picasso Approvals12:26–12:27SAST, actual Amonique Fourie and
+Ger-Marie mention entities. Owner requires this pleasant, short review request
+after future batches; poster captions remain unsigned. Shared skill/system updated.
+Original user-retained internal Canva/WhatsApp tabs remain open; no desktop takeover.
+
+Owner authorised choosing the next January client. Bloem Marble discovery selected:
+exact89e0ad6d-e08c-4a75-8b8e-abea71af581c, confirmed4DP/2videos (Nolan untouched),
+published strategy/report and guide recovered. No January dated rows/canonical
+draft; no missing-month or allocation claim. Existing73-page master read only,
+all previews retained; actual Gotham/Inter/native red observed. Exact kit/reviewed
+pack unresolved. Four new-shoot candidates excluded by manual same-project queue
+review even though SIFT found no exact suspected reuse.114/137 small workshop
+previews retained, no bulk source hydration. Social/approval coverage and fresh
+briefs/designs remain open. See owning client README; no new poster/send claimed.
+One append-only Dynamics direction record ad903e48-95e3-4e22-82a7-e483f9789810,
+unreviewed, guide unchanged. New structured runtime rollout remains held.
+No SQL/schema/deployment, new service/dependency/spend or other-agent change.
+Control Centre exact target still ungrounded; no guessed write.
+
 ## 25 November — Cape feedback amendments and PSG review delivered
 
 Same #948/draft#956 lane, main b524a9f9. User-retained signed-in internal Canva

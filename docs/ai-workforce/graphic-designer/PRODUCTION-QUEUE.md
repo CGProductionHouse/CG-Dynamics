@@ -1,5 +1,21 @@
 # Graphic designer production queue
 
+Current25November delivery override: Cape four amendments and PSG three R11
+January drafts have now been delivered to CG Picasso Approvals; see their current
+client READMEs. Earlier holds below are historical. No media replay without new
+feedback. Separate review heading/tag message and short client/bullet summary were
+Delivered12:26–12:27SAST, with actual Amonique Fourie and Ger-Marie mentions.
+Owner's standing rule: use that concise separate review note after every batch;
+keep artwork captions unsigned. Preserve the user's internal WhatsApp/Canva tabs.
+
+Next selected client: [Bloem Marble & Granite](bloem-marble-january-2027/README.md),
+confirmed4DP/2videos, videos remain Nolan's lane. Discovery only: existing73-page
+master read only, Gotham/Inter observed, complete kit/reviewed pack unresolved.
+Four apparent new originals excluded after actual queued-project review despite
+negative exact-image matching; 114 small workshop previews retained. Actual
+social/approval coverage, staff-month allocation and fresh briefs remain open.
+No new poster/send or January date invented; no new-system runtime qualification.
+
 Current25November: owner prioritised official shared PICASSO standards inside
 Dynamics for every model, human designers and still/motion work. Same #948/#956
 lane, reconciled with main b524a9f9. Implemented format-aware 27-item evidence

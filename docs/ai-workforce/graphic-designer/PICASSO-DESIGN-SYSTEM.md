@@ -209,6 +209,13 @@ photos/videos and client galleries require separate explicit authority. Approved
 finals only go to the established month client-portal folder; drafts/working assets
 remain internal. Do not add paid APIs, expose private folders or deploy a new app.
 
+After sharing, send a separate short review request tagging the actual Amonique
+Fourie and Ger-Marie WhatsApp members. Use a pleasant client/month heading and
+brief bullets: what changed and what needs their review. Keep the poster captions
+unsigned and directly forwardable. Retain the note's delivery receipt; a follow-up
+note never requires replaying the posters. This is an internal review request,
+not evidence of approval or authority to publish.
+
 ## Rollout truth
 
 Source implementation is on the existing #948/#956 lane. The base brand tables
