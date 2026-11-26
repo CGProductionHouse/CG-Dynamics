@@ -1,4 +1,25 @@
-## 26 November — Bloem R10 proof, new kit and current-history repair
+## 26 November continuation — consolidated Bloem brand evidence; R10 preserved
+
+Same #948/#956 lane. Added compact Bloem brand-pack.discovery.json and current
+production-queue override. Two experimental on-stone headline compositions failed
+visual review (logo clarity/dead space); cancelled, no save/send. Fresh native read
+proves all four saved page records/notes exactly equal R10 baseline; read-only
+verification transaction cancelled too. Actual source-photo/stone/return rasters
+are2160x2700. Existing alternate kitchen/vanity shortlist still repeats represented
+projects; don't re-download/re-test it. Current Picasso chat has no new feedback.
+Current exact-client caption footer is optional; allocated DP02 matches it and
+transport hash check passes. No manufactured mandatory-footer pass.
+
+Private completion-r11-20261126 contains rejected trials and preservation/check
+receipts; it is not a saved R11. Current selector still registered R10. Reviewed
+pack/private source destination/licence-clear-space, staff brief/allocation and
+DP01 project-scope remain unresolved. Human FINAL approval gates release, not the
+request for internal feedback. No live picasso packet/E2E claim, deployment, data
+mutation beyond earlier authorised records, permission change, spend or Nolan edit.
+See Bloem CONTINUATION-2026-11-26.md. Earlier15tests/build remain latest execution;
+this continuation changes safe metadata/docs only. Signed-in tabs preserved.
+
+## Earlier26November — Bloem R10 proof, new kit and current-history repair
 
 Same #948/draft#956 lane/workbench DAHb7sgsbpk, R10 WORKING. DP02's real craft
 photo now has a registered stone foreground/subtle red return, lower tonal layer

@@ -1,5 +1,14 @@
 # Graphic designer production queue
 
+**26November current Bloem override:** saved workbench DAHb7sgsbpk remains
+DP01 R8 / DP02 registered R10 / DP03 R9 / DP04 R4. New company Brand Kit
+kAHcBLOyMwQ and compact discovery pack are recorded, not a reviewed Dynamics pack.
+Two weaker composition trials cancelled; exact four-page/notes preservation proved.
+No new send. Source scope/pack/brief-allocation and final runtime qualification
+remain explicit; see Bloem CONTINUATION-2026-11-26.md. The old R3 delivery below
+is historical, not the current artwork or a replay instruction. Keep all private
+current selectors; no duplicate workbench/branch or source hydration.
+
 Current25November delivery override: Cape four amendments and PSG three R11
 January drafts have now been delivered to CG Picasso Approvals; see their current
 client READMEs. Earlier holds below are historical. No media replay without new

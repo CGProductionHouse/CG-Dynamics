@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "client": {
+    "clientId": "89e0ad6d-e08c-4a75-8b8e-abea71af581c",
+    "name": "Bloem Marble & Granite"
+  },
+  "authority": {
+    "identity": "CG Dynamics exact-client context",
+    "files": "OneDrive",
+    "approvedFinals": "CG Dynamics Client Portal Library",
+    "discoveryOnly": ["Canva Brand Kit", "Canva approved design references"]
+  },
+  "assets": {
+    "oneDriveRoot": {"provider": "OneDrive", "path": "Clients/Bloem Marble/", "access": "read-only"},
+    "logos": [{
+      "provider": "OneDrive",
+      "path": "Clients/Bloem Marble/Brand Identity/Logo/Bloem Marble Marketing.png",
+      "itemId": "A2AC9FE4B255F52F!s069bba2acea7423e8998c3780ad21aba",
+      "access": "read-only",
+      "role": "Exact primary original;3024x704;SHA25643c4cd0ff25d58334c234ca81ba481511721985ab996f9dde3817596ce60c0e5. Saved to company Canva Kit kAHcBLOyMwQ. No white plate or recoloured variant inferred.",
+      "format": "PNG"
+    }],
+    "photography": {"provider": "OneDrive", "path": "Clients/Bloem Marble/Photos/", "itemId": "A2AC9FE4B255F52F!sed9fcdb3e08145b49ced48c7f5639517", "access": "read-only"},
+    "graphicDesign": {"provider": "OneDrive", "path": "Clients/Bloem Marble/Graphic Design/", "access": "read-only"}
+  },
+  "typography": [
+    {"role": "Title and headline", "family": "Gotham", "style": "Bold selected in saved Kit; native reference YAFcfr0ZwUA,0", "availability": "canva-only", "source": "Actual company Canva master DAHLTyYy75o and saved Kit kAHcBLOyMwQ,26November2026. Native style and glyphs inspected; portable font licence not verified.", "fallback": null},
+    {"role": "Supporting copy", "family": "Inter", "style": "Medium selected in saved Kit; document-specific native weights retained", "availability": "canva-only", "source": "Actual company Canva font-style picker and saved Kit kAHcBLOyMwQ,26November2026. Picker exposes generic Bold after Medium selection; do not infer a portable file weight from that toggle.", "fallback": null}
+  ],
+  "colours": [
+    {"name": "Brand red", "value": "#E51B24", "source": "Exact native master colour and saved Kit kAHcBLOyMwQ. Use for selective emphasis and purposeful accents; avoid making all compositions the same red panel."},
+    {"name": "Black", "value": "#000000", "source": "Exact native master colour and saved Kit kAHcBLOyMwQ. Type, contrast and selective depth; the owner rejects an all-dark campaign."},
+    {"name": "White", "value": "#FFFFFF", "source": "Exact native master colour and saved Kit kAHcBLOyMwQ. Type and contrast where appropriate; not a flat document-style substitute for premium composition."}
+  ],
+  "creativeRules": [
+    "DISCOVERY ONLY. This metadata file is not a reviewed production design_pack or final approval.",
+    "Premium, architectural and warm; meaningful distinct propositions for homeowners, contractors and architects. No unverified trade programme or superiority claims.",
+    "Each poster needs a deliberate grid, alignment relationship and reading path. Vary headline, logo and CTA position across the batch; movement must serve the composition.",
+    "Use real source material, independently editable photographic planes/masks, compact typography and restrained red emphasis. Exact photo colour, veining, edges and proportions remain product truth.",
+    "Integrate gradients, texture and realistic shadows with the source light and actual surface. No arbitrary circles, hard duplicate text shadows, random white logo plates or repeated generic footers.",
+    "Important type/logo frames use64px at1080px as the current review starting point. Inspect visible mark padding, clear-space and actual edges; this is not an approved universal print-bleed rule.",
+    "Finish source exposure, white balance, detail and noise conservatively; preserve actual skin and stone. No generative reconstruction of client media, reshaping or clipped-JPEG recovery claims.",
+    "Read actual local-brand social art, approval messages and stable-ID current master previews. Exact-photo, near-image, same project/shoot/person and concept checks are separate. No biometric identities.",
+    "DP01 R8 uses an exact frame not detected in bounded checks but from an already represented kitchen at live master18; hold its source choice pending the existing owner clarification.",
+    "All tested alternative November kitchen/vanity sources are represented in current queue projects. Do not relabel a different camera angle as fresh content.",
+    "Preserve Drafts/Posted/Scheduled and staff work. Current owned four-page workbench DAHb7sgsbpk only; no official master insertion without the exact approved operation.",
+    "Allocated captions add useful context rather than repeat the artwork, use the current exact-client contact packet, maximum5 relevant hashtags and no agent signatures.",
+    "Motion should retain this identity and source truth, with intentional readable timing and independently editable layers. Nolan retains film ownership; no still-only restriction or unverified motion proof."
+  ],
+  "approvedClaims": [
+    "Exact-client ready Dynamics guide supports custom stone fabrication/installations, kitchen worktops and bathroom vanities. A listed material category does not establish stock, price, performance, capacity or lead time.",
+    "Use current caption-context contacts before any delivery; do not treat static metadata as a permanent freshness guarantee."
+  ],
+  "referenceDesigns": [
+    {"provider": "Canva", "path": "Brand Kit BLOEM MARBLE & GRANITE kAHcBLOyMwQ; company Team; saved26November2026", "access": "discovery-only"},
+    {"provider": "Canva", "path": "Official73-page master; stable read-only capture revision1795695109; queued and Posted/Scheduled references require separate status checks", "designId": "DAHLTyYy75o", "access": "read-only"},
+    {"provider": "CG Dynamics", "path": "Ready exact-client guide ca8e7042-2fc9-4670-9d75-a3fce3a373f2 v1; current get_client_context26November2026", "access": "read-only"},
+    {"provider": "CG Dynamics", "path": "Recorded owner direction ffbb4016-ea90-43f0-a788-f8356e866c42; unreviewed append-only update", "access": "read-only"}
+  ],
+  "limitations": [
+    "Does not satisfy the reviewed DesignBrandPack contract: no manager review, versioned private OneDrive pack source or complete font licence/clear-space approval yet.",
+    "New Canva Kit ID is verified, not an inferred BGG kit. Earlier BGG/Bloem assumptions are superseded; the unrelated BGG logo must not be used.",
+    "Local reference manifest binds73preview hashes and stable IDs to the observed master revision; it does not authenticate Canva externally. Old index-only cache mappings are superseded.",
+    "Bounded exact-source negatives do not establish global non-use, project freshness or human creative approval. No alternate selected photo has yet cleared the required broader-project check.",
+    "January staff strategy draftv2, working owner pivot and actual schedule remain separate. No dates, deliverable IDs or approvals are invented.",
+    "Existing live image_edit context is ready for client-guide use but returns no deployed picasso packet. Normal company ChatGPT current-pack-to-final-review E2E remains unverified.",
+    "Private archive was not uploaded to the candidate anonymous-edit OneDrive storage. No permissions were changed. No private source, font file or signed URL is committed here."
+  ]
+}

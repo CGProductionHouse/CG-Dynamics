@@ -1,5 +1,12 @@
 # Bloem Marble & Granite — January 2027 working proofs
 
+Latest continuation: [brand evidence and rejected composition trials](CONTINUATION-2026-11-26.md).
+Compact [brand discovery pack](brand-pack.discovery.json) now records actual Kit,
+logo, families, palette and owner rules. It remains unreviewed. Both on-stone
+headline trials were discarded; fresh readback proves saved R10 and all siblings/
+notes remain exact. Current optional caption footer and transport rechecked. No
+new HD revision/send; use the registered R10 final below, never a trial preview.
+
 ## Latest26November — R10 and current reference repair
 
 Read [R10 proof and history repair](R10-PROOF-AND-HISTORY-REPAIR-2026-11-26.md)
