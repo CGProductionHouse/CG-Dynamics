@@ -1,5 +1,15 @@
 # Bloem Marble & Granite — January 2027 working proofs
 
+## Latest26November — R10 and current reference repair
+
+Read [R10 proof and history repair](R10-PROOF-AND-HISTORY-REPAIR-2026-11-26.md)
+before the dated checkpoints below. DP02 is now registered R10; DP01 R8, DP03 R9
+and DP04 R4 remain exact. New real company Canva Kit **kAHcBLOyMwQ** saves the
+original logo, palette and available typography. It is discovery, not reviewed
+Dynamics pack/runtime acceptance. Old index-only73-page mappings were stale;
+fresh stable-ID/revision/hash capture supersedes their current-clearance claims.
+No new batch send; final R10 HD hash39afbabee8fe60cf72e73857116baeac59a94011601d2a9b23ea070f2b4b7a5c.
+
 ## 26 November — owner-directed composition revisions saved and HD checked
 
 Same four-page workbench **DAHb7sgsbpk**, now titled

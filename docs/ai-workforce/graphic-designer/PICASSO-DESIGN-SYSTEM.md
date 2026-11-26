@@ -26,6 +26,13 @@ private photography engine. It does not prescribe one visual style for every cli
    revisions, serially, with allocated unsigned captions and delivery readback.
    Human approval and publication permissions are separate from this checklist.
 
+Current reuse evidence must identify the actual design revision and stable page
+IDs, not just numbered cached thumbnails. Bind retained preview bytes in the
+source-history manifest and record its limits. Local hash validation does not
+authenticate the remote service or clear broader project/person/concept reuse.
+Native cutout registration also requires actual export inspection: shared element
+bounds can conceal different inherited image crop/zoom transforms.
+
 ## One maintained authority
 
 | Information | Authority |

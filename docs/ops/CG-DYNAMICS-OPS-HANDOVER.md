@@ -1,4 +1,33 @@
-## 26 November — Bloem composition revisions saved; no new batch send
+## 26 November — Bloem R10 proof, new kit and current-history repair
+
+Same #948/draft#956 lane/workbench DAHb7sgsbpk, R10 WORKING. DP02's real craft
+photo now has a registered stone foreground/subtle red return, lower tonal layer
+and larger live SHAPE. Actual2160x2700 Canva High2x inspected after correcting an
+inherited image zoom that duplicated an edge. Final hash
+39afbabee8fe60cf72e73857116baeac59a94011601d2a9b23ea070f2b4b7a5c;
+first R10 export is superseded. DP01 R8/DP03 R9/DP04 R4/all captions unchanged.
+Company Canva Kit BLOEM MARBLE & GRANITE kAHcBLOyMwQ created/saved/read back:
+exact OneDrive logo, red/black/white, Gotham Title/Heading and Inter Body. No
+new access recipients or spend. This is discovery, not reviewed Dynamics pack.
+
+Old numbered master cache had wrong page identity despite equal73count. Fresh
+read-only master capture binds stable IDs/revision1795695109/local file hashes;
+capture transaction cancelled, no master content/page/sharing edit. Remote
+thumbnail re-fetch bytes varied on page40; no deterministic or external signature
+claim. Helper now fails on stale/mismatched/incomplete manifests and marks legacy
+mode exploratory.15tests pass; actual73preview scan0errors.9434positively reused
+at live15/excluded;199A2341/5635negative exact-frame scan is not clearance.5635same
+kitchen project at live18; owner scope clarification still pending.
+
+No new media send, full-set replay, strategy/date allocation, production release,
+SQL/schema, dependency or Nolan change. Reviewed pack/brief/source/human gates
+remain open. Private selector completion-r10-20261126; full detail in Bloem
+R10-PROOF-AND-HISTORY-REPAIR-2026-11-26.md. Build/diff checks passed. Keep the
+signed-in tabs. Native64px check passes17texts/four logos/zero findings. Recorded
+unreviewed exact-client Dynamics updateffbb4016-ea90-43f0-a788-f8356e866c42.
+Control Centre exact target still ungrounded; do not guess writes.
+
+## Earlier26November — Bloem composition revisions saved; no new batch send
 
 Same #948/draft#956 branch/workbench DAHb7sgsbpk, now DISTINCT COMPOSITIONS / R9
 WORKING. Owner explicitly rejects repeated heading locations and wants deliberate

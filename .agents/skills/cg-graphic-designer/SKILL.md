@@ -73,6 +73,18 @@ refinement. Both were removed: preserve the full head below the header and use a
 registered straight-edged stone cap instead. A technically source-preserving mask
 can still look poor. Keep decorative source-edge fragments clear of actual hands.
 
+26 November correction: identical outer bounds do not establish registered image
+pixels. A native rectangle retained hidden crop/zoom after replacement; the HD
+export showed a duplicated stone edge. Rebuild the base with an explicit native
+imageBox matching the foreground, inspect the actual2x export, and invalidate the
+misregistered artifact. Preserve the real source RGB inside any alpha plane.
+Source-history evidence must bind fresh design revision, stable page IDs and local
+preview hashes. An old folder named page-034 is not current page34 merely because
+its page count matches. Use the manifest mode of `source-history-audit.py` and
+review project/shoot/concept recurrence separately. Thumbnail matching cannot
+certify a person or photograph unused. A newly saved Canva Brand Kit is discovery,
+not a reviewed Dynamics pack, licence portability or production approval.
+
 Browser recovery25November: removal of the old browser tool namespace did not
 remove the supported installed browser runtime. The bundled browser client's
 `setupBrowserRuntime()` returns an agent usable from the available Node REPL;

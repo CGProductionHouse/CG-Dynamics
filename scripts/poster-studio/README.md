@@ -84,6 +84,22 @@ node scripts/poster-studio/canva-native-package.mjs <private-native-scene.json> 
 
 The history matcher records every preview hash and decode error. Its controlled test places a resized source inside a poster and checks that an unrelated texture is rejected. Small, heavily overlaid, edited, same-shoot or missing historical content still needs visual/history review; do not promote a candidate automatically from this report.
 
+For current master evidence, pass `--manifest <capture.json> --expected-design
+<fresh-design-id> --expected-updated-at <fresh-integer-revision>` together. Obtain
+the authority and stable page IDs through a fresh authorised read-only Canva
+transaction; close it without edits. The manifest requires `designId`,
+`designUpdatedAt`, timezone-aware `observedAt`, `captureMode` set to
+`read-only-transaction`, its `readOnlyTransactionId`, complete `pageCount`, and
+`pages` entries containing `page`, `pageId`, direct-child `file` and `sha256`.
+The checker rejects observations older than24 hours, future dates, wrong revisions,
+duplicate IDs, missing/extra images, path escapes and changed bytes. This validates
+local bindings, not remote cryptographic authenticity. Index-only folders remain
+`legacy-unbound` exploratory evidence: an equal count does not prove page identity.
+On26November the old73-page Bloem cache disagreed with the actual current master;
+stable-ID recapture corrected the mapping. A repeated thumbnail fetch can change
+bytes; retain the exact capture hash rather than claiming remote determinism.
+Run `python -m unittest discover -s scripts/poster-studio -p test_source_history_manifest.py -v`.
+
 For verified parent-brand use of a subsidiary photograph, add `--brand-pack <trusted-brand-pack-index.json>` to the ledger check. Exact-client `sourceScopeRules` permit only the reviewed parent scope; candidates cannot self-authorise mixing sibling kits. Unknown people/branches remain unresolved, and headline matching uses the actual headline. The real pilot exercises source hashes, pHash and EXIF capture/sequence against 12 candidates and a known human-history source; it retains repetition warnings rather than auto-approving the month.
 
 The matcher now caps OpenCV worker threads at two unless already lower. The uncapped real multi-source pass consumed roughly 9 GB; bounded follow-ups preserved matching settings and completed with much lower observed memory. This is not a 6,000-photo throughput benchmark. Run one feature audit at a time on the MSI and keep receipts for rejected matches and resource limits.
