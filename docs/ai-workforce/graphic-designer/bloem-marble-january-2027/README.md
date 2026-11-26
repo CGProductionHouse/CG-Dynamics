@@ -1,5 +1,18 @@
 # Bloem Marble & Granite — January 2027 working proofs
 
+## Current26November15:11 — four current HD posters delivered
+
+Owner explicitly requested finished posters sent to Picasso WhatsApp. The current
+four-page DAHb7sgsbpk is now R12 INTERNAL REVIEW; DP02 optical spacing tightened,
+other art/captions preserved. Four genuine2160x2700 Canva exports inspected, then
+four2048x2560 HD photo+unsigned-caption messages read back **Delivered**15:08–15:10.
+Separate review note Sent15:11, edited in place for verified Amonique/Ger-Marie
+mentions. [Exact files, hashes, IDs and limits](DELIVERY-2026-11-26.md).
+Private selector now `delivery-20261126/`. This bounded owner-directed legacy
+internal delivery is not a reviewed-pack/runtime pass, source-project approval or
+client release. No formal HOLD relabelled green. Await exact-version feedback;
+do not duplicate or forward to Graphic Design Approvals before approvals/order.
+
 Latest continuation: [brand evidence and rejected composition trials](CONTINUATION-2026-11-26.md).
 Compact [brand discovery pack](brand-pack.discovery.json) now records actual Kit,
 logo, families, palette and owner rules. It remains unreviewed. Both on-stone

@@ -108,6 +108,17 @@ For WhatsApp mentions, a typed name is insufficient: the actual `@` key opened
 participant suggestions; select the named participant and verify its mention
 entity. Caption text must remain unsigned and separate from the tagged review note.
 
+26 November delivery: compose all prose before inserting mentions. Rewriting the
+textbox with `typeText` after selecting names reduced the mentions to plain text.
+The same note was edited in place: Playwright `fill` replaced the existing edit
+textbox correctly, then real `@` keystrokes and participant selections were the
+last content actions. Saved readback showed actual named mention buttons. Verify
+those entities, not just visible @strings. Refresh the DOM after closing a dialog;
+an old AX index must not be reused as though the edit dialog were still open.
+Use the current supported `cua_repl` for all UI interaction; the older Node-runtime
+recovery paragraph above is historical, not permission to start an alternate UI
+automation path. Browser-only export/upload is distinct from desktop takeover.
+
 Recent-post evidence means the actual artwork on the exact local brand's page,
 with observed dates and locators. Canva Posted/Scheduled labels, report captions
 and national/sibling feeds are not equivalent. On18November PSG's exact page

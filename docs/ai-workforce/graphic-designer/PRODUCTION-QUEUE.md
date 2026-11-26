@@ -1,5 +1,14 @@
 # Graphic designer production queue
 
+**26November15:11 Bloem delivery override:** owner explicitly requested the final
+current review set. Four HD photo+allocated unsigned-caption messages in exact
+CG Picasso Approvals, verified Nolan sender,15:08–15:10: all **Delivered**. Separate
+review note Sent15:11 with verified Amonique/Ger-Marie mentions, edited in place.
+DAHb7sgsbpk R12 INTERNAL REVIEW, exact files/IDs in Bloem DELIVERY-2026-11-26.md.
+No duplicate resend. Prior holds below remain formal qualification history, not
+newly cleared; no client/public release, final portal upload or forwarding without
+all approvals and authoritative schedule. Private current selector updated.
+
 **26November current Bloem override:** saved workbench DAHb7sgsbpk remains
 DP01 R8 / DP02 registered R10 / DP03 R9 / DP04 R4. New company Brand Kit
 kAHcBLOyMwQ and compact discovery pack are recorded, not a reviewed Dynamics pack.

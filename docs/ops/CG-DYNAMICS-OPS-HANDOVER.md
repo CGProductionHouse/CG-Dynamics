@@ -1,4 +1,29 @@
-## 26 November continuation — consolidated Bloem brand evidence; R10 preserved
+## 26 November15:11 — owner-requested Bloem current review set delivered
+
+Same #948/#956 lane. DAHb7sgsbpk now R12 INTERNAL REVIEW. DP02 SHAPE up22px for
+compact leading; other artwork/allocated captions intact. Four genuine2160x2700
+Canva High2x PNGs inspected and metadata-cleaned without new decoded-pixel change.
+Native64px check passes17texts/four logos/zero findings. Four2048x2560 HD image+
+unsigned-caption messages sent serially from verified Nolan account to exact CG
+Picasso Approvals15:08–15:10, all read back Delivered: DP01 3EB074EF6EC57E159F95F7;
+DP02 3EB0EA9E984CA5B789217A; DP03 3EB02BFED4FDC4206A69EE;
+DP04 3EB06CA1EC97710B611BAF. Review note3EB0CE5B31F8F9F8153178 Sent15:11,
+edited in place; actual Amonique/Ger-Marie mention buttons verified, no duplicate.
+
+Owner's renewed explicit send request governs this bounded legacy INTERNAL review
+delivery. Formal pack/runtime holds were not converted to passes; no source-project
+acceptance or final/client approval claimed. Note discloses DP01 previously featured
+kitchen detail and DP03 abstract illustration. Await feedback on exact delivered
+versions; do not replay or forward to Graphic Design Approvals until approvals and
+authoritative order. No portal-final promotion, schedule/date invention or publish.
+Current private selector delivery-20261126; actual receipts and full details in
+Bloem DELIVERY-2026-11-26.md. Dynamics unreviewed exact-client record
+e9f6bb7e-5b8a-4f88-ab57-089a48e7d0c0. R0, no deployment/SQL/schema/dependency or
+Nolan film change. Signed-in tabs retained; no desktop takeover. Control Centre
+exact target still ungrounded, no guessed write. Shared skill records actual
+mention-preservation repair and current CUA-only UI path.
+
+## Earlier26November continuation — consolidated Bloem brand evidence; R10 preserved
 
 Same #948/#956 lane. Added compact Bloem brand-pack.discovery.json and current
 production-queue override. Two experimental on-stone headline compositions failed
