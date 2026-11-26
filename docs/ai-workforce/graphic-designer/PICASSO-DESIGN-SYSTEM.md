@@ -91,6 +91,15 @@ Keep exact brand grammar. A logo plate, empty footer, diagonal card or a few ext
 layers is not a substitute for art direction. Restraint may be correct for one
 brand; rich graphics may be correct for another. Avoid generic corporate/filler copy.
 
+Before assembly, name each poster's headline region and reading order, grid or
+alignment anchor, primary-logo anchor, photo/depth mechanism and CTA relationship.
+Review those choices against the adjacent actual posters, not in isolation.
+26 November owner feedback explicitly rejects repeatedly putting headings in the
+same place. Do not use the same upper-left header and corner logo throughout a
+batch. Deliberately vary the visual hierarchy while retaining coherent brand
+grammar; arbitrary movement or a numerical quadrant target is not good composition.
+The final export must demonstrate the stated relationships and clear reading.
+
 Depth must be convincing: purposeful silhouettes, foreground/background interaction,
 contact shadows, light, texture, graphics and gradients. Do not put decorations
 through important text or faces. Real subject/type overlap can work when registered

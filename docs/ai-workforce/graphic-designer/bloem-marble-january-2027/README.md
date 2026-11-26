@@ -1,6 +1,57 @@
 # Bloem Marble & Granite — January 2027 working proofs
 
-## Current continuation — DP01 R8 saved; source-scope answer pending
+## 26 November — owner-directed composition revisions saved and HD checked
+
+Same four-page workbench **DAHb7sgsbpk**, now titled
+**BLOEM MARBLE | JAN 2027 | DISTINCT COMPOSITIONS | R9 WORKING**. No duplicate file,
+official-master merge, page operation or external send. The owner rejects repeated
+headline positions and asks for deliberate logo/text grids, not random movement.
+
+| Item | Reading path / alignment | Current saved state |
+| --- | --- | --- |
+| DP01 | Right-middle type; upper-left logo aligned to real stone corner | R8 unchanged; source-project clarification pending |
+| DP02 | Full real craft photo; lower-left three-line headline; logo/service column on photographed light stone | R9; nine independent native elements/four live texts |
+| DP03 | Headline/kicker share right edge1002; lower-left logo and opposing right-aligned CTA; sculpture below type | R9; nine independent native elements/five live texts |
+| DP04 | Existing upper-left sample-study hierarchy and upper-right mark | R4 preserved exactly; positive owner reaction, not publication approval |
+
+DP02 keeps original199A2341 geometry/face/hands and source texture. The crop is
+proportional; independent lower tonal control supports compact type. Subtle broad
+local face light preserves texture, glasses and features, with zero newly clipped
+channels. No human mask/reconstruction or invented stone/product. DP03 retains
+its separately editable abstract illustration, not a real installation claim.
+All four allocated unsigned captions remain exact. Saved native readback confirms
+DP01/DP04 byte-equivalent page records. Reviewed64px native-frame check passes
+17texts/four logos/zero findings; it does not judge taste or visible ink.
+
+Genuine Canva PNG High2x exports of only changed pages2–3 are2160x2700. Actual HD
+and adjacent grid inspected. Metadata-clean derivatives preserve decoded pixels;
+untagged Canva exports do not establish an sRGB certificate. DP02 hash
+`6a1d97945b7fdb7de5f294e10b21c48033be4704d221224b183a328c1a14abd6`;
+DP03 hash `2cfca689597ffa823e674839c9c90aa9c155f012573781c10dd7d94633b07166`.
+Private current evidence: `discovery-20261125/composition-r9-20261126/`.
+
+Current actual Facebook artwork inspected26November in company Chrome: Willows
+Rustenburg20mm, UFS Eezi Quartz Iceberg20mm, Welkom Rustenburg Leader20mm and the
+bar/entertainment post. Bounded screenshots/text retained; these are not new
+physical-stock guarantees or exhaustive gallery clearance. Earlier73master and
+138actualsocial source checks remain separate. No new source introduced here.
+
+Fresh January brief still returns canonical draft65c76b5b-f323-4c4e-b4d3-bc0d40618dfb
+version2. Owner's subsequent creative pivot is recorded separately; do not rewrite
+the staff draft, allocate dates or count these working concepts as accepted slots.
+Reviewed pack/runtime qualification, source scope and human approval remain open.
+Current review files stay held; do not send old R6/R7 exports or replay DP04.
+The actual DP02 structured review was exercised against an explicitly legacy-only
+packet, not a made-up reviewed pack. Eighteen component declarations pass, four
+remain held and five are not applicable. The final validator correctly stays
+**HOLD** with11reported qualification/binding/check problems. This is not a green
+batch or live-ChatGPT certificate. Both unchanged caption transport checks pass.
+Append-only Dynamics records ebd71534-9493-460f-a6ab-33a68cc9b681 and corrective
+scope record5fda4a38-c9e1-42ec-8210-8dd8ed0af822 are unreviewed. The latter excludes
+an unrelated operational sentence from client-guide incorporation; no guide rewrite.
+R0; no deployment, SQL/schema, new dependency, hosting or Nolan change.
+
+## Earlier continuation — DP01 R8 saved; source-scope answer pending
 
 DP01 now **SEE IT / IN YOUR / LIGHT** in the same DAHb7sgsbpk, with genuine
 installed-stone photograph0L8A5635, conservative colour preparation, proportional

@@ -1,5 +1,9 @@
 # Cape Lumber — January 2027 working production
 
+26 November readback: the25November22:02 DP03 photo and22:03 separate review note
+both now display **Delivered** in the retained CG Picasso Approvals conversation.
+No new feedback was visible at observation. No resend; delivery is not approval.
+
 ## 25 November22:03 — DP03 logo correction saved, HD sent
 
 Ger-Marie16:25 requests the floating logo either above a larger heading or in the

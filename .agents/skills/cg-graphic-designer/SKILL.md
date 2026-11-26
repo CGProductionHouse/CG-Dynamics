@@ -105,9 +105,17 @@ earlier navy/cyan-only interpretation. Save bounded visual evidence and coverage
 limits; do not copy its photos, headlines or corner mechanisms into every draft.
 25 November capability refresh: native `edit_design` now actually supports
 `replace_text`, `format_text`, `update_fill`, `position_element`,
-`resize_element` and `delete_element`. Supply **page_index** and **locator_id**;
+`resize_element` and `delete_element`. The 26 November schema uses **page_index**
+at the call's top level and **locator_id** inside each operation; per-operation
+page_index is rejected before application. Read current results rather than
+copying an old call shape.
 `format_text` uses `formatting: {color, font_size}` and photo replacement uses
 `update_fill` with `asset_id`, `asset_type: "image"`, and `alt_text`.
+Right alignment was proven with `formatting: {text_align: "end"}`. For text-box
+width changes, `resize_element` with **width only** works. Supplying height too
+returned an individual vertical-resize failure even though the overall response
+was `edits_unverified` and other operations applied. Inspect every operation
+result and actual preview: initial R9 text overflow was corrected before save.
 Every applied operation remains unverified until its actual returned preview and
 native document are inspected. Keep the transaction open for corrections, then
 commit once; saved readback must prove the intended diff. Cape and PSG production
@@ -204,6 +212,15 @@ from native-element/margin checks. Keep brand consistency without repeating one
 page skeleton. Amend a supported existing draft in place where possible, verify
 the exact native diff, and preserve earlier versions/receipts rather than creating
 another Canva copy for a two-layer correction.
+
+26 November composition feedback requires an explicit per-item placement matrix,
+not just different headlines or source files. Bloem DP02 changed from a top-header
+card to a full real craft photograph with lower-left stacked type and logo/service
+column on the existing light stone field. DP03 changed to a shared right-edge
+headline/kicker, lower-left mark and opposing CTA. Actual High2x exports and the
+adjacent grid were inspected; DP01/positively received DP04 stayed exact. This is
+an observed implementation, not a universal photo-on-stone logo template or human
+approval. Keep source, runtime and strategy/allocation gates explicit.
 
 Owner rejection invalidates a candidate's creative/send readiness even when its
 tests, source audit, margins and HD export pass. Record the rejection in the current

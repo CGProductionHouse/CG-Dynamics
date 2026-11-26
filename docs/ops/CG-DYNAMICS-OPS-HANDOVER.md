@@ -1,3 +1,36 @@
+## 26 November — Bloem composition revisions saved; no new batch send
+
+Same #948/draft#956 branch/workbench DAHb7sgsbpk, now DISTINCT COMPOSITIONS / R9
+WORKING. Owner explicitly rejects repeated heading locations and wants deliberate
+logo/type grids. DP02 is now full original craft photo with lower-left stacked
+headline and logo/service column on the photographed light stone. DP03 has a
+right-aligned heading/kicker, lower-left logo and opposite CTA. Exact fonts/logos,
+independent layers and all unsigned captions retained. DP01 R8/DP04 R4 page records
+unchanged. Both changed pages have nine native elements; no new Canva file/pages.
+
+Actual Canva High2x2160x2700 exports inspected, clean derivatives pixel-identical;
+no ICC certificate. Hashes: DP02
+6a1d97945b7fdb7de5f294e10b21c48033be4704d221224b183a328c1a14abd6;
+DP03 2cfca689597ffa823e674839c9c90aa9c155f012573781c10dd7d94633b07166.
+64px frame check PASS17texts/four logos/0findings; actual adjacent grid inspected.
+Current private selector/evidence under Bloem discovery/composition-r9-20261126.
+Current company-Facebook project/bar art observed and retained26November. Fresh
+January brief still draft65c76b5b-f323-4c4e-b4d3-bc0d40618dfb v2; no staff strategy
+rewrite or dated allocation. Source-scope/reviewed pack/runtime/human gates remain
+open; no R9 WhatsApp send or master merge. Shared system/skill now explicitly
+require placement relationships, not a repeated upper-left header/corner logo.
+Exact-client unreviewed Dynamics records ebd71534-9493-460f-a6ab-33a68cc9b681 and
+scope correction5fda4a38-c9e1-42ec-8210-8dd8ed0af822 retained. DP02's actual
+structured component review stays HOLD:18component declarations pass/4hold/5NA,
+11qualification/binding/check problems; no fabricated reviewed pack. Both caption
+transport checks pass. These are component proofs, not a qualified new send.
+
+Cape's prior media/note both now read back **Delivered** in Picasso Approvals;
+no new feedback visible at observation and neither message resent. Company Chrome
+WhatsApp is owned by another chat; retained signed-in internal approvals tab used
+without interfering. No desktop takeover, deployment, SQL, new dependency/spend or
+Nolan changes. Control Centre exact target remains ungrounded; no guessed write.
+
 ## 25 November22:04 — Cape DP03 logo amendment sent; Bloem source scope pending
 
 Same #948/draft#956 lane. Cape's existing master28 DP03 logo now bottom-left
