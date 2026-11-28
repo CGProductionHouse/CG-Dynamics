@@ -27,6 +27,16 @@ listed migrations that have since been applied).
   Microsoft, provider keys) belongs in an Edge Function.
 - Never expose, log, commit or return secrets.
 
+## Prepared, not applied — PICASSO pack extension (25 November)
+
+`20261125073157_picasso_design_pack.sql` adds nullable structured `design_pack`
+metadata to the existing staff-only `client_brand_profiles`, with exact-client
+constraint and unchanged RLS/grants. No seed/backfill or new table. Qualified in
+an isolated network-disabled PostgreSQL fixture; production application and actual
+multi-role/runtime acceptance require their own approval. See
+`docs/ai-workforce/graphic-designer/PICASSO-SYSTEM-ACCEPTANCE-2026-11-25.md`.
+Do **not** replay the already-applied base brand migration below.
+
 ## Recently applied
 
 - `20261111064719_client_brand_profiles_and_rules.sql` — staff-only client brand

@@ -1,0 +1,247 @@
+{
+  "schemaVersion": 1,
+  "client": {
+    "id": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
+    "name": "Piek Group"
+  },
+  "observedAt": "2026-11-05",
+  "status": "native-canva-candidates-saved-release-gates-open",
+  "currentEvidence": "production-evidence-2026-11-06.json",
+  "sourceScopeRules": [
+    {
+      "clientId": "ed7aa1ae-de21-4151-a8f9-54796b234c1f",
+      "parentScope": "PIEK_GROUP",
+      "allowedSourceScopes": ["PIEK_GROUP", "ENGEN", "SASOL", "GET_TOGETHER", "COLLEGE_BREW"],
+      "evidenceUrl": "https://www.piekgroup.co.za/brands",
+      "meaning": "Umbrella-only real subsidiary/partner photography, grounded in the current exact-client guide and owner-confirmed live site. Does not authorise sibling-brand logos, false branch attribution or a generic merged kit."
+    }
+  ],
+  "ownerWebsiteAuthority": {
+    "confirmedAt": "2026-11-06",
+    "primary": "https://www.piekgroup.co.za/",
+    "hospitality": "https://www.gettogethercs.co.za/",
+    "meaning": "Owner confirms current CG-built website locations/services as accurate authority over conflicting historical captions or guides. Recheck mutable claims near release."
+  },
+  "nativeImportProof": {
+    "observedAt": "2026-11-06",
+    "method": "Private HTML import into actual Canva native compositions, declared exact kit font families, visual specimen checks and API-observable text/image readback",
+    "fontsChecked": ["Lastica", "Barlow", "Horizon", "Inter", "Tall", "Anton"],
+    "fontFamilyReadableOrEditableThroughConnector": false,
+    "proof": "Twelve saved internal candidates; shared CLI creates the verified DP08 replacement with live text and independently bound exact logos.",
+    "limits": "Native visual/structure evidence is not local font-file licensing, editable PSD, final export, human creative approval or normal-company-ChatGPT end-to-end acceptance."
+  },
+  "activeCanvaProduction": {
+    "designId": "DAHaD4mJnGY",
+    "title": "PIEK GROUP OF COMPANIES | ACTIVE FROM 05 NOV 2026 | JAN 2027",
+    "ownerAuthorisedAt": "2026-11-05",
+    "purpose": "active dated continuation with copied reusable assets and unfinished work",
+    "legacyReadOnlyDesignId": "DAGcXGWhDhI",
+    "legacyPurpose": "existing Drafts/Posted/Scheduled exports and anti-repetition history; retain original schedule",
+    "copiedLegacyGuideMeaning": "reference-only; disputed historical claims do not override current verified intelligence"
+  },
+  "canvaBrandKitInspection": {
+    "observedAt": "2026-11-05",
+    "method": "read-only inspection of the signed-in Canva editor Brand panel, followed by direct Canva connector verification",
+    "contentChanged": false,
+    "scope": "exact kit font labels and colour-palette tokens only",
+    "warning": "A Canva font label proves kit configuration, not local font-file availability, licence portability or successful headless rendering."
+  },
+  "canvaConnectorVerification": {
+    "observedAt": "2026-11-05",
+    "companyChatGptPathVerified": true,
+    "brandKitListingVerified": true,
+    "historicalDesignMetadataVerified": true,
+    "selectedReferenceTextReadVerified": true,
+    "designId": "DAGcXGWhDhI",
+    "observedTitle": "PIEK GROUP OF COMPANIES",
+    "observedPageCount": 352,
+    "contentChanged": false,
+    "productionMeaning": "Brand discovery and reference retrieval can run through the authorised Canva connector without routine browser or desktop takeover. This does not yet prove final design creation, editable amendment or export."
+  },
+  "localFontAudit": {
+    "observedAt": "2026-11-05",
+    "locations": ["C:/Windows/Fonts", "C:/Users/chris/AppData/Local/Microsoft/Windows/Fonts"],
+    "searchedLabels": ["Lastica", "Barlow", "Red Hat Display", "Horizon", "HORIZON", "Inter", "Anton", "Univers", "Tall"],
+    "installedMatches": [],
+    "productionImpact": "Local SVG/PSD font rendering remains blocked for missing exact files/licences. Headless native Canva import now provides checked kit typography without installing/substituting those fonts. It does not grant local font portability."
+  },
+  "fontAssetEvidence": {
+    "observedAt": "2026-11-05",
+    "companyOneDriveSearch": true,
+    "verifiedAssets": [
+      {
+        "font": "Anton",
+        "filename": "Anton-Regular.ttf",
+        "licenceFilename": "Anton-OFL.txt",
+        "licence": "SIL Open Font License 1.1",
+        "sourceFolder": "Clients/Ehlrich Park Slaghuis/Video Editing Library/brand/fonts",
+        "availabilityMeaning": "A company-held, explicitly OFL-licensed file exists and may support the Get Together scope after renderer-level font identity and output testing. It is not installed on the MSI and does not clear the other Get Together fonts."
+      }
+    ],
+    "unresolvedFonts": ["Lastica", "Barlow", "Red Hat Display", "Horizon", "HORIZON", "Inter", "Univers", "Tall"]
+  },
+  "oneDrive": {
+    "root": "Clients/Piek Group/",
+    "brandIdentityFolderId": "A2AC9FE4B255F52F!sa43c41ac83074a4284c29f4d6f5ea5ec",
+    "groupLogoFolderId": "A2AC9FE4B255F52F!sc520fb572fbd4a71aef377ab99334820",
+    "graphicDesign2026FolderId": "A2AC9FE4B255F52F!s62aaa9133c4d4e5b9d9268d8cb12dd00",
+    "creativeAssistantFolderId": "A2AC9FE4B255F52F!s4456b0de5bed4279b92968e00fe722a6",
+    "styleReferencesFolderId": "A2AC9FE4B255F52F!s3cfe97f6bb2c44c4b6c0f2d5c1a1a8a1",
+    "historyFolderId": "A2AC9FE4B255F52F!s2a190d6fa299456da024e3f0af9489ba",
+    "connectorReadState": {
+      "observedAt": "2026-11-05",
+      "assetLibraryFolders": ["BLOCKED_DO_NOT_USE", "READY_UNUSED", "USED_REFERENCE"],
+      "assetLibraryFoldersCurrentlyEmpty": true,
+      "historyFolderCurrentlyEmpty": true,
+      "styleReferenceState": "ENGEN contains one index file; PIEK_GROUP, SASOL and GET_TOGETHER are empty",
+      "textFetchBlocker": "The OneDrive connector listed files but returned serviceReadOnly/Database Is Read Only when fetching text content."
+    }
+  },
+  "canvaHistory": {
+    "designId": "DAGcXGWhDhI",
+    "title": "PIEK GROUP OF COMPANIES",
+    "pageCount": 352,
+    "sampledPageInventory": { "from": 329, "to": 352 },
+    "visualAnnotationStatus": "representative-private-headless-sample-complete",
+    "sampleContactSheet": "private-local-only: piek-january-2027/canva-sample/contact-sheet-pages-329-340.jpg",
+    "sampledReferences": [
+      {
+        "page": 329,
+        "pageId": "PBm8Hz18vFXjNm8x",
+        "scope": "SASOL",
+        "publicationState": "unresolved",
+        "observedGrammar": ["white and ice-blue field", "oversized condensed display type", "fuel-nozzle cutouts", "liquid splash depth", "exact Sasol mark positioned independently"]
+      },
+      {
+        "page": 330,
+        "pageId": "PBNcmzFSYTvyrfWj",
+        "scope": "SASOL",
+        "publicationState": "unresolved",
+        "observedGrammar": ["technical fact card", "organic white information panel", "light-blue repeated type texture", "water/splash foreground"]
+      },
+      {
+        "page": 331,
+        "pageId": "PByCr3XLxqhFMfly",
+        "scope": "ENGEN",
+        "publicationState": "unresolved",
+        "observedGrammar": ["hard product cutouts", "oversized product-name typography behind subject", "price block", "blue Engen footer", "layered food props and shadows"]
+      },
+      {
+        "page": 332,
+        "pageId": "PBB4mND8FqsfdsxW",
+        "scope": "GET_TOGETHER",
+        "publicationState": "unresolved",
+        "observedGrammar": ["warm venue photography", "translucent dark overlay", "editorial serif/italic headline", "thin divider rules", "restrained footer identity"]
+      },
+      {
+        "page": 334,
+        "pageId": "PBn0lfhlP533zLxG",
+        "scope": "GET_TOGETHER",
+        "publicationState": "unresolved",
+        "observedGrammar": ["diagonal pastel colour fields", "food cutouts crossing panels", "outlined display headline", "layered fruit/graphic decoration", "clear price hierarchy"]
+      },
+      {
+        "page": 336,
+        "pageId": "PB7nh9pCzjnWMLxM",
+        "scope": "PIEK_GROUP",
+        "publicationState": "unresolved",
+        "observedGrammar": ["deep blue/cyan gradient", "blurred real branch background", "rounded translucent information panel", "geometric narrow display type", "tag-like skill pills"]
+      },
+      {
+        "page": 338,
+        "pageId": "PB1z9Pj52YyFH4p0",
+        "scope": "PIEK_GROUP",
+        "publicationState": "unresolved",
+        "observedGrammar": ["navy and cream split composition", "large geometric sans type", "fine line framework", "food photography integrated into an editorial crop", "signature line-art brand motif"]
+      },
+      {
+        "page": 340,
+        "pageId": "PBGXL0PL4cXqxFW2",
+        "scope": "PIEK_GROUP",
+        "publicationState": "unresolved",
+        "observedGrammar": ["deep navy minimal field", "thin cream border", "large exact product photograph", "fine-line signature motif", "high negative space"]
+      }
+    ],
+    "warning": "A page inventory is not publication proof. Classify approved, scheduled, posted, draft and discarded states before adding ledger history."
+  },
+  "scopes": [
+    {
+      "key": "PIEK_GROUP",
+      "canvaBrandKitId": "kAGn0NB0i8s",
+      "canvaBrandKitName": "Piek Group",
+      "brandKitVerified": true,
+      "exactLogoStatus": "two-raster-variants-hashed-source-selection-pending",
+      "logoCandidates": [
+        {
+          "itemId": "A2AC9FE4B255F52F!sdf0d04eb9fee463e8232f5a6588ae0d7",
+          "filename": "Logo.png",
+          "sha256": "a3d2b6d0aaf893ab6222db19e46b929b0a44cf6995d5ef716d68fa074f4a08ea",
+          "selectionState": "unresolved"
+        },
+        {
+          "itemId": "A2AC9FE4B255F52F!sc4567d197b1c4bce83b651425d0ca735",
+          "filename": "PIEK GROUP OF COMPANIES.png",
+          "sha256": "d78617f6bae802804402c6523661296c14e2ab7b4cdab9c3a05d1183ae02c991",
+          "selectionState": "unresolved"
+        }
+      ],
+      "fontStatus": "exact-canva-kit-labels-verified-local-availability-pending",
+      "fonts": ["Lastica", "Barlow"],
+      "referenceSpecificFonts": [
+        {
+          "font": "Red Hat Display",
+          "page": 336,
+          "usage": "recruitment headline and body",
+          "promotionToCoreKit": false
+        }
+      ],
+      "colourStatus": "exact-canva-kit-values-verified",
+      "colours": ["#FFFFFF", "#25334E"],
+      "productionBlocked": true,
+      "observedVisualGrammar": ["deep navy/cream restraint", "fine linework and borders", "large geometric type", "architectural/translucent panels", "signature line-art motif", "photo-led asymmetry"],
+      "blockers": ["correct logo variant for the selected composition is unresolved", "Canva font labels are verified but local font files/licence and render fidelity are not", "sample publication/approval states unresolved"]
+    },
+    {
+      "key": "ENGEN",
+      "canvaBrandKitId": "kAGn0G7VXUE",
+      "canvaBrandKitName": "Engen",
+      "brandKitVerified": true,
+      "exactLogoStatus": "required-not-yet-hashed",
+      "fontStatus": "exact-canva-kit-labels-verified-local-availability-pending",
+      "fonts": ["Horizon", "HORIZON", "Inter"],
+      "colourStatus": "exact-canva-kit-values-verified",
+      "colours": ["#E3000F", "#134094", "#AFC9ED", "#FFFFFF"],
+      "productionBlocked": true,
+      "observedVisualGrammar": ["product cutouts with realistic shadows", "oversized type behind products", "strong blue footer/offer band", "clear price hierarchy", "energetic layered food props"],
+      "blockers": ["exact logo variant/hash required", "Canva font labels are verified but local font files/licence and render fidelity are not", "sample publication/approval states unresolved"]
+    },
+    {
+      "key": "SASOL",
+      "canvaBrandKitId": "kAGn0F8Qe9Q",
+      "canvaBrandKitName": "Sasol",
+      "brandKitVerified": true,
+      "exactLogoStatus": "required-not-yet-hashed",
+      "fontStatus": "exact-canva-kit-labels-verified-local-availability-pending",
+      "fonts": ["Barlow", "Tall"],
+      "colourStatus": "exact-canva-kit-values-verified",
+      "colours": ["#D0D9E5", "#263760", "#2D355E", "#FFFFFF"],
+      "productionBlocked": true,
+      "observedVisualGrammar": ["white and ice-blue technical cleanliness", "liquid/splash movement", "condensed display typography", "organic information shapes", "independent exact logo placement"],
+      "blockers": ["exact logo variant/hash required", "Canva font labels are verified but local font files/licence and render fidelity are not", "sample publication/approval states unresolved"]
+    },
+    {
+      "key": "GET_TOGETHER",
+      "canvaBrandKitId": "kAGn0JYDZ04",
+      "canvaBrandKitName": "Get Together",
+      "brandKitVerified": true,
+      "exactLogoStatus": "required-not-yet-hashed",
+      "fontStatus": "exact-canva-kit-labels-verified-local-availability-pending",
+      "fonts": ["Anton", "Barlow", "Univers"],
+      "colourStatus": "exact-canva-kit-values-verified",
+      "colours": ["#8095C9", "#0B1629"],
+      "productionBlocked": true,
+      "observedVisualGrammar": ["warm editorial hospitality photography", "serif/italic accent type", "soft translucent overlays", "playful diagonal colour fields for product offers", "food cutouts crossing depth planes"],
+      "blockers": ["exact logo variant/hash required", "Canva font labels are verified but local font files/licence and render fidelity are not", "sample publication/approval states unresolved"]
+    }
+  ]
+}

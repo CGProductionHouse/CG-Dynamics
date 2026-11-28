@@ -35,6 +35,20 @@ Before a chat/session is handed off or becomes context-heavy, reconcile the hand
 
 ## Product direction
 
+### PICASSO creative production authority
+
+Before creating, amending, reviewing or delivering client posters, animated posters
+or video graphics, read
+`docs/ai-workforce/graphic-designer/PICASSO-DESIGN-SYSTEM.md` and its portable
+`picasso-standard.v1.json` checklist, then load the exact reviewed client/brand-scope
+pack and active rules from the existing Dynamics brand store. Use
+`.agents/skills/cg-graphic-designer/SKILL.md` for proven poster techniques and tool
+limits. All models and human/AI lanes share these standards; never invent a second
+brand register. Missing branding, reuse coverage or actual-output evidence holds
+delivery. Complete an evidence-bound check for every applicable item; successful
+rendering is not creative approval. Preserve Nolan's pipeline and motion flexibility.
+New UI/connector/schema source is not live until separately released and verified.
+
 CG Dynamics is CG Production House's internal operating system. Three product areas:
 
 - Client Intelligence — Clients, Performance, reports, integrations and client-safe projections.

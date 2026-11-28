@@ -1,0 +1,216 @@
+{
+  "schemaVersion": 1,
+  "client": {
+    "id": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
+    "name": "Wiseman Group"
+  },
+  "observedAt": "2026-11-16",
+  "status": "balanced-colour-r6-native-and-transfer-verified-held-HD-and-review",
+  "sourceAuthority": "CG Dynamics exact-client guide v1 plus owner month/tone instructions; OneDrive remains media authority",
+  "scopes": [
+    {
+      "key": "WISEMAN_GROUP",
+      "canvaBrandKitId": "kAFRuQsd8N8",
+      "fonts": [
+        "Impact",
+        "Mokoto"
+      ],
+      "kitFontLabels": [
+        "Impact",
+        "Mokoto",
+        "Monsterrat"
+      ],
+      "fontStatus": "native-canva-picker-verified",
+      "fontLimits": "Impact and Mokoto actually shown in Canva native font picker on14November. Literal Monsterrat label remains unverified. No font files redistributed or portable licence inferred.",
+      "colours": [
+        "#FA5C0F",
+        "#FEE500",
+        "#FFFFFF",
+        "#000000",
+        "#F10000"
+      ],
+      "exactLogoStatus": "OneDrive-original-hash-verified; transparent PNG and actual native placement inspected",
+      "productionBlocked": true,
+      "productionBlockReason": "Native Canva font picker proves Impact/Mokoto for the reviewed drafts. Portable local rendering of every exact kit font and normal-company-ChatGPT end-to-end remain unverified; do not relabel native font evidence as a local-font pass. Human creative approval also pending."
+    }
+  ],
+  "sourceScopeRules": [
+    {
+      "clientId": "899c9988-8207-4e45-a8fc-a7446dfcf96b",
+      "parentScope": "WISEMAN_GROUP",
+      "allowedSourceScopes": [
+        "WISEMAN_GROUP",
+        "SUPA_QUICK",
+        "WISE_RIDE",
+        "MIDAS",
+        "DUNLOP_ZONE"
+      ],
+      "evidenceUrl": "https://wisemangroup.co.za/business-divisions/",
+      "meaning": "Owner explicitly expanded Group-source permission on14November2026 to suitable actual store photos, including Supa Quick, Wise Ride, Midas and Dunlop Zone. Hi-Q explicitly excluded by owner as taken down, overriding the older website listing. Keep Group kit/logo, exact source provenance and actual service attribution; do not count child package deliveries as Group slots."
+    }
+  ],
+  "sourceScopeWarning": "Group posts may use owner-authorised suitable store originals. Separate franchise package quantities remain excluded. No Hi-Q promotion; no invented local branch/ownership/service claim or assumed social-photo licence.",
+  "authorities": [
+    "https://wisemangroup.co.za/contact-us/",
+    "https://wisemangroup.co.za/business-divisions/"
+  ],
+  "officialCanva": {
+    "id": "DAHEfeuQzP4",
+    "observedPages": 102,
+    "unchanged": false,
+    "legacyReadOnlyId": "DAFvepOOYcM",
+    "original93PagesPreserved": true,
+    "ownedJanuaryWorkingPages": [
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47
+    ],
+    "nativeEditingConnector": "Actual native verification succeeded at99and100pages during the approved transfer; full completed102-page editing request was rejected. Source workbenches retained for amendments. All four poster live text read from official pages; six transferred drafts full native layers verified.",
+    "ownedJanuaryWorkingPageIds": [
+      {
+        "slot": "DP01",
+        "id": "PB258Wybnc7kxczK"
+      },
+      {
+        "slot": "DP02",
+        "id": "PBs46FTZyDXFvlPR"
+      },
+      {
+        "slot": "DP03",
+        "id": "PBQVQGkmNhkLjGgb"
+      },
+      {
+        "slot": "DP04",
+        "id": "PBvs3sSwG8V6xkFL"
+      },
+      {
+        "slot": "F01",
+        "id": "PBL5qh3V0q3hLytH"
+      },
+      {
+        "slot": "F02",
+        "id": "PB7XLwkSDrgsrTV3"
+      },
+      {
+        "slot": "F03",
+        "id": "PBS4b5yFvMnp1Byk"
+      },
+      {
+        "slot": "F04",
+        "id": "PBxpqDSwlwgs6CDD"
+      }
+    ],
+    "other94PageIdsAndOrderPreserved": true,
+    "additionalJanuaryPagePreserved": "PBcymBNbhmR8JW6X",
+    "other98PageIdsAndOrderPreserved": true,
+    "nativeVerification": "Current R6 four-page master copy DAHbET8uSHs proves27text/21media and geometry exact;480x600 native renders identical to saved source. Not HD/creative approval."
+  },
+  "releaseGates": [
+    "Actual relevant social and approval artwork coverage",
+    "Source/shoot/cycle review without biometrics",
+    "Genuine final-resolution output and margins",
+    "Human creative approval",
+    "Authoritative Client Schedule assignments before scheduling"
+  ],
+  "privateMediaMeaning": "Originals, hashes, captions, derivatives, signed URLs and detailed evidence stay in the private job, not this repository.",
+  "ownerExclusions": [
+    {
+      "scope": "HI_Q",
+      "reason": "Owner says taken down on14November2026; do not promote, regardless of stale website listing."
+    }
+  ],
+  "captionFooterContract": "Retrieve current exact-client task_type=caption packet; both required footer fields verified against official HQ contact page15November. Local receipt only; no contacts copied into a second database.",
+  "ownerDirectionUpdate": {
+    "id": "183f24ca-43c2-41de-aafb-ccabfa93c4ba",
+    "kind": "content_direction",
+    "reviewState": "unreviewed",
+    "recordedOn": "2026-11-16",
+    "retrievalVerified": true,
+    "source": "Agency-owner working brief, not client creative approval; canonical append returned by get_client_context. Guidev1 unchanged.",
+    "previousId": "b6e113f5-39e0-457d-8900-c38854b7d5da"
+  },
+  "ownerVisualRefinement": {
+    "source": "Direct owner16November correction: R5 colour removal overkill; Amonique does not understand DP02; approved exact R6 replacement, not creative release.",
+    "revision": "balanced-colour-r6",
+    "direction": "Retain purposeful brand colour in typography and designed graphics on dark/photo-led structure; make DP02 need/action explicit. No near-monochrome or tiny-accent-only rule.",
+    "ownerPreviewAccepted": false,
+    "actualPreviewDimensions": [
+      480,
+      600
+    ],
+    "newHdExportVerified": false,
+    "officialMasterTransferCompleted": true,
+    "deliveryState": "Official R6 native records/render verified; genuine HD, human approval and send held."
+  },
+  "previousVisualRefinement": {
+    "source": "Owner15November direct feedback and acceptance of actual revised previews; issue948",
+    "direction": "Modern mature automotive graphics and realistic materials; no hard offset duplicate type or toy steering icons. Concepts retained.",
+    "revision": "automotive-r4",
+    "ownerPreviewAccepted": true,
+    "actualPreviewDimensions": [
+      480,
+      600
+    ],
+    "newHdExportVerified": false,
+    "other98MasterPageIdsAndOrderPreserved": true,
+    "deliveryState": "Owner-authorised but blocked by Computer Use URL-policy stop; no sends or tag"
+  },
+  "backgroundRolePolicy": {
+    "scope": "WISEMAN_GROUP",
+    "authority": "Direct owner colour-balance correction16November2026 supersedes near-monochrome R5 interpretation.",
+    "allowedBackgrounds": [
+      "source-faithful-photo-led",
+      "charcoal-neutral with purposeful branded graphic areas"
+    ],
+    "forbiddenBackgrounds": [
+      "unconsidered-white-page-background",
+      "flat-full-page-colour-flood"
+    ],
+    "brandColourRole": "Purposeful type, accents and designed graphic areas. Preserve colour energy and actual visual balance; do not minimise chromatic pixels as a goal.",
+    "pattern": "Low-contrast restrained honeycomb; avoid excessive density.",
+    "applyTo": [
+      "DP01",
+      "DP02",
+      "DP03",
+      "DP04"
+    ],
+    "doesNotAuthorise": [
+      "reuse of reference photographs",
+      "obsolete Hi-Q franchise footer",
+      "client approval",
+      "schedule or publication"
+    ]
+  },
+  "visualRefinementHistory": [
+    {
+      "source": "Owner-supplied16November screenshots of Ger-Marie internal review09:07/09:10/09:21; source references retained privately",
+      "revision": "charcoal-r5",
+      "direction": "ALL FOUR Group posters: photo-led or charcoal neutral backgrounds only; subtle honeycomb; brand colours in text/small accents, never replacement background fields.",
+      "supersedes": "automotive-r4 execution acceptance, not concepts or photo-post slots",
+      "ownerPreviewAccepted": false,
+      "actualPreviewDimensions": [
+        480,
+        600
+      ],
+      "newHdExportVerified": false,
+      "officialMasterTransferCompleted": true,
+      "deliveryState": "Official current pages replaced; actual copied native records/render verified. New HD/export, human approval and delivery held."
+    }
+  ],
+  "pendingSinglePosterAmendment": {
+    "slot": "DP03",
+    "revision": "soft-background-join-r7",
+    "sourceSavedAndReadBack": true,
+    "officialTransferCompleted": false,
+    "currentOfficialPageId": "PBQVQGkmNhkLjGgb",
+    "observedPage": 42,
+    "scope": "Replace hard horizontal join with upper-background feather. Retain original source RGB/ICC and lower RGBA, vehicle/roof overlap, all text/logo/caption; other101pages protected.",
+    "actualPreviewInspected": true,
+    "newHdVerified": false
+  }
+}

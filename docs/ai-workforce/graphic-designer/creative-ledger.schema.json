@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cgdynamics.local/schemas/creative-ledger.schema.json",
+  "title": "CG Graphic Designer creative usage ledger",
+  "type": "object",
+  "required": ["schemaVersion", "clientId", "entries"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "clientId": { "type": "string", "minLength": 1 },
+    "updatedAt": { "type": ["string", "null"], "format": "date-time" },
+    "entries": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/entry" }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "stringTags": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "entry": {
+      "type": "object",
+      "required": ["id", "clientId", "brandScope", "publicationState"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "clientId": { "type": "string", "minLength": 1 },
+        "brandScope": { "enum": ["PIEK_GROUP", "ENGEN", "SASOL", "GET_TOGETHER"] },
+        "branch": { "type": ["string", "null"] },
+        "headline": { "type": ["string", "null"] },
+        "createdAt": { "type": ["string", "null"], "format": "date-time" },
+        "creatorKind": { "enum": ["human", "ai-assisted", "unknown"] },
+        "publicationState": { "enum": ["approved", "scheduled", "posted", "draft", "discarded", "internal-pilot-only", "unresolved"] },
+        "visiblePersonTags": { "$ref": "#/$defs/stringTags" },
+        "subjectTags": { "$ref": "#/$defs/stringTags" },
+        "productTags": { "$ref": "#/$defs/stringTags" },
+        "serviceTags": { "$ref": "#/$defs/stringTags" },
+        "conceptTags": { "$ref": "#/$defs/stringTags" },
+        "mechanismTags": { "$ref": "#/$defs/stringTags" },
+        "reuseConfidence": { "enum": ["confirmed", "probable", "unresolved"] },
+        "reuseJustification": { "type": ["string", "null"] },
+        "source": {
+          "type": ["object", "null"],
+          "properties": {
+            "oneDriveItemId": { "type": ["string", "null"] },
+            "filename": { "type": ["string", "null"] },
+            "sha256": { "type": ["string", "null"], "pattern": "^[A-Fa-f0-9]{64}$" },
+            "perceptualHash": { "type": ["string", "null"], "pattern": "^[A-Fa-f0-9]{16}$" },
+            "shootId": { "type": ["string", "null"] },
+            "captureTime": { "type": ["string", "null"], "format": "date-time" },
+            "cameraId": { "type": ["string", "null"] },
+            "brandScope": { "type": ["string", "null"] }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

@@ -304,3 +304,14 @@ policy would have exposed brand notes to client-role logins.
 
 Rules are never edited or deleted: a trigger allows an update only to retire a
 rule and stamps the retiring user. Anon has no access.
+
+PICASSO's proposed `design_pack` column extends this same profile (migration
+`20261125073157_picasso_design_pack.sql`, **not applied here**). It inherits active
+content-staff read and manager-only write, with an exact `clientId` constraint.
+No new table, policy, grant, public projection or privileged function. Metadata
+contains private OneDrive locators, not file bytes or credentials. The staff UI
+updates only the selected existing profile with an `updated_at` conflict fence.
+The connector reuses its existing staff/exact-client authentication and reads only
+that client's pack and active client/house rules; no parent/sibling lookup.
+Missing schema/data yields a delivery hold, never a broad fallback. Static/mock
+tests do not substitute for later actual multi-role production acceptance.

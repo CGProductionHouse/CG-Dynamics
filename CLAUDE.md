@@ -27,6 +27,12 @@ notes follow.
 
 ## Repo-specific reminders
 
+- Client poster/animated-poster/video-graphics work follows the shared
+  `docs/ai-workforce/graphic-designer/PICASSO-DESIGN-SYSTEM.md`, portable checklist
+  and exact reviewed Dynamics Brand Pack/scope. Read it before design or delivery;
+  complete evidence checks and preserve Nolan's pipeline. Do not substitute a new
+  Claude-only brand register, template or approval process.
+
 - `monthly_deliverables` is the schedule source of truth; Client Schedule edits
   it, the client-ready calendar only reads it.
 - Shared schedule helpers live in `src/lib/planner.ts`

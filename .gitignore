@@ -148,6 +148,7 @@ scripts/generated/
 .vercel
 .worktrees/
 artifacts/
+scripts/poster-studio/__pycache__/
 
 # Generated Python interpreter caches
 __pycache__/
