@@ -127,6 +127,33 @@ The actual shared CLI generated the 1,462,279-byte Sasol night candidate, import
 
 ## Privacy and provenance
 
+Before another delivery attempt, run the read-only guard on the private current
+manifest and retained prior manifests:
+
+```powershell
+node scripts/poster-studio/delivery-guard.mjs <manifest.json> --history <earlier-manifest.json> --out <new-receipt.json>
+node --test tests/posterDeliveryGuard.test.mjs tests/captionGuard.test.mjs
+```
+
+The manifest names exact `clientId`, `designId`, `recipient` and `entries`. Each
+entry binds `poster`, stable `pageId`, job-relative `png`/`caption`, artwork
+`sha256`, canonical `captionSha256` and actual `dimensions: [width,height]`.
+Retain observed `messageId`/`deliveryStatus` once sent. The guard checks local
+hashes, PNG header dimensions, allocated unsigned UTF-8 caption and containment;
+it never changes a file or resets a delivery. Existing receipts cannot be overwritten.
+Any matching message witness, including Sent/unknown, stops blind replay. Matching
+payloads in the same exact client/destination remain recorded across renamed
+pages/workbenches. A status without a message ID is held for live investigation.
+
+Exit1 means a transport hold **or an already-recorded delivery**, with the distinct
+reason in the receipt. Exit0 only means no transport failure/witness was found in
+the supplied records. It is not send authority, fresh chat identity, complete
+history, HD source-quality, PNG pixel validation, creative approval, source/reuse
+clearance or schedule verification. `automaticSendAllowed` is always false.
+After an uncertain UI action, read the exact live chat before retrying. Run on the
+four actual Bloem26November exports on28November: transport passed, four recorded,
+zero unrecorded, so a repeated full-set attempt was refused. No media was resent.
+
 For allocated forwardable captions, run `node scripts/poster-studio/caption-guard.mjs
 <caption.txt> <canonical-utf8-lf-sha256> --out <new-receipt.json>`. It rejects malformed
 UTF-8, common punctuation corruption, stale copy, controls and standalone agent

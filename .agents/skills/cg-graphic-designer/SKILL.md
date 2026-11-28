@@ -17,6 +17,15 @@ colours, forms, fonts and preferences remain in that client's pack/rules.
 
 Produce professional, individually art-directed work from exact client evidence. A technically valid render is not creative approval.
 
+Before retrying delivery, run `scripts/poster-studio/delivery-guard.mjs` against
+the private current manifest and retained prior manifests (contract in the script
+README). It checks exact local export/caption hashes and recorded send witnesses;
+Sent or uncertain delivery is not an unsent item. Same-payload renames do not
+clear history. Inspect the live exact chat before any uncertain retry; an
+unrecorded result does not certify complete history or authorise sending.
+Preserve receipts and change only the affected current version after feedback.
+This read-only check never approves creative quality or resets a delivery.
+
 Premium-brand research must change the actual campaign, not just add texture to
 the same sample-card composition. Inspect real competitor/reference visuals and
 the exact client's professional/customer evidence. Translate useful principles

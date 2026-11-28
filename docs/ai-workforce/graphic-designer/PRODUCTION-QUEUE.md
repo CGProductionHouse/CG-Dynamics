@@ -1,5 +1,12 @@
 # Graphic designer production queue
 
+**28November feedback check:** exact Picasso Approvals still ends at the
+26November Bloem review note; no later feedback. Note now Delivered with actual
+mentions. No resend/artwork change. New read-only delivery guard exercised on
+the actual files:4 already recorded/0 unrecorded; no automatic send permission.
+See Bloem CONTINUATION-2026-11-28.md. Current artwork remains R12 and all existing
+final-release/approval/order limits remain unchanged.
+
 **26November15:11 Bloem delivery override:** owner explicitly requested the final
 current review set. Four HD photo+allocated unsigned-caption messages in exact
 CG Picasso Approvals, verified Nolan sender,15:08–15:10: all **Delivered**. Separate

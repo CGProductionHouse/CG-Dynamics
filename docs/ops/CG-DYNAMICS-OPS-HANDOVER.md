@@ -1,3 +1,22 @@
+## 28 November — Picasso feedback check and delivery retry guard
+
+Existing #948/draft#956 lane only. Exact CG Picasso Approvals has no message after
+Thursday26November's Bloem review note at the fresh check. That note now reads
+Delivered with actual Amonique/Ger-Marie mentions; retained old Sent receipt as
+history. No resend, reply, forward, reaction or artwork change. Existing signed-in
+internal tabs retained, no desktop takeover/reconnect or private media in Git.
+
+Implemented read-only local delivery-guard.mjs: selected export/caption hash,
+PNG header dimensions, private containment and supplied prior-send witnesses.
+Renamed same payloads and uncertain sends cannot silently become unsent. Actual
+Bloem run:4 already recorded/0 unrecorded/0 transport holds; intentionally refuses
+replay.11 new +7 caption regression tests pass. Does not authorise sending, decode
+PNG quality, replace live receipt review or certify creative/reuse/brand readiness.
+See Bloem CONTINUATION-2026-11-28.md. Formal pack/runtime, source-project, final
+approval/order gates remain; normal company-ChatGPT invocation still unverified.
+No deployment/SQL/dependency/spend or Nolan change. Control Centre exact target
+still ungrounded; no guessed write.
+
 ## 26 November15:11 — owner-requested Bloem current review set delivered
 
 Same #948/#956 lane. DAHb7sgsbpk now R12 INTERNAL REVIEW. DP02 SHAPE up22px for
